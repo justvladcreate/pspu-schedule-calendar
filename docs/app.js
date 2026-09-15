@@ -566,56 +566,113 @@ function toggleTheme() {
         state.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
 }
 
-// ==================== MONTH NAVIGATION (wheel / swipe) ====================
-function setupMonthNavigation() {
+// ==================== CALENDAR GESTURES (wheel / swipe / pinch) ====================
+function setupCalendarGestures() {
     const calendar = document.getElementById('calendar');
 
-    // --- Wheel (desktop / trackpad): вертикальный скролл листает месяцы ---
+    // ---------- WHEEL (desktop) ----------
     let wheelLocked = false;
     calendar.addEventListener('wheel', e => {
         if (state.view !== 'month') return;
-
-        // Реагируем только на преимущественно вертикальный скролл
         if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
         if (Math.abs(e.deltaY) < 4) return;
 
         e.preventDefault();
-        if (wheelLocked) return;      // антидребезг: один флик = один месяц
-
+        if (wheelLocked) return;
         wheelLocked = true;
         navigate(e.deltaY > 0 ? 1 : -1);
         setTimeout(() => { wheelLocked = false; }, 250);
     }, { passive: false });
 
-    // --- Touch (mobile): горизонтальный свайп листает месяцы ---
-    const SWIPE_THRESHOLD = 60;       // пикселей до срабатывания
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let tracking = false;
+    // ---------- PINCH (week view only) ----------
+    // Масштабируем ширину колонок --m-day-col.
+    // min = «вся неделя влезает в экран», max = текущий вид недели.
+    const TIME_COL      = 56;
+    const DEFAULT_COL   = 110;
+    const MIN_COL       = () => Math.max(30, (window.innerWidth - TIME_COL) / 7);
+    const MAX_COL       = DEFAULT_COL;
+
+    const getColWidth = () => {
+        const v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--m-day-col');
+        return parseFloat(v) || DEFAULT_COL;
+    };
+    const setColWidth = px => {
+        document.documentElement.style.setProperty('--m-day-col', px + 'px');
+    };
+    const dist = (t1, t2) =>
+        Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+
+    let pinchStartDist = 0;
+    let pinchStartCol  = 0;
+
+    // ---------- SWIPE ----------
+    const SWIPE_THRESHOLD = 60;
+    let startX = 0, startY = 0, tracking = false;
 
     calendar.addEventListener('touchstart', e => {
-        if (state.view !== 'month') return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        // Два и более пальца → режим пинча. Отменяем свайп-навигацию.
+        if (e.touches.length >= 2) {
+            tracking = false;
+            if (state.view === 'week') {
+                pinchStartDist = dist(e.touches[0], e.touches[1]);
+                pinchStartCol  = getColWidth();
+            }
+            return;
+        }
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
         tracking = true;
     }, { passive: true });
 
+    calendar.addEventListener('touchmove', e => {
+        if (e.touches.length !== 2 || !pinchStartDist) return;
+        if (state.view !== 'week') return;
+
+        if (e.cancelable) e.preventDefault();   // блокируем страничный zoom
+
+        const scale = dist(e.touches[0], e.touches[1]) / pinchStartDist;
+        const next  = pinchStartCol * scale;
+        setColWidth(Math.max(MIN_COL(), Math.min(MAX_COL, next)));
+    }, { passive: false });
+
     calendar.addEventListener('touchend', e => {
+        if (e.touches.length < 2) pinchStartDist = 0;
+
         if (!tracking) return;
         tracking = false;
-        if (state.view !== 'month') return;
 
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        const dy = e.changedTouches[0].clientY - touchStartY;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
 
-        // Только горизонтальный жест, и он должен быть доминирующим.
-        // Вертикальный свайп уходит в pull-to-refresh.
         if (Math.abs(dx) < SWIPE_THRESHOLD) return;
-        if (Math.abs(dy) > Math.abs(dx)) return;
+        if (Math.abs(dy) > Math.abs(dx)) return;   // вертикаль → в PTR
 
-        // Влево → следующий месяц, вправо → предыдущий
-        navigate(dx < 0 ? 1 : -1);
+        const dir = dx < 0 ? 1 : -1;               // влево → вперёд
+
+        if (state.view === 'week') {
+            const atLeft  = calendar.scrollLeft <= 1;
+            const atRight = calendar.scrollLeft + calendar.clientWidth
+                            >= calendar.scrollWidth - 1;
+            if (dir === -1 && atLeft)  { navigate(-1); return; }
+            if (dir ===  1 && atRight) { navigate( 1); return; }
+            return;   // иначе — нативный горизонтальный скролл сетки
+        }
+        navigate(dir);
     }, { passive: true });
+
+    calendar.addEventListener('touchcancel', () => {
+        pinchStartDist = 0;
+        tracking = false;
+    });
+
+    // После поворота экрана / изменения ширины — пересчитываем min
+    window.addEventListener('resize', () => {
+        if (state.view !== 'week') return;
+        const cur = getColWidth();
+        const clamped = Math.max(MIN_COL(), Math.min(MAX_COL, cur));
+        if (Math.abs(clamped - cur) > 0.5) setColWidth(clamped);
+    });
 }
 
 // ==================== POPOVER POSITIONING ====================
@@ -1075,7 +1132,7 @@ async function init() {
     });
 
     setupPullToRefresh();
-    setupMonthNavigation();
+    setupCalendarGestures();
     render();
 }
 
