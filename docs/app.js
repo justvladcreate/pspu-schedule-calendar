@@ -570,6 +570,12 @@ function toggleTheme() {
 function setupCalendarGestures() {
     const calendar = document.getElementById('calendar');
 
+    // iOS Safari: pinch обрабатывается отдельными gesture-событиями,
+    // touch-action у него частично игнорируется. Явно глушим.
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(name => {
+        calendar.addEventListener(name, e => e.preventDefault(), { passive: false });
+    });
+
     // ---------- WHEEL (desktop) ----------
     let wheelLocked = false;
     calendar.addEventListener('wheel', e => {
@@ -626,10 +632,15 @@ function setupCalendarGestures() {
     }, { passive: true });
 
     calendar.addEventListener('touchmove', e => {
+        // Два пальца — всегда глушим браузерный zoom,
+        // независимо от вида. Иначе Chrome/Safari сами зумируют страницу.
+        if (e.touches.length === 2 && e.cancelable) {
+            e.preventDefault();
+        }
+
+        // А масштабируем колонки только в неделе
         if (e.touches.length !== 2 || !pinchStartDist) return;
         if (state.view !== 'week') return;
-
-        if (e.cancelable) e.preventDefault();   // блокируем страничный zoom
 
         const scale = dist(e.touches[0], e.touches[1]) / pinchStartDist;
         const next  = pinchStartCol * scale;

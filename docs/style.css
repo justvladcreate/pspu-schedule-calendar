@@ -369,7 +369,7 @@ body { overflow: hidden; }
     min-height: 0;
     position: relative;
     overscroll-behavior-y: contain;
-    touch-action: pan-x pan-y pinch-zoom;   /* даём pinch-событиям дойти до JS */
+    touch-action: pan-x pan-y;
 }
 
 /* ==== WEEK / DAY HEADER ==== */
