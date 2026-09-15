@@ -994,3 +994,51 @@ body { overflow: hidden; }
         height: 18px !important;
     }
 }
+
+/* ==== PULL TO REFRESH ==== */
+.calendar {
+    /* Отключаем нативный pull-to-refresh и rubber-band на iOS/Android —
+       чтобы не конфликтовал с нашим */
+    overscroll-behavior-y: contain;
+}
+
+.ptr-indicator {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translate(-50%, -70px);
+    width: 44px;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    z-index: 9999;
+    pointer-events: none;
+    transition: transform 0.2s ease-out;
+}
+
+.ptr-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--text-muted);
+    border-radius: 50%;
+    transition: border-color 0.15s;
+}
+
+.ptr-indicator.ptr-ready .ptr-spinner {
+    border-top-color: var(--accent);
+}
+
+.ptr-indicator.ptr-loading .ptr-spinner {
+    animation: ptr-spin 0.7s linear infinite;
+    border-top-color: var(--accent);
+}
+
+@keyframes ptr-spin {
+    to { transform: rotate(360deg); }
+}

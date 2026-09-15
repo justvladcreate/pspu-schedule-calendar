@@ -93,7 +93,9 @@ function addMonths(d, n) {
 
 // ==================== DATA ====================
 async function loadData() {
-    const resp = await fetch(DATA_URL);
+    // Читаем сохранённый "отпечаток" кэша. Если его нет — "0" (стабильный URL).
+    const bust = localStorage.getItem('schedule-cache-bust') || '0';
+    const resp = await fetch(`${DATA_URL}?v=${bust}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     return data.events || [];
@@ -849,6 +851,73 @@ function setupUnifiedFilter() {
     window.addEventListener('resize', updateDateLabel);
 }
 
+// ==================== PULL TO REFRESH ====================
+function setupPullToRefresh() {
+    // Только на устройствах с тач-интерфейсом
+    if (!('ontouchstart' in window)) return;
+
+    const THRESHOLD = 70;   // сколько пикселей протянуть, чтобы сработало
+    const MAX_PULL = 100;   // максимум, насколько выедет индикатор
+
+    const calendar = document.getElementById('calendar');
+
+    const indicator = document.createElement('div');
+    indicator.className = 'ptr-indicator';
+    indicator.innerHTML = '<div class="ptr-spinner"></div>';
+    document.body.appendChild(indicator);
+
+    let startY = 0;
+    let currentPull = 0;
+    let isPulling = false;
+
+    calendar.addEventListener('touchstart', e => {
+        if (calendar.scrollTop > 0) return;
+        if (indicator.classList.contains('ptr-loading')) return;
+        startY = e.touches[0].clientY;
+        isPulling = true;
+        currentPull = 0;
+    }, { passive: true });
+
+    calendar.addEventListener('touchmove', e => {
+        if (!isPulling) return;
+
+        const dy = e.touches[0].clientY - startY;
+        if (dy <= 0) {
+            currentPull = 0;
+            indicator.style.transform = 'translate(-50%, -70px)';
+            return;
+        }
+
+        // Демпфирование: чем дальше тянем, тем медленнее растёт
+        currentPull = Math.min(MAX_PULL, dy * 0.5);
+
+        // -70px — исходная позиция за экраном, добавляем протяг
+        indicator.style.transform = `translate(-50%, ${-70 + currentPull}px)`;
+        indicator.classList.toggle('ptr-ready', currentPull >= THRESHOLD);
+    }, { passive: true });
+
+    const endPull = () => {
+        if (!isPulling) return;
+        isPulling = false;
+
+        if (currentPull >= THRESHOLD) {
+            indicator.classList.add('ptr-loading');
+            indicator.classList.remove('ptr-ready');
+            indicator.style.transform = `translate(-50%, ${-70 + THRESHOLD}px)`;
+            // Обновляем "отпечаток" кэша — следующая загрузка пойдёт в обход кэша
+            localStorage.setItem('schedule-cache-bust', Date.now().toString());
+            // Небольшая задержка, чтобы пользователь увидел спиннер
+            setTimeout(() => location.reload(), 250);
+        } else {
+            indicator.classList.remove('ptr-ready');
+            indicator.style.transform = 'translate(-50%, -70px)';
+        }
+        currentPull = 0;
+    };
+
+    calendar.addEventListener('touchend', endPull);
+    calendar.addEventListener('touchcancel', endPull);
+}
 
 // ==================== INIT ====================
 async function init() {
@@ -933,6 +1002,7 @@ async function init() {
         }
     });
 
+    setupPullToRefresh();
     render();
 }
 
