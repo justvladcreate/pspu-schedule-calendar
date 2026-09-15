@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 BASE_DIR       = Path(__file__).resolve().parent.parent
 PARSED_JSON    = BASE_DIR / "data" / "latest" / "groups_info_parsed.json"
-WEB_DATA_JSON  = BASE_DIR / "web" / "data.json"
+WEB_DATA_JSON  = BASE_DIR / "docs" / "data.json"
 COMMIT_MESSAGE = "chore: update web/data.json"
 
 
