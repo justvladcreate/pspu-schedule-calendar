@@ -979,11 +979,10 @@ function setupUnifiedFilter() {
 
 // ==================== PULL TO REFRESH ====================
 function setupPullToRefresh() {
-    // Только на устройствах с тач-интерфейсом
     if (!('ontouchstart' in window)) return;
 
-    const THRESHOLD = 70;   // сколько пикселей протянуть, чтобы сработало
-    const MAX_PULL = 100;   // максимум, насколько выедет индикатор
+    const THRESHOLD = 70;
+    const MAX_PULL = 100;
 
     const calendar = document.getElementById('calendar');
 
@@ -992,66 +991,89 @@ function setupPullToRefresh() {
     indicator.innerHTML = '<div class="ptr-spinner"></div>';
     document.body.appendChild(indicator);
 
+    let startX = 0;
     let startY = 0;
     let currentPull = 0;
     let isPulling = false;
 
+    const resetPull = () => {
+        currentPull = 0;
+        indicator.style.transform = 'translate(-50%, -70px)';
+        indicator.classList.remove('ptr-ready');
+    };
+
     calendar.addEventListener('touchstart', e => {
+        // ← Два и более пальца — это pinch, не PTR
+        if (e.touches.length > 1) {
+            isPulling = false;
+            resetPull();
+            return;
+        }
         if (calendar.scrollTop > 0) return;
         if (indicator.classList.contains('ptr-loading')) return;
+
+        startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         isPulling = true;
         currentPull = 0;
-    }, { passive: false });
+    }, { passive: true });
 
     calendar.addEventListener('touchmove', e => {
         if (!isPulling) return;
 
+        // ← Второй палец добавлен уже во время движения — отменяем PTR
+        if (e.touches.length > 1) {
+            isPulling = false;
+            resetPull();
+            return;
+        }
+
+        const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
 
-        // Если палец пошёл вверх — сбрасываем индикатор, отдаём жест скроллу
-        if (dy <= 0) {
-            currentPull = 0;
-            indicator.style.transform = 'translate(-50%, -70px)';
-            indicator.classList.remove('ptr-ready');
+        // Горизонтальный жест — не наш
+        if (Math.abs(dx) > Math.abs(dy)) {
+            isPulling = false;
+            resetPull();
             return;
         }
 
-        // Если контейнер уже отскроллен — не перехватываем жест
+        // Палец пошёл вверх — сбрасываем
+        if (dy <= 0) {
+            resetPull();
+            return;
+        }
+
+        // Контейнер уже отскроллен вниз
         if (calendar.scrollTop > 0) {
             isPulling = false;
-            currentPull = 0;
-            indicator.style.transform = 'translate(-50%, -70px)';
-            indicator.classList.remove('ptr-ready');
+            resetPull();
             return;
         }
 
-        // Забираем жест себе — блокируем нативный скролл и rubber-band
         if (e.cancelable) e.preventDefault();
 
-        // Демпфирование: чем дальше тянем, тем медленнее растёт
         currentPull = Math.min(MAX_PULL, dy * 0.5);
-
-        // Индикатор выезжает из-за верха
         indicator.style.transform = `translate(-50%, ${-70 + currentPull}px)`;
         indicator.classList.toggle('ptr-ready', currentPull >= THRESHOLD);
     }, { passive: false });
 
-    const endPull = () => {
+    const endPull = e => {
         if (!isPulling) return;
+
+        // ← Ещё остались пальцы на экране — жест не завершён
+        if (e && e.touches && e.touches.length > 0) return;
+
         isPulling = false;
 
         if (currentPull >= THRESHOLD) {
             indicator.classList.add('ptr-loading');
             indicator.classList.remove('ptr-ready');
             indicator.style.transform = `translate(-50%, ${-70 + THRESHOLD}px)`;
-            // Обновляем "отпечаток" кэша — следующая загрузка пойдёт в обход кэша
             localStorage.setItem('schedule-cache-bust', Date.now().toString());
-            // Небольшая задержка, чтобы пользователь увидел спиннер
             setTimeout(() => location.reload(), 250);
         } else {
-            indicator.classList.remove('ptr-ready');
-            indicator.style.transform = 'translate(-50%, -70px)';
+            resetPull();
         }
         currentPull = 0;
     };
