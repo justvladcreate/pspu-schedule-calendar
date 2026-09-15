@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+    <header class="toolbar">
+        <div class="toolbar-left">
+            <div class="date-label" id="dateLabel" role="button" tabindex="0"></div>
+        </div>
+
+        <div class="toolbar-center">
+            <button class="btn" id="prevBtn" type="button">Назад</button>
+            <button class="btn" id="todayBtn" type="button">Сегодня</button>
+            <button class="btn" id="nextBtn" type="button">Вперёд</button>
+        </div>
+
+        <div class="toolbar-right">
+            <div class="filter" id="filterRoot">
+                <button class="btn filter-trigger" type="button">
+                    <span class="filter-label">Фильтр</span>
+                </button>
+                <div class="filter-dropdown">
+                    <input type="text" class="filter-search" placeholder="Поиск по группам и преподавателям...">
+
+                    <div class="filter-columns">
+                        <div class="filter-column">
+                            <div class="filter-column-title">Группы</div>
+                            <div class="filter-options" id="filterGroupsList"></div>
+                        </div>
+                        <div class="filter-column">
+                            <div class="filter-column-title">Преподаватели</div>
+                            <div class="filter-options" id="filterTeachersList"></div>
+                        </div>
+                    </div>
+
+                    <div class="filter-footer">
+                        <span class="filter-counter" id="filterCounter"></span>
+                        <button class="filter-clear" type="button">Сбросить всё</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" id="viewBtn" type="button">Месяц</button>
+            <button class="btn" id="themeBtn" type="button">Светлая тема</button>
+        </div>
+    </header>
+
+    <!-- ЗАМЕНИТЬ ССЫЛКУ -->
+    <a class="warning-banner" id="warningBanner" href="https://example.com/details" target="_blank" rel="noopener">
+        <span class="warning-icon" aria-hidden="true">ⓘ</span>
+        <span class="warning-text">Расписание может значительно отличаться от реального варианта — нет ручной ревизии</span>
+        <span class="warning-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <main class="calendar" id="calendar"></main>
+
+    <footer class="footer">
+        <!-- ЗАМЕНИТЬ ССЫЛКУ -->
+        <a class="footer-link" id="githubLink" href="https://github.com/" target="_blank" rel="noopener">
+            Исходный код на GitHub
+        </a>
+        <!-- позже: сюда email для обратной связи -->
+    </footer>
+</div>
+
+<div class="popover" id="eventPopover"></div>
+
+<div class="modal-backdrop" id="dateModal">
+    <div class="picker" role="dialog">
+        <div class="picker-header">
+            <button class="btn" id="pickerPrev" type="button">‹</button>
+            <div class="picker-title" id="pickerTitle"></div>
+            <button class="btn" id="pickerNext" type="button">›</button>
+        </div>
+        <div class="picker-weekdays">
+            <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+        </div>
+        <div class="picker-grid" id="pickerGrid"></div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
