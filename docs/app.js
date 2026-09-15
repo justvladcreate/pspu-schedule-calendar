@@ -870,31 +870,50 @@ function setupPullToRefresh() {
     let currentPull = 0;
     let isPulling = false;
 
+    let startY = 0;
+    let currentPull = 0;
+    let isPulling = false;
+
     calendar.addEventListener('touchstart', e => {
         if (calendar.scrollTop > 0) return;
         if (indicator.classList.contains('ptr-loading')) return;
         startY = e.touches[0].clientY;
         isPulling = true;
         currentPull = 0;
-    }, { passive: true });
+    }, { passive: false });
 
     calendar.addEventListener('touchmove', e => {
         if (!isPulling) return;
 
         const dy = e.touches[0].clientY - startY;
+
+        // Если палец пошёл вверх — сбрасываем индикатор, отдаём жест скроллу
         if (dy <= 0) {
             currentPull = 0;
             indicator.style.transform = 'translate(-50%, -70px)';
+            indicator.classList.remove('ptr-ready');
             return;
         }
+
+        // Если контейнер уже отскроллен — не перехватываем жест
+        if (calendar.scrollTop > 0) {
+            isPulling = false;
+            currentPull = 0;
+            indicator.style.transform = 'translate(-50%, -70px)';
+            indicator.classList.remove('ptr-ready');
+            return;
+        }
+
+        // Забираем жест себе — блокируем нативный скролл и rubber-band
+        if (e.cancelable) e.preventDefault();
 
         // Демпфирование: чем дальше тянем, тем медленнее растёт
         currentPull = Math.min(MAX_PULL, dy * 0.5);
 
-        // -70px — исходная позиция за экраном, добавляем протяг
+        // Индикатор выезжает из-за верха
         indicator.style.transform = `translate(-50%, ${-70 + currentPull}px)`;
         indicator.classList.toggle('ptr-ready', currentPull >= THRESHOLD);
-    }, { passive: true });
+    }, { passive: false });
 
     const endPull = () => {
         if (!isPulling) return;
