@@ -294,7 +294,6 @@ function renderWeek(root) {
 
     const grid = document.createElement('div');
     grid.className = 'day-grid';
-    grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
     body.appendChild(grid);
 
     const byDate = groupByDate(state.filteredEvents);
@@ -348,7 +347,6 @@ function renderDay(root) {
 
     const grid = document.createElement('div');
     grid.className = 'day-grid';
-    grid.style.gridTemplateColumns = '1fr';
     body.appendChild(grid);
 
     const col = document.createElement('div');
@@ -497,22 +495,30 @@ function renderMonth(root) {
             cell.appendChild(num);
 
             const dayEvents = byDate.get(toISO(day)) || [];
-            dayEvents.slice(0, MAX_SHOW).forEach(ev => {
-                const chip = document.createElement('div');
-                chip.className = 'month-event';
-                chip.textContent = `${ev.time} ${ev.discipline}${ev.type ? ` (${ev.type})` : ''}`;
-                chip.title = chip.textContent;
-                chip.addEventListener('click', e => {
-                    e.stopPropagation();
-                    showEventDetails(ev, chip);
-                });
-                cell.appendChild(chip);
-            });
+
             if (dayEvents.length > MAX_SHOW) {
-                const more = document.createElement('div');
-                more.className = 'month-more';
-                more.textContent = `+${dayEvents.length - MAX_SHOW} ещё`;
-                cell.appendChild(more);
+                // Слишком много — один сгруппированный блок, клик открывает список
+                const group = document.createElement('div');
+                group.className = 'month-event month-event--group';
+                group.textContent = `${dayEvents.length} мероприятий`;
+                group.title = `${dayEvents.length} мероприятий — нажмите, чтобы увидеть`;
+                group.addEventListener('click', e => {
+                    e.stopPropagation();
+                    showGroupDetails(dayEvents, group);
+                });
+                cell.appendChild(group);
+            } else {
+                dayEvents.forEach(ev => {
+                    const chip = document.createElement('div');
+                    chip.className = 'month-event';
+                    chip.textContent = `${ev.time} ${ev.discipline}${ev.type ? ` (${ev.type})` : ''}`;
+                    chip.title = chip.textContent;
+                    chip.addEventListener('click', e => {
+                        e.stopPropagation();
+                        showEventDetails(ev, chip);
+                    });
+                    cell.appendChild(chip);
+                });
             }
 
             grid.appendChild(cell);
@@ -558,6 +564,58 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', state.theme);
     document.getElementById('themeBtn').textContent =
         state.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+}
+
+// ==================== MONTH NAVIGATION (wheel / swipe) ====================
+function setupMonthNavigation() {
+    const calendar = document.getElementById('calendar');
+
+    // --- Wheel (desktop / trackpad): вертикальный скролл листает месяцы ---
+    let wheelLocked = false;
+    calendar.addEventListener('wheel', e => {
+        if (state.view !== 'month') return;
+
+        // Реагируем только на преимущественно вертикальный скролл
+        if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+        if (Math.abs(e.deltaY) < 4) return;
+
+        e.preventDefault();
+        if (wheelLocked) return;      // антидребезг: один флик = один месяц
+
+        wheelLocked = true;
+        navigate(e.deltaY > 0 ? 1 : -1);
+        setTimeout(() => { wheelLocked = false; }, 250);
+    }, { passive: false });
+
+    // --- Touch (mobile): горизонтальный свайп листает месяцы ---
+    const SWIPE_THRESHOLD = 60;       // пикселей до срабатывания
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let tracking = false;
+
+    calendar.addEventListener('touchstart', e => {
+        if (state.view !== 'month') return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        tracking = true;
+    }, { passive: true });
+
+    calendar.addEventListener('touchend', e => {
+        if (!tracking) return;
+        tracking = false;
+        if (state.view !== 'month') return;
+
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+
+        // Только горизонтальный жест, и он должен быть доминирующим.
+        // Вертикальный свайп уходит в pull-to-refresh.
+        if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+        if (Math.abs(dy) > Math.abs(dx)) return;
+
+        // Влево → следующий месяц, вправо → предыдущий
+        navigate(dx < 0 ? 1 : -1);
+    }, { passive: true });
 }
 
 // ==================== POPOVER POSITIONING ====================
@@ -870,10 +928,6 @@ function setupPullToRefresh() {
     let currentPull = 0;
     let isPulling = false;
 
-    let startY = 0;
-    let currentPull = 0;
-    let isPulling = false;
-
     calendar.addEventListener('touchstart', e => {
         if (calendar.scrollTop > 0) return;
         if (indicator.classList.contains('ptr-loading')) return;
@@ -999,7 +1053,6 @@ async function init() {
         if (e.target.id === 'dateModal') closeDatePicker();
     });
 
-    document.getElementById('eventPopover').addEventListener('click', e => e.stopPropagation());
 
     document.addEventListener('click', (e) => {
         hideEventDetails();
@@ -1022,6 +1075,7 @@ async function init() {
     });
 
     setupPullToRefresh();
+    setupMonthNavigation();
     render();
 }
 

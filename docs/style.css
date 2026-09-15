@@ -49,6 +49,12 @@
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* Ширина одной дневной колонки на мобилке.
+   Одна переменная управляет и шапкой, и телом — они не разъезжаются. */
+:root {
+    --m-day-col: 110px;
+}
+
 html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
@@ -99,6 +105,31 @@ body { overflow: hidden; }
 }
 .btn:hover { background: var(--surface-2); border-color: var(--grid-line-strong); }
 .btn:active { background: var(--surface-3); }
+
+
+.btn-arrow {
+    padding: 8px 14px;
+    min-width: 40px;
+    position: relative;
+    font-size: 0;   /* прячем возможный текст */
+}
+
+.btn-arrow::before {
+    content: '';
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-top: 3px solid currentColor;      /* толщина стрелки */
+    border-right: 3px solid currentColor;
+    transform: rotate(45deg);                /* › */
+    margin-right: 2px;
+}
+
+#prevBtn::before {
+    transform: rotate(-135deg);              /* ‹ */
+    margin-right: 0;
+    margin-left: 2px;
+}
 
 .date-label {
     font-size: 15px;
@@ -167,9 +198,6 @@ body { overflow: hidden; }
     justify-content: center;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
-    border: 1.5px solid currentColor;
-    font-weight: 700;
 }
 .warning-text { flex: 1; min-width: 0; }
 .warning-arrow {
@@ -341,7 +369,7 @@ body { overflow: hidden; }
     min-height: 0;
     position: relative;
     overscroll-behavior-y: contain;
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
 }
 
 /* ==== WEEK / DAY HEADER ==== */
@@ -413,6 +441,15 @@ body { overflow: hidden; }
 .day-grid {
     display: grid;
     position: relative;
+}
+
+/* Раскладка колонок теперь в CSS, а не в JS —
+   это гарантирует, что шапка и тело используют одну и ту же ширину. */
+.cal-body.week .day-grid {
+    grid-template-columns: repeat(7, 1fr);
+}
+.cal-body.day .day-grid {
+    grid-template-columns: 1fr;
 }
 
 .day-col {
@@ -554,6 +591,12 @@ body { overflow: hidden; }
     letter-spacing: 0.03em;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+}
+
+.month-event--group {
+    font-weight: 600;
+    color: var(--event-title);
+    text-align: center;
 }
 
 .month-cell {
@@ -1010,24 +1053,30 @@ body { overflow: hidden; }
         padding: 10px 12px;
     }
 
-    /* ==== WEEK VIEW: горизонтальный скролл + компактные блоки ==== */
+    /* ==== WEEK VIEW: горизонтальный скролл ====
+       И шапка, и тело используют ОДНУ И ТУ ЖЕ ширину колонки
+       (--m-day-col), поэтому их итоговая ширина совпадает и
+       они не разъезжаются при скролле. */
     .calendar.view-week {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .cal-header.week {
-        grid-template-columns: 56px repeat(7, minmax(90px, 1fr));
+        grid-template-columns: 56px repeat(7, var(--m-day-col));
+        min-width: calc(56px + 7 * var(--m-day-col));
     }
 
     .cal-body.week {
-        grid-template-columns: 56px 1fr;
+        grid-template-columns: 56px calc(7 * var(--m-day-col));
+        min-width: calc(56px + 7 * var(--m-day-col));
     }
 
     .cal-body.week .day-grid {
-        grid-template-columns: repeat(7, minmax(90px, 1fr));
+        grid-template-columns: repeat(7, var(--m-day-col));
     }
 
-    /* События компактнее — помещается больше текста */
+    /* Компактнее события в узких колонках */
     .event-block {
         padding: 2px 5px;
         border-left-width: 2px;
