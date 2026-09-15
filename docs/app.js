@@ -15,13 +15,33 @@ const MONTHS_NOM = ['Январь', 'Февраль', 'Март', 'Апрель'
 const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
 // ==================== STATE ====================
+// Хелперы для сериализации Set → массив → localStorage
+function loadSetFromStorage(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return new Set();
+        const arr = JSON.parse(raw);
+        return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function saveSetToStorage(key, set) {
+    try {
+        localStorage.setItem(key, JSON.stringify([...set]));
+    } catch {
+        // localStorage может быть недоступен (приватный режим, переполнение) — молча игнорируем
+    }
+}
+
 const state = {
     allEvents: [],
     filteredEvents: [],
     groups: [],
     teachers: [],
-    selectedGroups: new Set(),
-    selectedTeachers: new Set(),
+    selectedGroups: loadSetFromStorage('schedule-selected-groups'),
+    selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
     currentDate: new Date(),
     view: localStorage.getItem('schedule-view') || 'week',
     theme: localStorage.getItem('schedule-theme') || 'dark',
@@ -713,6 +733,11 @@ function setupUnifiedFilter() {
             if (cb.checked) set.add(value);
             else set.delete(value);
 
+            saveSetToStorage(
+                type === 'group' ? 'schedule-selected-groups' : 'schedule-selected-teachers',
+                set,
+            );
+
             updateTriggerLabel();
             updateCounter();
             applyFilters();
@@ -806,6 +831,8 @@ function setupUnifiedFilter() {
         e.stopPropagation();
         state.selectedGroups.clear();
         state.selectedTeachers.clear();
+        saveSetToStorage('schedule-selected-groups', state.selectedGroups);
+        saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
         updateTriggerLabel();
         updateCounter();
         applyFilters();
@@ -849,6 +876,16 @@ async function init() {
     }
     state.groups = [...groups].sort();
     state.teachers = [...teachers].sort();
+
+    // Убираем из сохранённых фильтров то, чего больше нет в данных
+    for (const g of [...state.selectedGroups]) {
+        if (!state.groups.includes(g)) state.selectedGroups.delete(g);
+    }
+    for (const t of [...state.selectedTeachers]) {
+        if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
+    }
+    saveSetToStorage('schedule-selected-groups', state.selectedGroups);
+    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
     applyFilters();
     setupUnifiedFilter();
