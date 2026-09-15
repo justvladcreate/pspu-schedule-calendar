@@ -838,14 +838,17 @@ body { overflow: hidden; }
 }
 
 /* ==== MOBILE / TABLET ==== */
+/* Header кнопки закрытия — по умолчанию скрыт, виден только на мобилке */
+.filter-mobile-header {
+    display: none;
+}
+
 @media (max-width: 900px) {
-    /* App height: dynamic viewport */
     .app {
         height: 100vh !important;
         height: 100dvh !important;
     }
 
-    /* Toolbar — многострочный */
     .toolbar {
         position: relative !important;
         padding: 8px 10px !important;
@@ -853,29 +856,34 @@ body { overflow: hidden; }
         flex-wrap: wrap !important;
     }
 
+    /* Дата — компактная, слева, в одной строке с навигацией */
     .toolbar-left {
-        flex: 1 1 100% !important;
+        flex: 0 1 auto !important;
         order: 1;
-        width: 100%;
     }
 
+    /* Навигация — справа от даты, в той же строке */
     .toolbar-center {
+        flex: 1 1 auto !important;
         order: 2;
-        flex: 0 1 auto;
+        justify-content: flex-end;
     }
 
+    /* Фильтр, вид, тема — на новой строке, на всю ширину */
     .toolbar-right {
+        flex: 1 1 100% !important;
         order: 3;
-        flex: 0 1 auto;
-        margin-left: auto !important;
-        flex-wrap: nowrap;
+        margin-left: 0 !important;
+        justify-content: flex-start;
     }
 
+    /* Дата компактнее */
     .date-label {
-        width: 100% !important;
+        width: auto !important;
         min-width: 0 !important;
-        font-size: 14px !important;
-        padding: 8px 12px !important;
+        font-size: 13px !important;
+        padding: 7px 10px !important;
+        white-space: nowrap;
     }
 
     .btn {
@@ -883,7 +891,6 @@ body { overflow: hidden; }
         font-size: 12px !important;
     }
 
-    /* Баннер */
     .warning-banner {
         font-size: 12px !important;
         padding: 6px 12px 6px 10px !important;
@@ -896,7 +903,7 @@ body { overflow: hidden; }
         font-size: 14px !important;
     }
 
-    /* ==== FILTER DROPDOWN — полноэкранная модалка ==== */
+    /* ==== FILTER — полноэкранная модалка ==== */
     .filter {
         position: static !important;
     }
@@ -911,8 +918,50 @@ body { overflow: hidden; }
         max-width: none !important;
         border-radius: 0 !important;
         padding: 16px !important;
+        padding-top: max(16px, env(safe-area-inset-top)) !important;
+        padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
         overflow-y: auto !important;
         z-index: 500 !important;
+    }
+
+    /* Header модалки */
+    .filter-mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0 12px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .filter-mobile-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .filter-close {
+        appearance: none;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-family: inherit;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .filter-close:hover,
+    .filter-close:active {
+        background: var(--surface-2);
+        color: var(--text);
     }
 
     .filter-columns {
@@ -922,7 +971,7 @@ body { overflow: hidden; }
 
     .filter-options {
         height: auto !important;
-        max-height: 180px !important;
+        max-height: 200px !important;
     }
 
     .filter-search {

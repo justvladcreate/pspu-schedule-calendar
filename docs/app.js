@@ -12,6 +12,7 @@ const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const WEEKDAYS_FULL  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 const MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 const MONTHS_NOM = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
 // ==================== STATE ====================
 const state = {
@@ -231,8 +232,10 @@ function render(animation = null) {
 
 function updateDateLabel() {
     const d = state.currentDate;
-    document.getElementById('dateLabel').textContent =
-        `${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
+    const isNarrow = window.innerWidth <= 900;
+    document.getElementById('dateLabel').textContent = isNarrow
+        ? `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`
+        : `${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 // ==================== WEEK VIEW ====================
@@ -751,16 +754,49 @@ function setupUnifiedFilter() {
         }
     }
 
+    function openFilter() {
+        document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
+        root.classList.add('open');
+        search.value = '';
+        renderLists('');
+        updateCounter();
+        // История — чтобы кнопка "Назад" на телефоне закрывала модалку
+        history.pushState({ filterOpen: true }, '');
+        setTimeout(() => search.focus(), 50);
+    }
+
+    function closeFilter() {
+        if (!root.classList.contains('open')) return;
+        if (history.state && history.state.filterOpen) {
+            history.back();  // popstate закроет модалку
+        } else {
+            root.classList.remove('open');
+        }
+    }
+
     trigger.addEventListener('click', e => {
         e.stopPropagation();
-        const wasOpen = root.classList.contains('open');
-        document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
-        if (!wasOpen) {
-            root.classList.add('open');
-            search.value = '';
-            renderLists('');
-            updateCounter();
-            search.focus();
+        if (root.classList.contains('open')) closeFilter();
+        else openFilter();
+    });
+
+    const closeBtn = dropdown.querySelector('.filter-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            closeFilter();
+        });
+    }
+
+    window.addEventListener('popstate', () => {
+        if (root.classList.contains('open')) {
+            root.classList.remove('open');
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && root.classList.contains('open')) {
+            closeFilter();
         }
     });
 
@@ -781,7 +817,11 @@ function setupUnifiedFilter() {
 
     updateTriggerLabel();
     updateCounter();
+
+    // Реагируем на изменение ширины окна (поворот экрана, resize)
+    window.addEventListener('resize', updateDateLabel);
 }
+
 
 // ==================== INIT ====================
 async function init() {
@@ -836,16 +876,23 @@ async function init() {
 
     document.getElementById('eventPopover').addEventListener('click', e => e.stopPropagation());
 
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
         hideEventDetails();
-        document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
+        // На десктопе закрываем фильтр при клике вне его
+        if (window.innerWidth > 900) {
+            const filterRoot = document.getElementById('filterRoot');
+            if (filterRoot && filterRoot.classList.contains('open') && !filterRoot.contains(e.target)) {
+                filterRoot.classList.remove('open');
+                if (history.state && history.state.filterOpen) history.back();
+            }
+        }
     });
 
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             hideEventDetails();
             closeDatePicker();
-            document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
+            // Escape для фильтра обрабатывается внутри setupUnifiedFilter
         }
     });
 
