@@ -12,7 +12,7 @@ from parser.process import process_schedule
 
 logger = logging.getLogger(__name__)
 
-CHECK_CHANGES_TIMER: int = 15 * 60  # 15 минут
+CHECK_CHANGES_TIMER: int = 60 * 60  # минуты
 
 
 async def timer() -> None:
