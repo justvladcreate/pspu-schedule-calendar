@@ -836,3 +836,107 @@ body { overflow: hidden; }
     .calendar.anim-prev,
     .calendar.anim-fade { animation: none; }
 }
+
+/* ==== MOBILE / TABLET ==== */
+@media (max-width: 700px) {
+    /* App height: dynamic viewport — учитывает адресную строку браузера */
+    .app {
+        height: 100vh;   /* fallback для старых браузеров */
+        height: 100dvh;  /* Chrome 108+, Safari 15.4+, Firefox 101+ */
+    }
+
+    /* Toolbar: переносим в несколько строк, чтобы всё поместилось */
+    .toolbar {
+        position: relative;   /* якорь для dropdown */
+        padding: 8px 10px;
+        gap: 6px;
+    }
+
+    .toolbar-left {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .toolbar-center {
+        order: 2;
+        flex: 1 1 auto;
+    }
+
+    .toolbar-right {
+        order: 3;
+        flex: 1 1 auto;
+        margin-left: 0;              /* убираем авто-выталкивание вправо */
+        justify-content: flex-end;   /* но группу прижимаем к правому краю */
+    }
+
+    /* Дата — на всю ширину, компактнее */
+    .date-label {
+        width: 100%;
+        min-width: 0;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    /* Кнопки — компактнее */
+    .btn {
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    /* Баннер — плотнее */
+    .warning-banner {
+        font-size: 12px;
+        padding: 6px 12px 6px 10px;
+        gap: 8px;
+    }
+
+    .warning-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 14px;
+    }
+
+    /* ==== FILTER DROPDOWN ==== */
+    /* На мобильных .filter теряет позиционирование — dropdown
+       якорится к .toolbar (position: relative выше) и растягивается на всю ширину */
+    .filter {
+        position: static;
+    }
+
+    .filter-dropdown {
+        position: absolute;
+        top: 100%;          /* сразу под тулбаром */
+        left: 8px;
+        right: 8px;
+        width: auto;        /* растягивается по left/right */
+        max-width: none;
+    }
+
+    /* Две колонки → одна, чтобы не сжимать контент */
+    .filter-columns {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    /* Списки короче — dropdown не вылезает за низ экрана */
+    .filter-options {
+        height: 140px;
+    }
+
+    /* Footer компактнее */
+    .footer {
+        padding: 4px 12px;
+    }
+
+    /* Месячный вид — чуть мельче тексты, чтобы не наезжали */
+    .month-event {
+        font-size: 10px;
+        padding: 1px 3px;
+    }
+
+    .month-day-num {
+        font-size: 11px;
+        min-width: 18px;
+        height: 18px;
+    }
+}
