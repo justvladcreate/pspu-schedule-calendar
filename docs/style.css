@@ -838,105 +838,110 @@ body { overflow: hidden; }
 }
 
 /* ==== MOBILE / TABLET ==== */
-@media (max-width: 700px) {
-    /* App height: dynamic viewport — учитывает адресную строку браузера */
+@media (max-width: 900px) {
+    /* App height: dynamic viewport */
     .app {
-        height: 100vh;   /* fallback для старых браузеров */
-        height: 100dvh;  /* Chrome 108+, Safari 15.4+, Firefox 101+ */
+        height: 100vh !important;
+        height: 100dvh !important;
     }
 
-    /* Toolbar: переносим в несколько строк, чтобы всё поместилось */
+    /* Toolbar — многострочный */
     .toolbar {
-        position: relative;   /* якорь для dropdown */
-        padding: 8px 10px;
-        gap: 6px;
+        position: relative !important;
+        padding: 8px 10px !important;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
     }
 
     .toolbar-left {
-        flex: 1 1 100%;
+        flex: 1 1 100% !important;
         order: 1;
+        width: 100%;
     }
 
     .toolbar-center {
         order: 2;
-        flex: 1 1 auto;
+        flex: 0 1 auto;
     }
 
     .toolbar-right {
         order: 3;
-        flex: 1 1 auto;
-        margin-left: 0;              /* убираем авто-выталкивание вправо */
-        justify-content: flex-end;   /* но группу прижимаем к правому краю */
+        flex: 0 1 auto;
+        margin-left: auto !important;
+        flex-wrap: nowrap;
     }
 
-    /* Дата — на всю ширину, компактнее */
     .date-label {
-        width: 100%;
-        min-width: 0;
-        font-size: 14px;
-        padding: 8px 12px;
+        width: 100% !important;
+        min-width: 0 !important;
+        font-size: 14px !important;
+        padding: 8px 12px !important;
     }
 
-    /* Кнопки — компактнее */
     .btn {
-        padding: 7px 10px;
-        font-size: 12px;
+        padding: 7px 10px !important;
+        font-size: 12px !important;
     }
 
-    /* Баннер — плотнее */
+    /* Баннер */
     .warning-banner {
-        font-size: 12px;
-        padding: 6px 12px 6px 10px;
-        gap: 8px;
+        font-size: 12px !important;
+        padding: 6px 12px 6px 10px !important;
+        gap: 8px !important;
     }
 
     .warning-icon {
-        width: 18px;
-        height: 18px;
-        font-size: 14px;
+        width: 18px !important;
+        height: 18px !important;
+        font-size: 14px !important;
     }
 
-    /* ==== FILTER DROPDOWN ==== */
-    /* На мобильных .filter теряет позиционирование — dropdown
-       якорится к .toolbar (position: relative выше) и растягивается на всю ширину */
+    /* ==== FILTER DROPDOWN — полноэкранная модалка ==== */
     .filter {
-        position: static;
+        position: static !important;
     }
 
     .filter-dropdown {
-        position: absolute;
-        top: 100%;          /* сразу под тулбаром */
-        left: 8px;
-        right: 8px;
-        width: auto;        /* растягивается по left/right */
-        max-width: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+        padding: 16px !important;
+        overflow-y: auto !important;
+        z-index: 500 !important;
     }
 
-    /* Две колонки → одна, чтобы не сжимать контент */
     .filter-columns {
-        grid-template-columns: 1fr;
-        gap: 8px;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
     }
 
-    /* Списки короче — dropdown не вылезает за низ экрана */
     .filter-options {
-        height: 140px;
+        height: auto !important;
+        max-height: 180px !important;
     }
 
-    /* Footer компактнее */
+    .filter-search {
+        font-size: 15px !important;
+        padding: 10px 12px !important;
+    }
+
     .footer {
-        padding: 4px 12px;
+        padding: 4px 12px !important;
     }
 
-    /* Месячный вид — чуть мельче тексты, чтобы не наезжали */
     .month-event {
-        font-size: 10px;
-        padding: 1px 3px;
+        font-size: 10px !important;
+        padding: 1px 3px !important;
     }
 
     .month-day-num {
-        font-size: 11px;
-        min-width: 18px;
-        height: 18px;
+        font-size: 11px !important;
+        min-width: 18px !important;
+        height: 18px !important;
     }
 }
