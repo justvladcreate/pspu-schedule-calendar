@@ -106,6 +106,51 @@ body { overflow: hidden; }
 .btn:hover { background: var(--surface-2); border-color: var(--grid-line-strong); }
 .btn:active { background: var(--surface-3); }
 
+/* ==== ICON BUTTONS ==== */
+.btn-icon {
+    position: relative;
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-icon .icon { display: block; flex-shrink: 0; }
+
+/* View: показываем только иконку текущего вида */
+.btn-icon .view-icon { display: none; }
+.btn-icon[data-view="month"] .view-icon-month { display: block; }
+.btn-icon[data-view="week"]  .view-icon-week  { display: block; }
+.btn-icon[data-view="day"]   .view-icon-day   { display: block; }
+
+/* Theme: sun в тёмной, moon в светлой */
+.btn-icon .theme-icon { display: none; }
+.btn-icon[data-theme-current="dark"]  .theme-icon-sun  { display: block; }
+.btn-icon[data-theme-current="light"] .theme-icon-moon { display: block; }
+
+/* Бейдж с числом активных фильтров */
+.filter-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 5px;
+    border-radius: 9px;
+    min-width: 17px;
+    height: 17px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px var(--surface);
+}
+.filter-badge--visible { display: inline-flex; }
+
 
 .btn-arrow {
     padding: 8px 14px;
@@ -948,6 +993,18 @@ body { overflow: hidden; }
         order: 3;
         margin-left: 0;
         justify-content: flex-start;
+    }
+
+    /* Фильтр — слева, вид и тема — справа */
+    .toolbar-right .filter {
+        margin-right: auto;
+    }
+
+    /* Чуть компактнее иконки на мобилке */
+    .btn-icon {
+        padding: 7px;
+        min-width: 34px;
+        min-height: 34px;
     }
 
     .date-label {

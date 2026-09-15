@@ -549,12 +549,29 @@ function viewLabel(v) {
     return { month: 'Месяц', week: 'Неделя', day: 'День' }[v];
 }
 
+function updateViewButton() {
+    const btn = document.getElementById('viewBtn');
+    btn.dataset.view = state.view;
+    btn.setAttribute('aria-label', `Вид: ${viewLabel(state.view)}`);
+}
+
+function updateThemeButton() {
+    const btn = document.getElementById('themeBtn');
+    btn.dataset.themeCurrent = state.theme;
+    btn.setAttribute(
+        'aria-label',
+        state.theme === 'dark'
+            ? 'Переключить на светлую тему'
+            : 'Переключить на тёмную тему'
+    );
+}
+
 function cycleView() {
     const order = ['month', 'week', 'day'];
     const idx = order.indexOf(state.view);
     state.view = order[(idx + 1) % order.length];
     localStorage.setItem('schedule-view', state.view);
-    document.getElementById('viewBtn').textContent = viewLabel(state.view);
+    updateViewButton();
     render('fade');
 }
 
@@ -562,8 +579,7 @@ function toggleTheme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
     localStorage.setItem('schedule-theme', state.theme);
     document.documentElement.setAttribute('data-theme', state.theme);
-    document.getElementById('themeBtn').textContent =
-        state.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    updateThemeButton();
 }
 
 // ==================== CALENDAR GESTURES (wheel / swipe / pinch) ====================
@@ -833,8 +849,14 @@ function setupUnifiedFilter() {
 
     function updateTriggerLabel() {
         const total = state.selectedGroups.size + state.selectedTeachers.size;
-        trigger.querySelector('.filter-label').textContent =
-            total === 0 ? 'Фильтр' : `Фильтр · ${total}`;
+        const badge = trigger.querySelector('.filter-badge');
+        if (total === 0) {
+            badge.textContent = '';
+            badge.classList.remove('filter-badge--visible');
+        } else {
+            badge.textContent = total > 99 ? '99+' : String(total);
+            badge.classList.add('filter-badge--visible');
+        }
     }
 
     function updateCounter() {
@@ -1085,9 +1107,8 @@ function setupPullToRefresh() {
 // ==================== INIT ====================
 async function init() {
     document.documentElement.setAttribute('data-theme', state.theme);
-    document.getElementById('themeBtn').textContent =
-        state.theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
-    document.getElementById('viewBtn').textContent = viewLabel(state.view);
+    updateViewButton();
+    updateThemeButton();
 
     let raw;
     try {
