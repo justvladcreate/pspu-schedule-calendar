@@ -1,6 +1,6 @@
 import itertools
 from typing import Dict, List, Optional, Any
-from datetime import time, date, timedelta
+from datetime import time, date, timedelta, datetime, timezone
 
 from parser.postprocess import remove_academic_titles
 
@@ -159,5 +159,8 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
             ev["event_id"] = f"{group}_{weekday}_{pair_number}_{idx}"
             final_events.append(ev)
 
-    return {"events": final_events}
+    return {
+        "events": final_events,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
 
