@@ -69,7 +69,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+web/_build/
 
 # PyBuilder
 .pybuilder/
@@ -224,5 +224,4 @@ groups_info**
 dev
 #utils
 
-.worktree-gh-pages/
 .worktree-gh-pages/
