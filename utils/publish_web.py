@@ -185,7 +185,16 @@ def publish_web_sync() -> dict:
         return result
     result["committed"] = True
 
-    push = _run_git("push", "-u", "origin", GH_PAGES_BRANCH, cwd=WORKTREE_DIR)
+    # push: gh-pages — синтетическая ветка, её содержимое полностью
+    # определяется этим скриптом, поэтому перезаписываем remote.
+    # --force-with-lease защищает от перезаписи, если между fetch'ем
+    # и push'ем кто-то (или GitHub UI) успел что-то дописать.
+    _run_git("fetch", "origin", GH_PAGES_BRANCH, cwd=WORKTREE_DIR)
+
+    push = _run_git(
+        "push", "--force-with-lease", "-u", "origin", GH_PAGES_BRANCH,
+        cwd=WORKTREE_DIR,
+    )
     if push.returncode != 0:
         result["reason"] = f"git push: {push.stderr.strip()}"
         logger.error(result["reason"])
