@@ -6,7 +6,7 @@ const HOUR_START = 8;
 const HOUR_END = 22;
 const HOUR_HEIGHT = 60;
 const PAIR_MINUTES = 90;
-const MAX_INLINE_EVENTS = 3;  // больше — группируем
+const MAX_INLINE_EVENTS = 3;
 
 const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 const WEEKDAYS_FULL  = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
@@ -15,7 +15,6 @@ const MONTHS_NOM = ['Январь', 'Февраль', 'Март', 'Апрель'
 const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
 // ==================== STATE ====================
-// Хелперы для сериализации Set → массив → localStorage
 function loadSetFromStorage(key) {
     try {
         const raw = localStorage.getItem(key);
@@ -30,9 +29,7 @@ function loadSetFromStorage(key) {
 function saveSetToStorage(key, set) {
     try {
         localStorage.setItem(key, JSON.stringify([...set]));
-    } catch {
-        // localStorage может быть недоступен (приватный режим, переполнение) — молча игнорируем
-    }
+    } catch {}
 }
 
 const state = {
@@ -45,6 +42,8 @@ const state = {
     currentDate: new Date(),
     view: localStorage.getItem('schedule-view') || 'week',
     theme: localStorage.getItem('schedule-theme') || 'dark',
+    viewingOld: false,
+    currentData: null,
 };
 
 // ==================== UTILS ====================
@@ -92,13 +91,11 @@ function addMonths(d, n) {
 }
 
 // ==================== DATA ====================
-async function loadData() {
-    // Читаем сохранённый "отпечаток" кэша. Если его нет — "0" (стабильный URL).
+async function loadData(url = 'data.json') {
     const bust = localStorage.getItem('schedule-cache-bust') || '0';
-    const resp = await fetch(`${DATA_URL}?v=${bust}`);
+    const resp = await fetch(`${url}?v=${bust}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
-    return data.events || [];
+    return await resp.json();
 }
 
 function expandEvents(rawEvents) {
@@ -146,17 +143,9 @@ function applyFilters() {
 }
 
 // ==================== OVERLAP LAYOUT ====================
-
-// ==================== OVERLAP LAYOUT ====================
-// Разбиваем список событий дня на кластеры (транзитивно пересекающиеся),
-// внутри кластера раскладываем по колонкам.
-// Возвращаем массив элементов:
-//   { type: 'single', ev, column, columnsCount }
-//   { type: 'group',  events, startMin, endMin }  — если в кластере > MAX_INLINE_EVENTS
 function layoutDayEvents(events) {
     if (events.length === 0) return [];
 
-    // 1. Сортировка по началу, затем по концу
     const sorted = [...events].sort((a, b) => {
         const ta = timeToMinutes(a.time);
         const tb = timeToMinutes(b.time);
@@ -164,7 +153,6 @@ function layoutDayEvents(events) {
         return timeToMinutes(a.endTime) - timeToMinutes(b.endTime);
     });
 
-    // 2. Кластеризация
     const clusters = [];
     let current = [];
     let currentEnd = -1;
@@ -183,12 +171,10 @@ function layoutDayEvents(events) {
     }
     if (current.length) clusters.push(current);
 
-    // 3. Раскладка по колонкам внутри кластера
     const result = [];
 
     for (const cluster of clusters) {
         if (cluster.length > MAX_INLINE_EVENTS) {
-            // Группируем
             const start = cluster.reduce((min, e) => Math.min(min, timeToMinutes(e.time)), Infinity);
             const end = cluster.reduce((max, e) => Math.max(max, timeToMinutes(e.endTime)), -Infinity);
             result.push({
@@ -200,9 +186,8 @@ function layoutDayEvents(events) {
             continue;
         }
 
-        // Раскладываем по колонкам
-        const columns = [];   // каждая колонка — массив событий в ней
-        const placement = []; // {ev, column}
+        const columns = [];
+        const placement = [];
 
         for (const ev of cluster) {
             const start = timeToMinutes(ev.time);
@@ -497,7 +482,6 @@ function renderMonth(root) {
             const dayEvents = byDate.get(toISO(day)) || [];
 
             if (dayEvents.length > MAX_SHOW) {
-                // Слишком много — один сгруппированный блок, клик открывает список
                 const group = document.createElement('div');
                 group.className = 'month-event month-event--group';
                 group.textContent = `${dayEvents.length} мероприятий`;
@@ -566,6 +550,173 @@ function updateThemeButton() {
     );
 }
 
+// ==================== VERSION (Обновлено / прошлая версия) ====================
+function updateUpdatedLabel(iso) {
+    const el = document.getElementById('updatedTime');
+    const btn = document.getElementById('updatedBtn');
+    if (!iso) {
+        el.textContent = '—';
+        btn.setAttribute('aria-label', 'Обновлено: неизвестно');
+        return;
+    }
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) {
+        el.textContent = '—';
+        return;
+    }
+    const hh = pad(d.getHours());
+    const mm = pad(d.getMinutes());
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    const timeStr = `${hh}:${mm}`;
+    const full = sameDay
+        ? `сегодня ${timeStr}`
+        : `${d.getDate()} ${MONTHS_GEN[d.getMonth()]}, ${timeStr}`;
+
+    el.textContent = timeStr;
+    btn.setAttribute('aria-label', `Обновлено: ${full}. Нажмите, чтобы увидеть прошлую версию`);
+}
+
+function updateVersionUi() {
+    const wrap = document.getElementById('updatedWrap');
+    const sub  = document.getElementById('updatedSub');
+    if (state.viewingOld) {
+        wrap.classList.add('is-old');
+        sub.hidden = false;
+    } else {
+        wrap.classList.remove('is-old');
+        sub.hidden = true;
+    }
+}
+
+function applyData(data) {
+    state.allEvents = expandEvents(data.events || []);
+    updateUpdatedLabel(data.generated_at || null);
+    updateVersionUi();
+
+    const groups = new Set();
+    const teachers = new Set();
+    for (const ev of state.allEvents) {
+        if (ev.group) groups.add(ev.group);
+        (ev.teachers || []).forEach(t => teachers.add(t));
+    }
+    state.groups   = [...groups].sort();
+    state.teachers = [...teachers].sort();
+
+    for (const g of [...state.selectedGroups])   if (!state.groups.includes(g))   state.selectedGroups.delete(g);
+    for (const t of [...state.selectedTeachers]) if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
+    saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
+    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+
+    applyFilters();
+    render('fade');
+}
+
+function setupVersionToggle() {
+    const btn = document.getElementById('updatedBtn');
+    btn.addEventListener('click', async () => {
+        if (state.viewingOld) {
+            state.viewingOld = false;
+            applyData(state.currentData);
+            return;
+        }
+        try {
+            const oldData = await loadData('old_data.json');
+            state.viewingOld = true;
+            applyData(oldData);
+        } catch (e) {
+            console.warn('Прошлая версия недоступна:', e);
+            btn.disabled = true;
+            btn.setAttribute('title', 'Прошлая версия пока недоступна');
+        }
+    });
+}
+
+// ==================== README MODAL ====================
+function setupReadmeModal() {
+    const banner = document.getElementById('warningBanner');
+    const modal  = document.getElementById('readmeModal');
+    const body   = document.getElementById('readmeBody');
+    const close  = modal.querySelector('.readme-close');
+    let loaded = false;
+
+    async function open() {
+        modal.classList.add('open');
+        if (loaded) return;
+        body.innerHTML = '<div class="readme-loading">Загрузка…</div>';
+        try {
+            const resp = await fetch('readme.md?v=' + Date.now());
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const text = await resp.text();
+            body.innerHTML = renderMarkdown(text);
+            loaded = true;
+        } catch (e) {
+            body.innerHTML =
+                `<p style="color:var(--danger-text)">Не удалось загрузить текст: ${escapeHtml(e.message)}</p>`;
+        }
+    }
+    function hide() { modal.classList.remove('open'); }
+
+    banner.addEventListener('click', open);
+    close.addEventListener('click', hide);
+    modal.addEventListener('click', e => { if (e.target === modal) hide(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) hide();
+    });
+}
+
+// ==================== MARKDOWN (минимальный) ====================
+function renderMarkdown(src) {
+    const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const inline = s => {
+        s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+        s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img alt="$1" src="$2">');
+        s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,
+            '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+        return s;
+    };
+
+    const lines = esc(src).split('\n');
+    const out = [];
+    let para = [], listType = null, inCode = false, codeBuf = [];
+
+    const closeList = () => { if (listType) { out.push(`</${listType}>`); listType = null; } };
+    const flushPara = () => { if (para.length) { out.push('<p>' + para.join(' ') + '</p>'); para = []; } };
+
+    for (const line of lines) {
+        if (line.startsWith('```')) {
+            if (inCode) { out.push('<pre><code>' + codeBuf.join('\n') + '</code></pre>'); codeBuf = []; inCode = false; }
+            else { flushPara(); closeList(); inCode = true; }
+            continue;
+        }
+        if (inCode) { codeBuf.push(line); continue; }
+
+        const h = line.match(/^(#{1,6})\s+(.*)$/);
+        if (h) { flushPara(); closeList(); out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`); continue; }
+
+        if (line.trim() === '') { flushPara(); closeList(); continue; }
+
+        const ul = line.match(/^[-*+]\s+(.*)$/);
+        if (ul) { flushPara(); if (listType !== 'ul') { closeList(); out.push('<ul>'); listType = 'ul'; } out.push('<li>' + inline(ul[1]) + '</li>'); continue; }
+
+        const ol = line.match(/^\d+\.\s+(.*)$/);
+        if (ol) { flushPara(); if (listType !== 'ol') { closeList(); out.push('<ol>'); listType = 'ol'; } out.push('<li>' + inline(ol[1]) + '</li>'); continue; }
+
+        const bq = line.match(/^>\s?(.*)$/);
+        if (bq) { flushPara(); closeList(); out.push('<blockquote>' + inline(bq[1]) + '</blockquote>'); continue; }
+
+        if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) { flushPara(); closeList(); out.push('<hr>'); continue; }
+
+        para.push(inline(line));
+    }
+    if (inCode) out.push('<pre><code>' + codeBuf.join('\n') + '</code></pre>');
+    flushPara(); closeList();
+    return out.join('\n');
+}
+
 function cycleView() {
     const order = ['month', 'week', 'day'];
     const idx = order.indexOf(state.view);
@@ -586,13 +737,10 @@ function toggleTheme() {
 function setupCalendarGestures() {
     const calendar = document.getElementById('calendar');
 
-    // iOS Safari: pinch обрабатывается отдельными gesture-событиями,
-    // touch-action у него частично игнорируется. Явно глушим.
     ['gesturestart', 'gesturechange', 'gestureend'].forEach(name => {
         calendar.addEventListener(name, e => e.preventDefault(), { passive: false });
     });
 
-    // ---------- WHEEL (desktop) ----------
     let wheelLocked = false;
     calendar.addEventListener('wheel', e => {
         if (state.view !== 'month') return;
@@ -606,9 +754,7 @@ function setupCalendarGestures() {
         setTimeout(() => { wheelLocked = false; }, 250);
     }, { passive: false });
 
-    // ---------- PINCH (week view only) ----------
-    // Масштабируем ширину колонок --m-day-col.
-    // min = «вся неделя влезает в экран», max = текущий вид недели.
+    // ---- Ctrl/Cmd + wheel: зум колонок недели ----
     const TIME_COL      = 56;
     const DEFAULT_COL   = 110;
     const MIN_COL       = () => Math.max(30, (window.innerWidth - TIME_COL) / 7);
@@ -625,6 +771,17 @@ function setupCalendarGestures() {
     const dist = (t1, t2) =>
         Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
 
+    calendar.addEventListener('wheel', e => {
+        if (state.view !== 'week') return;
+        if (!e.ctrlKey && !e.metaKey) return;
+        e.preventDefault();
+        const step = e.deltaY > 0 ? -8 : 8;
+        const cur  = getColWidth();
+        const next = Math.max(MIN_COL(), Math.min(MAX_COL, cur + step));
+        setColWidth(next);
+    }, { passive: false });
+
+    // ---------- PINCH (week only) ----------
     let pinchStartDist = 0;
     let pinchStartCol  = 0;
 
@@ -633,7 +790,6 @@ function setupCalendarGestures() {
     let startX = 0, startY = 0, tracking = false;
 
     calendar.addEventListener('touchstart', e => {
-        // Два и более пальца → режим пинча. Отменяем свайп-навигацию.
         if (e.touches.length >= 2) {
             tracking = false;
             if (state.view === 'week') {
@@ -648,13 +804,10 @@ function setupCalendarGestures() {
     }, { passive: true });
 
     calendar.addEventListener('touchmove', e => {
-        // Два пальца — всегда глушим браузерный zoom,
-        // независимо от вида. Иначе Chrome/Safari сами зумируют страницу.
         if (e.touches.length === 2 && e.cancelable) {
             e.preventDefault();
         }
 
-        // А масштабируем колонки только в неделе
         if (e.touches.length !== 2 || !pinchStartDist) return;
         if (state.view !== 'week') return;
 
@@ -673,9 +826,9 @@ function setupCalendarGestures() {
         const dy = e.changedTouches[0].clientY - startY;
 
         if (Math.abs(dx) < SWIPE_THRESHOLD) return;
-        if (Math.abs(dy) > Math.abs(dx)) return;   // вертикаль → в PTR
+        if (Math.abs(dy) > Math.abs(dx)) return;
 
-        const dir = dx < 0 ? 1 : -1;               // влево → вперёд
+        const dir = dx < 0 ? 1 : -1;
 
         if (state.view === 'week') {
             const atLeft  = calendar.scrollLeft <= 1;
@@ -683,7 +836,7 @@ function setupCalendarGestures() {
                             >= calendar.scrollWidth - 1;
             if (dir === -1 && atLeft)  { navigate(-1); return; }
             if (dir ===  1 && atRight) { navigate( 1); return; }
-            return;   // иначе — нативный горизонтальный скролл сетки
+            return;
         }
         navigate(dir);
     }, { passive: true });
@@ -693,7 +846,6 @@ function setupCalendarGestures() {
         tracking = false;
     });
 
-    // После поворота экрана / изменения ширины — пересчитываем min
     window.addEventListener('resize', () => {
         if (state.view !== 'week') return;
         const cur = getColWidth();
@@ -935,7 +1087,6 @@ function setupUnifiedFilter() {
         search.value = '';
         renderLists('');
         updateCounter();
-        // История — чтобы кнопка "Назад" на телефоне закрывала модалку
         history.pushState({ filterOpen: true }, '');
         setTimeout(() => search.focus(), 50);
     }
@@ -943,7 +1094,7 @@ function setupUnifiedFilter() {
     function closeFilter() {
         if (!root.classList.contains('open')) return;
         if (history.state && history.state.filterOpen) {
-            history.back();  // popstate закроет модалку
+            history.back();
         } else {
             root.classList.remove('open');
         }
@@ -995,7 +1146,6 @@ function setupUnifiedFilter() {
     updateTriggerLabel();
     updateCounter();
 
-    // Реагируем на изменение ширины окна (поворот экрана, resize)
     window.addEventListener('resize', updateDateLabel);
 }
 
@@ -1025,7 +1175,6 @@ function setupPullToRefresh() {
     };
 
     calendar.addEventListener('touchstart', e => {
-        // ← Два и более пальца — это pinch, не PTR
         if (e.touches.length > 1) {
             isPulling = false;
             resetPull();
@@ -1043,7 +1192,6 @@ function setupPullToRefresh() {
     calendar.addEventListener('touchmove', e => {
         if (!isPulling) return;
 
-        // ← Второй палец добавлен уже во время движения — отменяем PTR
         if (e.touches.length > 1) {
             isPulling = false;
             resetPull();
@@ -1053,20 +1201,17 @@ function setupPullToRefresh() {
         const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
 
-        // Горизонтальный жест — не наш
         if (Math.abs(dx) > Math.abs(dy)) {
             isPulling = false;
             resetPull();
             return;
         }
 
-        // Палец пошёл вверх — сбрасываем
         if (dy <= 0) {
             resetPull();
             return;
         }
 
-        // Контейнер уже отскроллен вниз
         if (calendar.scrollTop > 0) {
             isPulling = false;
             resetPull();
@@ -1082,8 +1227,6 @@ function setupPullToRefresh() {
 
     const endPull = e => {
         if (!isPulling) return;
-
-        // ← Ещё остались пальцы на экране — жест не завершён
         if (e && e.touches && e.touches.length > 0) return;
 
         isPulling = false;
@@ -1110,16 +1253,18 @@ async function init() {
     updateViewButton();
     updateThemeButton();
 
-    let raw;
+    let currentData;
     try {
-        raw = await loadData();
+        currentData = await loadData('data.json');
     } catch (e) {
         document.getElementById('calendar').innerHTML =
             `<div class="empty-state">Не удалось загрузить расписание: ${escapeHtml(e.message)}</div>`;
         return;
     }
 
-    state.allEvents = expandEvents(raw);
+    state.currentData = currentData;
+    state.allEvents = expandEvents(currentData.events || []);
+    updateUpdatedLabel(currentData.generated_at || null);
 
     const groups = new Set();
     const teachers = new Set();
@@ -1130,7 +1275,6 @@ async function init() {
     state.groups = [...groups].sort();
     state.teachers = [...teachers].sort();
 
-    // Убираем из сохранённых фильтров то, чего больше нет в данных
     for (const g of [...state.selectedGroups]) {
         if (!state.groups.includes(g)) state.selectedGroups.delete(g);
     }
@@ -1142,6 +1286,7 @@ async function init() {
 
     applyFilters();
     setupUnifiedFilter();
+    setupVersionToggle();
 
     document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
     document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
@@ -1164,10 +1309,8 @@ async function init() {
         if (e.target.id === 'dateModal') closeDatePicker();
     });
 
-
     document.addEventListener('click', (e) => {
         hideEventDetails();
-        // На десктопе закрываем фильтр при клике вне его
         if (window.innerWidth > 900) {
             const filterRoot = document.getElementById('filterRoot');
             if (filterRoot && filterRoot.classList.contains('open') && !filterRoot.contains(e.target)) {
@@ -1181,12 +1324,12 @@ async function init() {
         if (e.key === 'Escape') {
             hideEventDetails();
             closeDatePicker();
-            // Escape для фильтра обрабатывается внутри setupUnifiedFilter
         }
     });
 
     setupPullToRefresh();
     setupCalendarGestures();
+    setupReadmeModal();
     render();
 }
 

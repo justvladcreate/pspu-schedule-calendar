@@ -49,8 +49,6 @@
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Ширина одной дневной колонки на мобилке.
-   Одна переменная управляет и шапкой, и телом — они не разъезжаются. */
 :root {
     --m-day-col: 110px;
 }
@@ -72,7 +70,7 @@ body { overflow: hidden; }
     flex-direction: column;
 }
 
-/* ==== TOOLBAR ==== */
+/* ==== TOOLBAR (общая раскладка) ==== */
 .toolbar {
     display: flex;
     align-items: center;
@@ -84,10 +82,30 @@ body { overflow: hidden; }
     flex-shrink: 0;
 }
 
-.toolbar-left { display: flex; align-items: center; gap: 10px; }
-.toolbar-center { display: flex; align-items: center; gap: 6px; }
-.toolbar-right { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
 
+.toolbar-left   { order: 1; }
+.toolbar-center { order: 2; }
+.updated-wrap   { order: 3; }
+.toolbar-right  { order: 4; }
+
+/* ==== BUTTONS ==== */
 .btn {
     appearance: none;
     border: 1px solid var(--border);
@@ -118,13 +136,11 @@ body { overflow: hidden; }
 }
 .btn-icon .icon { display: block; flex-shrink: 0; }
 
-/* View: показываем только иконку текущего вида */
 .btn-icon .view-icon { display: none; }
 .btn-icon[data-view="month"] .view-icon-month { display: block; }
 .btn-icon[data-view="week"]  .view-icon-week  { display: block; }
 .btn-icon[data-view="day"]   .view-icon-day   { display: block; }
 
-/* Theme: sun в тёмной, moon в светлой */
 .btn-icon .theme-icon { display: none; }
 .btn-icon[data-theme-current="dark"]  .theme-icon-sun  { display: block; }
 .btn-icon[data-theme-current="light"] .theme-icon-moon { display: block; }
@@ -151,31 +167,30 @@ body { overflow: hidden; }
 }
 .filter-badge--visible { display: inline-flex; }
 
-
+/* ==== ARROW BUTTONS ==== */
 .btn-arrow {
     padding: 8px 14px;
     min-width: 40px;
     position: relative;
-    font-size: 0;   /* прячем возможный текст */
+    font-size: 0;
 }
-
 .btn-arrow::before {
     content: '';
     display: inline-block;
     width: 9px;
     height: 9px;
-    border-top: 3px solid currentColor;      /* толщина стрелки */
+    border-top: 3px solid currentColor;
     border-right: 3px solid currentColor;
-    transform: rotate(45deg);                /* › */
+    transform: rotate(45deg);
     margin-right: 2px;
 }
-
 #prevBtn::before {
-    transform: rotate(-135deg);              /* ‹ */
+    transform: rotate(-135deg);
     margin-right: 0;
     margin-left: 2px;
 }
 
+/* ==== DATE LABEL ==== */
 .date-label {
     font-size: 15px;
     font-weight: 700;
@@ -208,6 +223,42 @@ body { overflow: hidden; }
 }
 .date-label:hover::after { border-color: var(--text); }
 
+/* ==== UPDATED BUTTON ==== */
+.updated-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.updated-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-weight: 600;
+}
+.updated-btn .icon { color: var(--text-muted); }
+.updated-btn .updated-label { white-space: nowrap; }
+
+.updated-wrap.is-old .updated-btn {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.updated-wrap.is-old .updated-btn .icon { color: var(--accent); }
+
+.updated-sub {
+    font-size: 10px;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+    padding: 0 4px;
+    white-space: nowrap;
+}
+.updated-sub[hidden] { display: none; }
+
 /* ==== WARNING BANNER ==== */
 .warning-banner {
     flex-shrink: 0;
@@ -216,11 +267,16 @@ body { overflow: hidden; }
     gap: 10px;
     padding: 8px 16px 8px 14px;
     background: var(--danger-bg);
+    border: none;
     border-left: 4px solid var(--danger);
+    border-radius: 0;
     color: var(--danger-text);
+    font: inherit;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.005em;
+    text-align: left;
+    width: 100%;
     text-decoration: none;
     cursor: pointer;
     transition: background 0.15s, padding-left 0.15s;
@@ -234,8 +290,15 @@ body { overflow: hidden; }
     outline-offset: -2px;
 }
 
+.warning-underline {
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 2px;
+}
+
 .warning-icon {
     font-size: 16px;
+    font-weight: 700;
     line-height: 1;
     flex-shrink: 0;
     display: inline-flex;
@@ -488,8 +551,6 @@ body { overflow: hidden; }
     position: relative;
 }
 
-/* Раскладка колонок теперь в CSS, а не в JS —
-   это гарантирует, что шапка и тело используют одну и ту же ширину. */
 .cal-body.week .day-grid {
     grid-template-columns: repeat(7, 1fr);
 }
@@ -874,6 +935,111 @@ body { overflow: hidden; }
     color: var(--accent-text);
 }
 
+/* ==== README MODAL ==== */
+.readme {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: min(640px, calc(100vw - 24px));
+    max-height: min(80vh, 720px);
+    display: flex;
+    flex-direction: column;
+}
+
+.readme-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+}
+.readme-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+.readme-close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+}
+.readme-close:hover { background: var(--surface-2); color: var(--text); }
+
+.readme-body {
+    padding: 16px 20px 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+}
+.readme-body h1,
+.readme-body h2,
+.readme-body h3 {
+    color: var(--text);
+    margin: 18px 0 8px;
+    line-height: 1.25;
+}
+.readme-body h1 { font-size: 20px; margin-top: 0; }
+.readme-body h2 { font-size: 17px; }
+.readme-body h3 { font-size: 15px; }
+.readme-body p { margin: 0 0 12px; }
+.readme-body ul,
+.readme-body ol { margin: 0 0 12px; padding-left: 22px; }
+.readme-body li { margin-bottom: 4px; }
+.readme-body a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.readme-body a:hover { color: var(--accent-hover); }
+.readme-body code {
+    background: var(--surface-2);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+}
+.readme-body pre {
+    background: var(--surface-2);
+    border-radius: 6px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    margin: 0 0 12px;
+}
+.readme-body pre code { background: transparent; padding: 0; }
+.readme-body blockquote {
+    border-left: 3px solid var(--border);
+    padding-left: 12px;
+    margin: 0 0 12px;
+    color: var(--text-muted);
+}
+.readme-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+}
+.readme-body img { max-width: 100%; height: auto; border-radius: 6px; }
+.readme-loading {
+    color: var(--text-muted);
+    padding: 8px 0;
+    font-style: italic;
+}
+
 .empty-state {
     padding: 60px 20px;
     text-align: center;
@@ -969,7 +1135,7 @@ body { overflow: hidden; }
         height: 100dvh;
     }
 
-    /* ==== TOOLBAR ==== */
+    /* ==== TOOLBAR: перенос правых кнопок на вторую строку ==== */
     .toolbar {
         position: relative;
         padding: 8px 10px;
@@ -982,15 +1148,21 @@ body { overflow: hidden; }
         order: 1;
     }
 
-    .toolbar-center {
-        flex: 1 1 auto;
+    .updated-wrap {
         order: 2;
+        flex: 1;              /* растягиваем обёртку на всё свободное место */
+        align-items: center;  /* кнопка и подпись — по центру */
+    }
+
+    .toolbar-center {
+        flex: 0 1 auto;       /* не растягивается, прижат вправо */
+        order: 3;
         justify-content: flex-end;
     }
 
     .toolbar-right {
         flex: 1 1 100%;
-        order: 3;
+        order: 4;
         margin-left: 0;
         justify-content: flex-start;
     }
@@ -999,6 +1171,9 @@ body { overflow: hidden; }
     .toolbar-right .filter {
         margin-right: auto;
     }
+
+    /* На мобилке убираем «Обновлено:» — оставляем иконку + время */
+    .updated-prefix { display: none; }
 
     /* Чуть компактнее иконки на мобилке */
     .btn-icon {
@@ -1018,6 +1193,10 @@ body { overflow: hidden; }
     .btn {
         padding: 7px 10px;
         font-size: 12px;
+    }
+
+    .updated-btn {
+        padding: 7px 16px;    /* чуть шире, чем базовые 7px 10px */
     }
 
     .warning-banner {
@@ -1110,10 +1289,7 @@ body { overflow: hidden; }
         padding: 10px 12px;
     }
 
-    /* ==== WEEK VIEW: горизонтальный скролл ====
-       И шапка, и тело используют ОДНУ И ТУ ЖЕ ширину колонки
-       (--m-day-col), поэтому их итоговая ширина совпадает и
-       они не разъезжаются при скролле. */
+    /* ==== WEEK VIEW: горизонтальный скролл ==== */
     .calendar.view-week {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -1133,7 +1309,6 @@ body { overflow: hidden; }
         grid-template-columns: repeat(7, var(--m-day-col));
     }
 
-    /* Компактнее события в узких колонках */
     .event-block {
         padding: 2px 5px;
         border-left-width: 2px;
@@ -1148,7 +1323,6 @@ body { overflow: hidden; }
         font-size: 9.5px;
     }
 
-    /* ==== MONTH — компактнее ==== */
     .month-event {
         font-size: 10px;
         padding: 1px 3px;
@@ -1157,5 +1331,11 @@ body { overflow: hidden; }
         font-size: 11px;
         min-width: 18px;
         height: 18px;
+    }
+
+    /* Модалка README почти на весь экран */
+    .readme {
+        width: calc(100vw - 16px);
+        max-height: 90dvh;
     }
 }

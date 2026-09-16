@@ -86,23 +86,46 @@ class DataExtractor:
 
     async def extract(self, file_path):
         sheets_metadata = await self.get_sheets_metadata()
-        sheet_names = pd.ExcelFile(file_path).sheet_names
+
+        # Порядок листов берём у pandas — он совпадает с порядком в книге.
+        all_sheet_names = pd.ExcelFile(file_path).sheet_names
+
+        # Открываем книгу в read_only, чтобы дёшево узнать, какие листы скрыты.
+        wb = load_workbook(file_path, read_only=True, data_only=True)
+        try:
+            hidden_sheets = {
+                ws.title
+                for ws in wb.worksheets
+                if ws.sheet_state != "visible"     # 'hidden' и 'veryHidden'
+            }
+        finally:
+            wb.close()
+
+        skipped = [s for s in all_sheet_names if s in hidden_sheets]
+        if skipped:
+            logger.info(f"Пропускаю скрытые листы: {skipped}")
+
+        visible_sheets = [s for s in all_sheet_names if s not in hidden_sheets]
+
         groups_info = {}
 
-        #Проходимся по всем листам
-        for sheet_name in sheet_names[1:]:
-            # if not sheet_name == "1237":
-            #     continue
+        # Первый лист — сводный ("ГРУППЫ"), не парсим.
+        for sheet_name in visible_sheets[1:]:
             df = fill_merged_cells_safe(file_path, sheet_name=sheet_name)
             sheet_gid = None
             if sheet_name in sheets_metadata:
                 sheet_gid = sheets_metadata[sheet_name]['gid']
-            
+
             group_info = extraction(df, sheet_gid)
             if not group_info:
                 continue
-            groups_info.update(group_info)
-            
+
+            # Не затираем уже собранные группы сводными листами.
+            for grp, data in group_info.items():
+                if grp in groups_info and groups_info[grp].get("events"):
+                    continue
+                groups_info[grp] = data
+
         return groups_info
 
 

@@ -4,13 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание</title>
-    <link rel="stylesheet" href="style.css?v=20260916-9">
+    <link rel="stylesheet" href="style.css?v=20260916-10">
 </head>
 <body>
 <div class="app">
     <header class="toolbar">
         <div class="toolbar-left">
             <div class="date-label" id="dateLabel" role="button" tabindex="0"></div>
+        </div>
+
+        <div class="updated-wrap" id="updatedWrap">
+            <button class="btn updated-btn" id="updatedBtn" type="button" aria-label="Обновлено">
+                <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M12 7v5l4 2"/>
+                </svg>
+                <span class="updated-label">
+                    <span class="updated-prefix">Обновлено:&nbsp;</span><span id="updatedTime">—</span>
+                </span>
+            </button>
+            <span class="updated-sub" id="updatedSub" hidden>← прошлая версия</span>
         </div>
 
         <div class="toolbar-center">
@@ -45,7 +61,6 @@
                             <div class="filter-options" id="filterTeachersList"></div>
                         </div>
                     </div>
-
                     <div class="filter-footer">
                         <span class="filter-counter" id="filterCounter"></span>
                         <button class="filter-clear" type="button">Сбросить всё</button>
@@ -55,7 +70,6 @@
 
             <button class="btn btn-icon" id="viewBtn" type="button"
                     data-view="week" aria-label="Переключить вид">
-                <!-- Месяц: сетка 2×2 -->
                 <svg class="icon view-icon view-icon-month" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -64,7 +78,6 @@
                     <rect x="3" y="14" width="7" height="7"/>
                     <rect x="14" y="14" width="7" height="7"/>
                 </svg>
-                <!-- Неделя: колонки -->
                 <svg class="icon view-icon view-icon-week" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="1.8"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -73,7 +86,6 @@
                     <rect x="12.67" y="5" width="4" height="14" rx="1"/>
                     <rect x="18" y="5" width="4" height="14" rx="1"/>
                 </svg>
-                <!-- День: одна колонка -->
                 <svg class="icon view-icon view-icon-day" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -83,14 +95,12 @@
 
             <button class="btn btn-icon" id="themeBtn" type="button"
                     data-theme-current="dark" aria-label="Сменить тему">
-                <!-- Солнце: показываем в тёмной теме (клик → светлая) -->
                 <svg class="icon theme-icon theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"/>
                     <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
                 </svg>
-                <!-- Луна: показываем в светлой теме (клик → тёмная) -->
                 <svg class="icon theme-icon theme-icon-moon" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -100,21 +110,21 @@
         </div>
     </header>
 
-    <!-- ЗАМЕНИТЬ ССЫЛКУ -->
-    <a class="warning-banner" id="warningBanner" href="https://cloud.mail.ru/public/xqay/nJth4nGAS/12_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%9E%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).pdf" target="_blank" rel="noopener">
+    <button class="warning-banner" id="warningBanner" type="button">
         <span class="warning-icon" aria-hidden="true">ⓘ</span>
-        <span class="warning-text">Расписание может значительно отличаться от реального варианта — нет ручной ревизии</span>
+        <span class="warning-text">
+            Расписание может <span class="warning-underline">значительно отличаться</span>
+            от реального варианта — нет ручной ревизии
+        </span>
         <span class="warning-arrow" aria-hidden="true">→</span>
-    </a>
+    </button>
 
     <main class="calendar" id="calendar"></main>
 
     <footer class="footer">
-        <!-- ЗАМЕНИТЬ ССЫЛКУ -->
         <a class="footer-link" id="githubLink" href="https://github.com/justvladcreate/pspu-schedule-calendar" target="_blank" rel="noopener">
             Исходный код на GitHub
         </a>
-        <!-- позже: сюда email для обратной связи -->
     </footer>
 </div>
 
@@ -131,6 +141,18 @@
             <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
         </div>
         <div class="picker-grid" id="pickerGrid"></div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="readmeModal">
+    <div class="readme" role="dialog" aria-labelledby="readmeTitle">
+        <div class="readme-header">
+            <h2 class="readme-title" id="readmeTitle">О расписании</h2>
+            <button class="readme-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="readme-body" id="readmeBody">
+            <div class="readme-loading">Загрузка…</div>
+        </div>
     </div>
 </div>
 
