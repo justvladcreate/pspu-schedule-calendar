@@ -101,8 +101,8 @@ body { overflow: hidden; }
 }
 
 .toolbar-left   { order: 1; }
-.toolbar-center { order: 2; }
-.updated-wrap   { order: 3; }
+.updated-wrap   { order: 2; }   /* было 3 — теперь сразу после даты */
+.toolbar-center { order: 3; }   /* было 2 */
 .toolbar-right  { order: 4; }
 
 /* ==== BUTTONS ==== */
@@ -224,23 +224,32 @@ body { overflow: hidden; }
 .date-label:hover::after { border-color: var(--text); }
 
 /* ==== UPDATED BUTTON ==== */
+/* На десктопе кнопка теперь inline и стоит сразу после .toolbar-left
+   (см. порядок через order в блоке .toolbar). Разделитель и перенос
+   на отдельную строку убраны. */
 .updated-wrap {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 2px;
-    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .updated-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 12px;
+    padding: 5px 12px;
     font-weight: 600;
+    font-size: 12px;
 }
 .updated-btn .icon { color: var(--text-muted); }
 .updated-btn .updated-label { white-space: nowrap; }
+
+.updated-prefix {
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-right: 2px;
+}
 
 .updated-wrap.is-old .updated-btn {
     border-color: var(--accent);
@@ -250,12 +259,21 @@ body { overflow: hidden; }
 .updated-wrap.is-old .updated-btn .icon { color: var(--accent); }
 
 .updated-sub {
-    font-size: 10px;
-    color: var(--accent);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--accent-text);
+    background: var(--accent);
     text-align: center;
-    line-height: 1;
-    padding: 0 4px;
+    line-height: 1.2;
+    padding: 4px 10px;
+    border-radius: 12px;
     white-space: nowrap;
+    pointer-events: none;
+    z-index: 30;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 .updated-sub[hidden] { display: none; }
 
@@ -1135,45 +1153,66 @@ body { overflow: hidden; }
         height: 100dvh;
     }
 
-    /* ==== TOOLBAR: перенос правых кнопок на вторую строку ==== */
+    /* ==== TOOLBAR: grid 4 колонки × 2 строки ==== */
+    /* Строка 1: [toolbar-left (cols 1..2)] [toolbar-center (cols 3..5)]
+       Строка 2: [filter] [updated] [view] [theme]                     */
     .toolbar {
-        position: relative;
+        display: grid;
+        grid-template-columns: auto 1fr auto auto auto;
+        gap: 6px 8px;
         padding: 8px 10px;
-        gap: 6px;
-        flex-wrap: wrap;
     }
 
     .toolbar-left {
-        flex: 0 1 auto;
-        order: 1;
-    }
-
-    .updated-wrap {
-        order: 2;
-        flex: 1;              /* растягиваем обёртку на всё свободное место */
-        align-items: center;  /* кнопка и подпись — по центру */
+        grid-column: 1 / 3;
+        grid-row: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
     }
 
     .toolbar-center {
-        flex: 0 1 auto;       /* не растягивается, прижат вправо */
-        order: 3;
+        grid-column: 3 / 6;
+        grid-row: 1;
+        display: flex;
         justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
     }
 
+    /* Раскрываем контейнер — его дети становятся прямыми grid-элементами */
     .toolbar-right {
-        flex: 1 1 100%;
-        order: 4;
-        margin-left: 0;
-        justify-content: flex-start;
+        display: contents;
     }
 
-    /* Фильтр — слева, вид и тема — справа */
-    .toolbar-right .filter {
-        margin-right: auto;
+    .toolbar-right > .filter {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: center;
+        justify-self: start;
     }
 
-    /* На мобилке убираем «Обновлено:» — оставляем иконку + время */
-    .updated-prefix { display: none; }
+    .updated-wrap {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        align-self: center;
+        min-width: 0;
+    }
+
+    .toolbar-right > #viewBtn {
+        grid-column: 4;
+        grid-row: 2;
+        align-self: center;
+        justify-self: end;
+    }
+
+    .toolbar-right > #themeBtn {
+        grid-column: 5;
+        grid-row: 2;
+        align-self: center;
+        justify-self: end;
+    }
 
     /* Чуть компактнее иконки на мобилке */
     .btn-icon {
@@ -1196,7 +1235,18 @@ body { overflow: hidden; }
     }
 
     .updated-btn {
-        padding: 7px 16px;    /* чуть шире, чем базовые 7px 10px */
+        padding: 7px 12px;
+        font-size: 12px;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .updated-btn #updatedTime {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
     }
 
     .warning-banner {
@@ -1338,4 +1388,31 @@ body { overflow: hidden; }
         width: calc(100vw - 16px);
         max-height: 90dvh;
     }
+}
+
+/* ==== TOAST ==== */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translate(-50%, calc(100% + 40px));
+    background: var(--surface-3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: var(--shadow);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    max-width: calc(100vw - 32px);
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+}
+.toast.toast--visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
 }

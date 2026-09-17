@@ -4,29 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание</title>
-    <link rel="stylesheet" href="style.css?v=20260916-10">
+    <link rel="stylesheet" href="style.css?v=20260916-11">
 </head>
 <body>
 <div class="app">
+    <button class="warning-banner" id="warningBanner" type="button">
+        <span class="warning-icon" aria-hidden="true">ⓘ</span>
+        <span class="warning-text">
+            Расписание может <span class="warning-underline">значительно отличаться</span>
+            от реального варианта — нет ручной ревизии
+        </span>
+        <span class="warning-arrow" aria-hidden="true">→</span>
+    </button>
+
     <header class="toolbar">
         <div class="toolbar-left">
             <div class="date-label" id="dateLabel" role="button" tabindex="0"></div>
-        </div>
-
-        <div class="updated-wrap" id="updatedWrap">
-            <button class="btn updated-btn" id="updatedBtn" type="button" aria-label="Обновлено">
-                <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                    <path d="M3 3v5h5"/>
-                    <path d="M12 7v5l4 2"/>
-                </svg>
-                <span class="updated-label">
-                    <span class="updated-prefix">Обновлено:&nbsp;</span><span id="updatedTime">—</span>
-                </span>
-            </button>
-            <span class="updated-sub" id="updatedSub" hidden>← прошлая версия</span>
         </div>
 
         <div class="toolbar-center">
@@ -108,16 +101,22 @@
                 </svg>
             </button>
         </div>
-    </header>
 
-    <button class="warning-banner" id="warningBanner" type="button">
-        <span class="warning-icon" aria-hidden="true">ⓘ</span>
-        <span class="warning-text">
-            Расписание может <span class="warning-underline">значительно отличаться</span>
-            от реального варианта — нет ручной ревизии
-        </span>
-        <span class="warning-arrow" aria-hidden="true">→</span>
-    </button>
+        <div class="updated-wrap" id="updatedWrap">
+            <button class="btn updated-btn" id="updatedBtn" type="button" aria-label="Обновлено">
+                <span class="updated-prefix">Обновлено:</span>
+                <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M12 7v5l4 2"/>
+                </svg>
+                <span id="updatedTime">—</span>
+            </button>
+            <span class="updated-sub" id="updatedSub" hidden>Вы просматриваете старую версию</span>
+        </div>
+    </header>
 
     <main class="calendar" id="calendar"></main>
 
@@ -155,6 +154,8 @@
         </div>
     </div>
 </div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="app.js"></script>
 </body>

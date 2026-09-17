@@ -112,6 +112,15 @@ def _build_gh_pages_content() -> None:
     """Заполняет worktree: web/ + сгенерированные файлы."""
     _clear_worktree_content()
 
+    # Сбрасываем индекс: убираем из него все ранее отслеживаемые файлы.
+    # Это нужно, чтобы git не «узнавал» файлы со старым регистром имени
+    # (актуально на Windows с core.ignorecase=true). После сброса новые
+    # файлы добавляются с тем регистром, что реально лежит на диске.
+    _run_git(
+        "rm", "-r", "--cached", "--ignore-unmatch", ".",
+        cwd=WORKTREE_DIR,
+    )
+
     # 1. Всё содержимое web/ — как есть (включая ручной readme.md)
     for src in WEB_SRC_DIR.iterdir():
         if src.name in GENERATED_IN_WEB:
