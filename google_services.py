@@ -11,19 +11,14 @@ logger = logging.getLogger(__name__)
 # --- пути ---
 BASE_DIR     = Path(__file__).resolve().parent
 PRIVATE_DIR  = BASE_DIR / "private"
-CALENDAR_DIR = PRIVATE_DIR / "calendar"
 SHEETS_DIR   = PRIVATE_DIR / "sheets"
 
 # --- scopes ---
-CALENDAR_SCOPES = ["https://www.googleapis.com/auth/calendar"]
 SHEETS_SCOPES   = ["https://www.googleapis.com/auth/drive.readonly"]
 
 # --- id ресурсов ---
 SPREADSHEET_ID = "1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg"
 
-from config import CONFIG
-CALENDAR_ID = CONFIG.get("calendar_id") or "primary"
-TEST_CALENDAR_ID = CONFIG.get("test_calendar_id")
 # ---------------------------------------------------------------- core
 
 def _load_credentials(credentials_file: Path, token_file: Path, scopes: list[str]) -> Credentials:
@@ -58,16 +53,6 @@ def _load_credentials(credentials_file: Path, token_file: Path, scopes: list[str
 
 
 # ---------------------------------------------------------------- public
-
-def get_calendar_service():
-    """Сервис Google Calendar API v3."""
-    creds = _load_credentials(
-        credentials_file=CALENDAR_DIR / "credentials.json",
-        token_file=CALENDAR_DIR / "token.json",
-        scopes=CALENDAR_SCOPES,
-    )
-    return build("calendar", "v3", credentials=creds, cache_discovery=False)
-
 
 def get_drive_service():
     """Сервис Google Drive API v3 (для скачивания Excel)."""

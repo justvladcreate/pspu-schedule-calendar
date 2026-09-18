@@ -1,6 +1,4 @@
 """
-Разовый прогон полного пайплайна БЕЗ синхронизации с Google Calendar.
-
 Что делает:
   1. Скачивает Excel из Google Sheets (нужны sheets-креды).
   2. Извлекает события, чистит, гонит через AI.
@@ -35,11 +33,11 @@ async def run(
         chunk_size: int = CHUNK_SIZE,
 ) -> int:
     """Возвращает количество обработанных событий (0 при ошибке)."""
-    logger.info("Локальный прогон пайплайна (без Google Calendar)")
+    logger.info("Локальный прогон пайплайна (без публикации web)")
     result = await process_schedule(
         use_chunks=use_chunks,
         chunk_size=chunk_size,
-        sync_calendar_flag=False,
+        publish_web_flag=False,
     )
     if result is None:
         logger.error("Пайплайн не вернул результат — смотри логи выше")

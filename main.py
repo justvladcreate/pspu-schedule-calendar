@@ -1,7 +1,6 @@
 """
 Точка входа: раз в 15 минут перезапускает парсер.
 Готовый JSON лежит в data/latest/groups_info_parsed.json.
-Сюда позже подключишь синк с Google Calendar.
 """
 
 import asyncio

@@ -7,7 +7,6 @@ import shutil
 from parser.ai import ask_ai, user_prompt
 from parser.extractor import DataExtractor, delete_old_file
 from parser.finalize import transform_schedule
-from calendar_sync import sync_calendar
 from parser.overrides import load_overrides, apply_overrides
 from utils.publish_web import publish_web
 
@@ -94,7 +93,7 @@ async def save_data(data, path: Path) -> None:
 async def process_schedule(
         use_chunks: bool = False,
         chunk_size: int = 12,
-        sync_calendar_flag: bool = True,
+        publish_web_flag: bool = True,
 ) -> dict | None:
     """Полный цикл: скачать Excel → извлечь → прогнать через AI → собрать финальный JSON."""
     logger.info("Начата обработка расписания")
@@ -148,24 +147,16 @@ async def process_schedule(
 
     # Синк с календарём — ровно один раз за цикл, после успешного парсинга
     # Синк с календарём — только если явно запрошен
-    if sync_calendar_flag:
-        try:
-            stats = await sync_calendar()
-            logger.info(f"Calendar sync stats: {stats}")
-        except Exception as e:
-            logger.error(f"Calendar sync failed: {e}", exc_info=True)
-
-        # Публикация на GitHub Pages — тоже только при полном прогоне
+    # Синк с календарём — только если явно запрошен
+    # Публикация на GitHub Pages — только при полном прогоне
+    if publish_web_flag:
         try:
             pub = await publish_web()
             logger.info(f"Publish web stats: {pub}")
         except Exception as e:
             logger.error(f"Publish web failed: {e}", exc_info=True)
     else:
-        logger.info("Calendar sync и publish web: пропущены (dry-run)")
-
-    logger.info(f"Расписание обработано: {len(parsed['events'])} событий.")
-    return parsed
+        logger.info("Publish web: пропущен (dry-run)")
 
     logger.info(f"Расписание обработано: {len(parsed['events'])} событий.")
     return parsed
