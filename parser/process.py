@@ -93,7 +93,6 @@ async def save_data(data, path: Path) -> None:
 async def process_schedule(
         use_chunks: bool = False,
         chunk_size: int = 12,
-        publish_web_flag: bool = True,
 ) -> dict | None:
     """Полный цикл: скачать Excel → извлечь → прогнать через AI → собрать финальный JSON."""
     logger.info("Начата обработка расписания")
@@ -144,19 +143,6 @@ async def process_schedule(
 
     await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
 
-
-    # Синк с календарём — ровно один раз за цикл, после успешного парсинга
-    # Синк с календарём — только если явно запрошен
-    # Синк с календарём — только если явно запрошен
-    # Публикация на GitHub Pages — только при полном прогоне
-    if publish_web_flag:
-        try:
-            pub = await publish_web()
-            logger.info(f"Publish web stats: {pub}")
-        except Exception as e:
-            logger.error(f"Publish web failed: {e}", exc_info=True)
-    else:
-        logger.info("Publish web: пропущен (dry-run)")
 
     logger.info(f"Расписание обработано: {len(parsed['events'])} событий.")
     return parsed

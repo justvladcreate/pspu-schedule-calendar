@@ -37,7 +37,6 @@ async def run(
     result = await process_schedule(
         use_chunks=use_chunks,
         chunk_size=chunk_size,
-        publish_web_flag=False,
     )
     if result is None:
         logger.error("Пайплайн не вернул результат — смотри логи выше")
