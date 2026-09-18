@@ -245,9 +245,6 @@ body { overflow: hidden; }
 .date-label:hover::after { border-color: var(--text); }
 
 /* ==== UPDATED BUTTON ==== */
-/* На десктопе стоит сразу после правой стрелки, в той же строке.
-   Размеры полностью совпадают с обычными .btn (padding 8px 14px,
-   font-size 13px, min-height 36px) — вертикальный размер выровнен. */
 .updated-wrap {
     position: relative;
     display: flex;
@@ -259,7 +256,6 @@ body { overflow: hidden; }
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    /* padding / font-size / min-height наследуются от .btn */
 }
 .updated-btn .icon { color: var(--text-muted); }
 .updated-btn .updated-label { white-space: nowrap; }
@@ -485,14 +481,24 @@ body { overflow: hidden; }
     margin-top: 10px;
     padding-top: 8px;
     border-top: 1px solid var(--border);
+    flex-wrap: wrap;
 }
 
 .filter-counter {
     font-size: 12px;
     color: var(--text-muted);
     padding-left: 4px;
+    min-width: 0;
 }
 
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.filter-select-all,
 .filter-clear {
     padding: 7px 14px;
     background: transparent;
@@ -503,9 +509,20 @@ body { overflow: hidden; }
     font-size: 12px;
     font-family: inherit;
     font-weight: 600;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    white-space: nowrap;
 }
-.filter-clear:hover { background: var(--surface-2); color: var(--text); }
+
+.filter-select-all:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--grid-line-strong);
+}
+
+.filter-clear:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
 
 /* ==== CALENDAR AREA ==== */
 .calendar {
@@ -1077,11 +1094,61 @@ body { overflow: hidden; }
     font-style: italic;
 }
 
+/* Пустой стейт: общий (для ошибки загрузки) + внутри календаря */
 .empty-state {
     padding: 60px 20px;
     text-align: center;
     color: var(--text-muted);
     font-size: 14px;
+}
+
+.calendar > .empty-state {
+    position: absolute;
+    inset: 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    user-select: none;
+}
+
+.empty-state-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: var(--shadow);
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
+}
+
+.empty-state-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.empty-state-btn:active {
+    transform: scale(0.98);
+}
+
+.empty-state-btn .icon {
+    color: var(--accent);
+    flex-shrink: 0;
 }
 
 /* ==== SCROLLBARS ==== */
@@ -1172,9 +1239,6 @@ body { overflow: hidden; }
         height: 100dvh;
     }
 
-    /* ==== TOOLBAR: две строки через flex-wrap ==== */
-    /* Строка 1: [дата]  ............  [Экспорт] [‹ Сегодня ›]
-       Строка 2: [Фильтр] [Обновлено]  .....  [Вид] [Тема]           */
     .toolbar {
         display: flex;
         flex-wrap: wrap;
@@ -1198,20 +1262,15 @@ body { overflow: hidden; }
         gap: 6px;
     }
 
-    /* Раскрываем контейнер — дети становятся прямыми flex-элементами */
     .toolbar-right {
         display: contents;
     }
 
-    /* Экспорт — первый справа в строке 1.
-       margin-left: auto съедает всё свободное место слева,
-       прижимая сам Экспорт и идущую за ним навигацию к правому краю. */
     .toolbar-right > #exportIcsBtn {
         order: 2;
         margin-left: auto;
     }
 
-    /* Принудительный перенос строки после навигации */
     .toolbar::after {
         content: "";
         order: 4;
@@ -1219,7 +1278,6 @@ body { overflow: hidden; }
         height: 0;
     }
 
-    /* Строка 2 — слева */
     .toolbar-right > .filter {
         order: 5;
     }
@@ -1229,8 +1287,6 @@ body { overflow: hidden; }
         min-width: 0;
     }
 
-    /* Строка 2 — справа.
-       margin-left: auto прижимает Вид и следующую за ним Тему к правому краю. */
     .toolbar-right > #viewBtn {
         order: 7;
         margin-left: auto;
@@ -1240,7 +1296,6 @@ body { overflow: hidden; }
         order: 8;
     }
 
-    /* Обновлено: на мобилке сжимается и обрезается многоточием */
     .updated-btn {
         min-width: 0;
         max-width: 100%;
@@ -1254,7 +1309,6 @@ body { overflow: hidden; }
         min-width: 0;
     }
 
-    /* Чуть компактнее иконки на мобилке */
     .btn-icon {
         padding: 7px;
         min-width: 34px;
@@ -1305,7 +1359,6 @@ body { overflow: hidden; }
         padding: 4px 12px;
     }
 
-    /* ==== FILTER — полноэкранная модалка ==== */
     .filter {
         position: static;
     }
@@ -1379,7 +1432,6 @@ body { overflow: hidden; }
         padding: 10px 12px;
     }
 
-    /* ==== WEEK VIEW: горизонтальный скролл ==== */
     .calendar.view-week {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -1423,13 +1475,11 @@ body { overflow: hidden; }
         height: 18px;
     }
 
-    /* Модалка README почти на весь экран */
     .readme {
         width: calc(100vw - 16px);
         max-height: 90dvh;
     }
 }
-
 
 /* ==== EXPORT MODAL ==== */
 .export {

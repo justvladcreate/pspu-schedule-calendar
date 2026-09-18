@@ -4,39 +4,45 @@ import logging
 import json
 import asyncio
 import shutil
+import subprocess
+
 from parser.ai import ask_ai, user_prompt
 from parser.extractor import DataExtractor, delete_old_file
 from parser.finalize import transform_schedule
 from parser.overrides import load_overrides, apply_overrides
-from utils.publish_web import publish_web
 
 logger = logging.getLogger(__name__)
 
 current_dir = Path(__file__).resolve().parent.parent
 
 latest_files_path = current_dir / "data" / "latest"
-old_files_path = current_dir / "data" / "old"
+old_files_path    = current_dir / "data" / "old"
 latest_files_path.mkdir(parents=True, exist_ok=True)
 old_files_path.mkdir(parents=True, exist_ok=True)
 
-excel_file_name = "pspu_schedule.xlsx"
+web_dir = current_dir / "web"
+
+excel_file_name     = "pspu_schedule.xlsx"
 extracted_file_name = "groups_info_extracted_and_cleaned.json"
-after_ai_file_name = "groups_info_after_ai.json"
-parsed_file_name = "groups_info_parsed.json"
+after_ai_file_name  = "groups_info_after_ai.json"
+parsed_file_name    = "groups_info_parsed.json"
 
 latest_excel_path = latest_files_path / excel_file_name
-old_excel_path = old_files_path / excel_file_name
+old_excel_path    = old_files_path    / excel_file_name
 
 latest_extracted_path = latest_files_path / extracted_file_name
-old_extracted_path = old_files_path / extracted_file_name
+old_extracted_path    = old_files_path    / extracted_file_name
 
 latest_after_ai_path = latest_files_path / after_ai_file_name
-old_after_ai_path = old_files_path / after_ai_file_name
+old_after_ai_path    = old_files_path    / after_ai_file_name
 
 latest_parsed_path = latest_files_path / parsed_file_name
-old_parsed_path = old_files_path / parsed_file_name
+old_parsed_path    = old_files_path    / parsed_file_name
 
 OVERRIDES_PATH = current_dir / "private" / "overrides.yaml"
+
+WEB_DATA_PATH     = web_dir / "data.json"
+WEB_OLD_DATA_PATH = web_dir / "old_data.json"
 
 data_extractor = DataExtractor()
 
@@ -78,7 +84,7 @@ async def handle_json_files(data, latest_path: Path, old_path: Path) -> bool:
     except PermissionError:
         logger.error("Нет прав на запись JSON.")
         if not latest_path.exists():
-            await save_data(data, str(latest_path))
+            await save_data(data, latest_path)
         return True
     except Exception as e:
         logger.error(f"Ошибка при работе с JSON: {e}")
@@ -88,6 +94,72 @@ async def handle_json_files(data, latest_path: Path, old_path: Path) -> bool:
 async def save_data(data, path: Path) -> None:
     text = json.dumps(data, ensure_ascii=False, indent=4)
     await asyncio.to_thread(path.write_text, text, encoding="utf-8")
+
+
+async def sync_web_data(latest: Path, old: Path) -> bool:
+    """Копирует свежие parsed-файлы в web/ для публикации через GitHub Actions."""
+    try:
+        web_dir.mkdir(parents=True, exist_ok=True)
+
+        if latest.exists():
+            await asyncio.to_thread(shutil.copyfile, latest, WEB_DATA_PATH)
+        else:
+            logger.warning(f"Нет файла для web/data.json: {latest}")
+            return False
+
+        if old.exists():
+            await asyncio.to_thread(shutil.copyfile, old, WEB_OLD_DATA_PATH)
+        else:
+            logger.warning(f"Нет файла для web/old_data.json: {old}")
+
+        return True
+    except Exception as e:
+        logger.error(f"Не удалось скопировать данные в web/: {e}")
+        return False
+
+
+def _git(*args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", *args],
+        cwd=current_dir,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+
+
+def _sync_commit_and_push() -> bool:
+    """Коммитит web/data.json и web/old_data.json и пушит в текущую ветку.
+
+    Возвращает True, если коммит был создан (и пуш прошёл).
+    Требует настроенного upstream (git push -u origin <branch> хотя бы раз).
+    """
+    add = _git("add", "web/data.json", "web/old_data.json")
+    if add.returncode != 0:
+        logger.error(f"git add: {add.stderr.strip()}")
+        return False
+
+    diff = _git("diff", "--cached", "--quiet")
+    if diff.returncode == 0:
+        logger.info("Нет изменений для коммита")
+        return False
+
+    commit = _git("commit", "-m", "chore: update schedule")
+    if commit.returncode != 0:
+        logger.error(f"git commit: {commit.stderr.strip()}")
+        return False
+
+    push = _git("push")
+    if push.returncode != 0:
+        logger.error(f"git push: {push.stderr.strip()}")
+        return False
+
+    logger.info("Расписание закоммичено и запушено — GitHub Actions запустится сам")
+    return True
+
+
+async def commit_and_push() -> bool:
+    return await asyncio.to_thread(_sync_commit_and_push)
 
 
 async def process_schedule(
@@ -143,6 +215,11 @@ async def process_schedule(
 
     await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
 
+    # 1. Обновляем web/data.json и web/old_data.json
+    await sync_web_data(latest_parsed_path, old_parsed_path)
+
+    # 2. Коммитим и пушим — Actions пересоберёт Pages
+    await commit_and_push()
 
     logger.info(f"Расписание обработано: {len(parsed['events'])} событий.")
     return parsed

@@ -133,6 +133,13 @@ function groupByDate(events) {
 function applyFilters() {
     const sg = state.selectedGroups;
     const st = state.selectedTeachers;
+
+    // Ничего не выбрано — не показываем ни одного события
+    if (sg.size === 0 && st.size === 0) {
+        state.filteredEvents = [];
+        return;
+    }
+
     state.filteredEvents = state.allEvents.filter(ev => {
         if (sg.size > 0 && !sg.has(ev.group)) return false;
         if (st.size > 0) {
@@ -217,15 +224,67 @@ function layoutDayEvents(events) {
     return result;
 }
 
+// ==================== EMPTY STATE ====================
+function hasActiveFilters() {
+    return state.selectedGroups.size > 0 || state.selectedTeachers.size > 0;
+}
+
+function openFilterDropdown() {
+    const trigger = document.querySelector('.filter-trigger');
+    if (trigger) trigger.click();
+}
+
+function openFilterDropdown() {
+    const trigger = document.querySelector('.filter-trigger');
+    if (trigger) trigger.click();
+}
+
+function makeEmptyState() {
+    const el = document.createElement('div');
+    el.className = 'empty-state';
+
+    if (state.allEvents.length === 0) {
+        el.textContent = 'Мероприятий нет';
+    } else if (!hasActiveFilters()) {
+        el.innerHTML = `
+            <button class="empty-state-btn" type="button">
+                <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                <span>Выберите фильтр</span>
+            </button>
+        `;
+        el.querySelector('.empty-state-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            openFilterDropdown();
+        });
+    } else {
+        el.textContent = 'Нет мероприятий по выбранным фильтрам';
+    }
+    return el;
+}
+
+function shouldShowEmptyState() {
+    return state.filteredEvents.length === 0;
+}
+
 // ==================== RENDER DISPATCH ====================
 function render(animation = null) {
     const cal = document.getElementById('calendar');
     cal.innerHTML = '';
     cal.className = 'calendar view-' + state.view;
 
-    if (state.view === 'month') renderMonth(cal);
-    else if (state.view === 'week') renderWeek(cal);
-    else renderDay(cal);
+    if (shouldShowEmptyState()) {
+        cal.appendChild(makeEmptyState());
+    } else if (state.view === 'month') {
+        renderMonth(cal);
+    } else if (state.view === 'week') {
+        renderWeek(cal);
+    } else {
+        renderDay(cal);
+    }
 
     updateDateLabel();
 
@@ -1038,6 +1097,7 @@ function setupUnifiedFilter() {
     const dropdown = root.querySelector('.filter-dropdown');
     const search = root.querySelector('.filter-search');
     const clearBtn = root.querySelector('.filter-clear');
+    const selectAllBtn = root.querySelector('.filter-select-all');
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
     const counterEl = document.getElementById('filterCounter');
@@ -1057,10 +1117,22 @@ function setupUnifiedFilter() {
     function updateCounter() {
         const g = state.selectedGroups.size;
         const t = state.selectedTeachers.size;
+        const totalG = state.groups.length;
+        const totalT = state.teachers.length;
+
+        if (g === 0 && t === 0) {
+            counterEl.textContent = 'Ничего не выбрано';
+            return;
+        }
+        if (g === totalG && t === totalT && (totalG + totalT) > 0) {
+            counterEl.textContent = 'Выбрано всё';
+            return;
+        }
+
         const parts = [];
         if (g > 0) parts.push(`групп: ${g}`);
         if (t > 0) parts.push(`преподавателей: ${t}`);
-        counterEl.textContent = parts.length ? `Выбрано — ${parts.join(', ')}` : 'Ничего не выбрано';
+        counterEl.textContent = `Выбрано — ${parts.join(', ')}`;
     }
 
     function buildOption(value, type) {
@@ -1170,6 +1242,24 @@ function setupUnifiedFilter() {
     });
 
     search.addEventListener('input', () => renderLists(search.value));
+
+    selectAllBtn.addEventListener('click', e => {
+        e.stopPropagation();
+
+        state.selectedGroups.clear();
+        state.selectedTeachers.clear();
+        for (const g of state.groups)   state.selectedGroups.add(g);
+        for (const t of state.teachers) state.selectedTeachers.add(t);
+
+        saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
+        saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+
+        updateTriggerLabel();
+        updateCounter();
+        applyFilters();
+        render();
+        renderLists(search.value);
+    });
 
     clearBtn.addEventListener('click', e => {
         e.stopPropagation();
@@ -1291,14 +1381,18 @@ function setupPullToRefresh() {
 }
 
 // ==================== EXPORT TO GOOGLE CALENDAR ====================
-// ==================== EXPORT TO GOOGLE CALENDAR ====================
 const ICS_BASE = "https://pspu-ics-worker.vladjust059.workers.dev";
 
 function buildIcsUrl() {
     const groups   = [...state.selectedGroups];
     const teachers = [...state.selectedTeachers];
 
-    if (groups.length === 0 && teachers.length === 0) {
+    const isAll = (state.groups.length + state.teachers.length) > 0
+        && groups.length   === state.groups.length
+        && teachers.length === state.teachers.length;
+
+    // Ничего не выбрано ИЛИ выбрано всё — универсальная ссылка /ics
+    if ((groups.length === 0 && teachers.length === 0) || isAll) {
         return `${ICS_BASE}/ics`;
     }
 
