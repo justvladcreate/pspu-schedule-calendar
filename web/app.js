@@ -707,6 +707,9 @@ function applyData(data) {
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
+    updateTriggerLabel();
+    updateCounter();
+
     applyFilters();
     render('fade');
 }
@@ -1091,6 +1094,48 @@ function renderPicker() {
 }
 
 // ==================== UNIFIED FILTER (two columns) ====================
+
+function updateTriggerLabel() {
+    const trigger = document.querySelector('.filter-trigger');
+    if (!trigger) return;
+
+    const total = state.selectedGroups.size + state.selectedTeachers.size;
+    const badge = trigger.querySelector('.filter-badge');
+    if (!badge) return;
+
+    if (total === 0) {
+        badge.textContent = '';
+        badge.classList.remove('filter-badge--visible');
+    } else {
+        badge.textContent = total > 99 ? '99+' : String(total);
+        badge.classList.add('filter-badge--visible');
+    }
+}
+
+function updateCounter() {
+    const counterEl = document.getElementById('filterCounter');
+    if (!counterEl) return;
+
+    const g = state.selectedGroups.size;
+    const t = state.selectedTeachers.size;
+    const totalG = state.groups.length;
+    const totalT = state.teachers.length;
+
+    if (g === 0 && t === 0) {
+        counterEl.textContent = 'Ничего не выбрано';
+        return;
+    }
+    if (g === totalG && t === totalT && (totalG + totalT) > 0) {
+        counterEl.textContent = 'Выбрано всё';
+        return;
+    }
+
+    const parts = [];
+    if (g > 0) parts.push(`групп: ${g}`);
+    if (t > 0) parts.push(`преподавателей: ${t}`);
+    counterEl.textContent = `Выбрано — ${parts.join(', ')}`;
+}
+
 function setupUnifiedFilter() {
     const root = document.getElementById('filterRoot');
     const trigger = root.querySelector('.filter-trigger');
@@ -1101,39 +1146,6 @@ function setupUnifiedFilter() {
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
     const counterEl = document.getElementById('filterCounter');
-
-    function updateTriggerLabel() {
-        const total = state.selectedGroups.size + state.selectedTeachers.size;
-        const badge = trigger.querySelector('.filter-badge');
-        if (total === 0) {
-            badge.textContent = '';
-            badge.classList.remove('filter-badge--visible');
-        } else {
-            badge.textContent = total > 99 ? '99+' : String(total);
-            badge.classList.add('filter-badge--visible');
-        }
-    }
-
-    function updateCounter() {
-        const g = state.selectedGroups.size;
-        const t = state.selectedTeachers.size;
-        const totalG = state.groups.length;
-        const totalT = state.teachers.length;
-
-        if (g === 0 && t === 0) {
-            counterEl.textContent = 'Ничего не выбрано';
-            return;
-        }
-        if (g === totalG && t === totalT && (totalG + totalT) > 0) {
-            counterEl.textContent = 'Выбрано всё';
-            return;
-        }
-
-        const parts = [];
-        if (g > 0) parts.push(`групп: ${g}`);
-        if (t > 0) parts.push(`преподавателей: ${t}`);
-        counterEl.textContent = `Выбрано — ${parts.join(', ')}`;
-    }
 
     function buildOption(value, type) {
         const row = document.createElement('label');
