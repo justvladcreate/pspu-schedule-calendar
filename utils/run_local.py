@@ -25,7 +25,7 @@ logging.basicConfig(
 
 # --- параметры прогона (правь прямо тут) ---
 USE_CHUNKS = False       # True — резать события на чанки перед AI
-CHUNK_SIZE = 12          # размер чанка при USE_CHUNKS=True
+CHUNK_SIZE = 30          # размер чанка при USE_CHUNKS=True
 
 
 async def run(

@@ -5,6 +5,7 @@ import json
 import asyncio
 import shutil
 import subprocess
+import hashlib
 
 from parser.ai import ask_ai, user_prompt
 from parser.extractor import DataExtractor, delete_old_file
@@ -38,6 +39,8 @@ old_after_ai_path    = old_files_path    / after_ai_file_name
 
 latest_parsed_path = latest_files_path / parsed_file_name
 old_parsed_path    = old_files_path    / parsed_file_name
+
+chunks_cache_path = latest_files_path / "chunks_cache.json"
 
 OVERRIDES_PATH = current_dir / "private" / "overrides.yaml"
 
@@ -95,6 +98,19 @@ async def save_data(data, path: Path) -> None:
     text = json.dumps(data, ensure_ascii=False, indent=4)
     await asyncio.to_thread(path.write_text, text, encoding="utf-8")
 
+def _chunk_hash(chunk: list[str]) -> str:
+    payload = "\n".join(chunk).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _read_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning(f"Не удалось прочитать {path}: {e}")
+        return {}
 
 async def sync_web_data(latest: Path, old: Path) -> bool:
     """Копирует свежие parsed-файлы в web/ для публикации через GitHub Actions."""
@@ -164,7 +180,7 @@ async def commit_and_push() -> bool:
 
 async def process_schedule(
         use_chunks: bool = False,
-        chunk_size: int = 12,
+        chunk_size: int = 30,
 ) -> dict | None:
     """Полный цикл: скачать Excel → извлечь → прогнать через AI → собрать финальный JSON."""
     logger.info("Начата обработка расписания")
@@ -175,6 +191,24 @@ async def process_schedule(
 
     groups_info = await data_extractor.extract(latest_excel_path)
     groups_info_after_ai: dict = {}
+
+    # --- Кэш чанков ---
+    old_cache_data = _read_json(chunks_cache_path)
+    old_cache: dict[str, list[str]] = {}
+
+    # Если размер чанка изменился с прошлого раза — сбрасываем кэш,
+    # иначе старые ключи бессмысленны
+    if old_cache_data.get("chunk_size") == chunk_size:
+        old_cache = old_cache_data.get("entries", {}) or {}
+    else:
+        logger.info(
+            f"chunk_size изменён "
+            f"({old_cache_data.get('chunk_size')} → {chunk_size}), кэш чанков сброшен"
+        )
+
+    new_cache: dict[str, list[str]] = {}
+    cache_hits = 0
+    ai_calls  = 0
 
     for group, group_data in groups_info.items():
         events_list = group_data.get("events", [])
@@ -187,20 +221,52 @@ async def process_schedule(
 
         for i in range(0, len(events_list), current_chunk_size):
             chunk = events_list[i:i + current_chunk_size]
+            key = _chunk_hash(chunk)
+
+            # --- cache hit ---
+            if key in old_cache:
+                result_lines = old_cache[key]
+                all_events.extend(result_lines)
+                new_cache[key] = result_lines
+                cache_hits += 1
+                logger.info(
+                    f"[skip AI] {group} chunk {i // current_chunk_size}: "
+                    f"cache hit ({len(chunk)} строк)"
+                )
+                continue
+
+            # --- cache miss: зовём AI ---
             prompt_text = user_prompt.format(data=str(chunk))
             try:
                 chunk_result = await ask_ai(prompt=prompt_text)
                 if isinstance(chunk_result, list):
-                    all_events.extend(chunk_result)
+                    result_lines = [e for e in chunk_result if e.strip()]
                 else:
-                    all_events.extend(chunk_result.split("\n"))
+                    result_lines = [e for e in chunk_result.split("\n") if e.strip()]
             except Exception as e:
-                logger.error(f"AI ошибка (группа {group}, чанк {i // current_chunk_size}): {e}")
+                logger.error(
+                    f"AI ошибка (группа {group}, чанк {i // current_chunk_size}): {e}"
+                )
                 continue
+
+            ai_calls += 1
+            all_events.extend(result_lines)
+            new_cache[key] = result_lines
             await asyncio.sleep(0.5)
 
-        # убираем возможные пустые строки от модели
-        groups_info_after_ai[group] = {"events": [e for e in all_events if e.strip()]}
+        groups_info_after_ai[group] = {
+            "events": [e for e in all_events if e.strip()]
+        }
+
+    logger.info(
+        f"AI-статистика: {ai_calls} вызовов, {cache_hits} попаданий в кэш"
+    )
+
+    # Сохраняем новый кэш (старые ключи автоматически выпали)
+    await save_data(
+        {"chunk_size": chunk_size, "entries": new_cache},
+        chunks_cache_path,
+    )
 
     # Промежуточные JSON (можно отключить, если не нужны)
     await handle_json_files(groups_info, latest_extracted_path, old_extracted_path)
