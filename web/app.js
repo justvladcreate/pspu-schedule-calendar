@@ -234,11 +234,6 @@ function openFilterDropdown() {
     if (trigger) trigger.click();
 }
 
-function openFilterDropdown() {
-    const trigger = document.querySelector('.filter-trigger');
-    if (trigger) trigger.click();
-}
-
 function makeEmptyState() {
     const el = document.createElement('div');
     el.className = 'empty-state';
@@ -702,8 +697,10 @@ function applyData(data) {
     state.groups   = [...groups].sort();
     state.teachers = [...teachers].sort();
 
-    for (const g of [...state.selectedGroups])   if (!state.groups.includes(g))   state.selectedGroups.delete(g);
-    for (const t of [...state.selectedTeachers]) if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
+    // Пользовательский выбор не должен сбрасываться при переключении между
+    // текущей и старой версией. Устаревшие записи (которых больше нет в
+    // данных) убираются только при загрузке страницы — в init().
+
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
@@ -1145,7 +1142,6 @@ function setupUnifiedFilter() {
     const selectAllBtn = root.querySelector('.filter-select-all');
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
-    const counterEl = document.getElementById('filterCounter');
 
     function buildOption(value, type) {
         const row = document.createElement('label');
