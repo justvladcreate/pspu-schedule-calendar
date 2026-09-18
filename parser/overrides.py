@@ -37,33 +37,54 @@ def load_overrides(path: Path) -> dict:
 
 # ---------------------------------------------------------------- матчинг
 
+def _matches_single(ev: dict, key: str, value) -> bool:
+    """Проверяет одно условие. Возвращает True, если совпало."""
+    if key == "discipline_contains":
+        return str(value).lower() in (ev.get("discipline") or "").lower()
+
+    if key == "teacher":
+        teachers = [str(t) for t in (ev.get("teachers") or [])]
+        return str(value) in teachers
+
+    if key == "teacher_contains":
+        needle = str(value).lower()
+        teachers = [str(t).lower() for t in (ev.get("teachers") or [])]
+        return any(needle in t for t in teachers)
+
+    if isinstance(value, list):
+        return str(ev.get(key)) in [str(v) for v in value]
+
+    return str(ev.get(key)) == str(value)
+
+
 def _matches(ev: dict, match: dict) -> bool:
-    """Все условия в match должны совпасть (AND)."""
+    """
+    Все условия в match должны совпасть (AND).
+
+    Поддерживается блок `not` — вложенный словарь с теми же ключами,
+    но условия внутри него должны НЕ совпасть.
+
+    Схема:
+        match:
+          group: "1247"            # ev.group == "1247"
+          discipline_contains: "…" # "…" в ev.discipline
+          not:
+            time: "11:30"          # ev.time != "11:30"
+            subgroup: "п/г 1"      # ev.subgroup != "п/г 1"
+    """
     for key, value in match.items():
-        if key == "discipline_contains":
-            if str(value).lower() not in (ev.get("discipline") or "").lower():
-                return False
+        # Блок отрицаний — все условия внутри должны НЕ совпасть
+        if key == "not":
+            if not isinstance(value, dict):
+                continue
+            for nk, nv in value.items():
+                if _matches_single(ev, nk, nv):
+                    return False
+            continue
 
-        elif key == "teacher":
-            # точное совпадение с одним из преподавателей
-            teachers = [str(t) for t in (ev.get("teachers") or [])]
-            if str(value) not in teachers:
-                return False
+        if not _matches_single(ev, key, value):
+            return False
 
-        elif key == "teacher_contains":
-            # подстрока (регистронезависимо) хотя бы в одном преподавателе
-            needle = str(value).lower()
-            teachers = [str(t).lower() for t in (ev.get("teachers") or [])]
-            if not any(needle in t for t in teachers):
-                return False
-
-        elif isinstance(value, list):
-            if str(ev.get(key)) not in [str(v) for v in value]:
-                return False
-
-        else:
-            if str(ev.get(key)) != str(value):
-                return False
     return True
 
 

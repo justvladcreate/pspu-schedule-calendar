@@ -115,6 +115,8 @@ class DataExtractor:
             sheet_gid = None
             if sheet_name in sheets_metadata:
                 sheet_gid = sheets_metadata[sheet_name]['gid']
+            if not sheet_name == "1214":
+                continue
 
             group_info = extraction(df, sheet_gid)
             if not group_info:
@@ -295,13 +297,24 @@ def extraction(df, sheet_id):
                     day_of_week = str(left_col_val).strip().upper()
 
 
-                time_vals = time_val.split("\n")
+                    time_vals = time_val.split("\n")
 
-                for time_value in time_vals:
-                    time_val = normalize_time(time_value)
-                    # Собираем все данные воедино
-                    events.append(str("discipline info: "+day_of_week+" "+time_val+"\n"+subject_val+"\n"+"rooms info: "+", ".join(room_val)))
+                    merged_times = []
+                    i = 0
+                    while i < len(time_vals):
+                        cur = time_vals[i].strip()
+                        if cur.endswith(("-", "–", "—")) and i + 1 < len(time_vals):
+                            nxt = time_vals[i + 1].strip()
+                            merged_times.append(cur + nxt)
+                            i += 2
+                        else:
+                            merged_times.append(cur)
+                            i += 1
 
+                    for time_value in merged_times:
+                        time_val = normalize_time(time_value)
+                        # Собираем все данные воедино
+                        events.append(str("discipline info: "+day_of_week+" "+time_val+"\n"+subject_val+"\n"+"rooms info: "+", ".join(room_val)))
 
             except Exception as e:
                 print(f"Ошибка при обработке строки {row} {group_name}: {e}")
