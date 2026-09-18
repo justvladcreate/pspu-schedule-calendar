@@ -42,7 +42,7 @@ old_parsed_path    = old_files_path    / parsed_file_name
 
 chunks_cache_path = latest_files_path / "chunks_cache.json"
 
-OVERRIDES_PATH = current_dir / "private" / "overrides.yaml"
+OVERRIDES_PATH = current_dir / "overrides.yaml"
 
 WEB_DATA_PATH     = web_dir / "data.json"
 WEB_OLD_DATA_PATH = web_dir / "old_data.json"

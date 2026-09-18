@@ -115,8 +115,8 @@ class DataExtractor:
             sheet_gid = None
             if sheet_name in sheets_metadata:
                 sheet_gid = sheets_metadata[sheet_name]['gid']
-            if not sheet_name == "1214":
-                continue
+            # if not sheet_name == "1214":
+            #     continue
 
             group_info = extraction(df, sheet_gid)
             if not group_info:
