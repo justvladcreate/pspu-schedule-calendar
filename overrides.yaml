@@ -34,7 +34,7 @@ overrides:
     fill_semester: true
 
   - match:
-      time: "11:30"
+      time_start: "11:30"
       discipline_contains: "Операционные системы"
       group: "1237"
     drop: true

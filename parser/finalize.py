@@ -4,39 +4,24 @@ from datetime import time, date, timedelta, datetime, timezone
 
 from parser.postprocess import remove_academic_titles
 
+
 # Карта соответствия времени начала пары номеру пары
 PAIR_INTERVALS = [
-    (time(8, 0),  time(9, 45)),  # 1-я пара
-    (time(9, 45), time(11, 30)), # 2-я пара
-    (time(11, 30), time(13, 30)),# 3-я пара
-    (time(13, 30), time(15, 15)),# 4-я пара
-    (time(15, 15), time(17, 0)), # 5-я пара
-    (time(17, 0),  time(18, 45)),# 6-я пара
-    (time(18, 45), time(20, 15)) # 7-я пара
+    (time(8, 0),  time(9, 45)),   # 1-я пара
+    (time(9, 45), time(11, 30)),  # 2-я пара
+    (time(11, 30), time(13, 30)), # 3-я пара
+    (time(13, 30), time(15, 15)), # 4-я пара
+    (time(15, 15), time(17, 0)),  # 5-я пара
+    (time(17, 0),  time(18, 45)), # 6-я пара
+    (time(18, 45), time(20, 15)), # 7-я пара
 ]
 
-
-def parse_event_string(event_str: str) -> Dict[str, str]:
-    """Разбирает строку события на словарь параметров."""
-    params = {}
-    # Разделяем по '; ' (точка с запятой и пробел)
-    parts = [p.strip() for p in event_str.split("; ")]
-    for part in parts:
-        if ": " in part:
-            key, value = part.split(": ", 1)
-            params[key] = value
-        elif part.endswith(":"):
-            # Пустое значение (например, "type: ;" превращается в "type:")
-            key = part[:-1]
-            params[key] = ""
-    return params
 
 def get_pair_number(time_str: str) -> Optional[int]:
     """Возвращает номер пары (1-7) для времени в формате HH:MM или None."""
     try:
         h, m = map(int, time_str.strip().split(':'))
         t = time(h, m)
-        # Проверяем все интервалы
         for i, (start, end) in enumerate(PAIR_INTERVALS, start=1):
             if start <= t < end:
                 return i
@@ -47,19 +32,17 @@ def get_pair_number(time_str: str) -> Optional[int]:
         pass
     return None
 
-def extract_weekday_and_time(time_str: str) -> tuple[str, str]:
-    """Извлекает день недели и время из строки вида 'ПН 09:45'."""
-    parts = time_str.split()
-    weekday = parts[0]  # "ПН", "ВТ" и т.д.
-    time = parts[1] if len(parts) > 1 else ""
-    return weekday, time
 
 async def normalize_teachers(teacher_str: str) -> List[str]:
-    return [remove_academic_titles(t.strip()) for t in teacher_str.split(",") if remove_academic_titles(t.strip())]
+    return [
+        remove_academic_titles(t.strip())
+        for t in teacher_str.split(",")
+        if remove_academic_titles(t.strip())
+    ]
 
 
 async def expand_dates(s: str, current_year: int | None = None) -> list[str]:
-    """Async-обёртка. Логика синхронная, event loop не разгружает."""
+    """Разворачивает строку дат в список 'DD.MM.YYYY'."""
     if current_year is None:
         current_year = date.today().year
 
@@ -110,39 +93,45 @@ async def expand_dates(s: str, current_year: int | None = None) -> list[str]:
 
     return result
 
+
 async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
-    temp_events = []  # события без event_id и position
+    """
+    raw_data: {group: {"events": [
+        {weekday, time_start, time_end, dates, discipline, type,
+         subgroup, teachers, rooms}, ...]}}
+
+    Возвращает финальную структуру с event_id / position.
+    """
+    temp_events: list[dict] = []
 
     for group, group_data in raw_data.items():
-        event_strings = group_data.get("events", [])
-        for event_str in event_strings:
-            params = parse_event_string(event_str)
-
-            time_raw = params.get("time", "")
-            if not time_raw:
+        event_dicts = group_data.get("events", [])
+        for event in event_dicts:
+            weekday  = (event.get("weekday")    or "").strip()
+            time_val = (event.get("time_start") or "").strip()
+            if not weekday or not time_val:
                 continue
-            weekday, time_val = extract_weekday_and_time(time_raw)
+
             pair_number = get_pair_number(time_val)
             if pair_number is None:
                 continue
 
-            teachers = await normalize_teachers(params.get("teachers", ""))
-
-            dates = await expand_dates(params.get("dates", ""), date.today().year)
+            teachers = await normalize_teachers(event.get("teachers", "") or "")
+            dates    = await expand_dates(event.get("dates", "") or "", date.today().year)
 
             temp_events.append({
-                "group": group,
-                "weekday": weekday,
-                "time": time_val,
-                "pair_number": pair_number,
-                "discipline": params.get("discipline", ""),
-                "type": params.get("type", ""),
-                "subgroup": params.get("subgroup", ""),
-                "teachers": teachers,
-                "dates": dates,
-                "rooms": params.get("rooms", ""),
-                # "comment": params.get("comment", ""),
-                "comment": ""
+                "group":        group,
+                "weekday":      weekday,
+                "time_start":   time_val,
+                "time_end":     event.get("time_end", "") or "",
+                "pair_number":  pair_number,
+                "discipline":   event.get("discipline", "") or "",
+                "type":         event.get("type", "") or "",
+                "subgroup":     event.get("subgroup", "") or "",
+                "teachers":     teachers,
+                "dates":        dates,
+                "rooms":        event.get("rooms", "") or "",
+                "comment":      "",
             })
 
     # Группируем по group, weekday, pair_number
@@ -163,4 +152,3 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
         "events": final_events,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
-

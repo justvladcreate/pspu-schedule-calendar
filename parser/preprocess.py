@@ -6,6 +6,8 @@ from datetime import date
 # ---------- Константы для очистки ----------
 CLEAN_REPLACEMENTS = {
     "\\": "", "\"": "", "“": "", "”": "", "«": "", "»": "",
+    ";": " ",                                   # запрещаем разделитель AI
+    "+": " ",                                   # мусорный префикс дисциплины
     "—": "-", "–": "-", "−": "-", "‐": "-", "‑": "-",
     "`": "'", "´": "'",
     "„": "", "‚": "",
@@ -65,64 +67,75 @@ def _normalize_spaces(text: str) -> str:
     return text
 
 def normalize_rooms(line: str) -> List[str]:
-    distant_pat = re.compile(r'дистанционно\s*[\\/]\s*СФЕРУМ', re.IGNORECASE)
-    corpus_pat = re.compile(r'\b([IVX]+)\s+к\.\s*[\\/]?\s*', re.IGNORECASE)
+    """
+    Нормализует строку с аудиториями в список уникальных аудиторий.
 
-    full_text = line
-    result = []
-    seen = set()
+    Особенности:
+      • Разбивает по переносам строк и запятым.
+      • Убирает кавычки.
+      • Схлопывает множественные пробелы, убирает слеши.
+      • "дистанционно <что угодно>" → "дистанционно онлайн"
+        или "дистанционно СФЕРУМ".
+      • Убирает дубликаты, сохраняя порядок первого появления.
+      • Мусорные значения ("-", "нет", "n/a", "н/д") — отбрасываются.
+    """
+    if line is None:
+        return []
 
-    # 1. "дистанционно СФЕРУМ"
-    for m in distant_pat.finditer(full_text):
-        val = "дистанционно СФЕРУМ"
-        if val not in seen:
-            seen.add(val)
-            result.append(val)
+    text = str(line)
+    if not text.strip():
+        return []
 
-    clean_text = distant_pat.sub(' ', full_text)
-    clean_text = re.sub(r'\([^)]*\)', ' ', clean_text)
-    clean_text = re.sub(r'\b\d{1,2}\.\d{2}(?:-\d{1,2}\.\d{2})?\b', ' ', clean_text)
+    # 1. Убираем кавычки
+    for ch in ('"', '«', '»', '“', '”'):
+        text = text.replace(ch, ' ')
 
-    # 2. Обработка корпусов
-    corpus_matches = list(corpus_pat.finditer(clean_text))
-    for i, match in enumerate(corpus_matches):
-        corpus_roman = match.group(1)
-        corpus_norm = f"{corpus_roman} к."
-        start = match.end()
-        end = corpus_matches[i+1].start() if i+1 < len(corpus_matches) else len(clean_text)
-        tail = clean_text[start:end]
+    # 2. Разбиваем по переносам строк и запятым (СЛЕШИ пока не трогаем)
+    raw_parts = re.split(r'[\n\r,]+', text)
 
-        # Извлекаем все потенциальные токены аудиторий
-        tokens = re.findall(r'[А-Яа-я\d-]+(?:\.\s*[А-Яа-я]+)?', tail, re.IGNORECASE)
+    # Мусорные значения. Сравниваем в двух формах:
+    #   - со слешами   ("n/a", "н/д")
+    #   - без слешей   ("n a", "н д") — на случай, если слеш уже был
+    #     заменён пробелом где-то раньше
+    JUNK = {
+        "-", "—", "–",
+        "нет",
+        "n/a", "n a",
+        "н/д", "н д",
+        "n\\a", "n a",
+    }
 
-        for token in tokens:
-            token = token.strip()
-            if not token:
-                continue
+    result: List[str] = []
+    seen: set = set()
 
-            # Особый случай: акт. зал
-            if re.fullmatch(r'акт\.\s*зал', token, re.IGNORECASE):
-                room = "акт. зал"
-            else:
-                # Удаляем ведущий числовой префикс с дефисом (05-А305 -> А305)
-                room_clean = re.sub(r'^\d{1,2}-(?=[А-Я])', '', token, flags=re.IGNORECASE)
-                room_clean = re.sub(r'\s+', ' ', room_clean).strip()
+    for part in raw_parts:
+        room = re.sub(r'\s+', ' ', part).strip()
+        if not room:
+            continue
 
-                # Валидация: число из ≥2 цифр или буква+цифры
-                if re.fullmatch(r'\d{2,}', room_clean):
-                    room = room_clean
-                elif re.search(r'[А-Я]', room_clean, re.IGNORECASE) and re.search(r'\d', room_clean):
-                    room = room_clean
-                else:
-                    continue
+        low = room.lower()
+        if low in JUNK:
+            continue
 
-                # Убираем дефис между буквой и цифрой (А-406 -> А406)
-                room = re.sub(r'(?<=[А-Я])-(?=\d)', '', room, flags=re.IGNORECASE)
+        # 3. Теперь можно чистить слеши
+        room = room.replace('\\', ' ').replace('/', ' ')
+        room = re.sub(r'\s+', ' ', room).strip()
+        if not room:
+            continue
 
-            full_room = f"{corpus_norm} {room}"
-            if full_room not in seen:
-                seen.add(full_room)
-                result.append(full_room)
+        low = room.lower()
+
+        # 4. "дистанционно ..." — единый вид
+        if low.startswith('дистанционно'):
+            room = "дистанционно СФЕРУМ" if 'сферум' in low else "дистанционно онлайн"
+        else:
+            # "IV к.  А331", "IVк.А331" → "IV к. А331"
+            room = re.sub(r'\b([IVX]+)\s*к\.\s*', r'\1 к. ', room)
+            room = re.sub(r'\s+', ' ', room).strip()
+
+        if room and room not in seen:
+            seen.add(room)
+            result.append(room)
 
     return result
 

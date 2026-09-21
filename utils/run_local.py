@@ -4,7 +4,8 @@
   2. Извлекает события, чистит, гонит через AI.
   3. Прогоняет postprocess, overrides.
   4. Пишет JSON в data/latest/groups_info_parsed.json.
-  5. НЕ трогает Google Calendar.
+  5. Обновляет web/data.json и web/old_data.json.
+  6. НЕ делает git commit/push.
 
 Как запускать:
   • Из PyCharm: правый клик по файлу → Run 'run_local'.
@@ -33,10 +34,12 @@ async def run(
         chunk_size: int = CHUNK_SIZE,
 ) -> int:
     """Возвращает количество обработанных событий (0 при ошибке)."""
-    logger.info("Локальный прогон пайплайна (без публикации web)")
+    logger.info("Локальный прогон пайплайна (web обновляется, git — нет)")
     result = await process_schedule(
         use_chunks=use_chunks,
         chunk_size=chunk_size,
+        publish_web=True,    # ← web/data.json и web/old_data.json обновляем
+        git_push=False,      # ← но без commit/push
     )
     if result is None:
         logger.error("Пайплайн не вернул результат — смотри логи выше")
@@ -45,6 +48,7 @@ async def run(
     events = result.get("events", [])
     logger.info(f"Готово. Всего событий: {len(events)}")
     logger.info("JSON обновлён в data/latest/groups_info_parsed.json")
+    logger.info("web/data.json и web/old_data.json обновлены (git push пропущен)")
     return len(events)
 
 

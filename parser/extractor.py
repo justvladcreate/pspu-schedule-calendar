@@ -313,9 +313,14 @@ def extraction(df, sheet_id):
 
                     for time_value in merged_times:
                         time_val = normalize_time(time_value)
-                        # Собираем все данные воедино
-                        events.append(str("discipline info: "+day_of_week+" "+time_val+"\n"+subject_val+"\n"+"rooms info: "+", ".join(room_val)))
-
+                        # НОВЫЙ ФОРМАТ: dict вместо строки-обёртки
+                        events.append({
+                            "day_of_week": day_of_week,
+                            "time_start": time_val,
+                            "rooms": ", ".join(room_val),
+                            "subject": subject_val,
+                        })
+                        
             except Exception as e:
                 print(f"Ошибка при обработке строки {row} {group_name}: {e}")
 
