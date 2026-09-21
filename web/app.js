@@ -704,10 +704,9 @@ function applyData(data) {
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
+    applyFilters();
     updateTriggerLabel();
     updateCounter();
-
-    applyFilters();
     render('fade');
 }
 
@@ -1100,12 +1099,20 @@ function updateTriggerLabel() {
     const badge = trigger.querySelector('.filter-badge');
     if (!badge) return;
 
+    const newText = total === 0 ? '' : (total > 99 ? '99+' : String(total));
+    const changed = badge.textContent !== newText;
+
+    badge.textContent = newText;
+
     if (total === 0) {
-        badge.textContent = '';
         badge.classList.remove('filter-badge--visible');
     } else {
-        badge.textContent = total > 99 ? '99+' : String(total);
         badge.classList.add('filter-badge--visible');
+        if (changed) {
+            badge.classList.remove('badge-pulse');
+            void badge.offsetWidth;         // перезапуск анимации
+            badge.classList.add('badge-pulse');
+        }
     }
 }
 
@@ -1117,20 +1124,22 @@ function updateCounter() {
     const t = state.selectedTeachers.size;
     const totalG = state.groups.length;
     const totalT = state.teachers.length;
+    const found = state.filteredEvents.length;
 
+    let selectionText;
     if (g === 0 && t === 0) {
-        counterEl.textContent = 'Ничего не выбрано';
-        return;
-    }
-    if (g === totalG && t === totalT && (totalG + totalT) > 0) {
-        counterEl.textContent = 'Выбрано всё';
-        return;
+        selectionText = 'Ничего не выбрано';
+    } else if (g === totalG && t === totalT && (totalG + totalT) > 0) {
+        selectionText = 'Выбрано всё';
+    } else {
+        const parts = [];
+        if (g > 0) parts.push(`групп: ${g}`);
+        if (t > 0) parts.push(`преподавателей: ${t}`);
+        selectionText = `Выбрано — ${parts.join(', ')}`;
     }
 
-    const parts = [];
-    if (g > 0) parts.push(`групп: ${g}`);
-    if (t > 0) parts.push(`преподавателей: ${t}`);
-    counterEl.textContent = `Выбрано — ${parts.join(', ')}`;
+    const foundText = `найдено: ${found}`;
+    counterEl.textContent = `${selectionText} · ${foundText}`;
 }
 
 function setupUnifiedFilter() {
@@ -1138,8 +1147,9 @@ function setupUnifiedFilter() {
     const trigger = root.querySelector('.filter-trigger');
     const dropdown = root.querySelector('.filter-dropdown');
     const search = root.querySelector('.filter-search');
-    const clearBtn = root.querySelector('.filter-clear');
-    const selectAllBtn = root.querySelector('.filter-select-all');
+    const clearBtn = root.querySelector('[data-action="clear"]');
+    const selectAllBtn = root.querySelector('[data-action="select-all"]');
+    const doneBtn = root.querySelector('.filter-done');
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
 
@@ -1163,9 +1173,9 @@ function setupUnifiedFilter() {
                 set,
             );
 
+            applyFilters();
             updateTriggerLabel();
             updateCounter();
-            applyFilters();
             render();
         });
 
@@ -1237,6 +1247,13 @@ function setupUnifiedFilter() {
         });
     }
 
+    if (doneBtn) {
+        doneBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            closeFilter();
+        });
+    }
+
     window.addEventListener('popstate', () => {
         if (root.classList.contains('open')) {
             root.classList.remove('open');
@@ -1262,9 +1279,9 @@ function setupUnifiedFilter() {
         saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
         saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
+        applyFilters();
         updateTriggerLabel();
         updateCounter();
-        applyFilters();
         render();
         renderLists(search.value);
     });
@@ -1275,9 +1292,9 @@ function setupUnifiedFilter() {
         state.selectedTeachers.clear();
         saveSetToStorage('schedule-selected-groups', state.selectedGroups);
         saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+        applyFilters();
         updateTriggerLabel();
         updateCounter();
-        applyFilters();
         render();
         renderLists(search.value);
     });

@@ -221,6 +221,7 @@ private
 *.xlsx
 test**
 groups_info**
+chunks**
 dev
 #utils
 
