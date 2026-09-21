@@ -2367,6 +2367,25 @@
             "pair_number": 5,
             "discipline": "Иностранный язык",
             "type": "прак.",
+            "subgroup": "п/г 1",
+            "teachers": [
+                "Шенкман В.И."
+            ],
+            "dates": [
+                "22.09.2026"
+            ],
+            "rooms": "IV к. А111, IV к. А216",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ВТ_5_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ВТ",
+            "time": "15:15",
+            "pair_number": 5,
+            "discipline": "Иностранный язык",
+            "type": "прак.",
             "subgroup": "п/г 2",
             "teachers": [
                 "Болотова В.А."
@@ -2380,10 +2399,10 @@
                 "20.10.2026",
                 "27.10.2026"
             ],
-            "rooms": "IV к. А216",
+            "rooms": "IV к. А111, IV к. А216",
             "comment": "",
-            "position": 1,
-            "event_id": "1214_ВТ_5_1"
+            "position": 2,
+            "event_id": "1214_ВТ_5_2"
         },
         {
             "group": "1214",
@@ -6533,7 +6552,7 @@
             "weekday": "ПН",
             "time": "13:30",
             "pair_number": 4,
-            "discipline": "",
+            "discipline": "Математические методы в экономике",
             "type": "лаб.",
             "subgroup": "п/г 1, 2",
             "teachers": [
@@ -6998,6 +7017,25 @@
             "weekday": "СР",
             "time": "11:30",
             "pair_number": 3,
+            "discipline": "КОМПЕТЕНТНОСТНОЕ ТЕСТИРОВАНИЕ ПО ФИН, ГРАМОТНОСТИ",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Тихонова И.Ю."
+            ],
+            "dates": [
+                "23.09.2026"
+            ],
+            "rooms": "IV к. А101",
+            "comment": "",
+            "position": 1,
+            "event_id": "1232_СР_3_1"
+        },
+        {
+            "group": "1232",
+            "weekday": "СР",
+            "time": "11:30",
+            "pair_number": 3,
             "discipline": "Психология воспитательных практик",
             "type": "лек.",
             "subgroup": "",
@@ -7009,10 +7047,10 @@
                 "09.09.2026",
                 "16.09.2026"
             ],
-            "rooms": "",
+            "rooms": "IV к. А101",
             "comment": "",
-            "position": 1,
-            "event_id": "1232_СР_3_1"
+            "position": 2,
+            "event_id": "1232_СР_3_2"
         },
         {
             "group": "1232",
@@ -8511,7 +8549,7 @@
                 "19.10.2026",
                 "26.10.2026"
             ],
-            "rooms": "IV к. А101, IV к. А305",
+            "rooms": "IV к. А305",
             "comment": "",
             "position": 1,
             "event_id": "1237_ПН_4_1"
@@ -12893,5 +12931,5 @@
             "event_id": "М1227_ЧТ_7_2"
         }
     ],
-    "generated_at": "2026-09-21T08:06:11+00:00"
+    "generated_at": "2026-09-21T10:09:30+00:00"
 }
