@@ -54,6 +54,11 @@
                         <button class="filter-close" type="button" aria-label="Закрыть">✕</button>
                     </div>
                     <input type="text" class="filter-search" placeholder="Поиск по группам и преподавателям...">
+                    <div class="filter-quick-actions">
+                        <button class="filter-link-btn" type="button" data-action="select-all">Выбрать все</button>
+                        <span class="filter-link-sep" aria-hidden="true">·</span>
+                        <button class="filter-link-btn" type="button" data-action="clear">Снять все</button>
+                    </div>
                     <div class="filter-columns">
                         <div class="filter-column">
                             <div class="filter-column-title">Группы</div>
@@ -67,8 +72,7 @@
                     <div class="filter-footer">
                         <span class="filter-counter" id="filterCounter"></span>
                         <div class="filter-actions">
-                            <button class="filter-select-all" type="button">Выбрать все</button>
-                            <button class="filter-clear" type="button">Сбросить всё</button>
+                            <button class="filter-done" type="button">Готово</button>
                         </div>
                     </div>
                 </div>
