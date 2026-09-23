@@ -6,6 +6,8 @@ import asyncio
 import shutil
 import subprocess
 import hashlib
+from parser.rooms_hints import pick_rooms_for_branch, split_branch_by_rooms
+from collections import Counter
 
 from parser.ai import ask_ai, user_prompt
 from parser.extractor import DataExtractor, delete_old_file
@@ -98,7 +100,12 @@ async def handle_json_files(data, latest_path: Path, old_path: Path) -> bool:
 
 
 async def save_data(data, path: Path) -> None:
-    text = json.dumps(data, ensure_ascii=False, indent=4)
+    def _default(o):
+        if isinstance(o, set):
+            return sorted(o)
+        raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+
+    text = json.dumps(data, ensure_ascii=False, indent=4, default=_default)
     await asyncio.to_thread(path.write_text, text, encoding="utf-8")
 
 
@@ -136,24 +143,30 @@ def _add_90_minutes(time_start: str) -> str:
     return f"{(total // 60) % 24:02d}:{total % 60:02d}"
 
 
-def merge_ai_line(line: str, offset: int, sources: list[dict]) -> dict | None:
+def merge_ai_line(
+        line: str,
+        offset: int,
+        sources: list[dict],
+        branch_index: int = 0,   # 0-based позиция среди веток своего enumerator
+        branch_total: int = 1,   # всего веток для этого enumerator
+) -> list[dict]:
     """
-    Строка AI → dict мероприятия.
-    Fallback'и (day_of_week, time_start, rooms) берутся из sources[global_idx].
+    Возвращает список событий — 0, 1 или несколько, если одна AI-строка
+    разбилась по разным комнатам (date-hint внутри одной ветки).
     """
     parts = [p.strip() for p in line.split(";")]
-    # "-" — плейсхолдер пустого поля из промпта. Возвращаем пустые строки.
+    # "-" — плейсхолдер пустого поля из промпта
     parts = ["" if p == "-" else p for p in parts]
-    # 9 полей по промпту; 10 — если когда-нибудь добавим rooms в AI-выход
+
     if len(parts) not in (9, 10):
         logger.warning(f"AI: ожидалось 9/10 полей, получено {len(parts)}: {line!r}")
-        return None
+        return []
 
     try:
         local_n = int(parts[0].strip("[]").strip())
     except ValueError:
         logger.warning(f"AI: не удалось разобрать enumerator: {parts[0]!r}")
-        return None
+        return []
 
     global_idx = offset + local_n - 1
     if not (0 <= global_idx < len(sources)):
@@ -161,7 +174,7 @@ def merge_ai_line(line: str, offset: int, sources: list[dict]) -> dict | None:
             f"AI: enumerator {local_n} вне диапазона "
             f"(offset={offset}, total={len(sources)})"
         )
-        return None
+        return []
 
     src = sources[global_idx]
 
@@ -175,11 +188,59 @@ def merge_ai_line(line: str, offset: int, sources: list[dict]) -> dict | None:
     teachers   = parts[8]
     rooms_ai   = parts[9] if len(parts) == 10 else ""
 
-    # финальная нормализация времени
     time_start = normalize_time(time_start) if time_start else ""
     time_end   = normalize_time(time_end) if time_end else ""
 
-    return {
+    # Если AI сам вернул rooms — доверяем полностью, не распределяем.
+    # Иначе берём из источника и раскладываем по ветками.
+    # ── hints-режим: может разбить одну AI-строку на несколько event'ов ──
+    # ── hints-режим: может разбить одну AI-строку на несколько event'ов ──
+    # ── rooms не пришли от AI ──
+    if not rooms_ai:
+        hints = src.get("rooms_hints") or []
+        has_overrides = any(r["hint_type"] or r["hint_dates"] for r in hints)
+
+        # Только base (или hints нет) → старая позиционная логика:
+        # первая ветка → первая комната, вторая → вторая.
+        # Это нужно, когда в Excel две комнаты без хинтов и две ветки —
+        # связать их можно только по порядку.
+        if not has_overrides:
+            rooms = _assign_rooms(
+                src.get("rooms", ""),
+                branch_index=branch_index,
+                branch_total=branch_total,
+            )
+            return [{
+                "weekday":    weekday,
+                "time_start": time_start,
+                "time_end":   time_end,
+                "dates":      dates,
+                "discipline": discipline,
+                "type":       type_,
+                "subgroup":   subgroup,
+                "teachers":   teachers,
+                "rooms":      rooms,
+            }]
+
+        # Есть override'ы → split_branch_by_rooms
+        groups = split_branch_by_rooms(hints, type_, dates)
+        return [
+            {
+                "weekday":    weekday,
+                "time_start": time_start,
+                "time_end":   time_end,
+                "dates":      g_dates,
+                "discipline": discipline,
+                "type":       type_,
+                "subgroup":   subgroup,
+                "teachers":   teachers,
+                "rooms":      g_rooms,
+            }
+            for g_dates, g_rooms in groups
+        ]
+
+    # ── rooms пришли от AI ──
+    return [{
         "weekday":    weekday,
         "time_start": time_start,
         "time_end":   time_end,
@@ -188,8 +249,31 @@ def merge_ai_line(line: str, offset: int, sources: list[dict]) -> dict | None:
         "type":       type_,
         "subgroup":   subgroup,
         "teachers":   teachers,
-        "rooms":      rooms_ai or src.get("rooms", ""),
-    }
+        "rooms":      rooms_ai,
+    }]
+
+def _assign_rooms(rooms_str: str, branch_index: int, branch_total: int) -> str:
+    """
+    Распределяет комнаты по ветками одной ячейки.
+
+      1 комната          → всем ветками эта комната
+      M комнат == N веток → каждой ветке своя по позиции
+      иначе              → всем ветками все комнаты (fallback)
+    """
+    if not rooms_str:
+        return ""
+
+    rooms_list = [r.strip() for r in rooms_str.split(",") if r.strip()]
+    if not rooms_list:
+        return ""
+
+    if len(rooms_list) == 1:
+        return rooms_list[0]
+
+    if 1 < branch_total == len(rooms_list):
+        return rooms_list[branch_index]
+
+    return ", ".join(rooms_list)
 
 
 # ---------------------------------------------------------------- web / git
@@ -292,19 +376,12 @@ async def process_schedule(
     groups_info_after_ai: dict = {}
 
     old_cache_data = _read_json(chunks_cache_path)
-    old_cache: dict[str, list[str]] = {}
-
-    if old_cache_data.get("chunk_size") == chunk_size:
-        old_cache = old_cache_data.get("entries", {}) or {}
-    else:
-        logger.info(
-            f"chunk_size изменён "
-            f"({old_cache_data.get('chunk_size')} → {chunk_size}), кэш чанков сброшен"
-        )
+    # ключи — хэши групп, значения — ответы AI
+    old_cache: dict[str, list[str]] = old_cache_data.get("entries", {}) or {}
 
     new_cache: dict[str, list[str]] = {}
     cache_hits = 0
-    ai_calls  = 0
+    ai_calls = 0
 
     for group, group_data in groups_info.items():
         sources: list[dict] = group_data.get("events", [])
@@ -312,47 +389,64 @@ async def process_schedule(
             groups_info_after_ai[group] = {"events": []}
             continue
 
-        current_chunk_size = chunk_size if use_chunks else len(sources)
-        chunk_results: list[tuple[int, list[str]]] = []
+        # Группа целиком: один ключ = один вызов AI
+        ai_input_text = format_ai_input(sources)
+        key = _chunk_hash(ai_input_text)
 
-        for i in range(0, len(sources), current_chunk_size):
-            chunk = sources[i:i + current_chunk_size]
-            ai_input_text = format_ai_input(chunk)
-            key = _chunk_hash(ai_input_text)
+        if key in old_cache:
+            lines = old_cache[key]
+            cache_hits += 1
+            logger.info(f"[skip AI] {group}: cache hit ({len(sources)} ячеек)")
+        else:
+            prompt_text = user_prompt.format(data=ai_input_text)
+            try:
+                chunk_result = await ask_ai(prompt=prompt_text)
+                if isinstance(chunk_result, list):
+                    lines = [e for e in chunk_result if e.strip()]
+                else:
+                    lines = [e for e in chunk_result.split("\n") if e.strip()]
+            except Exception as e:
+                logger.error(f"AI ошибка (группа {group}): {e}")
+                continue
+            ai_calls += 1
+            await asyncio.sleep(0.5)
 
-            if key in old_cache:
-                lines = old_cache[key]
-                cache_hits += 1
-                logger.info(
-                    f"[skip AI] {group} chunk {i // current_chunk_size}: "
-                    f"cache hit ({len(chunk)} строк)"
-                )
-            else:
-                prompt_text = user_prompt.format(data=ai_input_text)
-                try:
-                    chunk_result = await ask_ai(prompt=prompt_text)
-                    if isinstance(chunk_result, list):
-                        lines = [e for e in chunk_result if e.strip()]
-                    else:
-                        lines = [e for e in chunk_result.split("\n") if e.strip()]
-                except Exception as e:
-                    logger.error(
-                        f"AI ошибка (группа {group}, чанк {i // current_chunk_size}): {e}"
-                    )
-                    continue
-                ai_calls += 1
-                await asyncio.sleep(0.5)
+        new_cache[key] = lines
 
-            new_cache[key] = lines
-            chunk_results.append((i, lines))
-
-        # merge AI-строк в dict-ы
+        # merge (branch_index / branch_total уже считаются по всем lines
+        # одной группы — сдвига между чанками больше нет)
         merged: list[dict] = []
-        for offset, lines in chunk_results:
-            for line in lines:
-                item = merge_ai_line(line, offset, sources)
-                if item:
-                    merged.append(item)
+        enum_counts = Counter()
+        for line in lines:
+            head = line.split(";", 1)[0].strip()
+            try:
+                n = int(head.strip("[]").strip())
+            except ValueError:
+                continue
+            enum_counts[n] += 1
+
+        seen: dict[int, int] = {}
+        for line in lines:
+            head = line.split(";", 1)[0].strip()
+            try:
+                n = int(head.strip("[]").strip())
+            except ValueError:
+                items = merge_ai_line(line, 0, sources)
+                if items:
+                    merged.extend(items)
+                continue
+
+            branch_index = seen.get(n, 0)
+            seen[n] = branch_index + 1
+            branch_total = enum_counts[n]
+
+            items = merge_ai_line(
+                line, 0, sources,
+                branch_index=branch_index,
+                branch_total=branch_total,
+            )
+            if items:
+                merged.extend(items)
 
         groups_info_after_ai[group] = {"events": merged}
 
@@ -360,10 +454,7 @@ async def process_schedule(
         f"AI-статистика: {ai_calls} вызовов, {cache_hits} попаданий в кэш"
     )
 
-    await save_data(
-        {"chunk_size": chunk_size, "entries": new_cache},
-        chunks_cache_path,
-    )
+    await save_data({"entries": new_cache}, chunks_cache_path)
 
     # 3. промежуточные JSON
     await handle_json_files(groups_info, latest_extracted_path, old_extracted_path)

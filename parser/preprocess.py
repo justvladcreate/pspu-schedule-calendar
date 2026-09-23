@@ -66,7 +66,7 @@ def _normalize_spaces(text: str) -> str:
     text = text.replace('\x00', '.')
     return text
 
-def normalize_rooms(line: str) -> List[str]:
+def normalize_rooms(line: str, url: str | None = None) -> List[str]:
     """
     Нормализует строку с аудиториями в список уникальных аудиторий.
 
@@ -78,6 +78,9 @@ def normalize_rooms(line: str) -> List[str]:
         или "дистанционно СФЕРУМ".
       • Убирает дубликаты, сохраняя порядок первого появления.
       • Мусорные значения ("-", "нет", "n/a", "н/д") — отбрасываются.
+      • Если передан url — markdown-ссылка [дистанционно онлайн](url)
+        привязывается ТОЛЬКО к первой дистанционной записи.
+        Если дистанционной записи нет, url игнорируется.
     """
     if line is None:
         return []
@@ -93,10 +96,6 @@ def normalize_rooms(line: str) -> List[str]:
     # 2. Разбиваем по переносам строк и запятым (СЛЕШИ пока не трогаем)
     raw_parts = re.split(r'[\n\r,]+', text)
 
-    # Мусорные значения. Сравниваем в двух формах:
-    #   - со слешами   ("n/a", "н/д")
-    #   - без слешей   ("n a", "н д") — на случай, если слеш уже был
-    #     заменён пробелом где-то раньше
     JUNK = {
         "-", "—", "–",
         "нет",
@@ -105,7 +104,8 @@ def normalize_rooms(line: str) -> List[str]:
         "n\\a", "n a",
     }
 
-    result: List[str] = []
+    # 3. Первый проход: чистим и дедуплицируем БЕЗ url
+    rooms_clean: List[str] = []
     seen: set = set()
 
     for part in raw_parts:
@@ -117,7 +117,6 @@ def normalize_rooms(line: str) -> List[str]:
         if low in JUNK:
             continue
 
-        # 3. Теперь можно чистить слеши
         room = room.replace('\\', ' ').replace('/', ' ')
         room = re.sub(r'\s+', ' ', room).strip()
         if not room:
@@ -125,19 +124,24 @@ def normalize_rooms(line: str) -> List[str]:
 
         low = room.lower()
 
-        # 4. "дистанционно ..." — единый вид
         if low.startswith('дистанционно'):
-            room = "дистанционно СФЕРУМ" if 'сферум' in low else "дистанционно онлайн"
+            room = "дистанционно онлайн"
         else:
-            # "IV к.  А331", "IVк.А331" → "IV к. А331"
             room = re.sub(r'\b([IVX]+)\s*к\.\s*', r'\1 к. ', room)
             room = re.sub(r'\s+', ' ', room).strip()
 
         if room and room not in seen:
             seen.add(room)
-            result.append(room)
+            rooms_clean.append(room)
 
-    return result
+    # 4. Второй проход: привязываем url ТОЛЬКО к первой дистанционной записи
+    if url:
+        for i, r in enumerate(rooms_clean):
+            if r.startswith("дистанционно"):
+                rooms_clean[i] = f"[{r}]({url})"
+                break
+
+    return rooms_clean
 
 def normalize_time(time_str: str) -> str:
     """

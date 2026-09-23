@@ -8,6 +8,9 @@ import time
 import logging
 import asyncio
 from parser.preprocess import add_year, clean, normalize_rooms, normalize_time, english_to_russian_lookalike, normalize_date_ranges, remove_invalid_dates, extract_first_date, remove_spaces_between_initials, normalize_subgroup
+from parser.rooms_hints import parse_rooms_with_hints
+import zipfile
+from xml.etree import ElementTree as ET
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +18,11 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 
+_XLSX_NS = {
+    'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main',
+    'rel':  'http://schemas.openxmlformats.org/package/2006/relationships',
+}
+_R_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 
 def delete_old_file(latest_path, old_path, max_time=0):
 
@@ -112,13 +120,14 @@ class DataExtractor:
         # Первый лист — сводный ("ГРУППЫ"), не парсим.
         for sheet_name in visible_sheets[1:]:
             df = fill_merged_cells_safe(file_path, sheet_name=sheet_name)
+            hyperlinks = load_hyperlinks(file_path, sheet_name)
             sheet_gid = None
             if sheet_name in sheets_metadata:
                 sheet_gid = sheets_metadata[sheet_name]['gid']
             # if not sheet_name == "1214":
             #     continue
 
-            group_info = extraction(df, sheet_gid)
+            group_info = extraction(df, sheet_gid, hyperlinks)
             if not group_info:
                 continue
 
@@ -138,7 +147,9 @@ def clean_group_name(group_name):
         return group_name[comma_index:bracket_index].strip()
     return group_name.strip()
 
-def extraction(df, sheet_id):
+def extraction(df, sheet_id, hyperlinks: dict | None = None):
+    if hyperlinks is None:
+        hyperlinks = {}
     # print(df)
     # Указываем стартовые клетки
     start_cells = []
@@ -276,7 +287,23 @@ def extraction(df, sheet_id):
                     if room_val in subject_val:
                         room_val = room_val_exception
 
-                room_val = normalize_rooms(room_val)
+                row_urls: list[str] = []
+                for c in range(start_cell[1], end_cell[1] + 3):
+                    for u in (hyperlinks.get((abs_row, c)) or []):
+                        if u not in row_urls:
+                            row_urls.append(u)
+
+                room_raw = str(room_val)
+                logger.info(f"[EXTRACT] group={group_name} row={abs_row} row_urls={row_urls} "
+                            f"raw_repr={room_raw!r}")
+                rooms_hints = parse_rooms_with_hints(room_raw, urls=row_urls)
+
+                if rooms_hints:
+                    room_val = [r["room"] for r in rooms_hints]
+                else:
+                    room_val = normalize_rooms(
+                        room_raw, url=row_urls[0] if row_urls else None
+                    )
 
                 subject_val = clean(text=subject_val)
                 subject_val = english_to_russian_lookalike(text=subject_val)
@@ -318,9 +345,10 @@ def extraction(df, sheet_id):
                             "day_of_week": day_of_week,
                             "time_start": time_val,
                             "rooms": ", ".join(room_val),
+                            "rooms_hints": rooms_hints,
                             "subject": subject_val,
                         })
-                        
+
             except Exception as e:
                 print(f"Ошибка при обработке строки {row} {group_name}: {e}")
 
@@ -363,3 +391,140 @@ def fill_merged_cells_safe(file_path, sheet_name):
                 df.iat[i, j] = top_left_value
     return df
 
+def _col_idx(letters: str) -> int:
+    n = 0
+    for ch in letters:
+        n = n * 26 + (ord(ch) - ord('A') + 1)
+    return n - 1
+
+
+def _parse_ref(ref: str):
+    """'G17' → (row0, col0)."""
+    import re
+    m = re.match(r'^([A-Z]+)(\d+)$', ref)
+    if not m:
+        return None
+    return int(m.group(2)) - 1, _col_idx(m.group(1))
+
+
+def _parse_range(ref: str):
+    """'A1:B2' → (min_r, min_c, max_r, max_c), 0-based."""
+    import re
+    m = re.match(r'^([A-Z]+)(\d+):([A-Z]+)(\d+)$', ref)
+    if not m:
+        return None
+    return (int(m.group(2)) - 1, _col_idx(m.group(1)),
+            int(m.group(4)) - 1, _col_idx(m.group(3)))
+
+
+def _find_sheet_path(zf: zipfile.ZipFile, sheet_name):
+    wb   = ET.fromstring(zf.read('xl/workbook.xml'))
+    rels = ET.fromstring(zf.read('xl/_rels/workbook.xml.rels'))
+
+    rid_to_target = {
+        r.get('Id'): r.get('Target')
+        for r in rels.findall('rel:Relationship', _XLSX_NS)
+    }
+
+    sheets = wb.findall('.//main:sheet', _XLSX_NS)
+
+    if isinstance(sheet_name, int):
+        sh = sheets[sheet_name] if 0 <= sheet_name < len(sheets) else None
+    else:
+        sh = next((s for s in sheets if s.get('name') == sheet_name), None)
+
+    if sh is None:
+        return None
+
+    rid = sh.get(f'{{{_R_NS}}}id')
+    target = rid_to_target.get(rid)
+    if not target:
+        return None
+
+    target = target.lstrip('/')
+    if not target.startswith('xl/'):
+        target = f'xl/{target}'
+    return target
+
+def load_hyperlinks(file_path, sheet_name) -> dict[tuple[int, int], list[str]]:
+    """
+    {(row, col): [url, url, ...]} — координаты 0-based (как в pandas).
+
+    Читает XML напрямую, потому что openpyxl через cell.hyperlink отдаёт
+    ровно одну ссылку на ячейку. При rich-text-гиперссылках (несколько
+    ссылок в одной ячейке) остальные теряются.
+
+    Гиперссылки в объединённых ячейках распространяются на всю область.
+    """
+    links: dict[tuple[int, int], list[str]] = {}
+
+    with zipfile.ZipFile(file_path) as zf:
+        sheet_path = _find_sheet_path(zf, sheet_name)
+        if sheet_path is None:
+            return links
+
+        d, f = sheet_path.rsplit('/', 1)
+        rels_path = f'{d}/_rels/{f}.rels'
+
+        rid_to_url: dict[str, str] = {}
+        try:
+            rels = ET.fromstring(zf.read(rels_path))
+            for rel in rels.findall('rel:Relationship', _XLSX_NS):
+                rid  = rel.get('Id')
+                url  = rel.get('Target')
+                typ  = rel.get('Type') or ''
+                if rid and url and typ.endswith('/hyperlink'):
+                    rid_to_url[rid] = url
+        except KeyError:
+            pass
+
+        sheet = ET.fromstring(zf.read(sheet_path))
+
+        # --- прямые <hyperlink ref=".." r:id=".."/> ---
+        for h in sheet.findall('.//main:hyperlink', _XLSX_NS):
+            ref = h.get('ref')
+            if not ref:
+                continue
+            rid = h.get(f'{{{_R_NS}}}id')
+            url = rid_to_url.get(rid) if rid else None
+            if not url or not url.lower().startswith(('http://', 'https://')):
+                continue
+
+            pos = _parse_ref(ref)
+            if pos is not None:
+                links.setdefault(pos, [])
+                if url not in links[pos]:
+                    links[pos].append(url)
+                continue
+
+            rng = _parse_range(ref)
+            if rng is None:
+                continue
+            min_r, min_c, max_r, max_c = rng
+            for r in range(min_r, max_r + 1):
+                for c in range(min_c, max_c + 1):
+                    links.setdefault((r, c), [])
+                    if url not in links[(r, c)]:
+                        links[(r, c)].append(url)
+
+        # --- распространение по объединённым ячейкам ---
+        merged: list[tuple[int, int, int, int]] = []
+        for mc in sheet.findall('.//main:mergeCell', _XLSX_NS):
+            rng = _parse_range(mc.get('ref') or '')
+            if rng:
+                merged.append(rng)
+
+        for min_r, min_c, max_r, max_c in merged:
+            src = (min_r, min_c)
+            if src not in links:
+                continue
+            for r in range(min_r, max_r + 1):
+                for c in range(min_c, max_c + 1):
+                    if (r, c) == src:
+                        continue
+                    links.setdefault((r, c), [])
+                    for u in links[src]:
+                        if u not in links[(r, c)]:
+                            links[(r, c)].append(u)
+
+    return links

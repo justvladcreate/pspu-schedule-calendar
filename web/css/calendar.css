@@ -276,3 +276,14 @@
     color: var(--text-muted);
     padding: 0 5px;
 }
+
+.event-block .event-room a,
+.group-item-room a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.event-block .event-room a:hover,
+.group-item-room a:hover {
+    color: var(--accent);
+}

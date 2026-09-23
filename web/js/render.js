@@ -7,8 +7,10 @@ import {
 import { state } from './state.js';
 import {
     pad, toISO, isToday, escapeHtml,
-    startOfWeek, addDays,
+    startOfWeek, addDays, renderRoomsLinks, plainRooms,
 } from './utils.js';
+
+
 import { groupByDate } from './data.js';
 import { layoutDayEvents } from './layout.js';
 import { showEventDetails, showGroupDetails } from './popover.js';
@@ -246,7 +248,7 @@ export function makeEventBlock(ev, column = 0, columnsCount = 1) {
     const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
     el.innerHTML = `
         <div class="event-title">${escapeHtml(titleText)}</div>
-        <div class="event-room">${escapeHtml(ev.rooms || '')}</div>
+        <div class="event-room">${escapeHtml(plainRooms(ev.rooms || ''))}</div>
         <div class="event-time">${ev.time_start}–${ev.endTime}</div>
     `;
 

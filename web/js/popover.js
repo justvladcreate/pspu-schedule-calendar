@@ -1,7 +1,7 @@
 'use strict';
 
 import { MONTHS_GEN } from './config.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, renderRoomsLinks } from './utils.js';
 
 export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
@@ -22,7 +22,7 @@ export function eventDetailsHtml(ev) {
         <h3>${escapeHtml(titleText)}</h3>
         <div class="popover-row"><span class="label">Время</span><span>${ev.time_start} – ${ev.endTime}</span></div>
         <div class="popover-row"><span class="label">Дата</span><span>${ev.dateObj.getDate()} ${MONTHS_GEN[ev.dateObj.getMonth()]} ${ev.dateObj.getFullYear()}</span></div>
-        ${ev.rooms ? `<div class="popover-row"><span class="label">Место</span><span>${escapeHtml(ev.rooms)}</span></div>` : ''}
+        ${ev.rooms ? `<div class="popover-row"><span class="label">Место</span><span>${renderRoomsLinks(ev.rooms)}</span></div>` : ''}
         ${ev.teachers && ev.teachers.length ? `<div class="popover-row"><span class="label">Преподаватель</span><span>${escapeHtml(ev.teachers.join(', '))}</span></div>` : ''}
         <div class="popover-row"><span class="label">Группа</span><span>${escapeHtml(ev.group)}</span></div>
         ${ev.subgroup ? `<div class="popover-row"><span class="label">Подгруппа</span><span>${escapeHtml(ev.subgroup)}</span></div>` : ''}
@@ -62,7 +62,7 @@ function renderGroupList(events, anchor, pop) {
                     <div class="group-item" data-idx="${i}">
                         <div class="group-item-time">${ev.time_start}–${ev.endTime}</div>
                         <div class="group-item-title">${escapeHtml(titleText)}</div>
-                        ${ev.rooms ? `<div class="group-item-room">${escapeHtml(ev.rooms)}</div>` : ''}
+                        ${ev.rooms ? `<div class="group-item-room">${renderRoomsLinks(ev.rooms)}</div>` : ''}
                     </div>
                 `;
             }).join('')}

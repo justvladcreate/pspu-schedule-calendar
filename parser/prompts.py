@@ -3,7 +3,7 @@
 
 USER_PROMPT = """You are a parser for university schedules. You receive a full group input string, containing a discipline info line. For each input string, output one or more structured lines in the strict format:
 
-<enumerator>;<day_of_week>;<time_start>;<time_end>;<dates>;<discipline_name>;<type>;<subgroup>;<teachers>
+<enumerator>;<day_of_week>;<time_start>;<time_end>;<dates>;<discipline_name>;<type>;<subgroup>;<teachers>;<rooms>
 
 If a field is missing, write a single dash "-" in its place.
 Every field MUST be present between two ; characters, even if it contains only "-".
@@ -70,11 +70,14 @@ If no teacher appears in the branch, look ahead to later parts of the same eleme
 7. Assemble the discipline
 After removing the date and time part, type parentheses, subgroup token, and teacher string, the remaining text is the discipline. Trim extra spaces, commas, or leading dots. If the discipline includes parenthesised notes like (ТЕСТИРОВАНИЕ) or trailing comments like - 8ч, leave them as part of the discipline name.
 
+8. Assign rooms (if present)
+If rooms info is explicitly given, try assigning it accordingly to branches. Rooms may contain info like "IV к. А331, дистанционно онлайн, IV к. холл 2 эт., I к. А101"
+
 Output Format
 For each branch, output exactly one line:
 
 text
-<enumerator>;<day_of_week>;<time_start>;<time_end>;<dates>;<discipline_name>;<type>;<subgroup>;<teachers>
+<enumerator>;<day_of_week>;<time_start>;<time_end>;<dates>;<discipline_name>;<type>;<subgroup>;<teachers>;<rooms>
 No other text. Fields are separated by ;.
 
 Priority Rules (in case of doubt)
@@ -84,40 +87,40 @@ Branch only when discipline, type, or subgroup changes.
 If a type keyword appears ambiguous, rely on the parenthesised form first.
 
 Examples
-Example 1 – single element, multiple branches, no day of week, no time
+Example 1 – single element, multiple branches, no day of week, no time, no rooms
 Input:
 [1] 2.02 - 6.04 Иностранный язык (прак.), п/г 1 ст. преп. Карсукова Н.К. 16.02 - 6.04 Иностранный язык (прак.), п/г 2 преп. Марченко О.В.
 Output:
-[1];-;-;-;2.02 - 6.04;Иностранный язык;прак.;п/г 1;ст. преп. Карсукова Н.К.
-[1];-;-;-;16.02 - 6.04;Иностранный язык;прак.;п/г 2;преп. Марченко О.В.
+[1];-;-;-;2.02 - 6.04;Иностранный язык;прак.;п/г 1;ст. преп. Карсукова Н.К.;-
+[1];-;-;-;16.02 - 6.04;Иностранный язык;прак.;п/г 2;преп. Марченко О.В.;-
 
-Example 2 – multiple elements, keeping the enumerator, no day of week, no time,
+Example 2 – multiple elements, keeping the enumerator, no day of week, no time, no rooms
 Input:
-[1] 10.09 Русский язык (прак.), преп. Штейникова В.И
-[2] 20.10 Русский язык (прак.), преп. Колесникова О.В.
+[1] 10.09 Русский язык (прак.), преп. Штейникова В.И;-
+[2] 20.10 Русский язык (прак.), преп. Колесникова О.В.;-
 
 Output:
-[1];-;-;-;10.09;Русский язык;прак.;-;преп. Штейникова В.И
-[2];-;-;-;20.10;Русский язык;прак.;-;преп. Колесникова О.В.
+[1];-;-;-;10.09;Русский язык;прак.;-;преп. Штейникова В.И;-
+[2];-;-;-;20.10;Русский язык;прак.;-;преп. Колесникова О.В.;-
 
-Example 3 – no day of week, no time, note inside parentheses kept, no subgroups
+Example 3 – no day of week, no time, note inside parentheses kept, no subgroups, no rooms
 Input:
 [1] 24.02 - 21.04 Общая и социальная психология (прак.) доц. Баландина Л.Л. 28.04 Общая и социальная психология (ТЕСТИРОВАНИЕ) доц. Баландина Л.Л.
 Output:
-[1];-;-;-;24.02 - 21.04;Общая и социальная психология;прак.;-;доц. Баландина Л.Л.
-[1];-;-;-;28.04;Общая и социальная психология (ТЕСТИРОВАНИЕ);-;-;доц. Баландина Л.Л.
+[1];-;-;-;24.02 - 21.04;Общая и социальная психология;прак.;-;доц. Баландина Л.Л.;-
+[1];-;-;-;28.04;Общая и социальная психология (ТЕСТИРОВАНИЕ);-;-;доц. Баландина Л.Л.;-
 
-Example 4 – stray preposition dropped
+Example 4 – stray preposition dropped, rooms given
 Input:
-[1] 25.04 в История России (прак.) преп. Штейников С.Н.
+[1] 25.04 в История России (прак.) преп. Штейников С.Н IV к. А314.
 Output:
-[1];-;-;-;25.04;История России;прак.;-;преп. Штейников С.Н.
+[1];-;-;-;25.04;История России;прак.;-;преп. Штейников С.Н.;IV к. А314
 
 Example 5 – No info
 Input:
 [1] Физическая культура
 Output:
-[1];-;-;-;-;Физическая культура;-;-;-
+[1];-;-;-;-;Физическая культура;-;-;-;-
 
 Apply these instructions to every input string you receive.
 

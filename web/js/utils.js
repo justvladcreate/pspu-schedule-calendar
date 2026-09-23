@@ -42,3 +42,19 @@ export function addMonths(d, n) {
     r.setMonth(r.getMonth() + n);
     return r;
 }
+
+export function renderRoomsLinks(text) {
+    if (!text) return '';
+    const escaped = escapeHtml(text);
+    return escaped.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener">$1</a>'
+    );
+}
+
+// Убирает markdown-ссылки, оставляя только текст:
+// "IV к. А331, [дистанционно онлайн](url)" → "IV к. А331, дистанционно онлайн"
+export function plainRooms(text) {
+    if (!text) return '';
+    return String(text).replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+}
