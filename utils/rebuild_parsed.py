@@ -40,7 +40,7 @@ AFTER_AI_PATH   = LATEST_DIR / "groups_info_after_ai.json"
 PARSED_PATH     = LATEST_DIR / "groups_info_parsed.json"
 OLD_PARSED_PATH = OLD_DIR    / "groups_info_parsed.json"
 
-OVERRIDES_PATH  = BASE_DIR / "private" / "overrides.yaml"
+OVERRIDES_PATH  = BASE_DIR / "overrides.yaml"
 
 
 async def rebuild_parsed() -> int:
@@ -58,7 +58,7 @@ async def rebuild_parsed() -> int:
         logger.error(f"Не удалось прочитать JSON: {e}")
         return 0
 
-    # 1. Финализация: event-строки → структурированные события
+    # 1. Финализация: dict-ы → структурированные события
     logger.info("Применяю transform_schedule (finalize)")
     parsed = await transform_schedule(raw)
 
@@ -66,7 +66,7 @@ async def rebuild_parsed() -> int:
     rules = load_overrides(OVERRIDES_PATH)
     overrides_count = len(rules.get("overrides", []))
     logger.info(f"Применяю overrides: {overrides_count} правил")
-    parsed["events"] = apply_overrides(parsed["events"], rules)
+    parsed["events"] = await apply_overrides(parsed["events"], rules)
 
     # 3. Запись с ротацией: старый parsed.json → data/old/
     ok = await handle_json_files(parsed, PARSED_PATH, OLD_PARSED_PATH)

@@ -2,13 +2,37 @@
 """
 Ручные правки расписания после парсинга.
 
-Позволяет:
-  • удалить конкретное событие (даже если оно есть в Excel)
-  • задать ему даты вручную
-  • развернуть его на весь семестр по дню недели
-  • поправить время / аудиторию / преподавателей
+Работает с событиями в формате finalize:
+  group, weekday, time_start, time_end, pair_number,
+  discipline, type, subgroup, teachers, dates, rooms,
+  comment, position, event_id
 
-Правила лежат в private/overrides.yaml.
+Схема правила в private/overrides.yaml:
+
+    semester:                     # необязательно
+      start: "01.09.2026"
+      end:   "30.12.2026"
+
+    overrides:
+      - match:                    # AND по всем ключам
+          group: "1247"
+          weekday: ["ПН", "ВТ"]   # значение может быть списком
+          discipline_contains: "Иностранный"
+          time_start: "11:30"
+          not:                    # вложенные отрицания
+            subgroup: "п/г 1"
+        drop: true                # ИЛИ любые из операций ниже
+
+        dates: "1.09 - 30.12"     # строка → expand_dates
+        fill_semester: true       # все даты семестра по weekday
+        time_start: "13:30"
+        time_end:   "15:00"
+        rooms: "IV к. А305"
+        teachers: ["Иванов И.И."]
+        type: "прак."
+        subgroup: "п/г 2"
+        discipline: "Новое название"
+        comment: "..."
 """
 import logging
 from datetime import date, datetime, timedelta
@@ -21,6 +45,23 @@ from parser.finalize import expand_dates
 logger = logging.getLogger(__name__)
 
 WEEKDAYS_RU = {"ПН": 0, "ВТ": 1, "СР": 2, "ЧТ": 3, "ПТ": 4, "СБ": 5, "ВС": 6}
+
+# Ключи, по которым можно матчить события (в дополнение к спец-ключам
+# discipline_contains / teacher / teacher_contains и блоку not).
+MATCH_KEYS = {
+    "group", "weekday", "pair_number",
+    "time_start", "time_end",
+    "discipline", "type", "subgroup",
+    "dates", "rooms", "comment",
+    "event_id",
+}
+
+# Поля, которые правило может перезаписать «в лоб».
+OVERRIDE_KEYS = (
+    "time_start", "time_end",
+    "discipline", "type", "subgroup",
+    "rooms", "teachers", "comment",
+)
 
 
 # ---------------------------------------------------------------- загрузка
@@ -51,29 +92,30 @@ def _matches_single(ev: dict, key: str, value) -> bool:
         teachers = [str(t).lower() for t in (ev.get("teachers") or [])]
         return any(needle in t for t in teachers)
 
-    if isinstance(value, list):
-        return str(ev.get(key)) in [str(v) for v in value]
+    if key not in MATCH_KEYS:
+        logger.warning(f"overrides: неизвестный ключ match: {key!r}")
+        return False
 
-    return str(ev.get(key)) == str(value)
+    ev_val = ev.get(key)
+
+    # dates в events — список; сравниваем построчно
+    if key == "dates":
+        if isinstance(ev_val, list):
+            return str(value) in [str(v) for v in ev_val]
+        return str(ev_val) == str(value)
+
+    if isinstance(value, list):
+        return str(ev_val) in [str(v) for v in value]
+
+    return str(ev_val) == str(value)
 
 
 def _matches(ev: dict, match: dict) -> bool:
     """
     Все условия в match должны совпасть (AND).
-
-    Поддерживается блок `not` — вложенный словарь с теми же ключами,
-    но условия внутри него должны НЕ совпасть.
-
-    Схема:
-        match:
-          group: "1247"            # ev.group == "1247"
-          discipline_contains: "…" # "…" в ev.discipline
-          not:
-            time: "11:30"          # ev.time != "11:30"
-            subgroup: "п/г 1"      # ev.subgroup != "п/г 1"
+    Блок not — вложенный словарь, условия которого должны НЕ совпасть.
     """
     for key, value in match.items():
-        # Блок отрицаний — все условия внутри должны НЕ совпасть
         if key == "not":
             if not isinstance(value, dict):
                 continue
@@ -88,10 +130,10 @@ def _matches(ev: dict, match: dict) -> bool:
     return True
 
 
-# ---------------------------------------------------------------- операции
+# ---------------------------------------------------------------- семестр
 
 def _semester_bounds(events: list[dict], explicit: dict | None) -> tuple[date, date] | None:
-    """Границы семестра: из YAML, либо min/max по датам всех событий."""
+    """Границы семестра: из YAML (semester: {start, end}), либо min/max по датам."""
     if explicit and "start" in explicit and "end" in explicit:
         return (
             datetime.strptime(str(explicit["start"]), "%d.%m.%Y").date(),
@@ -120,18 +162,12 @@ def _fill_semester(ev: dict, semester: tuple[date, date]) -> list[str]:
 
 # ---------------------------------------------------------------- вход
 
-def apply_overrides(events: list[dict], rules: dict) -> list[dict]:
+async def apply_overrides(events: list[dict], rules: dict) -> list[dict]:
     """
     Применяет overrides к списку финальных событий.
 
-    Схема правила:
-        match:                условия выбора события (AND по всем полям)
-        drop: true            убрать событие
-        dates: "..."          заменить dates (строка → expand_dates)
-        fill_semester: true   заполнить dates всеми датами семестра по weekday
-        time: "..."           заменить time
-        rooms: "..."          заменить rooms
-        teachers: [...]       заменить teachers
+    Асинхронная, потому что внутри await expand_dates.
+    Вызов: `parsed["events"] = await apply_overrides(parsed["events"], rules)`.
     """
     items = rules.get("overrides", [])
     if not items:
@@ -150,16 +186,16 @@ def apply_overrides(events: list[dict], rules: dict) -> list[dict]:
                 drop = True
                 break
 
+            # dates и fill_semester взаимоисключающие;
+            # если указаны оба — fill_semester перекрывает dates.
             if "dates" in rule:
-                ev["dates"] = expand_dates(rule["dates"])
+                ev["dates"] = await expand_dates(rule["dates"])
             if rule.get("fill_semester") and semester:
                 ev["dates"] = _fill_semester(ev, semester)
-            if "time" in rule:
-                ev["time"] = rule["time"]
-            if "rooms" in rule:
-                ev["rooms"] = rule["rooms"]
-            if "teachers" in rule:
-                ev["teachers"] = rule["teachers"]
+
+            for key in OVERRIDE_KEYS:
+                if key in rule:
+                    ev[key] = rule[key]
 
         if drop:
             logger.info(f"Override: drop {ev.get('event_id')} ({ev.get('discipline')})")
