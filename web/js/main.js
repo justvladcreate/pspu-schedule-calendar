@@ -14,7 +14,7 @@ import { setupVersionToggle, updateUpdatedLabel } from './version.js';
 import { setupReadmeModal } from './readme.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
-import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datePicker.js';
+import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import { hideEventDetails } from './popover.js';
 
 async function init() {
