@@ -189,7 +189,7 @@ async def apply_overrides(events: list[dict], rules: dict) -> list[dict]:
             # dates и fill_semester взаимоисключающие;
             # если указаны оба — fill_semester перекрывает dates.
             if "dates" in rule:
-                ev["dates"] = await expand_dates(rule["dates"])
+                ev["dates"] = expand_dates(rule["dates"])
             if rule.get("fill_semester") and semester:
                 ev["dates"] = _fill_semester(ev, semester)
 

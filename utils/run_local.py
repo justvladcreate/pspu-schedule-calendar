@@ -14,7 +14,7 @@
 """
 import asyncio
 import logging
-
+import os
 from parser.process import process_schedule
 
 
@@ -25,8 +25,9 @@ logging.basicConfig(
 )
 
 # --- параметры прогона (правь прямо тут) ---
-USE_CHUNKS = False       # True — резать события на чанки перед AI
-CHUNK_SIZE = 30          # размер чанка при USE_CHUNKS=True
+USE_CHUNKS = False
+CHUNK_SIZE = 30
+SCHEDULE_SOURCE = "google"    # "google" | "xlsx"
 
 
 async def run(
@@ -35,6 +36,7 @@ async def run(
 ) -> int:
     """Возвращает количество обработанных событий (0 при ошибке)."""
     logger.info("Локальный прогон пайплайна (web обновляется, git — нет)")
+    os.environ["SCHEDULE_SOURCE"] = SCHEDULE_SOURCE
     result = await process_schedule(
         use_chunks=use_chunks,
         chunk_size=chunk_size,

@@ -1,19 +1,32 @@
-from google.auth.exceptions import RefreshError
-from pathlib import Path
-import logging
-import json
+# parser/process.py
+from __future__ import annotations
+
 import asyncio
+import hashlib
+import json
+import logging
 import shutil
 import subprocess
-import hashlib
-from parser.rooms_hints import pick_rooms_for_branch, split_branch_by_rooms
 from collections import Counter
+from pathlib import Path
 
+from google.auth.exceptions import RefreshError
+from googleapiclient.http import MediaIoBaseDownload
+
+import config
+from config import CONFIG
+from google_services import (
+    SPREADSHEET_ID,
+    get_drive_and_sheets_services,
+    get_drive_service,
+)
 from parser.ai import ask_ai, user_prompt
 from parser.extractor import DataExtractor, delete_old_file
 from parser.finalize import transform_schedule
 from parser.overrides import load_overrides, apply_overrides
 from parser.preprocess import normalize_time
+from parser.rooms_hints import pick_rooms_for_branch, split_branch_by_rooms
+from parser.sources import GoogleSheetsSource, ScheduleSource, XlsxFileSource
 
 logger = logging.getLogger(__name__)
 
@@ -50,28 +63,51 @@ OVERRIDES_PATH = current_dir / "overrides.yaml"
 WEB_DATA_PATH     = web_dir / "data.json"
 WEB_OLD_DATA_PATH = web_dir / "old_data.json"
 
-data_extractor = DataExtractor()
+
+# ================================================================
+# скачивание Excel из Google Drive (только для xlsx-источника)
+# ================================================================
+
+def _sync_download_excel(excel_path: Path) -> None:
+    """Синхронный download Excel из Google Drive. Вызывать через asyncio.to_thread."""
+    service = get_drive_service()
+
+    request = service.files().export_media(
+        fileId=SPREADSHEET_ID,
+        mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+    excel_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(excel_path, "wb") as f:
+        downloader = MediaIoBaseDownload(f, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+            logger.info(f"Download progress: {int(status.progress() * 100)}%")
 
 
-# ---------------------------------------------------------------- io / misc
+async def _download_excel_from_drive(excel_path: Path) -> None:
+    await asyncio.to_thread(_sync_download_excel, excel_path)
+
 
 async def handle_excel_files(latest_excel: Path, old_excel: Path) -> bool:
+    """Ротация xlsx: latest → old и скачивание свежего. Только для xlsx-источника."""
     try:
         if old_excel.exists():
             if latest_excel.exists() and latest_excel.is_file():
                 delete_old_file(latest_excel, old_excel)
             if not (latest_excel.exists() and latest_excel.is_file()):
-                await data_extractor.download_file(latest_excel)
+                await _download_excel_from_drive(latest_excel)
         else:
             if latest_excel.exists():
                 delete_old_file(latest_excel, old_excel, max_time=0)
             if not (latest_excel.exists() and latest_excel.is_file()):
-                await data_extractor.download_file(latest_excel)
+                await _download_excel_from_drive(latest_excel)
         return True
     except PermissionError:
         logger.error("Нет прав на удаление/запись файла расписания.")
         if not (latest_excel.exists() and latest_excel.is_file()):
-            await data_extractor.download_file(latest_excel)
+            await _download_excel_from_drive(latest_excel)
         return True
     except RefreshError as e:
         logger.error(f"Credentials OAuth устарели: {e}")
@@ -80,6 +116,45 @@ async def handle_excel_files(latest_excel: Path, old_excel: Path) -> bool:
         logger.error(f"Ошибка при работе с Excel: {e}")
         return False
 
+
+# ================================================================
+# выбор источника
+# ================================================================
+
+async def build_schedule_source() -> ScheduleSource:
+    """
+    Собирает источник расписания по конфигу.
+
+    Приоритет:
+      1. Переменная окружения SCHEDULE_SOURCE=google|xlsx
+      2. CONFIG['schedule_source']['type']
+      3. default = 'google'
+    """
+    import os
+
+    src_type = (
+            os.environ.get("SCHEDULE_SOURCE")
+            or (CONFIG.get("schedule_source") or {}).get("type")
+            or "google"
+    ).lower()
+
+    logger.info(f"Источник расписания: {src_type}")
+
+    if src_type == "xlsx":
+        if not await handle_excel_files(latest_excel_path, old_excel_path):
+            raise RuntimeError("Не удалось скачать/подготовить xlsx")
+        return XlsxFileSource(latest_excel_path)
+
+    if src_type == "google":
+        _, sheets_service = await asyncio.to_thread(get_drive_and_sheets_services)
+        return GoogleSheetsSource(SPREADSHEET_ID, sheets_service)
+
+    raise ValueError(f"Неизвестный источник расписания: {src_type!r}")
+
+
+# ================================================================
+# io / misc
+# ================================================================
 
 async def handle_json_files(data, latest_path: Path, old_path: Path) -> bool:
     try:
@@ -119,7 +194,9 @@ def _read_json(path: Path) -> dict:
         return {}
 
 
-# ---------------------------------------------------------------- merge helpers
+# ================================================================
+# merge helpers
+# ================================================================
 
 def format_ai_input(sources: list[dict]) -> str:
     """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
@@ -193,8 +270,6 @@ def merge_ai_line(
 
     # Если AI сам вернул rooms — доверяем полностью, не распределяем.
     # Иначе берём из источника и раскладываем по ветками.
-    # ── hints-режим: может разбить одну AI-строку на несколько event'ов ──
-    # ── hints-режим: может разбить одну AI-строку на несколько event'ов ──
     # ── rooms не пришли от AI ──
     if not rooms_ai:
         hints = src.get("rooms_hints") or []
@@ -202,8 +277,6 @@ def merge_ai_line(
 
         # Только base (или hints нет) → старая позиционная логика:
         # первая ветка → первая комната, вторая → вторая.
-        # Это нужно, когда в Excel две комнаты без хинтов и две ветки —
-        # связать их можно только по порядку.
         if not has_overrides:
             rooms = _assign_rooms(
                 src.get("rooms", ""),
@@ -252,6 +325,7 @@ def merge_ai_line(
         "rooms":      rooms_ai,
     }]
 
+
 def _assign_rooms(rooms_str: str, branch_index: int, branch_total: int) -> str:
     """
     Распределяет комнаты по ветками одной ячейки.
@@ -276,7 +350,9 @@ def _assign_rooms(rooms_str: str, branch_index: int, branch_total: int) -> str:
     return ", ".join(rooms_list)
 
 
-# ---------------------------------------------------------------- web / git
+# ================================================================
+# web / git
+# ================================================================
 
 async def sync_web_data(latest: Path, old: Path) -> bool:
     """Копирует свежие parsed-файлы в web/ для публикации через GitHub Actions."""
@@ -340,7 +416,9 @@ async def commit_and_push() -> bool:
     return await asyncio.to_thread(_sync_commit_and_push)
 
 
-# ---------------------------------------------------------------- main pipeline
+# ================================================================
+# main pipeline
+# ================================================================
 
 async def process_schedule(
         use_chunks: bool = False,
@@ -349,34 +427,37 @@ async def process_schedule(
         git_push: bool = True,
 ) -> dict | None:
     """
-    Скачать Excel → извлечь → AI + merge → finalize → overrides.
+    Получить данные (Google Sheets API или xlsx) → извлечь → AI + merge
+    → finalize → overrides.
 
     publish_web=True  — копирует parsed.json в web/data.json и
                         parsed_old.json в web/old_data.json.
     git_push=True     — делает git add/commit/push (только если publish_web=True,
                         иначе пушить нечего).
-
-    main.py      → дефолты (оба True): публикация + пуш как раньше.
-    run_local.py → publish_web=True, git_push=False: web/ обновляется,
-                   но коммита/пуша нет.
     """
     logger.info(
         f"Начата обработка расписания "
         f"(publish_web={publish_web}, git_push={git_push})"
     )
 
-    if not await handle_excel_files(latest_excel_path, old_excel_path):
-        logger.error("Не удалось обработать Excel.")
+    # 1. Источник данных
+    try:
+        source = await build_schedule_source()
+    except Exception as e:
+        logger.error(f"Не удалось создать источник расписания: {e}")
         return None
 
-    # 1. extractor: {group: {"events": [{day_of_week, time_start, rooms, subject}, ...]}}
-    groups_info = await data_extractor.extract(latest_excel_path)
+    # 2. extractor: {group: {"events": [{day_of_week, time_start, rooms, subject}, ...]}}
+    try:
+        groups_info = await DataExtractor(source).extract()
+    except Exception as e:
+        logger.error(f"Не удалось извлечь расписание: {e}", exc_info=True)
+        return None
 
-    # 2. AI + merge
+    # 3. AI + merge
     groups_info_after_ai: dict = {}
 
     old_cache_data = _read_json(chunks_cache_path)
-    # ключи — хэши групп, значения — ответы AI
     old_cache: dict[str, list[str]] = old_cache_data.get("entries", {}) or {}
 
     new_cache: dict[str, list[str]] = {}
@@ -389,7 +470,6 @@ async def process_schedule(
             groups_info_after_ai[group] = {"events": []}
             continue
 
-        # Группа целиком: один ключ = один вызов AI
         ai_input_text = format_ai_input(sources)
         key = _chunk_hash(ai_input_text)
 
@@ -413,8 +493,6 @@ async def process_schedule(
 
         new_cache[key] = lines
 
-        # merge (branch_index / branch_total уже считаются по всем lines
-        # одной группы — сдвига между чанками больше нет)
         merged: list[dict] = []
         enum_counts = Counter()
         for line in lines:
@@ -456,26 +534,26 @@ async def process_schedule(
 
     await save_data({"entries": new_cache}, chunks_cache_path)
 
-    # 3. промежуточные JSON
+    # 4. промежуточные JSON
     await handle_json_files(groups_info, latest_extracted_path, old_extracted_path)
     await handle_json_files(groups_info_after_ai, latest_after_ai_path, old_after_ai_path)
 
-    # 4. финализация
+    # 5. финализация
     parsed = await transform_schedule(groups_info_after_ai)
 
-    # 5. ручные правки
+    # 6. ручные правки
     rules = load_overrides(OVERRIDES_PATH)
     parsed["events"] = await apply_overrides(parsed["events"], rules)
 
     await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
 
-    # 6. публикация в web/ (копирование)
+    # 7. публикация в web/
     if publish_web:
         await sync_web_data(latest_parsed_path, old_parsed_path)
     else:
         logger.info("publish_web=False — пропускаю копирование в web/")
 
-    # 7. git commit + push (только если web/ реально обновлялся)
+    # 8. git commit + push
     if git_push and publish_web:
         await commit_and_push()
     elif git_push and not publish_web:
