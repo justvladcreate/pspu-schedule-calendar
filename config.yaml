@@ -1,0 +1,2 @@
+schedule_source:
+  type: google        # google | xlsx

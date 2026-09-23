@@ -41,7 +41,7 @@ async def normalize_teachers(teacher_str: str) -> List[str]:
     ]
 
 
-async def expand_dates(s: str, current_year: int | None = None) -> list[str]:
+def expand_dates(s: str, current_year: int | None = None) -> list[str]:
     """Разворачивает строку дат в список 'DD.MM.YYYY'."""
     if current_year is None:
         current_year = date.today().year
@@ -117,7 +117,7 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
                 continue
 
             teachers = await normalize_teachers(event.get("teachers", "") or "")
-            dates    = await expand_dates(event.get("dates", "") or "", date.today().year)
+            dates    = expand_dates(event.get("dates", "") or "", date.today().year)
 
             temp_events.append({
                 "group":        group,

@@ -288,12 +288,21 @@ def parse_rooms_with_hints(
         if item["hint_dates"]:
             item["hint_dates"] = sorted(item["hint_dates"])
 
-    # дедупликация ПОСЛЕ раздачи URL: две дистанционные с разными URL
-    # остаются как две разные записи (url входит в ключ),
-    # а одинаковые текстовые дубли без URL схлопываются
+    # Дедуп применяем ТОЛЬКО к hinted-записям (hint_type / hint_dates) —
+    # одинаковые хинты не должны дублироваться.
+    #
+    # Base-записи (без хинтов) НЕ дедуплицируем: их позиция важна
+    # для позиционного распределения по ветками (см. _assign_rooms
+    # в parser/process.py). Если составитель таблицы случайно поставил
+    # два одинаковых base-room — это его ответственность.
     deduped: list[dict] = []
     seen: set[tuple] = set()
     for item in result:
+        has_hint = bool(item["hint_type"] or item["hint_dates"])
+        if not has_hint:
+            deduped.append(item)
+            continue
+
         key = (
             item["room"],
             item["hint_type"],
