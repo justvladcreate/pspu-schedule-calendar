@@ -5,7 +5,10 @@ import { pad, addMinutes } from './utils.js';
 
 export async function loadData(url = 'data.json') {
     const bust = localStorage.getItem('schedule-cache-bust') || '0';
-    const resp = await fetch(`${url}?v=${bust}`);
+    // cache: 'no-store' — не даём браузеру отдать data.json из своего
+    // HTTP-кэша. На python -m http.server (нет Cache-Control) это
+    // критично: иначе правки в data.json не долетают до страницы.
+    const resp = await fetch(`${url}?v=${bust}`, { cache: 'no-store' });
 
     if (!resp.ok) {
         throw new Error(`HTTP ${resp.status}`);

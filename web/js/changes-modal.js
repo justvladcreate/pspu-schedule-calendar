@@ -208,7 +208,7 @@ function renderList() {
     body.innerHTML = '';
 
     if (allChanges.length === 0) {
-        body.innerHTML = '<div class="changes-empty">Изменений нет</div>';
+        body.innerHTML = '<div class="changes-empty">Изменений с прошлого визита нет</div>';
         footer.hidden = true;
         return;
     }

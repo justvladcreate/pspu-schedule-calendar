@@ -162,8 +162,6 @@ async function init() {
         return;
     }
 
-    setupUpdatedButton();
-
     if (!loaded.data) {
         state.fallbackActive = loaded.usedFallback;
         showNoDataState();
@@ -302,6 +300,13 @@ async function init() {
 
     changesModalApi = setupChangesModal();
     updateBannerApi = setupUpdateBanner({
+        onOpen: () => changesModalApi.open(getVisibleChanges()),
+    });
+
+    // updatedBtn: в норме — открывает модалку изменений.
+    // В оффлайне и в fallback клик перехватывает online.js в capture-фазе,
+    // до этого обработчика управление не доходит.
+    setupUpdatedButton({
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
 

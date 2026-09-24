@@ -48,16 +48,21 @@ export function pluralRu(n, one, few, many) {
 }
 
 /**
- * Клик по updatedBtn в «нормальном» режиме (онлайн, без fallback).
+ * Клик по updatedBtn в «нормальном» режиме (онлайн + данные загружены).
  *
- * Оффлайн-клик и fallback-клик перехватывает online.js в capture-фазе —
- * сюда управление не доходит.
+ * Оффлайн и fallback перехватывает online.js в capture-фазе —
+ * сюда управление доходит только в норме.
  *
- * Пока здесь ничего нет. На фиче 7 переедет сюда открытие модалки
- * изменений (diff с прошлого визита).
+ * onOpen — колбэк, который открывает модалку изменений
+ * (см. main.js: передаёт changesModalApi.open(getVisibleChanges())).
  */
-export function setupUpdatedButton() {
+export function setupUpdatedButton({ onOpen } = {}) {
     const btn = document.getElementById('updatedBtn');
     if (!btn) return;
-    // intentionally empty — placeholder для фичи 7
+    if (typeof onOpen !== 'function') return;
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onOpen();
+    });
 }

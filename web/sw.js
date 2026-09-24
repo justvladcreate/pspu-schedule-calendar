@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v18';
+const CACHE = 'pspu-schedule-v21';
 
 const STATIC_ASSETS = [
   './',
@@ -44,26 +44,75 @@ const SW_LOCATION = self.location.href;
 const INDEX_URL   = new URL('./index.html', SW_LOCATION).href;
 const ROOT_URL    = new URL('./',           SW_LOCATION).href;
 
+/* ---------- install helpers ---------- */
+
+/**
+ * cache.add() с повторами. Хрупкий dev-сервер (python http.server)
+ * иногда рвёт соединения на пачке параллельных запросов — retry спасает.
+ */
+async function addWithRetry(cache, url, attempts = 3) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      await cache.add(url);
+      return { url, ok: true };
+    } catch (err) {
+      lastErr = err;
+      // небольшая пауза перед повтором, чтобы сервер успел отпустить сокет
+      await new Promise((r) => setTimeout(r, 150 * (i + 1)));
+    }
+  }
+  return { url, ok: false, err: String(lastErr) };
+}
+
+/**
+ * Прогон массива URL через addWithRetry с ограниченной параллельностью.
+ * В проде (GitHub Pages) 4 воркера отработают за миллисекунды, в локалке
+ * не перегрузят слабый сервер.
+ */
+async function addAllLimited(cache, urls, concurrency = 4) {
+  const results = [];
+  const queue = [...urls];
+
+  async function worker() {
+    while (queue.length) {
+      const url = queue.shift();
+      results.push(await addWithRetry(cache, url));
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(concurrency, urls.length) },
+    () => worker()
+  );
+  await Promise.all(workers);
+  return results;
+}
+
+/* ---------- install ---------- */
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    try { await cache.add(ROOT_URL); } catch (e) { console.warn('[SW] / :', e); }
-    try { await cache.add(INDEX_URL); } catch (e) { console.warn('[SW] index:', e); }
 
-    const rest = STATIC_ASSETS.filter(u => u !== './' && u !== './index.html');
-    const results = await Promise.all(rest.map(async (url) => {
-      try {
-        await cache.add(url);
-        return { url, ok: true };
-      } catch (err) {
-        return { url, ok: false, err: String(err) };
-      }
-    }));
+    // HTML-фоллбэк — критично, кэшируем первым и с запасом по попыткам.
+    const rootResult  = await addWithRetry(cache, ROOT_URL,  5);
+    const indexResult = await addWithRetry(cache, INDEX_URL, 5);
 
-    const failed = results.filter(r => !r.ok);
+    if (!rootResult.ok)  console.warn('[SW] Не закэшировал /:',          rootResult.err);
+    if (!indexResult.ok) console.warn('[SW] Не закэшировал /index.html:', indexResult.err);
+
+    // Остальное — пачкой, но с ограничением параллельности.
+    const rest = STATIC_ASSETS.filter(
+      (u) => u !== './' && u !== './index.html'
+    );
+    const results = await addAllLimited(cache, rest, 4);
+
+    const failed = results.filter((r) => !r.ok);
     if (failed.length) {
-      console.warn(`[SW] Не закэшировано ${failed.length} из ${rest.length}:`,
-        failed.map(f => f.url));
+      console.warn(
+        `[SW] Не закэшировано ${failed.length} из ${rest.length}:`,
+        failed.map((f) => f.url)
+      );
     }
   })());
 
@@ -98,7 +147,9 @@ self.addEventListener('fetch', (event) => {
 async function networkFirstJson(request, cacheKey) {
   const cache = await caches.open(CACHE);
   try {
-    const response = await fetch(request);
+    // no-store — игнорируем HTTP-кэш браузера на уровне SW.
+    // Иначе кэшируем устаревший ответ, притворяясь, что сходили в сеть.
+    const response = await fetch(request, { cache: 'no-store' });
     if (response.ok) cache.put(cacheKey, response.clone());
     return response;
   } catch (e) {
