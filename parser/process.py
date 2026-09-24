@@ -13,6 +13,8 @@ from pathlib import Path
 from google.auth.exceptions import RefreshError
 from googleapiclient.http import MediaIoBaseDownload
 
+import re
+
 import config
 from config import CONFIG
 from google_services import (
@@ -205,6 +207,62 @@ def format_ai_input(sources: list[dict]) -> str:
 
 def _chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+# --- сортировка AI-строк (гибрид: enumerator → подгруппа → natural) ---
+
+_NATURAL_CHUNK_RE = re.compile(r'(\d+)')
+_ENUMERATOR_RE   = re.compile(r'^\s*\[\s*(\d+)\s*\]')
+_SUBGROUP_RE     = re.compile(r'п\s*[/\\]?\s*г\s*(\d+)', re.IGNORECASE)
+
+
+def _natural_key(s: str) -> list[tuple[int, object]]:
+    """
+    Natural sort: строки с числами сортируются как люди ожидают.
+
+        [1] < [2] < [9] < [10] < [11]
+        п/г 1 < п/г 2 < п/г 10
+
+    Каждый чанк превращается в кортеж (тип, значение):
+      (0, int)  — для чисел,
+      (1, str)  — для строк (в lowercase).
+
+    Это исключает TypeError при сравнении int и str в одной позиции.
+    """
+    out: list[tuple[int, object]] = []
+    for chunk in _NATURAL_CHUNK_RE.split(s):
+        if chunk.isdigit():
+            out.append((0, int(chunk)))
+        else:
+            out.append((1, chunk.lower()))
+    return out
+
+
+def _line_sort_key(line: str) -> tuple:
+    """
+    Гибридная детерминированная сортировка AI-строк.
+
+    Порядок сравнения:
+      1. Enumerator — номер исходной ячейки [N].
+      2. Номер подгруппы (п/г N) — чтобы позиционное распределение комнат
+         стабильно связывало п/г 1 с первой комнатой, п/г 2 со второй и т.д.
+      3. Вся строка целиком с natural-обработкой чисел — для устойчивого
+         порядка строк без подгруппы и как tiebreaker.
+
+    Это нужно, чтобы распределение комнат между ветками не зависело
+    от того, в каком порядке LLM вернула строки.
+    """
+    m = _ENUMERATOR_RE.match(line)
+    enum = int(m.group(1)) if m else 0
+
+    subgroup_num = 0
+    parts = line.split(";")
+    if len(parts) > 7:
+        sm = _SUBGROUP_RE.search(parts[7])
+        if sm:
+            subgroup_num = int(sm.group(1))
+
+    return (enum, subgroup_num, _natural_key(line))
 
 
 def _add_90_minutes(time_start: str) -> str:
@@ -492,6 +550,7 @@ async def process_schedule(
             await asyncio.sleep(0.5)
 
         new_cache[key] = lines
+        lines = sorted(lines, key=_line_sort_key)
 
         merged: list[dict] = []
         enum_counts = Counter()
