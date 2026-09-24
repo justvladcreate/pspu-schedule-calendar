@@ -11,7 +11,10 @@ export const escapeHtml = s => {
 };
 
 export function addMinutes(t, m) {
-    const [h, mm] = t.split(':').map(Number);
+    if (typeof t !== 'string' || !t) return '';
+    const parts = t.split(':').map(Number);
+    const h = parts[0], mm = parts[1];
+    if (!Number.isFinite(h) || !Number.isFinite(mm)) return '';
     const total = h * 60 + mm + m;
     return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
 }

@@ -13,8 +13,10 @@ export async function loadData(url = 'data.json') {
 export function expandEvents(rawEvents) {
     const out = [];
     for (const ev of rawEvents) {
-        if (!ev.dates) continue;
+        if (!ev.dates || !Array.isArray(ev.dates) || ev.dates.length === 0) continue;
+        if (!ev.time_start) continue;
         for (const ds of ev.dates) {
+            if (typeof ds !== 'string' || !ds) continue;
             const parts = ds.split('.').map(Number);
             if (parts.length !== 3) continue;
             const [d, m, y] = parts;
