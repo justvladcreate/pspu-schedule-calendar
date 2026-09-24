@@ -29,15 +29,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Расписание">
 
-    <link rel="stylesheet" href="css/base.css?v=20260924-02">
-    <link rel="stylesheet" href="css/toolbar.css?v=20260924-02">
-    <link rel="stylesheet" href="css/filter.css?v=20260924-02">
-    <link rel="stylesheet" href="css/calendar.css?v=20260924-02">
-    <link rel="stylesheet" href="css/popover.css?v=20260924-02">
-    <link rel="stylesheet" href="css/modals.css?v=20260924-02">
-    <link rel="stylesheet" href="css/mobile.css?v=20260924-02">
-    <link rel="stylesheet" href="css/export-toast.css?v=20260924-02">
-    <link rel="stylesheet" href="css/changes.css?v=20260924-02">
+    <link rel="stylesheet" href="css/base.css?v=20260924-07">
+    <link rel="stylesheet" href="css/toolbar.css?v=20260924-07">
+    <link rel="stylesheet" href="css/filter.css?v=20260924-07">
+    <link rel="stylesheet" href="css/calendar.css?v=20260924-07">
+    <link rel="stylesheet" href="css/popover.css?v=20260924-07">
+    <link rel="stylesheet" href="css/modals.css?v=20260924-07">
+    <link rel="stylesheet" href="css/mobile.css?v=20260924-07">
+    <link rel="stylesheet" href="css/export-toast.css?v=20260924-07">
+    <link rel="stylesheet" href="css/changes.css?v=20260924-07">
 </head>
 <body>
 <div class="app">
@@ -174,9 +174,15 @@
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
+                <svg class="icon updated-icon updated-icon-warn" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
                 <span id="updatedTime">—</span>
             </button>
-            <span class="updated-sub" id="updatedSub" hidden>Вы просматриваете старую версию</span>
         </div>
         <div class="update-banner" id="updateBanner" role="button" tabindex="0" aria-label="Посмотреть изменения в расписании">
             <span class="update-banner-icon" aria-hidden="true">⟳</span>
@@ -243,16 +249,25 @@
             <button class="offline-close" type="button" aria-label="Закрыть">✕</button>
         </div>
         <div class="offline-body">
-            <p>
-                Сайт работает без интернета: расписание сохранено на вашем устройстве
-                и доступно в полном объёме.
+            <p class="offline-msg offline-msg--has">
+                Сайт работает без интернета: расписание сохранено на вашем
+                устройстве и доступно в полном объёме.
             </p>
-            <p>
+            <p class="offline-msg offline-msg--no">
+                Нет сохранённой копии расписания — она ещё не загружалась
+                на это устройство.
+            </p>
+
+            <p class="offline-version-row">
                 Просматриваемая версия: <b id="offlineTime">—</b>
             </p>
-            <p class="offline-note">
-                Когда появится интернет, сайт автоматически обновит данные — ничего
-                делать не нужно.
+
+            <p class="offline-note offline-note--has">
+                Когда появится интернет, сайт автоматически обновит данные —
+                ничего делать не нужно.
+            </p>
+            <p class="offline-note offline-note--no">
+                Подключитесь к интернету и нажмите «Обновить сейчас».
             </p>
         </div>
         <div class="offline-footer">

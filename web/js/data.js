@@ -6,8 +6,27 @@ import { pad, addMinutes } from './utils.js';
 export async function loadData(url = 'data.json') {
     const bust = localStorage.getItem('schedule-cache-bust') || '0';
     const resp = await fetch(`${url}?v=${bust}`);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return await resp.json();
+
+    if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+    }
+
+    let text;
+    try {
+        text = await resp.text();
+    } catch {
+        throw new Error('не удалось прочитать ответ');
+    }
+
+    if (!text || !text.trim()) {
+        throw new Error('пустой ответ');
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        throw new Error('некорректный JSON');
+    }
 }
 
 export function expandEvents(rawEvents) {

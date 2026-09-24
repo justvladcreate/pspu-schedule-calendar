@@ -29,7 +29,11 @@ export const state = {
   currentDate: loadCurrentDate() || new Date(),
   view: localStorage.getItem('schedule-view') || 'week',
   theme: localStorage.getItem('schedule-theme') || 'auto',
-  viewingOld: false,
+
+  // true — только когда: онлайн + data.json битый.
+  // В оффлайне фоллбэк на old_data.json всегда тихий.
+  fallbackActive: false,
+
   currentData: null,
   displayedIso: null,
   initialRenderDone: false,
@@ -37,7 +41,6 @@ export const state = {
   pendingChanges: [],
 };
 
-/* ---------- CURRENT DATE ---------- */
 export function saveCurrentDate(d) {
   try { localStorage.setItem('schedule-current-date', toISO(d)); } catch {}
 }
@@ -51,7 +54,6 @@ export function loadCurrentDate() {
   } catch { return null; }
 }
 
-/* ---------- SCROLL MEMORY (по view) ---------- */
 export function saveScrollMemory(view, data) {
   try { localStorage.setItem('schedule-scroll-' + view, JSON.stringify(data)); } catch {}
 }
@@ -62,7 +64,6 @@ export function loadScrollMemory(view) {
   } catch { return null; }
 }
 
-/* ---------- DAY COL WIDTH (зум недели) ---------- */
 export function saveDayColWidth(px) {
   try { localStorage.setItem('schedule-day-col-width', String(px)); } catch {}
 }
@@ -74,7 +75,6 @@ export function loadDayColWidth() {
   } catch { return null; }
 }
 
-/* ---------- SNAPSHOT ---------- */
 export function normalizeKey(ev) {
   return [
     ev.group || '',

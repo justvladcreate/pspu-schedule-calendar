@@ -153,7 +153,6 @@
     gap: 12px;
 }
 
-/* ---------- ITEM (общий контейнер карточки) ---------- */
 .changes-item {
     border-radius: 10px;
     overflow: hidden;
@@ -175,7 +174,6 @@
 .changes-item--removed .changes-item-header { color: #ef5350; }
 .changes-item--changed .changes-item-header { color: #ffa726; }
 
-/* ---------- ADDED / REMOVED — одна карточка на всю ширину ---------- */
 .changes-event-card {
     padding: 10px 14px;
     cursor: pointer;
@@ -192,7 +190,6 @@
     border-left: 4px solid #e57373;
 }
 
-/* ---------- CHANGED — две карточки рядом ---------- */
 .changes-changed-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -227,7 +224,6 @@
     font-size: 12px;
 }
 
-/* ---------- Содержимое события ---------- */
 .changes-event-title {
     font-weight: 600;
     color: var(--text);

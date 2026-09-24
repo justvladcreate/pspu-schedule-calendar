@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v9';
+const CACHE = 'pspu-schedule-v18';
 
 const STATIC_ASSETS = [
   './',
@@ -44,64 +44,41 @@ const SW_LOCATION = self.location.href;
 const INDEX_URL   = new URL('./index.html', SW_LOCATION).href;
 const ROOT_URL    = new URL('./',           SW_LOCATION).href;
 
-/* ---------- install ---------- */
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
+    try { await cache.add(ROOT_URL); } catch (e) { console.warn('[SW] / :', e); }
+    try { await cache.add(INDEX_URL); } catch (e) { console.warn('[SW] index:', e); }
 
-    // Сначала — самое важное: HTML-фоллбэк.
-    // Отдельно, с прямым try/catch, чтобы видеть в логах, если падает.
-    try {
-      await cache.add(ROOT_URL);
-    } catch (e) {
-      console.warn('[SW] Не удалось закэшировать /:', e);
-    }
-    try {
-      await cache.add(INDEX_URL);
-    } catch (e) {
-      console.warn('[SW] Не удалось закэшировать index.html:', e);
-    }
+    const rest = STATIC_ASSETS.filter(u => u !== './' && u !== './index.html');
+    const results = await Promise.all(rest.map(async (url) => {
+      try {
+        await cache.add(url);
+        return { url, ok: true };
+      } catch (err) {
+        return { url, ok: false, err: String(err) };
+      }
+    }));
 
-    // Остальное — параллельно, падение не роняет install.
-    const rest = STATIC_ASSETS.filter(
-      (u) => u !== './' && u !== './index.html'
-    );
-    const results = await Promise.all(
-      rest.map(async (url) => {
-        try {
-          await cache.add(url);
-          return { url, ok: true };
-        } catch (err) {
-          return { url, ok: false, err: String(err) };
-        }
-      })
-    );
-
-    const failed = results.filter((r) => !r.ok);
+    const failed = results.filter(r => !r.ok);
     if (failed.length) {
-      console.warn(
-        `[SW] Не закэшировано ${failed.length} из ${rest.length}:`,
-        failed.map((f) => f.url)
-      );
+      console.warn(`[SW] Не закэшировано ${failed.length} из ${rest.length}:`,
+        failed.map(f => f.url));
     }
   })());
 
   self.skipWaiting();
 });
 
-/* ---------- activate ---------- */
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(
-      keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
-    );
+    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
     await self.clients.claim();
     console.info('[SW] activate: кэш', CACHE, 'готов');
   })());
 });
 
-/* ---------- fetch ---------- */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;

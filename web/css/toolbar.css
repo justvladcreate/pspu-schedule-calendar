@@ -198,11 +198,25 @@
     margin-right: 2px;
 }
 
-/* ---- Оффлайн-состояние ---- */
+/* ============================================================
+ *  Иконки updatedBtn по состояниям
+ *
+ *  Норма    → clock
+ *  Оффлайн  → bolt
+ *  Fallback → warn
+ * ============================================================ */
 .updated-wrap .updated-icon-bolt { display: none; }
+.updated-wrap .updated-icon-warn { display: none; }
+
 .updated-wrap.is-offline .updated-icon-clock { display: none; }
+.updated-wrap.is-offline .updated-icon-warn  { display: none; }
 .updated-wrap.is-offline .updated-icon-bolt  { display: block; }
 
+.updated-wrap.is-fallback .updated-icon-clock { display: none; }
+.updated-wrap.is-fallback .updated-icon-bolt  { display: none; }
+.updated-wrap.is-fallback .updated-icon-warn  { display: block; }
+
+/* ---- Оффлайн ---- */
 .updated-wrap.is-offline .updated-btn {
     border-color: var(--grid-line-strong);
     background: var(--surface-2);
@@ -211,13 +225,14 @@
 .updated-wrap.is-offline .updated-btn .icon,
 .updated-wrap.is-offline .updated-prefix { color: var(--text-muted); }
 
-/* is-old (fallback old_data.json, фича 6) */
-.updated-wrap.is-old .updated-btn {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent);
+/* ---- Fallback (онлайн + data.json не загрузился) ---- */
+.updated-wrap.is-fallback .updated-btn {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+    color: var(--danger-text);
 }
-.updated-wrap.is-old .updated-btn .icon { color: var(--accent); }
+.updated-wrap.is-fallback .updated-btn .icon,
+.updated-wrap.is-fallback .updated-prefix { color: var(--danger-text); }
 
 .updated-sub {
     position: absolute;

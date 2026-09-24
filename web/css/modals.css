@@ -235,6 +235,18 @@
     color: var(--text-muted);
 }
 
+/* -- Переключение «есть данные / нет данных» -- */
+
+.offline-modal .offline-msg--no,
+.offline-modal .offline-note--no { display: none; }
+
+.offline-modal.no-data .offline-msg--has,
+.offline-modal.no-data .offline-note--has,
+.offline-modal.no-data .offline-version-row { display: none; }
+
+.offline-modal.no-data .offline-msg--no,
+.offline-modal.no-data .offline-note--no { display: block; }
+
 .offline-footer {
     padding: 12px 18px;
     border-top: 1px solid var(--border);
@@ -244,7 +256,9 @@
     background: var(--surface-2);
 }
 
-/* ---- прочее: скроллбары, анимации, PTR ---- */
+/* ============================================================
+ *  EMPTY STATE
+ * ============================================================ */
 
 .empty-state {
     padding: 60px 20px;
@@ -253,13 +267,18 @@
     font-size: 14px;
 }
 
+/* Внутри календаря пустое состояние растянуто на всю область.
+   flex-direction: column — чтобы несколько параграфов (title + hint)
+   вставали друг под друга, а не в ряд. */
 .calendar > .empty-state {
     position: absolute;
     inset: 0;
     padding: 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     text-align: center;
     color: var(--text-muted);
     font-size: 16px;
@@ -267,6 +286,26 @@
     letter-spacing: 0.01em;
     pointer-events: none;
     user-select: none;
+}
+
+.calendar > .empty-state p {
+    margin: 0;
+    max-width: 360px;
+    line-height: 1.4;
+}
+
+.calendar > .empty-state .empty-state-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.01em;
+}
+
+.calendar > .empty-state .empty-state-hint {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0;
 }
 
 .empty-state-btn {

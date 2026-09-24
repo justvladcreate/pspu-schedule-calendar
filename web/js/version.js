@@ -1,16 +1,8 @@
 'use strict';
 
-import { MONTHS_GEN } from './config.js';
-import { state, saveSetToStorage } from './state.js';
-import { pad } from './utils.js';
-import { loadData, expandEvents } from './data.js';
-import { render } from './render.js';
-import { applyFilters, updateTriggerLabel, updateCounter } from './filters.js';
-import { showToast } from './toast.js';
-
 /**
  * Обновляет ТОЛЬКО относительное время в #updatedTime.
- * aria-label и префикс — ответственность online.js (updateOnlineStatus).
+ * Префикс и aria-label — забота online.js.
  */
 export function updateUpdatedLabel(iso) {
     const el = document.getElementById('updatedTime');
@@ -55,73 +47,17 @@ export function pluralRu(n, one, few, many) {
     return many;
 }
 
-export function updateVersionUi() {
-    const wrap = document.getElementById('updatedWrap');
-    const sub  = document.getElementById('updatedSub');
-    if (!wrap || !sub) return;
-    if (state.viewingOld) {
-        wrap.classList.add('is-old');
-        sub.hidden = false;
-    } else {
-        wrap.classList.remove('is-old');
-        sub.hidden = true;
-    }
-}
-
-export function applyData(data) {
-    state.allEvents = expandEvents(data.events || []);
-    state.displayedIso = data.generated_at || null;
-    updateUpdatedLabel(state.displayedIso);
-    updateVersionUi();
-
-    const groups = new Set();
-    const teachers = new Set();
-    for (const ev of state.allEvents) {
-        if (ev.group) groups.add(ev.group);
-        (ev.teachers || []).forEach(t => teachers.add(t));
-    }
-    state.groups   = [...groups].sort();
-    state.teachers = [...teachers].sort();
-
-    saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
-    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
-
-    applyFilters();
-    updateTriggerLabel();
-    updateCounter();
-    render('fade');
-}
-
 /**
- * Временная логика toggle old/new через updatedBtn.
- * Фича 7 заменит этот вызов на открытие модалки изменений.
+ * Клик по updatedBtn в «нормальном» режиме (онлайн, без fallback).
  *
- * В оффлайне клик перехватывает online.js — сюда управление не доходит.
+ * Оффлайн-клик и fallback-клик перехватывает online.js в capture-фазе —
+ * сюда управление не доходит.
+ *
+ * Пока здесь ничего нет. На фиче 7 переедет сюда открытие модалки
+ * изменений (diff с прошлого визита).
  */
-export function setupVersionToggle() {
+export function setupUpdatedButton() {
     const btn = document.getElementById('updatedBtn');
     if (!btn) return;
-
-    btn.addEventListener('click', async () => {
-        // страховка на случай, если capture-перехват не сработал
-        if (navigator.onLine === false) return;
-
-        if (state.viewingOld) {
-            state.viewingOld = false;
-            applyData(state.currentData);
-            showToast('Вы просматриваете текущую версию');
-            return;
-        }
-        try {
-            const oldData = await loadData('old_data.json');
-            state.viewingOld = true;
-            applyData(oldData);
-            showToast('Вы просматриваете старую версию');
-        } catch (e) {
-            console.warn('Прошлая версия недоступна:', e);
-            showToast('Старая версия недоступна');
-            btn.disabled = true;
-            btn.setAttribute('title', 'Прошлая версия пока недоступна');
-        }
-    });
+    // intentionally empty — placeholder для фичи 7
 }
