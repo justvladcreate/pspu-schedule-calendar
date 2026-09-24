@@ -1,0 +1,26 @@
+{
+  "name": "Расписание ПГГПУ",
+  "short_name": "Расписание",
+  "description": "Расписание занятий ПГГПУ — фильтры, подписка на Google Calendar, офлайн",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#18191b",
+  "theme_color": "#6ba3d4",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

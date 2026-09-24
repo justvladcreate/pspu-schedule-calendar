@@ -1,23 +1,26 @@
 'use strict';
 
-import { state } from './state.js';
+import { state, saveCurrentDate, saveScrollMemory } from './state.js';
 import { addDays, addMonths } from './utils.js';
 import { render } from './render.js';
 
+
 export function navigate(delta) {
-    if (state.view === 'month') {
-        state.currentDate = addMonths(state.currentDate, delta);
-    } else if (state.view === 'week') {
-        state.currentDate = addDays(state.currentDate, delta * 7);
-    } else {
-        state.currentDate = addDays(state.currentDate, delta);
-    }
-    render(delta > 0 ? 'next' : 'prev');
+  if (state.view === 'month') {
+    state.currentDate = addMonths(state.currentDate, delta);
+  } else if (state.view === 'week') {
+    state.currentDate = addDays(state.currentDate, delta * 7);
+  } else {
+    state.currentDate = addDays(state.currentDate, delta);
+  }
+  saveCurrentDate(state.currentDate);   // ← новое
+  render(delta > 0 ? 'next' : 'prev');
 }
 
 export function goToToday() {
-    state.currentDate = new Date();
-    render('fade');
+  state.currentDate = new Date();
+  saveCurrentDate(state.currentDate);   // ← новое
+  render('fade');
 }
 
 export function viewLabel(v) {
@@ -42,6 +45,13 @@ export function updateThemeButton() {
 }
 
 export function cycleView() {
+    const cal = document.getElementById('calendar');
+    if (state.initialRenderDone && (state.view === 'week' || state.view === 'day')) {
+        saveScrollMemory(state.view, {
+            top: cal.scrollTop,
+            left: cal.scrollLeft,
+        });
+    }
     const order = ['month', 'week', 'day'];
     const idx = order.indexOf(state.view);
     state.view = order[(idx + 1) % order.length];

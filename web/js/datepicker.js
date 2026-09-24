@@ -1,11 +1,13 @@
 'use strict';
 
 import { MONTHS_NOM } from './config.js';
-import { state } from './state.js';
+import { state, saveCurrentDate } from './state.js';  // ← добавили saveCurrentDate
 import { toISO, isToday, startOfWeek, addDays } from './utils.js';
 import { render } from './render.js';
 
 export const pickerState = { year: 0, month: 0 };
+
+
 
 export function openDatePicker() {
     pickerState.year = state.currentDate.getFullYear();
@@ -40,6 +42,7 @@ export function renderPicker() {
             cell.textContent = day.getDate();
             cell.addEventListener('click', () => {
                 state.currentDate = new Date(day);
+                saveCurrentDate(state.currentDate);
                 closeDatePicker();
                 render('fade');
             });

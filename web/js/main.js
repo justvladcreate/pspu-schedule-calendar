@@ -1,6 +1,11 @@
 'use strict';
 
-import { state, saveSetToStorage } from './state.js';
+import {
+  state, saveSetToStorage,
+  loadDayColWidth, loadSnapshot, saveSnapshot,
+  saveScrollMemory, saveGeneratedAt, loadGeneratedAt,
+  saveCurrentDate,
+} from './state.js';
 import { escapeHtml } from './utils.js';
 import { loadData, expandEvents } from './data.js';
 
@@ -11,11 +16,17 @@ import {
     updateViewButton, updateThemeButton,
 } from './navigation.js';
 import { setupVersionToggle, updateUpdatedLabel } from './version.js';
+import { compareEvents, sortChanges } from './changes.js';
+import { setupChangesModal } from './changes-modal.js';
+import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import { hideEventDetails } from './popover.js';
+
+let changesModalApi = null;
+let updateBannerApi = null;
 
 async function init() {
     document.documentElement.setAttribute('data-theme', state.theme);
@@ -34,6 +45,51 @@ async function init() {
     state.currentData = currentData;
     state.allEvents = expandEvents(currentData.events || []);
     updateUpdatedLabel(currentData.generated_at || null);
+
+    // Восстановить ширину колонки (зум недели)
+    const savedColWidth = loadDayColWidth();
+    if (savedColWidth) {
+      document.documentElement.style.setProperty('--m-day-col', savedColWidth + 'px');
+    }
+
+    // Сравниваем generated_at с прошлым визитом
+    const savedGenAt = loadGeneratedAt();
+    const currentGenAt = currentData.generated_at;
+    const isFirstVisit = !savedGenAt;
+    const hasChanged = savedGenAt && savedGenAt !== currentGenAt;
+
+    if (isFirstVisit || hasChanged) {
+      // Сброс на сегодня + view = неделя + скролл к текущему времени
+      state.currentDate = new Date();
+      saveCurrentDate(state.currentDate);
+      state.view = 'week';
+      localStorage.setItem('schedule-view', 'week');
+      updateViewButton();
+
+      state.scrollToNow = true;
+
+      // Сохранённые скроллы устарели — чистим, чтобы не мешали
+      localStorage.removeItem('schedule-scroll-week');
+      localStorage.removeItem('schedule-scroll-day');
+    }
+
+    // Сравнение с предыдущим snapshot (если он есть)
+    const oldSnapshot = loadSnapshot();
+    if (oldSnapshot) {
+      const changes = compareEvents(oldSnapshot, currentData.events || []);
+      if (changes.length > 0) {
+        const sorted = sortChanges(changes);
+        console.log('[changes] Найдено изменений:', sorted.length);
+        state.pendingChanges = sorted;
+      } else {
+        console.log('[changes] Реальных изменений нет');
+      }
+    } else {
+      console.log('[changes] Первый визит — снапшот создаётся');
+    }
+
+    saveSnapshot(currentData.events || []);
+    saveGeneratedAt(currentGenAt);
 
     const groups = new Set();
     const teachers = new Set();
@@ -100,12 +156,105 @@ async function init() {
 
     setupPullToRefresh();
     setupCalendarGestures();
+
+    // Сохранять скролл при прокрутке календаря (debounce)
+    const cal = document.getElementById('calendar');
+    let scrollTimer = null;
+    cal.addEventListener('scroll', () => {
+      const viewAtScroll = state.view;
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        if (viewAtScroll === 'week' || viewAtScroll === 'day') {
+          saveScrollMemory(viewAtScroll, {
+            top: cal.scrollTop,
+            left: cal.scrollLeft,
+          });
+        }
+      }, 200);
+    }, { passive: true });
+
     setupReadmeModal();
+
+    // Инициализация модалки изменений и баннера
+    changesModalApi = setupChangesModal();
+    updateBannerApi = setupUpdateBanner({
+      onOpen: () => changesModalApi.open(getVisibleChanges()),
+    });
+
+    // Показать баннер, если есть видимые изменения и они не dismissed
+    updateBannerApi.refresh();
+
     render();
+
     setInterval(() => {
         if (state.displayedIso) updateUpdatedLabel(state.displayedIso);
     }, 60 * 1000);
+
+    registerServiceWorker();
 }
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('Service Worker registration failed:', err);
+    });
+  });
+}
+
+const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 минут
+
+async function checkForUpdates() {
+  if (state.viewingOld) {
+    console.log('[auto-update] Пропуск: смотрим старую версию');
+    return;
+  }
+
+  let fresh;
+  try {
+    const resp = await fetch('data.json?t=' + Date.now());
+    if (!resp.ok) return;
+    fresh = await resp.json();
+  } catch (e) {
+    console.warn('[auto-update] fetch failed:', e);
+    return;
+  }
+
+  if (fresh.generated_at === state.displayedIso) {
+    console.log('[auto-update] generated_at не изменился');
+    return;
+  }
+
+  const oldSnapshot = loadSnapshot();
+  const changes = oldSnapshot ? compareEvents(oldSnapshot, fresh.events || []) : [];
+
+  // Тихо применяем свежие данные
+  state.currentData = fresh;
+  state.allEvents = expandEvents(fresh.events || []);
+  state.displayedIso = fresh.generated_at;
+  updateUpdatedLabel(fresh.generated_at);
+  applyFilters();
+  render();
+  saveSnapshot(fresh.events || []);
+  saveGeneratedAt(fresh.generated_at);
+
+  if (changes.length === 0) {
+    console.log('[auto-update] data.json пересобран, реальных изменений нет');
+    return;
+  }
+
+  const sorted = sortChanges(changes);
+  console.log('[auto-update] Найдено изменений:', sorted.length);
+
+  state.pendingChanges = sorted;
+  if (updateBannerApi) updateBannerApi.refresh();
+}
+
+// Ручной вызов из консоли: __checkForUpdates()
+window.__checkForUpdates = checkForUpdates;
+
+// Фоновый цикл
+setInterval(checkForUpdates, UPDATE_INTERVAL);
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

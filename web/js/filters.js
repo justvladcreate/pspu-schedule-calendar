@@ -2,6 +2,7 @@
 
 import { state, saveSetToStorage } from './state.js';
 import { render } from './render.js';
+import { refreshBanner } from './update-banner.js';
 
 export function applyFilters() {
     const sg = state.selectedGroups;
@@ -108,6 +109,7 @@ export function setupUnifiedFilter() {
             updateTriggerLabel();
             updateCounter();
             render();
+            refreshBanner();
         });
 
         const text = document.createElement('span');
@@ -215,6 +217,7 @@ export function setupUnifiedFilter() {
         updateCounter();
         render();
         renderLists(search.value);
+        refreshBanner();
     });
 
     clearBtn.addEventListener('click', e => {
@@ -228,6 +231,7 @@ export function setupUnifiedFilter() {
         updateCounter();
         render();
         renderLists(search.value);
+        refreshBanner();
     });
 
     dropdown.addEventListener('click', e => e.stopPropagation());

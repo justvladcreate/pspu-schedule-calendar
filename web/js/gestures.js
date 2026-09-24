@@ -1,6 +1,6 @@
 'use strict';
 
-import { state } from './state.js';
+import { state, saveDayColWidth } from './state.js';  // ← добавили
 import { navigate } from './navigation.js';
 
 export function setupCalendarGestures() {
@@ -35,6 +35,7 @@ export function setupCalendarGestures() {
     };
     const setColWidth = px => {
         document.documentElement.style.setProperty('--m-day-col', px + 'px');
+        saveDayColWidth(px);
     };
     const dist = (t1, t2) =>
         Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);

@@ -4,7 +4,7 @@ import {
     HOUR_START, HOUR_END, HOUR_HEIGHT, PAIR_MINUTES,
     WEEKDAYS_SHORT, MONTHS_GEN, MONTHS_SHORT,
 } from './config.js';
-import { state } from './state.js';
+import { state, loadScrollMemory } from './state.js';
 import {
     pad, toISO, isToday, escapeHtml,
     startOfWeek, addDays, renderRoomsLinks, plainRooms,
@@ -58,29 +58,55 @@ export function shouldShowEmptyState() {
 
 /* ---------- RENDER DISPATCH ---------- */
 export function render(animation = null) {
-    const cal = document.getElementById('calendar');
-    cal.innerHTML = '';
-    cal.className = 'calendar view-' + state.view;
+  const cal = document.getElementById('calendar');
 
-    if (shouldShowEmptyState()) {
-        cal.appendChild(makeEmptyState());
-    } else if (state.view === 'month') {
-        renderMonth(cal);
-    } else if (state.view === 'week') {
-        renderWeek(cal);
+  cal.innerHTML = '';
+  cal.className = 'calendar view-' + state.view;
+
+  if (shouldShowEmptyState()) {
+    cal.appendChild(makeEmptyState());
+  } else if (state.view === 'month') {
+    renderMonth(cal);
+  } else if (state.view === 'week') {
+    renderWeek(cal);
+  } else {
+    renderDay(cal);
+  }
+
+  updateDateLabel();
+
+  // 2. Восстановить скролл после отрисовки
+  if (state.view === 'week' || state.view === 'day') {
+    if (state.scrollToNow) {
+      // Первый рендер после смены generated_at — скроллим к текущему времени
+      state.scrollToNow = false;
+      requestAnimationFrame(() => {
+        const now = new Date();
+        const top = (now.getHours() + now.getMinutes() / 60 - HOUR_START) * HOUR_HEIGHT;
+        cal.scrollTop = Math.max(0, top - 120);
+        cal.scrollLeft = 0;
+      });
     } else {
-        renderDay(cal);
+      const mem = loadScrollMemory(state.view);
+      if (mem) {
+        // requestAnimationFrame — ждём, пока браузер посчитает размеры
+        requestAnimationFrame(() => {
+          cal.scrollTop = mem.top || 0;
+          cal.scrollLeft = mem.left || 0;
+        });
+      }
     }
+  }
 
-    updateDateLabel();
+  state.initialRenderDone = true;
 
-    if (animation) {
-        void cal.offsetWidth;
-        cal.classList.add('anim-' + animation);
-        cal.addEventListener('animationend', () => {
-            cal.classList.remove('anim-' + animation);
-        }, { once: true });
-    }
+  if (animation) {
+    void cal.offsetWidth;
+    cal.classList.add('anim-' + animation);
+    cal.addEventListener('animationend', () => {
+      cal.classList.remove('anim-' + animation);
+    }, { once: true });
+  }
 }
 
 export function updateDateLabel() {

@@ -1,5 +1,7 @@
 'use strict';
 
+import { toISO } from './utils.js';
+
 export function loadSetFromStorage(key) {
     try {
         const raw = localStorage.getItem(key);
@@ -18,16 +20,108 @@ export function saveSetToStorage(key, set) {
 }
 
 export const state = {
-    allEvents: [],
-    filteredEvents: [],
-    groups: [],
-    teachers: [],
-    selectedGroups: loadSetFromStorage('schedule-selected-groups'),
-    selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
-    currentDate: new Date(),
-    view: localStorage.getItem('schedule-view') || 'week',
-    theme: localStorage.getItem('schedule-theme') || 'dark',
-    viewingOld: false,
-    currentData: null,
-    displayedIso: null,
+  allEvents: [],
+  filteredEvents: [],
+  groups: [],
+  teachers: [],
+  selectedGroups: loadSetFromStorage('schedule-selected-groups'),
+  selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
+  currentDate: loadCurrentDate() || new Date(),
+  view: localStorage.getItem('schedule-view') || 'week',
+  theme: localStorage.getItem('schedule-theme') || 'dark',
+  viewingOld: false,
+  currentData: null,
+  displayedIso: null,
+  initialRenderDone: false,
+  scrollToNow: false,
+  pendingChanges: [],
 };
+
+/* ---------- CURRENT DATE ---------- */
+export function saveCurrentDate(d) {
+  try { localStorage.setItem('schedule-current-date', toISO(d)); } catch {}
+}
+export function loadCurrentDate() {
+  try {
+    const s = localStorage.getItem('schedule-current-date');
+    if (!s) return null;
+    const [y, m, day] = s.split('-').map(Number);
+    if (!y || !m || !day) return null;
+    return new Date(y, m - 1, day);
+  } catch { return null; }
+}
+
+/* ---------- SCROLL MEMORY (по view) ---------- */
+export function saveScrollMemory(view, data) {
+  try { localStorage.setItem('schedule-scroll-' + view, JSON.stringify(data)); } catch {}
+}
+export function loadScrollMemory(view) {
+  try {
+    const raw = localStorage.getItem('schedule-scroll-' + view);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+/* ---------- DAY COL WIDTH (зум недели) ---------- */
+export function saveDayColWidth(px) {
+  try { localStorage.setItem('schedule-day-col-width', String(px)); } catch {}
+}
+export function loadDayColWidth() {
+  try {
+    const s = localStorage.getItem('schedule-day-col-width');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : null;
+  } catch { return null; }
+}
+
+/* ---------- SNAPSHOT (заготовка для фичи 4) ---------- */
+export function normalizeKey(ev) {
+  return [
+    ev.group || '',
+    ev.weekday || '',
+    ev.pair_number || '',
+    ev.discipline || '',
+    ev.subgroup || '',
+  ].join('|');
+}
+
+function makeSnapshotEntry(ev) {
+  return {
+    key: normalizeKey(ev),
+    event_id: ev.event_id,
+    group: ev.group,
+    weekday: ev.weekday,
+    pair_number: ev.pair_number,
+    time_start: ev.time_start,
+    time_end: ev.time_end,
+    discipline: ev.discipline,
+    type: ev.type,
+    subgroup: ev.subgroup,
+    teachers: [...(ev.teachers || [])],
+    dates: [...(ev.dates || [])],
+    rooms: ev.rooms || '',
+    comment: ev.comment || '',
+    position: ev.position,
+  };
+}
+
+export function saveSnapshot(events) {
+  try {
+    localStorage.setItem('schedule-snapshot', JSON.stringify(events.map(makeSnapshotEntry)));
+  } catch {}
+}
+export function loadSnapshot() {
+  try {
+    const raw = localStorage.getItem('schedule-snapshot');
+    if (!raw) return null;
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : null;
+  } catch { return null; }
+}
+
+export function saveGeneratedAt(iso) {
+  try { if (iso) localStorage.setItem('schedule-last-generated-at', iso); } catch {}
+}
+export function loadGeneratedAt() {
+  try { return localStorage.getItem('schedule-last-generated-at') || null; } catch { return null; }
+}

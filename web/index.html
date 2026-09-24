@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание</title>
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6ba3d4">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Расписание">
+
     <link rel="stylesheet" href="css/base.css?v=20260916-11">
     <link rel="stylesheet" href="css/toolbar.css?v=20260916-11">
     <link rel="stylesheet" href="css/filter.css?v=20260916-11">
@@ -13,6 +21,7 @@
     <link rel="stylesheet" href="css/modals.css?v=20260916-11">
     <link rel="stylesheet" href="css/mobile.css?v=20260916-11">
     <link rel="stylesheet" href="css/export-toast.css?v=20260916-11">
+    <link rel="stylesheet" href="css/changes.css?v=1">
 </head>
 <body>
 <div class="app">
@@ -141,6 +150,12 @@
             </button>
             <span class="updated-sub" id="updatedSub" hidden>Вы просматриваете старую версию</span>
         </div>
+        <div class="update-banner" id="updateBanner" role="button" tabindex="0" aria-label="Посмотреть изменения в расписании">
+            <span class="update-banner-icon" aria-hidden="true">⟳</span>
+            <span class="update-banner-text" id="updateBannerText">Изменения в расписании</span>
+            <span class="update-banner-arrow" aria-hidden="true">→</span>
+            <button class="update-banner-close" id="updateBannerClose" type="button" aria-label="Скрыть">✕</button>
+        </div>
     </header>
 
     <main class="calendar" id="calendar"></main>
@@ -176,6 +191,19 @@
         </div>
         <div class="readme-body" id="readmeBody">
             <div class="readme-loading">Загрузка…</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="changesModal">
+    <div class="changes-modal" role="dialog" aria-labelledby="changesTitle">
+        <div class="changes-header">
+            <h2 class="changes-title" id="changesTitle">Изменения в расписании</h2>
+            <button class="changes-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="changes-body" id="changesBody"></div>
+        <div class="changes-footer" id="changesFooter" hidden>
+            <button class="changes-more" id="changesMore" type="button">Показать ещё</button>
         </div>
     </div>
 </div>
