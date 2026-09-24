@@ -13,7 +13,7 @@ import { render, updateDateLabel } from './render.js';
 import { applyFilters, setupUnifiedFilter, updateTriggerLabel, updateCounter } from './filters.js';
 import {
     navigate, goToToday, cycleView, toggleTheme,
-    updateViewButton, updateThemeButton,
+    updateViewButton, initTheme,
 } from './navigation.js';
 import { setupVersionToggle, updateUpdatedLabel } from './version.js';
 import { compareEvents, sortChanges } from './changes.js';
@@ -29,9 +29,8 @@ let changesModalApi = null;
 let updateBannerApi = null;
 
 async function init() {
-    document.documentElement.setAttribute('data-theme', state.theme);
+    initTheme();
     updateViewButton();
-    updateThemeButton();
 
     let currentData;
     try {

@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Расписание</title>
 
+    <script>
+        (function () {
+            var stored = 'auto';
+            try { stored = localStorage.getItem('schedule-theme') || 'auto'; } catch (e) {}
+
+            var effective = stored;
+            if (stored === 'auto') {
+                effective = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                    ? 'dark'
+                    : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', effective);
+        })();
+    </script>
+
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="favicon.ico" sizes="any">
     <meta name="theme-color" content="#6ba3d4">
@@ -14,15 +29,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Расписание">
 
-    <link rel="stylesheet" href="css/base.css?v=20260916-11">
-    <link rel="stylesheet" href="css/toolbar.css?v=20260916-11">
-    <link rel="stylesheet" href="css/filter.css?v=20260916-11">
-    <link rel="stylesheet" href="css/calendar.css?v=20260916-11">
-    <link rel="stylesheet" href="css/popover.css?v=20260916-11">
-    <link rel="stylesheet" href="css/modals.css?v=20260916-11">
-    <link rel="stylesheet" href="css/mobile.css?v=20260916-11">
-    <link rel="stylesheet" href="css/export-toast.css?v=20260916-11">
-    <link rel="stylesheet" href="css/changes.css?v=1">
+    <link rel="stylesheet" href="css/base.css?v=20260924-01">
+    <link rel="stylesheet" href="css/toolbar.css?v=20260924-01">
+    <link rel="stylesheet" href="css/filter.css?v=20260924-01">
+    <link rel="stylesheet" href="css/calendar.css?v=20260924-01">
+    <link rel="stylesheet" href="css/popover.css?v=20260924-01">
+    <link rel="stylesheet" href="css/modals.css?v=20260924-01">
+    <link rel="stylesheet" href="css/mobile.css?v=20260924-01">
+    <link rel="stylesheet" href="css/export-toast.css?v=20260924-01">
+    <link rel="stylesheet" href="css/changes.css?v=20260924-01">
 </head>
 <body>
 <div class="app">
@@ -122,13 +137,23 @@
             </button>
 
             <button class="btn btn-icon" id="themeBtn" type="button"
-                    data-theme-current="dark" aria-label="Сменить тему">
+                    data-theme-current="auto" aria-label="Тема: авто">
+                <!-- current=light → sun -->
                 <svg class="icon theme-icon theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"/>
                     <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
                 </svg>
+                <!-- current=auto → circle with A -->
+                <svg class="icon theme-icon theme-icon-auto" viewBox="0 0 24 24" width="18" height="18"
+                     fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M8.5 16l3.5-9 3.5 9"/>
+                    <path d="M9.8 13h4.4"/>
+                </svg>
+                <!-- current=dark → moon -->
                 <svg class="icon theme-icon theme-icon-moon" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -81,9 +81,12 @@
 .btn-icon[data-view="week"]  .view-icon-week  { display: block; }
 .btn-icon[data-view="day"]   .view-icon-day   { display: block; }
 
-.btn-icon .theme-icon { display: none; }
-.btn-icon[data-theme-current="dark"]  .theme-icon-sun  { display: block; }
-.btn-icon[data-theme-current="light"] .theme-icon-moon { display: block; }
+/* Тема: light → auto → dark.
+   data-theme-current = текущий режим, показываем соответствующую иконку. */
+#themeBtn .theme-icon { display: none; }
+#themeBtn[data-theme-current="light"] .theme-icon-sun  { display: block; }
+#themeBtn[data-theme-current="auto"]  .theme-icon-auto { display: block; }
+#themeBtn[data-theme-current="dark"]  .theme-icon-moon { display: block; }
 
 .filter-badge {
     position: absolute;

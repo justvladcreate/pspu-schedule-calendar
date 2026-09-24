@@ -28,7 +28,7 @@ export const state = {
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
   currentDate: loadCurrentDate() || new Date(),
   view: localStorage.getItem('schedule-view') || 'week',
-  theme: localStorage.getItem('schedule-theme') || 'dark',
+  theme: localStorage.getItem('schedule-theme') || 'auto',
   viewingOld: false,
   currentData: null,
   displayedIso: null,
@@ -74,7 +74,7 @@ export function loadDayColWidth() {
   } catch { return null; }
 }
 
-/* ---------- SNAPSHOT (заготовка для фичи 4) ---------- */
+/* ---------- SNAPSHOT ---------- */
 export function normalizeKey(ev) {
   return [
     ev.group || '',
