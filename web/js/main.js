@@ -16,6 +16,7 @@ import {
     updateViewButton, initTheme,
 } from './navigation.js';
 import { setupVersionToggle, updateUpdatedLabel } from './version.js';
+import { setupOnlineStatus, updateOnlineStatus } from './online.js';
 import { compareEvents, sortChanges } from './changes.js';
 import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
@@ -28,9 +29,40 @@ import { hideEventDetails } from './popover.js';
 let changesModalApi = null;
 let updateBannerApi = null;
 
+/**
+ * Убирает служебный маркер `?_r=` из адресной строки после softReload()
+ * оффлайн-модалки. Не триггерит навигацию — просто чистит URL.
+ *
+ * Работает до initTheme() и до любой логики, чтобы при перерисовке
+ * и при формировании Share-ссылок (фича 1) URL был чистым.
+ */
+function stripReloadMarker() {
+    const search = location.search;
+    if (!search || !search.includes('_r=')) return;
+    try {
+        const url = new URL(location.href);
+        url.searchParams.delete('_r');
+        const next = url.pathname + (url.search ? url.search : '') + url.hash;
+        history.replaceState(null, '', next);
+    } catch (_) {
+        // если URL вдруг невалидный — не падаем, просто оставляем как есть
+    }
+}
+
 async function init() {
+    stripReloadMarker();
+
     initTheme();
     updateViewButton();
+
+    // Статус сети регистрируем ДО загрузки данных — чтобы кнопка
+    // updatedBtn отреагировала на клик даже если data.json не загрузится.
+    //
+    // ВАЖНО: именно этот setupOnlineStatus должен стоять РАНЬШЕ setupVersionToggle.
+    // На target-элементе capture-флаг не влияет на порядок — браузер вызывает
+    // слушатели в порядке регистрации. Наш capture-хендлер должен быть первым,
+    // чтобы stopImmediatePropagation() действительно заблокировал version-toggle.
+    setupOnlineStatus();
 
     let currentData;
     try {
@@ -58,7 +90,6 @@ async function init() {
     const hasChanged = savedGenAt && savedGenAt !== currentGenAt;
 
     if (isFirstVisit || hasChanged) {
-      // Сброс на сегодня + view = неделя + скролл к текущему времени
       state.currentDate = new Date();
       saveCurrentDate(state.currentDate);
       state.view = 'week';
@@ -67,7 +98,6 @@ async function init() {
 
       state.scrollToNow = true;
 
-      // Сохранённые скроллы устарели — чистим, чтобы не мешали
       localStorage.removeItem('schedule-scroll-week');
       localStorage.removeItem('schedule-scroll-day');
     }
@@ -78,13 +108,8 @@ async function init() {
       const changes = compareEvents(oldSnapshot, currentData.events || []);
       if (changes.length > 0) {
         const sorted = sortChanges(changes);
-        console.log('[changes] Найдено изменений:', sorted.length);
         state.pendingChanges = sorted;
-      } else {
-        console.log('[changes] Реальных изменений нет');
       }
-    } else {
-      console.log('[changes] Первый визит — снапшот создаётся');
     }
 
     saveSnapshot(currentData.events || []);
@@ -112,6 +137,8 @@ async function init() {
     setupUnifiedFilter();
     const exportModal = setupExportModal();
     document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
+
+    // version toggle регистрируем ПОСЛЕ online-status — см. комментарий выше
     setupVersionToggle();
 
     document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
@@ -156,7 +183,6 @@ async function init() {
     setupPullToRefresh();
     setupCalendarGestures();
 
-    // Сохранять скролл при прокрутке календаря (debounce)
     const cal = document.getElementById('calendar');
     let scrollTimer = null;
     cal.addEventListener('scroll', () => {
@@ -174,34 +200,51 @@ async function init() {
 
     setupReadmeModal();
 
-    // Инициализация модалки изменений и баннера
     changesModalApi = setupChangesModal();
     updateBannerApi = setupUpdateBanner({
       onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
 
-    // Показать баннер, если есть видимые изменения и они не dismissed
     updateBannerApi.refresh();
 
     render();
 
-    setInterval(() => {
-        if (state.displayedIso) updateUpdatedLabel(state.displayedIso);
-    }, 60 * 1000);
+    // Один тик в минуту: обновляет и относительное время, и префикс/иконку.
+    // updateOnlineStatus() внутри сам вызывает updateUpdatedLabel().
+    setInterval(updateOnlineStatus, 60 * 1000);
 
     registerServiceWorker();
 }
 
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch((err) => {
-      console.warn('Service Worker registration failed:', err);
-    });
+
+  // Если страница изначально НЕ под контролем SW — значит это первая
+  // установка. В этот момент controllerchange сработает на клиентском
+  // claim(), но перезагружаться не нужно: страница уже свежая, отдана
+  // из сети. Reload нужен только при обновлении с предыдущего SW.
+  const hadController = !!navigator.serviceWorker.controller;
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    if (!hadController) {
+      console.info('[SW] Первичный claim — перезагрузка не требуется.');
+      return;
+    }
+    refreshing = true;
+    console.info('[SW] Получил контроль — перезагружаю страницу.');
+    location.reload();
+  });
+
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    console.info('[SW] Зарегистрирован. scope:', reg.scope);
+  }).catch((err) => {
+    console.warn('[SW] Регистрация не удалась:', err);
   });
 }
 
-const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 минут
+const UPDATE_INTERVAL = 30 * 60 * 1000;
 
 async function checkForUpdates() {
   if (state.viewingOld) {
@@ -220,14 +263,12 @@ async function checkForUpdates() {
   }
 
   if (fresh.generated_at === state.displayedIso) {
-    console.log('[auto-update] generated_at не изменился');
     return;
   }
 
   const oldSnapshot = loadSnapshot();
   const changes = oldSnapshot ? compareEvents(oldSnapshot, fresh.events || []) : [];
 
-  // Тихо применяем свежие данные
   state.currentData = fresh;
   state.allEvents = expandEvents(fresh.events || []);
   state.displayedIso = fresh.generated_at;
@@ -238,21 +279,16 @@ async function checkForUpdates() {
   saveGeneratedAt(fresh.generated_at);
 
   if (changes.length === 0) {
-    console.log('[auto-update] data.json пересобран, реальных изменений нет');
     return;
   }
 
   const sorted = sortChanges(changes);
-  console.log('[auto-update] Найдено изменений:', sorted.length);
-
   state.pendingChanges = sorted;
   if (updateBannerApi) updateBannerApi.refresh();
 }
 
-// Ручной вызов из консоли: __checkForUpdates()
 window.__checkForUpdates = checkForUpdates;
 
-// Фоновый цикл
 setInterval(checkForUpdates, UPDATE_INTERVAL);
 
 if (document.readyState === 'loading') {

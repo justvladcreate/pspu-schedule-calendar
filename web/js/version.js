@@ -8,12 +8,16 @@ import { render } from './render.js';
 import { applyFilters, updateTriggerLabel, updateCounter } from './filters.js';
 import { showToast } from './toast.js';
 
+/**
+ * Обновляет ТОЛЬКО относительное время в #updatedTime.
+ * aria-label и префикс — ответственность online.js (updateOnlineStatus).
+ */
 export function updateUpdatedLabel(iso) {
     const el = document.getElementById('updatedTime');
-    const btn = document.getElementById('updatedBtn');
+    if (!el) return;
+
     if (!iso) {
         el.textContent = '—';
-        btn.setAttribute('aria-label', 'Обновлено: неизвестно');
         return;
     }
     const d = new Date(iso);
@@ -21,13 +25,7 @@ export function updateUpdatedLabel(iso) {
         el.textContent = '—';
         return;
     }
-    const relative = formatRelativeTime(d);
-    const hh = pad(d.getHours());
-    const mm = pad(d.getMinutes());
-    const full = `${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}, ${hh}:${mm}`;
-
-    el.textContent = relative;
-    btn.setAttribute('aria-label', `Обновлено: ${full}. Нажмите, чтобы переключить версию`);
+    el.textContent = formatRelativeTime(d);
 }
 
 export function formatRelativeTime(dateObj) {
@@ -60,6 +58,7 @@ export function pluralRu(n, one, few, many) {
 export function updateVersionUi() {
     const wrap = document.getElementById('updatedWrap');
     const sub  = document.getElementById('updatedSub');
+    if (!wrap || !sub) return;
     if (state.viewingOld) {
         wrap.classList.add('is-old');
         sub.hidden = false;
@@ -93,9 +92,20 @@ export function applyData(data) {
     render('fade');
 }
 
+/**
+ * Временная логика toggle old/new через updatedBtn.
+ * Фича 7 заменит этот вызов на открытие модалки изменений.
+ *
+ * В оффлайне клик перехватывает online.js — сюда управление не доходит.
+ */
 export function setupVersionToggle() {
     const btn = document.getElementById('updatedBtn');
+    if (!btn) return;
+
     btn.addEventListener('click', async () => {
+        // страховка на случай, если capture-перехват не сработал
+        if (navigator.onLine === false) return;
+
         if (state.viewingOld) {
             state.viewingOld = false;
             applyData(state.currentData);

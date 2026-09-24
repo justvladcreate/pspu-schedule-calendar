@@ -20,10 +20,6 @@ function formatLongDate(d) {
     return `${d.getDate()} ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/**
- * Обновляет иконку / префикс / aria-label у updatedBtn и пересчитывает
- * относительное время под новый префикс.
- */
 export function updateOnlineStatus() {
     const wrap   = document.getElementById('updatedWrap');
     const prefix = document.getElementById('updatedPrefix');
@@ -40,7 +36,6 @@ export function updateOnlineStatus() {
         btn.setAttribute('aria-label', 'Оффлайн режим. Нажмите для подробностей.');
     }
 
-    // Пересчитать «X минут назад» под актуальный state
     if (state.displayedIso) updateUpdatedLabel(state.displayedIso);
 }
 
@@ -65,12 +60,25 @@ function closeOfflineModal() {
     if (modal) modal.classList.remove('open');
 }
 
+/**
+ * Оффлайновый «refresh».
+ *
+ * location.reload() в ряде браузеров (особенно мобильный Chrome) при
+ * оффлайне уходит мимо Service Worker и роняет навигацию в сеть → dino.
+ * Мягкая навигация через смену URL заставляет браузер пройти обычным
+ * путём через fetch-обработчик SW.
+ */
+function softReload() {
+    const clean = location.href.split('#')[0];
+    // добавляем безобидный маркер, чтобы URL формально отличался
+    const sep = clean.includes('?') ? '&' : '?';
+    location.href = clean + sep + '_r=' + Date.now();
+}
+
 export function setupOnlineStatus() {
     const btn   = document.getElementById('updatedBtn');
     const modal = document.getElementById('offlineModal');
 
-    // Оффлайн-клик перехватываем в capture-фазе, чтобы он не дошёл
-    // до setupVersionToggle (который в онлайне переключает версию).
     if (btn) {
         btn.addEventListener('click', (e) => {
             if (isOnline()) return;
@@ -89,7 +97,10 @@ export function setupOnlineStatus() {
             if (e.target === modal) closeOfflineModal();
         });
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => location.reload());
+            refreshBtn.addEventListener('click', () => {
+                if (isOnline()) location.reload();
+                else softReload();
+            });
         }
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('open')) {

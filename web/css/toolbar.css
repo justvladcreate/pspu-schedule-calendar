@@ -81,8 +81,7 @@
 .btn-icon[data-view="week"]  .view-icon-week  { display: block; }
 .btn-icon[data-view="day"]   .view-icon-day   { display: block; }
 
-/* Тема: light → auto → dark.
-   data-theme-current = текущий режим, показываем соответствующую иконку. */
+/* Тема: light → auto → dark. */
 #themeBtn .theme-icon { display: none; }
 #themeBtn[data-theme-current="light"] .theme-icon-sun  { display: block; }
 #themeBtn[data-theme-current="auto"]  .theme-icon-auto { display: block; }
@@ -199,6 +198,20 @@
     margin-right: 2px;
 }
 
+/* ---- Оффлайн-состояние ---- */
+.updated-wrap .updated-icon-bolt { display: none; }
+.updated-wrap.is-offline .updated-icon-clock { display: none; }
+.updated-wrap.is-offline .updated-icon-bolt  { display: block; }
+
+.updated-wrap.is-offline .updated-btn {
+    border-color: var(--grid-line-strong);
+    background: var(--surface-2);
+    color: var(--text-muted);
+}
+.updated-wrap.is-offline .updated-btn .icon,
+.updated-wrap.is-offline .updated-prefix { color: var(--text-muted); }
+
+/* is-old (fallback old_data.json, фича 6) */
 .updated-wrap.is-old .updated-btn {
     border-color: var(--accent);
     background: var(--accent-soft);

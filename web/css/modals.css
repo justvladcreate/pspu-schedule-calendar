@@ -166,6 +166,86 @@
     font-style: italic;
 }
 
+/* ============================================================
+ *  OFFLINE MODAL
+ * ============================================================ */
+
+.offline-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: min(480px, calc(100vw - 24px));
+    max-height: min(80vh, 640px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.offline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.offline-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.offline-close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+.offline-close:hover { background: var(--surface-2); color: var(--text); }
+
+.offline-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+}
+.offline-body p { margin: 0 0 12px; }
+.offline-body p:last-child { margin-bottom: 0; }
+.offline-body b { color: var(--text); font-weight: 600; }
+
+.offline-note {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.offline-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    background: var(--surface-2);
+}
+
+/* ---- прочее: скроллбары, анимации, PTR ---- */
+
 .empty-state {
     padding: 60px 20px;
     text-align: center;
@@ -296,4 +376,12 @@
 
 @keyframes ptr-spin {
     to { transform: rotate(360deg); }
+}
+
+/* ---- мобильная адаптация оффлайн-модалки ---- */
+@media (max-width: 900px) {
+    .offline-modal {
+        width: calc(100vw - 16px);
+        max-height: 90dvh;
+    }
 }

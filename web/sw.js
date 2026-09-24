@@ -1,10 +1,7 @@
 'use strict';
 
-// Меняй версию, когда правишь статику, чтобы старый кэш сбросился.
-const CACHE = 'pspu-schedule-v5';
+const CACHE = 'pspu-schedule-v9';
 
-// Статика, которую кэшируем сразу при установке.
-// data.json и old_data.json сюда НЕ кладём — они меняются, кэшируются лениво.
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,6 +29,7 @@ const STATIC_ASSETS = [
   './js/gestures.js',
   './js/export.js',
   './js/version.js',
+  './js/online.js',
   './js/readme.js',
   './js/markdown.js',
   './js/toast.js',
@@ -42,24 +40,68 @@ const STATIC_ASSETS = [
   './icons/icon-512.png'
 ];
 
+const SW_LOCATION = self.location.href;
+const INDEX_URL   = new URL('./index.html', SW_LOCATION).href;
+const ROOT_URL    = new URL('./',           SW_LOCATION).href;
+
+/* ---------- install ---------- */
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
-  // Не ждём закрытия всех вкладок, чтобы новый SW активировался сразу.
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+
+    // Сначала — самое важное: HTML-фоллбэк.
+    // Отдельно, с прямым try/catch, чтобы видеть в логах, если падает.
+    try {
+      await cache.add(ROOT_URL);
+    } catch (e) {
+      console.warn('[SW] Не удалось закэшировать /:', e);
+    }
+    try {
+      await cache.add(INDEX_URL);
+    } catch (e) {
+      console.warn('[SW] Не удалось закэшировать index.html:', e);
+    }
+
+    // Остальное — параллельно, падение не роняет install.
+    const rest = STATIC_ASSETS.filter(
+      (u) => u !== './' && u !== './index.html'
+    );
+    const results = await Promise.all(
+      rest.map(async (url) => {
+        try {
+          await cache.add(url);
+          return { url, ok: true };
+        } catch (err) {
+          return { url, ok: false, err: String(err) };
+        }
+      })
+    );
+
+    const failed = results.filter((r) => !r.ok);
+    if (failed.length) {
+      console.warn(
+        `[SW] Не закэшировано ${failed.length} из ${rest.length}:`,
+        failed.map((f) => f.url)
+      );
+    }
+  })());
+
   self.skipWaiting();
 });
 
+/* ---------- activate ---------- */
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(
+      keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
+    );
+    await self.clients.claim();
+    console.info('[SW] activate: кэш', CACHE, 'готов');
+  })());
 });
 
+/* ---------- fetch ---------- */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -67,15 +109,12 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // JSON — network-first: онлайн всегда свежий, офлайн — из кэша.
-  // Ключ кэша — только pathname (без query string), иначе cache-bust
-  // в виде ?t=... создаст бесконечные дубликаты.
-  if (url.pathname.endsWith('/data.json') || url.pathname.endsWith('/old_data.json')) {
+  if (url.pathname.endsWith('/data.json') ||
+      url.pathname.endsWith('/old_data.json')) {
     event.respondWith(networkFirstJson(req, url.pathname));
     return;
   }
 
-  // Всё остальное — cache-first: статика с версиями через ?v=...
   event.respondWith(cacheFirst(req));
 });
 
@@ -83,24 +122,40 @@ async function networkFirstJson(request, cacheKey) {
   const cache = await caches.open(CACHE);
   try {
     const response = await fetch(request);
-    if (response.ok) {
-      cache.put(cacheKey, response.clone());
-    }
+    if (response.ok) cache.put(cacheKey, response.clone());
     return response;
   } catch (e) {
-    const cached = await cache.match(cacheKey);
+    const cached =
+      (await cache.match(cacheKey)) ||
+      (await cache.match(cacheKey, { ignoreSearch: true }));
     if (cached) return cached;
     throw e;
   }
 }
 
 async function cacheFirst(request) {
-  const cached = await caches.match(request);
+  let cached = await caches.match(request);
   if (cached) return cached;
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(CACHE);
-    cache.put(request, response.clone());
+
+  cached = await caches.match(request, { ignoreSearch: true });
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (e) {
+    if (request.mode === 'navigate') {
+      const fallback =
+        (await caches.match(INDEX_URL)) ||
+        (await caches.match(ROOT_URL)) ||
+        (await caches.match(INDEX_URL, { ignoreSearch: true })) ||
+        (await caches.match(ROOT_URL,  { ignoreSearch: true }));
+      if (fallback) return fallback;
+    }
+    throw e;
   }
-  return response;
 }

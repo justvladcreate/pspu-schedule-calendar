@@ -29,15 +29,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Расписание">
 
-    <link rel="stylesheet" href="css/base.css?v=20260924-01">
-    <link rel="stylesheet" href="css/toolbar.css?v=20260924-01">
-    <link rel="stylesheet" href="css/filter.css?v=20260924-01">
-    <link rel="stylesheet" href="css/calendar.css?v=20260924-01">
-    <link rel="stylesheet" href="css/popover.css?v=20260924-01">
-    <link rel="stylesheet" href="css/modals.css?v=20260924-01">
-    <link rel="stylesheet" href="css/mobile.css?v=20260924-01">
-    <link rel="stylesheet" href="css/export-toast.css?v=20260924-01">
-    <link rel="stylesheet" href="css/changes.css?v=20260924-01">
+    <link rel="stylesheet" href="css/base.css?v=20260924-02">
+    <link rel="stylesheet" href="css/toolbar.css?v=20260924-02">
+    <link rel="stylesheet" href="css/filter.css?v=20260924-02">
+    <link rel="stylesheet" href="css/calendar.css?v=20260924-02">
+    <link rel="stylesheet" href="css/popover.css?v=20260924-02">
+    <link rel="stylesheet" href="css/modals.css?v=20260924-02">
+    <link rel="stylesheet" href="css/mobile.css?v=20260924-02">
+    <link rel="stylesheet" href="css/export-toast.css?v=20260924-02">
+    <link rel="stylesheet" href="css/changes.css?v=20260924-02">
 </head>
 <body>
 <div class="app">
@@ -138,14 +138,12 @@
 
             <button class="btn btn-icon" id="themeBtn" type="button"
                     data-theme-current="auto" aria-label="Тема: авто">
-                <!-- current=light → sun -->
                 <svg class="icon theme-icon theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="4"/>
                     <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
                 </svg>
-                <!-- current=auto → circle with A -->
                 <svg class="icon theme-icon theme-icon-auto" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="1.8"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -153,7 +151,6 @@
                     <path d="M8.5 16l3.5-9 3.5 9"/>
                     <path d="M9.8 13h4.4"/>
                 </svg>
-                <!-- current=dark → moon -->
                 <svg class="icon theme-icon theme-icon-moon" viewBox="0 0 24 24" width="18" height="18"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -164,13 +161,18 @@
 
         <div class="updated-wrap" id="updatedWrap">
             <button class="btn updated-btn" id="updatedBtn" type="button" aria-label="Обновлено">
-                <span class="updated-prefix">Обновлено:</span>
-                <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                <span class="updated-prefix" id="updatedPrefix">Обновлено:</span>
+                <svg class="icon updated-icon updated-icon-clock" viewBox="0 0 24 24" width="16" height="16"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
                     <path d="M3 3v5h5"/>
                     <path d="M12 7v5l4 2"/>
+                </svg>
+                <svg class="icon updated-icon updated-icon-bolt" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                 </svg>
                 <span id="updatedTime">—</span>
             </button>
@@ -230,6 +232,31 @@
         <div class="changes-body" id="changesBody"></div>
         <div class="changes-footer" id="changesFooter" hidden>
             <button class="changes-more" id="changesMore" type="button">Показать ещё</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="offlineModal">
+    <div class="offline-modal" role="dialog" aria-labelledby="offlineTitle">
+        <div class="offline-header">
+            <h2 class="offline-title" id="offlineTitle">Вы сейчас оффлайн</h2>
+            <button class="offline-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="offline-body">
+            <p>
+                Сайт работает без интернета: расписание сохранено на вашем устройстве
+                и доступно в полном объёме.
+            </p>
+            <p>
+                Просматриваемая версия: <b id="offlineTime">—</b>
+            </p>
+            <p class="offline-note">
+                Когда появится интернет, сайт автоматически обновит данные — ничего
+                делать не нужно.
+            </p>
+        </div>
+        <div class="offline-footer">
+            <button class="btn offline-refresh" type="button">Обновить сейчас</button>
         </div>
     </div>
 </div>
