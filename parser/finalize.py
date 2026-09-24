@@ -41,15 +41,46 @@ async def normalize_teachers(teacher_str: str) -> List[str]:
     ]
 
 
+# Символы-обёртки, которые не являются частью даты.
+# Нужны, чтобы отрезать висячие дефисы/точки/скобки по краям.
+_DATE_TRIM = " \t.,;:()[]{}–—-"
+
+
 def expand_dates(s: str, current_year: int | None = None) -> list[str]:
-    """Разворачивает строку дат в список 'DD.MM.YYYY'."""
+    """Разворачивает строку дат в список 'DD.MM.YYYY'.
+
+    Устойчиво к неполным данным от LLM:
+      "13.10-"        → ["13.10.2026"]         (висячий дефис — это одиночная дата)
+      "13.10 - "      → ["13.10.2026"]
+      "13.10-15"      → ["13.10.2026"]         (правая часть не дата)
+      "13.10 - 20.10" → ["13.10.2026", "20.10.2026"]
+      "13.10.2026"    → ["13.10.2026"]
+      "-"             → []                     (плейсхолдер пустого поля)
+    """
     if current_year is None:
         current_year = date.today().year
 
-    def parse(t: str) -> tuple[int, int, int | None]:
-        parts = t.split(".")
-        day, month = int(parts[0]), int(parts[1])
-        year = int(parts[2]) if len(parts) == 3 else None
+    def parse(t: str) -> tuple[int, int, int | None] | None:
+        """'13.10' → (13, 10, None); '13.10.2026' → (13, 10, 2026).
+        None — если строка не похожа на дату."""
+        parts = t.strip().split(".")
+        if len(parts) < 2:
+            return None
+        try:
+            day = int(parts[0])
+            month = int(parts[1])
+        except ValueError:
+            return None
+
+        year: int | None = None
+        if len(parts) >= 3:
+            try:
+                year = int(parts[2])
+            except ValueError:
+                year = None
+
+        if not (1 <= day <= 31 and 1 <= month <= 12):
+            return None
         return day, month, year
 
     result: list[str] = []
@@ -58,38 +89,68 @@ def expand_dates(s: str, current_year: int | None = None) -> list[str]:
         if not item:
             continue
 
+        parsed_range = False
         for sep in (" - ", " – ", " — ", "-", "–", "—"):
-            if sep in item:
-                a, b = item.split(sep, 1)
-                d1, m1, y1 = parse(a.strip())
-                d2, m2, y2 = parse(b.strip())
+            if sep not in item:
+                continue
 
-                if y1 is not None:
-                    start_year = y1
-                elif y2 is not None:
-                    start_year = y2 if (m1, d1) <= (m2, d2) else y2 - 1
-                else:
-                    start_year = current_year
+            a, b = item.split(sep, 1)
+            pa = parse(a.strip(_DATE_TRIM))
+            pb = parse(b.strip(_DATE_TRIM))
 
-                if y2 is not None:
-                    end_year = y2
-                elif (m2, d2) < (m1, d1):
-                    end_year = start_year + 1
-                else:
-                    end_year = start_year
+            # Обе части должны быть валидными датами.
+            # Если правая не парсится — это не диапазон, а висячий дефис
+            # или дефис внутри слова. Пробуем следующий разделитель.
+            if pa is None or pb is None:
+                continue
 
+            d1, m1, y1 = pa
+            d2, m2, y2 = pb
+
+            if y1 is not None:
+                start_year = y1
+            elif y2 is not None:
+                start_year = y2 if (m1, d1) <= (m2, d2) else y2 - 1
+            else:
+                start_year = current_year
+
+            if y2 is not None:
+                end_year = y2
+            elif (m2, d2) < (m1, d1):
+                end_year = start_year + 1
+            else:
+                end_year = start_year
+
+            try:
                 cur = date(start_year, m1, d1)
                 end = date(end_year, m2, d2)
-                if end < cur:
-                    break
-
-                while cur <= end:
-                    result.append(cur.strftime("%d.%m.%Y"))
-                    cur += timedelta(days=7)
+            except ValueError:
+                # невалидная дата (например, 30.02)
                 break
-        else:
-            d, m, y = parse(item)
+
+            if end < cur:
+                break
+
+            while cur <= end:
+                result.append(cur.strftime("%d.%m.%Y"))
+                cur += timedelta(days=7)
+
+            parsed_range = True
+            break
+
+        if parsed_range:
+            continue
+
+        # Одиночная дата (в т.ч. с висячим дефисом/точкой по краям).
+        p = parse(item.strip(_DATE_TRIM))
+        if p is None:
+            continue
+        d, m, y = p
+        try:
             result.append(date(y or current_year, m, d).strftime("%d.%m.%Y"))
+        except ValueError:
+            # 30.02 или подобное — молча пропускаем
+            pass
 
     return result
 
