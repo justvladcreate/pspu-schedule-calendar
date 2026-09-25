@@ -19,6 +19,33 @@ export function saveSetToStorage(key, set) {
     } catch {}
 }
 
+/* ---------- pending changes: жить между визитами ---------- */
+
+const PENDING_CHANGES_KEY = 'schedule-pending-changes';
+
+export function savePendingChanges(changes) {
+  try {
+    if (!Array.isArray(changes) || changes.length === 0) {
+      localStorage.removeItem(PENDING_CHANGES_KEY);
+    } else {
+      localStorage.setItem(PENDING_CHANGES_KEY, JSON.stringify(changes));
+    }
+  } catch {}
+}
+
+export function loadPendingChanges() {
+  try {
+    const raw = localStorage.getItem(PENDING_CHANGES_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+
+export function clearPendingChanges() {
+  try { localStorage.removeItem(PENDING_CHANGES_KEY); } catch {}
+}
+
 export const state = {
   allEvents: [],
   filteredEvents: [],
@@ -57,7 +84,11 @@ export const state = {
   displayedIso: null,
   initialRenderDone: false,
   scrollToNow: false,
-  pendingChanges: [],
+
+  // Постоянный список изменений «с прошлого визита».
+  // Живёт в localStorage, переживает reload, перезаписывается
+  // только когда приходит новая порция изменений.
+  pendingChanges: loadPendingChanges(),
 };
 
 export function saveCurrentDate(d) {

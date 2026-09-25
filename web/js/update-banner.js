@@ -83,6 +83,15 @@ export function setupUpdateBanner({ onOpen }) {
 
     banner.addEventListener('click', (e) => {
         if (closeBtn.contains(e.target)) return;
+
+        // Открыл модалку = уже видел. Помечаем хеш dismissed,
+        // чтобы после reload баннер не всплывал.
+        const visible = getVisibleChanges();
+        if (visible.length > 0) {
+            const hash = hashChanges(visible);
+            try { localStorage.setItem('schedule-dismissed-diff-hash', hash); } catch {}
+        }
+
         hide();
         onOpen();
     });

@@ -4,7 +4,7 @@ import {
   state, saveSetToStorage,
   loadDayColWidth, loadSnapshot, saveSnapshot,
   saveScrollMemory, saveGeneratedAt, loadGeneratedAt,
-  saveCurrentDate,
+  saveCurrentDate, savePendingChanges,
 } from './state.js';
 import { escapeHtml } from './utils.js';
 import { loadData, expandEvents } from './data.js';
@@ -212,8 +212,12 @@ async function init() {
         if (oldSnapshot) {
             const changes = compareEvents(oldSnapshot, loaded.data.events || []);
             if (changes.length > 0) {
+                // Есть свежая порция — перезаписываем постоянный список.
                 state.pendingChanges = sortChanges(changes);
+                savePendingChanges(state.pendingChanges);
             }
+            // Если изменений нет — state.pendingChanges уже подгружен
+            // из localStorage в state.js, и мы его НЕ трогаем.
         }
 
         saveSnapshot(loaded.data.events || []);
@@ -382,6 +386,7 @@ async function checkForUpdates() {
     if (changes.length === 0) return;
 
     state.pendingChanges = sortChanges(changes);
+    savePendingChanges(state.pendingChanges);
     if (updateBannerApi) updateBannerApi.refresh();
 }
 
