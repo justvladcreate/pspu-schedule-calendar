@@ -71,6 +71,12 @@
     top: -8px;
 }
 
+/* Первая метка (08:00) прижата к верхнему краю скроллера и уходит
+   под sticky-шапку. Сдвигаем её вниз — на уровень своей линии часа. */
+.time-col > .time-label:first-child {
+    top: 0;
+}
+
 .day-grid {
     display: grid;
     position: relative;
