@@ -2,6 +2,9 @@
 
 import { MONTHS_GEN } from './config.js';
 import { escapeHtml, renderRoomsLinks } from './utils.js';
+import { state } from './state.js';
+import { showToast } from './toast.js';
+import { openShareMenu, buildTextForEvent } from './share.js';
 
 export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
@@ -19,7 +22,20 @@ export function positionPopover(pop, anchor) {
 export function eventDetailsHtml(ev) {
     const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
     return `
-        <h3>${escapeHtml(titleText)}</h3>
+        <div class="popover-title-row">
+            <h3>${escapeHtml(titleText)}</h3>
+            <button class="popover-share" type="button" aria-label="Поделиться ссылкой на событие">
+                <svg viewBox="0 0 24 24" width="14" height="14"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+            </button>
+        </div>
         <div class="popover-row"><span class="label">Время</span><span>${ev.time_start} – ${ev.endTime}</span></div>
         <div class="popover-row"><span class="label">Дата</span><span>${ev.dateObj.getDate()} ${MONTHS_GEN[ev.dateObj.getMonth()]} ${ev.dateObj.getFullYear()}</span></div>
         ${ev.rooms ? `<div class="popover-row"><span class="label">Место</span><span>${renderRoomsLinks(ev.rooms)}</span></div>` : ''}
@@ -34,12 +50,14 @@ export function showEventDetails(ev, anchor) {
     pop.classList.remove('popover--group');
     pop.innerHTML = eventDetailsHtml(ev);
     pop.classList.add('open');
+    attachShareHandler(pop, ev);
     positionPopover(pop, anchor);
 }
 
 export function hideEventDetails() {
     const pop = document.getElementById('eventPopover');
     pop.classList.remove('open', 'popover--group');
+    pop.innerHTML = '';
 }
 
 export function showGroupDetails(events, anchor) {
@@ -87,5 +105,62 @@ function renderGroupDetailItem(ev, events, anchor, pop) {
     pop.querySelector('.popover-back').addEventListener('click', e => {
         e.stopPropagation();
         renderGroupList(events, anchor, pop);
+    });
+    attachShareHandler(pop, ev);
+}
+
+/* ---------- SHARE EVENT ---------- */
+
+function buildEventUrl(ev) {
+    const params = new URLSearchParams();
+    if (ev.group)    params.set('g', ev.group);
+    if (ev.dateISO)  params.set('d', ev.dateISO);
+    if (state.view)  params.set('v', state.view);
+    if (ev.event_id) params.set('e', ev.event_id);
+    return location.origin + location.pathname + '?' + params.toString();
+}
+
+async function shareEventLink(ev) {
+    const url = buildEventUrl(ev);
+    try {
+        if (navigator.share) {
+            await navigator.share({ url, title: ev.discipline });
+        } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(url);
+            showToast('Ссылка скопирована');
+        } else {
+            showToast('Не удалось скопировать ссылку');
+        }
+    } catch (e) {
+        if (e && e.name !== 'AbortError') {
+            console.warn('[share] failed:', e);
+        }
+    }
+}
+
+async function copyEventText(ev) {
+    const text = buildTextForEvent(ev);
+    try {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+            showToast('Скопировано');
+        } else {
+            showToast('Не удалось скопировать');
+        }
+    } catch (e) {
+        console.warn('[copy] failed:', e);
+        showToast('Не удалось скопировать');
+    }
+}
+
+function attachShareHandler(pop, ev) {
+    const btn = pop.querySelector('.popover-share');
+    if (!btn) return;
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openShareMenu(btn, {
+            onLink: () => shareEventLink(ev),
+            onText: () => copyEventText(ev),
+        });
     });
 }

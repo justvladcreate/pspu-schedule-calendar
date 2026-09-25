@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v21';
+const CACHE = 'pspu-schedule-v33';
 
 const STATIC_ASSETS = [
   './',
@@ -10,17 +10,20 @@ const STATIC_ASSETS = [
   './css/toolbar.css',
   './css/filter.css',
   './css/calendar.css',
+  './css/load.css',
   './css/popover.css',
   './css/modals.css',
   './css/mobile.css',
   './css/export-toast.css',
   './css/changes.css',
+  './css/url-context.css',
   './js/main.js',
   './js/state.js',
   './js/config.js',
   './js/utils.js',
   './js/data.js',
   './js/render.js',
+  './js/load-view.js',
   './js/layout.js',
   './js/navigation.js',
   './js/datepicker.js',
@@ -36,6 +39,7 @@ const STATIC_ASSETS = [
   './js/changes.js',
   './js/changes-modal.js',
   './js/update-banner.js',
+  './js/share.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

@@ -4,13 +4,17 @@ import {
   state, saveSetToStorage,
   loadDayColWidth, loadSnapshot, saveSnapshot,
   saveScrollMemory, saveGeneratedAt, loadGeneratedAt,
-  saveCurrentDate,
+  saveCurrentDate, savePendingChanges,
+  applyUrlContext, resolveUrlContext, disarmUrlContext,
 } from './state.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, toISO } from './utils.js';
 import { loadData, expandEvents } from './data.js';
 
 import { render, updateDateLabel } from './render.js';
-import { applyFilters, setupUnifiedFilter, updateTriggerLabel, updateCounter } from './filters.js';
+import {
+    applyFilters, setupUnifiedFilter, updateTriggerLabel,
+    updateCounter, setupFavoritesButton,
+} from './filters.js';
 import {
     navigate, goToToday, cycleView, toggleTheme,
     updateViewButton, initTheme,
@@ -21,10 +25,12 @@ import { compareEvents, sortChanges } from './changes.js';
 import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
+import { showToast } from './toast.js';
+import { openShareMenu, buildTextForView } from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
-import { hideEventDetails } from './popover.js';
+import { hideEventDetails, showEventDetails } from './popover.js';
 
 let changesModalApi = null;
 let updateBannerApi = null;
@@ -132,7 +138,9 @@ function resetToToday() {
     state.currentDate = new Date();
     saveCurrentDate(state.currentDate);
     state.view = 'week';
-    localStorage.setItem('schedule-view', 'week');
+    if (!state.urlContext) {
+        localStorage.setItem('schedule-view', 'week');
+    }
     updateViewButton();
     state.scrollToNow = true;
 }
@@ -145,12 +153,17 @@ async function init() {
     stripReloadMarker();
 
     initTheme();
-    updateViewButton();
 
     // Подтягиваем последнюю известную версию из LS ДО setupOnlineStatus,
     // чтобы первый updateOnlineStatus() уже отрисовал корректное время,
     // а не «—».
     state.displayedIso = loadGeneratedAt();
+
+    // Deep links: читаем URL-параметры до всего остального — они
+    // перетирают то, что подгрузилось из localStorage.
+    applyUrlContext();
+
+    updateViewButton();
 
     setupOnlineStatus();
 
@@ -164,8 +177,15 @@ async function init() {
 
     if (!loaded.data) {
         state.fallbackActive = loaded.usedFallback;
+        // Данных нет — валидировать URL не с чем, просто гасим контекст,
+        // чтобы плашка не висела вхолостую.
+        state.urlContext = false;
+        state.urlRaw     = null;
+        state.urlEventId = null;
         showNoDataState();
         updateOnlineStatus();
+        setupShareButton();
+        setupUrlContextBanner();
         registerServiceWorker();
         return;
     }
@@ -194,12 +214,12 @@ async function init() {
     }
 
     if (state.fallbackActive) {
-        resetToToday();
+        if (!state.urlContext) resetToToday();
     } else {
         const isFirstVisit = !savedGenAt;
         const hasChanged = savedGenAt && savedGenAt !== currentGenAt;
 
-        if (isFirstVisit || hasChanged) {
+        if (!state.urlContext && (isFirstVisit || hasChanged)) {
             resetToToday();
             localStorage.removeItem('schedule-scroll-week');
             localStorage.removeItem('schedule-scroll-day');
@@ -209,8 +229,12 @@ async function init() {
         if (oldSnapshot) {
             const changes = compareEvents(oldSnapshot, loaded.data.events || []);
             if (changes.length > 0) {
+                // Есть свежая порция — перезаписываем постоянный список.
                 state.pendingChanges = sortChanges(changes);
+                savePendingChanges(state.pendingChanges);
             }
+            // Если изменений нет — state.pendingChanges уже подгружен
+            // из localStorage в state.js, и мы его НЕ трогаем.
         }
 
         saveSnapshot(loaded.data.events || []);
@@ -234,8 +258,22 @@ async function init() {
     saveSetToStorage('schedule-selected-groups', state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
+    // Deep links: валидируем URL-параметры против реальных данных.
+    // 'empty'   — обычный заход, ничего не делаем.
+    // 'none'    — параметры были, но не сматчились → откат + тост.
+    // 'full'/'partial' — применяем как есть.
+    const urlResult = resolveUrlContext();
+    if (urlResult === 'none') {
+        state.urlContext = false;
+        updateViewButton();
+        // Показываем тост после render — чтобы он не перекрывался
+        // первой отрисовкой пустого календаря.
+        setTimeout(() => showToast('Ссылка недействительна или устарела'), 300);
+    }
+
     applyFilters();
     setupUnifiedFilter();
+    setupFavoritesButton();
     const exportModal = setupExportModal();
     document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
 
@@ -316,9 +354,138 @@ async function init() {
 
     render();
 
+    setupShareButton();
+    setupUrlContextBanner();
+    openUrlContextEvent();
+
+    // Один раз на сессию: любой клик пользователя снимает urlContext,
+    // после этого все save-функции снова пишут в localStorage.
+    document.addEventListener('click', () => {
+        disarmUrlContext();
+    }, true);
+
     setInterval(updateOnlineStatus, 60 * 1000);
 
     registerServiceWorker();
+}
+
+/* ============================================================
+ *  DEEP LINKS / SHARE
+ * ============================================================ */
+
+function buildShareUrl() {
+    const params = new URLSearchParams();
+    const g = [...state.selectedGroups];
+    const t = [...state.selectedTeachers];
+
+    if (g.length) params.set('g', g.join(','));
+    if (t.length) params.set('t', t.join(','));
+    params.set('v', state.view);
+    params.set('d', toISO(state.currentDate));
+
+    return location.origin + location.pathname + '?' + params.toString();
+}
+
+async function shareLink(url, title) {
+    try {
+        if (navigator.share) {
+            await navigator.share({ url, title: title || 'Расписание' });
+        } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(url);
+            showToast('Ссылка скопирована');
+        } else {
+            showToast('Не удалось скопировать ссылку');
+        }
+    } catch (e) {
+        if (e && e.name !== 'AbortError') {
+            console.warn('[share] failed:', e);
+        }
+    }
+}
+
+async function copyText(text, emptyMessage) {
+    if (!text) {
+        showToast(emptyMessage || 'Нечего копировать');
+        return;
+    }
+    try {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+            showToast('Скопировано');
+        } else {
+            showToast('Не удалось скопировать');
+        }
+    } catch (e) {
+        console.warn('[copy] failed:', e);
+        showToast('Не удалось скопировать');
+    }
+}
+
+function setupShareButton() {
+    const btn = document.getElementById('shareBtn');
+    if (!btn) return;
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        openShareMenu(btn, {
+            onLink: () => shareLink(buildShareUrl(), 'Расписание'),
+            onText: () => {
+                const text = buildTextForView(
+                    state.view,
+                    state.currentDate,
+                    state.filteredEvents
+                );
+                copyText(text, 'Нет мероприятий для копирования');
+            },
+        });
+    });
+}
+
+function setupUrlContextBanner() {
+    const banner = document.getElementById('urlContextBanner');
+    if (!banner) return;
+
+    if (!state.urlContext) {
+        banner.hidden = true;
+        return;
+    }
+
+    banner.hidden = false;
+    banner.setAttribute('aria-label', 'Вы смотрите расписание по чужой ссылке. Перейти к своему расписанию');
+    banner.addEventListener('click', () => {
+        location.replace(location.origin + location.pathname);
+    });
+}
+
+function openUrlContextEvent() {
+    if (!state.urlContext || !state.urlEventId) return;
+
+    const eventId = state.urlEventId;
+    const targetIso = toISO(state.currentDate);
+
+    // Событие может быть скрыто фильтром g/t или не совпасть по дате —
+    // в этом случае молча ничего не открываем (баннер уже объясняет,
+    // почему вид не такой, как в личных настройках).
+    const target =
+        state.filteredEvents.find(ev => ev.event_id === eventId && ev.dateISO === targetIso) ||
+        state.filteredEvents.find(ev => ev.event_id === eventId);
+
+    if (!target) return;
+
+    requestAnimationFrame(() => {
+        let el = null;
+        try {
+            el = document.querySelector(
+                `[data-event-id="${CSS.escape(eventId)}"][data-date-iso="${CSS.escape(target.dateISO)}"]`
+            );
+        } catch (_) {}
+        if (!el) {
+            try {
+                el = document.querySelector(`[data-event-id="${CSS.escape(eventId)}"]`);
+            } catch (_) {}
+        }
+        if (el) showEventDetails(target, el);
+    });
 }
 
 function registerServiceWorker() {
@@ -378,6 +545,7 @@ async function checkForUpdates() {
     if (changes.length === 0) return;
 
     state.pendingChanges = sortChanges(changes);
+    savePendingChanges(state.pendingChanges);
     if (updateBannerApi) updateBannerApi.refresh();
 }
 

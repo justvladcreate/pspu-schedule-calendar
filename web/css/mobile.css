@@ -20,22 +20,25 @@
         min-width: 0;
     }
 
+    /* «Обновлено» переезжает наверх — вторым после даты */
+    .updated-wrap {
+        order: 2;
+        min-width: 0;
+    }
+
     .toolbar-center {
         order: 3;
         display: flex;
         align-items: center;
         gap: 6px;
+        margin-left: auto;
     }
 
     .toolbar-right {
         display: contents;
     }
 
-    .toolbar-right > #exportIcsBtn {
-        order: 2;
-        margin-left: auto;
-    }
-
+    /* Разрыв строки: всё, что с order >= 5, уедет вниз */
     .toolbar::after {
         content: "";
         order: 4;
@@ -43,35 +46,37 @@
         height: 0;
     }
 
+    /* ---- Нижняя строка ---- */
+
+    /* 5. Фильтр */
     .toolbar-right > .filter {
         order: 5;
     }
 
-    .updated-wrap {
+    /* 6. Звезда — сразу справа от фильтра */
+    .toolbar-right > #favoritesBtn {
         order: 6;
-        min-width: 0;
     }
 
-    .toolbar-right > #viewBtn {
+    /* 7. Экспорт — уезжает вправо, слева от вида */
+    .toolbar-right > #exportIcsBtn {
         order: 7;
         margin-left: auto;
     }
 
-    .toolbar-right > #themeBtn {
+    /* 8. Смена вида */
+    .toolbar-right > #viewBtn {
         order: 8;
     }
 
-    .updated-btn {
-        min-width: 0;
-        max-width: 100%;
-        overflow: hidden;
+    /* 9. Тема */
+    .toolbar-right > #themeBtn {
+        order: 9;
     }
 
-    .updated-btn #updatedTime {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        min-width: 0;
+    /* 10. Поделиться */
+    .toolbar-right > #shareBtn {
+        order: 10;
     }
 
     .btn-icon {
@@ -121,8 +126,16 @@
     }
 
     .footer {
-        padding: 4px 12px;
+        padding: 4px 8px;
+        gap: 2px;
     }
+
+    .footer-link {
+        padding: 6px 10px;
+        min-height: 34px;
+    }
+
+    .footer-link--icon { padding: 6px 8px; }
 
     .filter {
         position: static;

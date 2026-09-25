@@ -71,6 +71,12 @@
     top: -8px;
 }
 
+/* Первая метка (08:00) прижата к верхнему краю скроллера и уходит
+   под sticky-шапку. Сдвигаем её вниз — на уровень своей линии часа. */
+.time-col > .time-label:first-child {
+    top: 0;
+}
+
 .day-grid {
     display: grid;
     position: relative;
@@ -277,13 +283,11 @@
     padding: 0 5px;
 }
 
-.event-block .event-room a,
-.group-item-room a {
+.event-block .event-room a {
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 2px;
 }
-.event-block .event-room a:hover,
-.group-item-room a:hover {
+.event-block .event-room a:hover {
     color: var(--accent);
 }

@@ -24,7 +24,7 @@ export function goToToday() {
 }
 
 export function viewLabel(v) {
-    return { month: 'Месяц', week: 'Неделя', day: 'День' }[v];
+    return { month: 'Месяц', week: 'Неделя', day: 'День', load: 'Нагрузка' }[v];
 }
 
 export function updateViewButton() {
@@ -41,7 +41,7 @@ export function cycleView() {
             left: cal.scrollLeft,
         });
     }
-    const order = ['month', 'week', 'day'];
+    const order = ['month', 'week', 'day', 'load'];
     const idx = order.indexOf(state.view);
     state.view = order[(idx + 1) % order.length];
     localStorage.setItem('schedule-view', state.view);
@@ -130,4 +130,19 @@ export function initTheme() {
     applyTheme();
     updateThemeButton();
     setupThemeSystemListener();
+}
+
+/**
+ * Переключает вид (и при необходимости дату) и перерисовывает.
+ * Используется, в частности, из load-view при клике на номер недели.
+ */
+export function navigateTo(view, date) {
+    state.view = view;
+    if (date) state.currentDate = new Date(date);
+    if (!state.urlContext) {
+        try { localStorage.setItem('schedule-view', view); } catch {}
+    }
+    saveCurrentDate(state.currentDate);
+    updateViewButton();
+    render('fade');
 }

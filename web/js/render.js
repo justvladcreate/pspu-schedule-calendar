@@ -14,6 +14,7 @@ import {
 import { groupByDate } from './data.js';
 import { layoutDayEvents } from './layout.js';
 import { showEventDetails, showGroupDetails } from './popover.js';
+import { renderLoad } from './load-view.js';
 
 /* ---------- EMPTY STATE ---------- */
 export function hasActiveFilters() {
@@ -69,8 +70,10 @@ export function render(animation = null) {
     renderMonth(cal);
   } else if (state.view === 'week') {
     renderWeek(cal);
-  } else {
+  } else if (state.view === 'day') {
     renderDay(cal);
+  } else if (state.view === 'load') {
+    renderLoad(cal);
   }
 
   updateDateLabel();
@@ -263,6 +266,8 @@ export function makeEventBlock(ev, column = 0, columnsCount = 1) {
     el.className = 'event-block';
     el.style.top = top + 'px';
     el.style.height = height + 'px';
+    el.dataset.eventId = ev.event_id || '';
+    el.dataset.dateIso = ev.dateISO || '';
 
     if (columnsCount > 1) {
         const pct = 100 / columnsCount;
@@ -369,6 +374,8 @@ export function renderMonth(root) {
                     chip.className = 'month-event';
                     chip.textContent = `${ev.time_start} ${ev.discipline}${ev.type ? ` (${ev.type})` : ''}`;
                     chip.title = chip.textContent;
+                    chip.dataset.eventId = ev.event_id || '';
+                    chip.dataset.dateIso = ev.dateISO || '';
                     chip.addEventListener('click', e => {
                         e.stopPropagation();
                         showEventDetails(ev, chip);

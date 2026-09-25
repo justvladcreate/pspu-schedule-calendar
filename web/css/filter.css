@@ -84,10 +84,50 @@
 }
 
 .filter-option-value {
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
+}
+
+/* ============================================================
+ *  ИЗБРАННОЕ — звёздочка рядом с опцией фильтра
+ * ============================================================ */
+
+.favorite-star {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 2px;
+    margin: -2px 0;
+    color: var(--text-dim);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    line-height: 0;
+    transition: color 0.15s, background 0.15s, transform 0.08s;
+}
+
+.favorite-star:hover {
+    color: var(--accent);
+    background: var(--surface-3);
+}
+
+.favorite-star:active {
+    transform: scale(0.88);
+}
+
+.favorite-star.is-favorite {
+    color: var(--accent);
+}
+
+.favorite-star svg {
+    display: block;
+    pointer-events: none;
 }
 
 .filter-option-empty {

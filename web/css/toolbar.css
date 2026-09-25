@@ -80,6 +80,7 @@
 .btn-icon[data-view="month"] .view-icon-month { display: block; }
 .btn-icon[data-view="week"]  .view-icon-week  { display: block; }
 .btn-icon[data-view="day"]   .view-icon-day   { display: block; }
+.btn-icon[data-view="load"]  .view-icon-load  { display: block; }
 
 /* Тема: light → auto → dark. */
 #themeBtn .theme-icon { display: none; }
@@ -318,16 +319,67 @@
     padding: 6px 16px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     font-size: 12px;
 }
 .footer-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 5px 12px;
     border-radius: 6px;
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
+    line-height: 1;
     transition: background 0.15s, color 0.15s;
 }
 .footer-link:hover { background: var(--surface-2); color: var(--text); }
+
+/* Иконка GitHub — только иконка, без текста */
+.footer-link--icon { padding: 5px 8px; }
+.footer-link--icon svg { display: block; }
+
+/* ============================================================
+ *  КНОПКА «ИЗБРАННОЕ»
+ * ============================================================ */
+
+#favoritesBtn .favorites-icon { display: none; }
+#favoritesBtn .favorites-icon-empty { display: block; }
+
+#favoritesBtn.is-active .favorites-icon-empty { display: none; }
+#favoritesBtn.is-active .favorites-icon-filled {
+    display: block;
+    color: var(--accent);
+}
+
+/* ============================================================
+ *  TOOLTIP «Избранное пусто»
+ * ============================================================ */
+
+.favorites-tooltip {
+    position: fixed;
+    background: var(--surface-3);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: var(--shadow);
+    max-width: 280px;
+    z-index: 300;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+}
+
+.favorites-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
