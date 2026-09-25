@@ -128,7 +128,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 1,
             "event_id": "1211_ПН_3_1"
@@ -150,7 +150,7 @@
                 "14.12.2026",
                 "21.12.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 2,
             "event_id": "1211_ПН_3_2"
@@ -170,7 +170,7 @@
             "dates": [
                 "14.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
             "position": 3,
             "event_id": "1211_ПН_3_3"
@@ -197,7 +197,7 @@
                 "16.11.2026",
                 "23.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 4,
             "event_id": "1211_ПН_3_4"
@@ -218,7 +218,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 1,
             "event_id": "1211_ПН_4_1"
@@ -240,7 +240,7 @@
                 "14.12.2026",
                 "21.12.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 2,
             "event_id": "1211_ПН_4_2"
@@ -267,7 +267,7 @@
                 "16.11.2026",
                 "23.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 3,
             "event_id": "1211_ПН_4_3"
@@ -291,7 +291,7 @@
                 "09.11.2026",
                 "16.11.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 1,
             "event_id": "1211_ПН_5_1"
@@ -344,7 +344,7 @@
                 "14.12.2026",
                 "21.12.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 3,
             "event_id": "1211_ПН_5_3"
@@ -424,6 +424,24 @@
         {
             "group": "1211",
             "weekday": "ПТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "02.10.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_ПТ_2_1"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПТ",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
@@ -436,7 +454,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1211_ПТ_3_1"
@@ -457,28 +475,10 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. А305",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1211_ПТ_3_2"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026 Явка студентов на занятие строго обязательна",
-            "type": "",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "25.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 3,
-            "event_id": "1211_ПТ_3_3"
         },
         {
             "group": "1211",
@@ -495,10 +495,10 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. А305",
             "comment": "",
-            "position": 4,
-            "event_id": "1211_ПТ_3_4"
+            "position": 3,
+            "event_id": "1211_ПТ_3_3"
         },
         {
             "group": "1211",
@@ -540,7 +540,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 2,
             "event_id": "1211_ПТ_4_2"
@@ -585,7 +585,7 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. А305",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 4,
             "event_id": "1211_ПТ_4_4"
@@ -605,7 +605,7 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. А305",
             "comment": "",
             "position": 5,
             "event_id": "1211_ПТ_4_5"
@@ -743,7 +743,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 1,
             "event_id": "1211_СБ_2_1"
@@ -782,7 +782,7 @@
                 "09.01.2027",
                 "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 2,
             "event_id": "1211_СБ_2_2"
@@ -802,7 +802,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 1,
             "event_id": "1211_СБ_3_1"
@@ -841,7 +841,7 @@
                 "09.01.2027",
                 "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 2,
             "event_id": "1211_СБ_3_2"
@@ -876,7 +876,7 @@
             "time_start": "14:00",
             "time_end": "15:30",
             "pair_number": 4,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В) Явка студентов на занятие строго обязательна",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В)",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -1013,7 +1013,7 @@
                 "21.10.2026",
                 "28.10.2026"
             ],
-            "rooms": "IV к. А214",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 1,
             "event_id": "1211_СР_4_1"
@@ -1035,31 +1035,10 @@
                 "07.10.2026",
                 "14.10.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. А214",
             "comment": "",
             "position": 2,
             "event_id": "1211_СР_4_2"
-        },
-        {
-            "group": "1211",
-            "weekday": "СР",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 1",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [
-                "25.11.2026",
-                "02.12.2026"
-            ],
-            "rooms": "IV к. А214, IV к. А331",
-            "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_5_1"
         },
         {
             "group": "1211",
@@ -1079,8 +1058,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_СР_5_2"
+            "position": 1,
+            "event_id": "1211_СР_5_1"
         },
         {
             "group": "1211",
@@ -1089,8 +1068,8 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "прак.",
-            "subgroup": "",
+            "type": "прак.лаб.",
+            "subgroup": "п/г 1",
             "teachers": [
                 "Гаврилова И.Н."
             ],
@@ -1101,12 +1080,14 @@
                 "28.10.2026",
                 "04.11.2026",
                 "11.11.2026",
-                "18.11.2026"
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1211_СР_5_3"
+            "position": 2,
+            "event_id": "1211_СР_5_2"
         },
         {
             "group": "1211",
@@ -1125,26 +1106,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1211_СР_5_4"
-        },
-        {
-            "group": "1211",
-            "weekday": "СР",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [],
-            "rooms": "IV к. А214, IV к. А331",
-            "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_6_1"
+            "position": 3,
+            "event_id": "1211_СР_5_3"
         },
         {
             "group": "1211",
@@ -1164,8 +1127,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_СР_6_2"
+            "position": 1,
+            "event_id": "1211_СР_6_1"
         },
         {
             "group": "1211",
@@ -1185,8 +1148,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1211_СР_6_3"
+            "position": 2,
+            "event_id": "1211_СР_6_2"
         },
         {
             "group": "1211",
@@ -1206,8 +1169,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1211_СР_6_4"
+            "position": 3,
+            "event_id": "1211_СР_6_3"
         },
         {
             "group": "1211",
@@ -1568,7 +1531,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПН_3_1"
@@ -1588,7 +1551,7 @@
             "dates": [
                 "07.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПН_3_2"
@@ -1608,7 +1571,7 @@
             "dates": [
                 "14.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_3_3"
@@ -1637,7 +1600,7 @@
                 "30.11.2026",
                 "07.12.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "IV к. А",
             "comment": "",
             "position": 4,
             "event_id": "1212_ПН_3_4"
@@ -1658,7 +1621,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПН_4_1"
@@ -1687,7 +1650,7 @@
                 "30.11.2026",
                 "07.12.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПН_4_2"
@@ -1716,6 +1679,24 @@
         {
             "group": "1212",
             "weekday": "ПТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "02.10.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_ПТ_2_1"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
@@ -1728,7 +1709,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_3_1"
@@ -1749,28 +1730,10 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПТ_3_2"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026 Явка студентов на занятие строго обязательна",
-            "type": "",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "25.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_3_3"
         },
         {
             "group": "1212",
@@ -1787,10 +1750,10 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. А111",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПТ_3_4"
+            "position": 3,
+            "event_id": "1212_ПТ_3_3"
         },
         {
             "group": "1212",
@@ -1874,7 +1837,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 4,
             "event_id": "1212_ПТ_4_4"
@@ -1895,7 +1858,7 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 5,
             "event_id": "1212_ПТ_4_5"
@@ -1915,7 +1878,7 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 6,
             "event_id": "1212_ПТ_4_6"
@@ -2015,7 +1978,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 1,
             "event_id": "1212_СБ_2_1"
@@ -2054,7 +2017,7 @@
                 "09.01.2027",
                 "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 2,
             "event_id": "1212_СБ_2_2"
@@ -2074,7 +2037,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 1,
             "event_id": "1212_СБ_3_1"
@@ -2113,7 +2076,7 @@
                 "09.01.2027",
                 "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 2,
             "event_id": "1212_СБ_3_2"
@@ -2124,7 +2087,7 @@
             "time_start": "14:00",
             "time_end": "15:30",
             "pair_number": 4,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В) Явка студентов на занятие строго обязательна",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В)",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -2852,7 +2815,7 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Информатика",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -2895,7 +2858,7 @@
             "time_end": "18:30",
             "pair_number": 6,
             "discipline": "Информатика",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -2914,6 +2877,24 @@
         {
             "group": "1214",
             "weekday": "ПТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "02.10.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ПТ_2_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПТ",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
@@ -2926,7 +2907,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1214_ПТ_3_1"
@@ -2947,7 +2928,7 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1214_ПТ_3_2"
@@ -2968,7 +2949,7 @@
                 "25.09.2026",
                 "02.10.2026"
             ],
-            "rooms": "IV к. А201",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 3,
             "event_id": "1214_ПТ_3_3"
@@ -2979,26 +2960,8 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026 Явка студентов на занятие строго обязательна",
-            "type": "",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "25.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 4,
-            "event_id": "1214_ПТ_3_4"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Прикладная математика и теория дифференциальных уравнений",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Швалева О.В."
@@ -3010,10 +2973,10 @@
                 "13.11.2026",
                 "20.11.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. А201",
             "comment": "",
-            "position": 5,
-            "event_id": "1214_ПТ_3_5"
+            "position": 4,
+            "event_id": "1214_ПТ_3_4"
         },
         {
             "group": "1214",
@@ -3030,7 +2993,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1214_ПТ_4_1"
@@ -3051,7 +3014,7 @@
                 "09.10.2026",
                 "16.10.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1214_ПТ_4_2"
@@ -3072,7 +3035,7 @@
                 "25.09.2026",
                 "02.10.2026"
             ],
-            "rooms": "IV к. А201",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 3,
             "event_id": "1214_ПТ_4_3"
@@ -3084,7 +3047,7 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Прикладная математика и теория дифференциальных уравнений",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Швалева О.В."
@@ -3096,7 +3059,7 @@
                 "13.11.2026",
                 "20.11.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. А201",
             "comment": "",
             "position": 4,
             "event_id": "1214_ПТ_4_4"
@@ -3117,7 +3080,7 @@
                 "25.09.2026",
                 "02.10.2026"
             ],
-            "rooms": "IV к. А201",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 1,
             "event_id": "1214_ПТ_5_1"
@@ -3129,7 +3092,7 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Прикладная математика и теория дифференциальных уравнений",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Швалева О.В."
@@ -3141,7 +3104,7 @@
                 "13.11.2026",
                 "20.11.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А201",
             "comment": "",
             "position": 2,
             "event_id": "1214_ПТ_5_2"
@@ -3168,7 +3131,7 @@
                 "21.11.2026",
                 "28.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "IV к. А204",
             "comment": "",
             "position": 1,
             "event_id": "1214_СБ_2_1"
@@ -3188,7 +3151,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 2,
             "event_id": "1214_СБ_2_2"
@@ -3209,7 +3172,7 @@
                 "12.09.2026",
                 "26.09.2026"
             ],
-            "rooms": "IV к. А204",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 3,
             "event_id": "1214_СБ_2_3"
@@ -3236,7 +3199,7 @@
                 "21.11.2026",
                 "28.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "IV к. А204",
             "comment": "",
             "position": 1,
             "event_id": "1214_СБ_3_1"
@@ -3256,7 +3219,7 @@
             "dates": [
                 "03.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 2,
             "event_id": "1214_СБ_3_2"
@@ -3277,7 +3240,7 @@
                 "12.09.2026",
                 "26.09.2026"
             ],
-            "rooms": "IV к. А204",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 3,
             "event_id": "1214_СБ_3_3"
@@ -3288,7 +3251,7 @@
             "time_start": "14:00",
             "time_end": "15:30",
             "pair_number": 4,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В) Явка студентов на занятие строго обязательна",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В)",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -3358,7 +3321,7 @@
                 "21.10.2026",
                 "28.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 1,
             "event_id": "1214_СР_3_1"
@@ -3378,7 +3341,7 @@
             "dates": [
                 "23.09.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 2,
             "event_id": "1214_СР_3_2"
@@ -3411,7 +3374,7 @@
             "time_end": "13:00",
             "pair_number": 3,
             "discipline": "Введение в искусственный интеллект",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Чуприна С.И."
@@ -3438,7 +3401,7 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Введение в искусственный интеллект",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Чуприна С.И."
@@ -3453,7 +3416,7 @@
                 "22.10.2026",
                 "29.10.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А204",
             "comment": "",
             "position": 1,
             "event_id": "1214_ЧТ_4_1"
@@ -3473,7 +3436,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "IV к. А204",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 2,
             "event_id": "1214_ЧТ_4_2"
@@ -3485,7 +3448,7 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Информатика",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -3530,7 +3493,7 @@
             "time_end": "18:30",
             "pair_number": 6,
             "discipline": "Информатика",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -3773,7 +3736,7 @@
             "dates": [
                 "29.09.2026"
             ],
-            "rooms": "IV к. А112",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM)",
             "comment": "",
             "position": 1,
             "event_id": "1221_ВТ_5_1"
@@ -3801,7 +3764,7 @@
                 "24.11.2026",
                 "01.12.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM)",
+            "rooms": "IV к. А112",
             "comment": "",
             "position": 2,
             "event_id": "1221_ВТ_5_2"
@@ -3822,7 +3785,7 @@
                 "14.09.2026",
                 "21.09.2026"
             ],
-            "rooms": "II к. 301",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk)",
             "comment": "",
             "position": 1,
             "event_id": "1221_ПН_3_1"
@@ -3848,7 +3811,7 @@
                 "09.11.2026",
                 "16.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk)",
+            "rooms": "II к. 301",
             "comment": "",
             "position": 2,
             "event_id": "1221_ПН_3_2"
@@ -4061,6 +4024,26 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
+            "discipline": "Методы проектной и исследовательской деятельности",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Шуминская С.И."
+            ],
+            "dates": [
+                "25.09.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
+            "position": 1,
+            "event_id": "1221_ПТ_5_1"
+        },
+        {
+            "group": "1221",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
             "discipline": "Нормативно-правовые основы профессиональной деятельности и антикоррупционное поведение",
             "type": "прак.",
             "subgroup": "",
@@ -4077,8 +4060,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
-            "position": 1,
-            "event_id": "1221_ПТ_5_1"
+            "position": 2,
+            "event_id": "1221_ПТ_5_2"
         },
         {
             "group": "1221",
@@ -4255,6 +4238,24 @@
         {
             "group": "1221",
             "weekday": "ЧТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Установочная конференция по Учебной технологической (проектно-технологической) практике Модуль учебно-исследовательской и проектной деятельности. Явка студентов обязательна!",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "08.10.2026"
+            ],
+            "rooms": "IV к. акт. зал, ул. Пушкина, 42",
+            "comment": "",
+            "position": 2,
+            "event_id": "1221_ЧТ_2_2"
+        },
+        {
+            "group": "1221",
+            "weekday": "ЧТ",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
@@ -4401,7 +4402,7 @@
                 "08.09.2026",
                 "15.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
             "position": 1,
             "event_id": "1222_ВТ_1_1"
@@ -4423,7 +4424,7 @@
                 "13.10.2026",
                 "20.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
+            "rooms": "II к.",
             "comment": "",
             "position": 2,
             "event_id": "1222_ВТ_1_2"
@@ -4444,7 +4445,7 @@
                 "22.09.2026",
                 "29.09.2026"
             ],
-            "rooms": "II к.",
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_1_3"
@@ -4465,7 +4466,7 @@
                 "08.09.2026",
                 "15.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
             "position": 1,
             "event_id": "1222_ВТ_2_1"
@@ -4487,7 +4488,7 @@
                 "13.10.2026",
                 "20.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
+            "rooms": "II к.",
             "comment": "",
             "position": 2,
             "event_id": "1222_ВТ_2_2"
@@ -4508,7 +4509,7 @@
                 "22.09.2026",
                 "29.09.2026"
             ],
-            "rooms": "II к.",
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_2_3"
@@ -4920,6 +4921,26 @@
         },
         {
             "group": "1222",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Методы проектной и исследовательской деятельности",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Шуминская С.И."
+            ],
+            "dates": [
+                "25.09.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
+            "position": 2,
+            "event_id": "1222_ПТ_5_2"
+        },
+        {
+            "group": "1222",
             "weekday": "СБ",
             "time_start": "11:30",
             "time_end": "13:00",
@@ -5087,11 +5108,6 @@
             ],
             "dates": [
                 "30.09.2026",
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
                 "11.11.2026"
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
@@ -5134,8 +5150,7 @@
                 "Липкина Н.Г."
             ],
             "dates": [
-                "04.11.2026",
-                "11.11.2026"
+                "04.11.2026"
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
@@ -5158,7 +5173,7 @@
                 "16.09.2026",
                 "23.09.2026"
             ],
-            "rooms": "IV к. А202, II к. 315, II к. 302",
+            "rooms": "IV к. А202",
             "comment": "",
             "position": 1,
             "event_id": "1222_СР_5_1"
@@ -5180,7 +5195,7 @@
                 "25.11.2026",
                 "02.12.2026"
             ],
-            "rooms": "IV к. А202, II к. 315, II к. 302",
+            "rooms": "II к. 302",
             "comment": "",
             "position": 2,
             "event_id": "1222_СР_5_2"
@@ -5198,10 +5213,9 @@
                 "Липкина Н.Г."
             ],
             "dates": [
-                "04.11.2026",
-                "11.11.2026"
+                "04.11.2026"
             ],
-            "rooms": "IV к. А202, II к. 315, II к. 302",
+            "rooms": "II к. 315",
             "comment": "",
             "position": 3,
             "event_id": "1222_СР_5_3"
@@ -5222,15 +5236,9 @@
                 "30.09.2026",
                 "07.10.2026",
                 "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026",
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
+                "21.10.2026"
             ],
-            "rooms": "IV к. А202, II к. 315, II к. 302",
+            "rooms": "IV к. А214",
             "comment": "",
             "position": 4,
             "event_id": "1222_СР_5_4"
@@ -5276,6 +5284,24 @@
             "comment": "",
             "position": 1,
             "event_id": "1222_ЧТ_2_1"
+        },
+        {
+            "group": "1222",
+            "weekday": "ЧТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Установочная конференция по Учебной технологической (проектно-технологической) практике Модуль учебно-исследовательской и проектной деятельности. Явка студентов обязательна!",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "08.10.2026"
+            ],
+            "rooms": "IV к. акт. зал, ул. Пушкина, 42",
+            "comment": "",
+            "position": 2,
+            "event_id": "1222_ЧТ_2_2"
         },
         {
             "group": "1222",
@@ -5385,7 +5411,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550)",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
             "comment": "",
             "position": 1,
             "event_id": "1222_ЧТ_5_1"
@@ -5407,7 +5433,7 @@
                 "01.10.2026",
                 "08.10.2026"
             ],
-            "rooms": "IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
             "comment": "",
             "position": 2,
             "event_id": "1222_ЧТ_5_2"
@@ -5427,7 +5453,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550)",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
             "comment": "",
             "position": 1,
             "event_id": "1222_ЧТ_6_1"
@@ -5449,7 +5475,7 @@
                 "01.10.2026",
                 "08.10.2026"
             ],
-            "rooms": "IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
             "comment": "",
             "position": 2,
             "event_id": "1222_ЧТ_6_2"
@@ -5851,7 +5877,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность -22ч",
+            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -5871,7 +5897,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность -22ч",
+            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -5896,7 +5922,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность -22ч",
+            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -6637,7 +6663,7 @@
                 "23.10.2026",
                 "30.10.2026"
             ],
-            "rooms": "-22ч",
+            "rooms": "IV к. А304",
             "comment": "",
             "position": 2,
             "event_id": "1227_ПТ_4_2"
@@ -7112,7 +7138,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "А101",
+            "rooms": "А316",
             "comment": "",
             "position": 1,
             "event_id": "1227_ЧТ_5_1"
@@ -7156,7 +7182,7 @@
             "dates": [
                 "29.10.2026"
             ],
-            "rooms": "А101",
+            "rooms": "А316",
             "comment": "",
             "position": 3,
             "event_id": "1227_ЧТ_5_3"
@@ -7277,7 +7303,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "А101",
+            "rooms": "А316",
             "comment": "",
             "position": 1,
             "event_id": "1227_ЧТ_6_1"
@@ -7321,7 +7347,7 @@
             "dates": [
                 "29.10.2026"
             ],
-            "rooms": "А101",
+            "rooms": "А316",
             "comment": "",
             "position": 3,
             "event_id": "1227_ЧТ_6_3"
@@ -7877,7 +7903,7 @@
                 "16.10.2026",
                 "23.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
+            "rooms": "IV к. А202",
             "comment": "",
             "position": 1,
             "event_id": "1232_ПТ_3_1"
@@ -7897,7 +7923,7 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
             "position": 2,
             "event_id": "1232_ПТ_3_2"
@@ -7917,7 +7943,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
             "comment": "",
             "position": 3,
             "event_id": "1232_ПТ_3_3"
@@ -7937,7 +7963,7 @@
             "dates": [
                 "25.09.2026"
             ],
-            "rooms": "IV к. А202",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
             "comment": "",
             "position": 4,
             "event_id": "1232_ПТ_3_4"
@@ -7987,7 +8013,7 @@
                 "16.10.2026",
                 "23.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/0RtePHjo1J_WRSlFvANfbntZt5Wlp13JjzYxv4Hm0yM)",
+            "rooms": "IV к. 202",
             "comment": "",
             "position": 1,
             "event_id": "1232_ПТ_4_1"
@@ -8007,7 +8033,7 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/0RtePHjo1J_WRSlFvANfbntZt5Wlp13JjzYxv4Hm0yM)",
             "comment": "",
             "position": 2,
             "event_id": "1232_ПТ_4_2"
@@ -8027,7 +8053,7 @@
             "dates": [
                 "18.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
             "comment": "",
             "position": 3,
             "event_id": "1232_ПТ_4_3"
@@ -8047,7 +8073,7 @@
             "dates": [
                 "25.09.2026"
             ],
-            "rooms": "IV к. 202",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
             "comment": "",
             "position": 4,
             "event_id": "1232_ПТ_4_4"
@@ -8259,7 +8285,7 @@
                 "18.11.2026",
                 "25.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
+            "rooms": "IV к. А",
             "comment": "",
             "position": 1,
             "event_id": "1232_СР_4_1"
@@ -8279,7 +8305,7 @@
             "dates": [
                 "23.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
             "position": 2,
             "event_id": "1232_СР_4_2"
@@ -8299,7 +8325,7 @@
             "dates": [
                 "30.09.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
             "position": 3,
             "event_id": "1232_СР_4_3"
@@ -8326,7 +8352,7 @@
                 "18.11.2026",
                 "25.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
+            "rooms": "IV к. А",
             "comment": "",
             "position": 1,
             "event_id": "1232_СР_5_1"
@@ -8346,7 +8372,7 @@
             "dates": [
                 "23.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
             "position": 2,
             "event_id": "1232_СР_5_2"
@@ -8366,7 +8392,7 @@
             "dates": [
                 "30.09.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
             "position": 3,
             "event_id": "1232_СР_5_3"
@@ -8465,7 +8491,7 @@
                 "22.10.2026",
                 "29.10.2026"
             ],
-            "rooms": "II к. 315",
+            "rooms": "II к. 314",
             "comment": "",
             "position": 1,
             "event_id": "1232_ЧТ_4_1"
@@ -8476,7 +8502,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Технология и организация воспитательных практик (классное руководство) -6ч",
+            "discipline": "Технология и организация воспитательных практик (классное руководство)",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -8489,7 +8515,7 @@
                 "26.11.2026",
                 "03.12.2026"
             ],
-            "rooms": "II к. 314",
+            "rooms": "II к. 315",
             "comment": "",
             "position": 2,
             "event_id": "1232_ЧТ_4_2"
@@ -8514,7 +8540,7 @@
                 "22.10.2026",
                 "29.10.2026"
             ],
-            "rooms": "II к. 315",
+            "rooms": "II к. 314",
             "comment": "",
             "position": 1,
             "event_id": "1232_ЧТ_5_1"
@@ -8525,7 +8551,7 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Технология и организация воспитательных практик (классное руководство) -6ч",
+            "discipline": "Технология и организация воспитательных практик (классное руководство)",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -8538,7 +8564,7 @@
                 "26.11.2026",
                 "03.12.2026"
             ],
-            "rooms": "II к. 314",
+            "rooms": "II к. 315",
             "comment": "",
             "position": 2,
             "event_id": "1232_ЧТ_5_2"
@@ -9120,17 +9146,49 @@
         {
             "group": "1233",
             "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Web-программирование",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "07.11.2026",
+                "14.11.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 1,
+            "event_id": "1233_СБ_3_1"
+        },
+        {
+            "group": "1233",
+            "weekday": "СБ",
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Проектирование и программирование беспилотных летательных аппаратов",
-            "type": "лек.прак.",
+            "discipline": "Web-программирование",
+            "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Шаронов Н.С."
+                "Кудреватых В.А."
             ],
-            "dates": [],
-            "rooms": "IV к. А204",
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "07.11.2026",
+                "14.11.2026"
+            ],
+            "rooms": "дистанционно онлайн",
             "comment": "",
             "position": 1,
             "event_id": "1233_СБ_4_1"
@@ -9482,7 +9540,7 @@
                 "17.12.2026",
                 "24.12.2026"
             ],
-            "rooms": "IV к. А316",
+            "rooms": "IV к. Б406",
             "comment": "",
             "position": 1,
             "event_id": "1233_ЧТ_4_1"
@@ -9507,7 +9565,7 @@
                 "03.12.2026",
                 "17.12.2026"
             ],
-            "rooms": "IV к. Б406",
+            "rooms": "IV к. А316",
             "comment": "",
             "position": 2,
             "event_id": "1233_ЧТ_4_2"
@@ -9540,7 +9598,7 @@
                 "17.12.2026",
                 "24.12.2026"
             ],
-            "rooms": "IV к. А316",
+            "rooms": "IV к. Б406",
             "comment": "",
             "position": 1,
             "event_id": "1233_ЧТ_5_1"
@@ -9565,10 +9623,41 @@
                 "03.12.2026",
                 "17.12.2026"
             ],
-            "rooms": "IV к. Б406",
+            "rooms": "IV к. А316",
             "comment": "",
             "position": 2,
             "event_id": "1233_ЧТ_5_2"
+        },
+        {
+            "group": "1233",
+            "weekday": "ЧТ",
+            "time_start": "18:00",
+            "time_end": "19:30",
+            "pair_number": 6,
+            "discipline": "Web-программирование -8ч",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "08.10.2026",
+                "15.10.2026",
+                "22.10.2026",
+                "29.10.2026",
+                "05.11.2026",
+                "12.11.2026",
+                "19.11.2026",
+                "26.11.2026",
+                "03.12.2026",
+                "10.12.2026",
+                "17.12.2026",
+                "24.12.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 1,
+            "event_id": "1233_ЧТ_6_1"
         },
         {
             "group": "1237",
@@ -9846,6 +9935,129 @@
             "comment": "",
             "position": 1,
             "event_id": "1237_ПН_5_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "ПН",
+            "time_start": "18:45",
+            "time_end": "20:15",
+            "pair_number": 7,
+            "discipline": "Web-программирование",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "05.10.2026",
+                "12.10.2026",
+                "19.10.2026",
+                "26.10.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 1,
+            "event_id": "1237_ПН_7_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Web-программирование",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "07.11.2026",
+                "14.11.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 1,
+            "event_id": "1237_СБ_3_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Web-программирование",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "21.11.2026",
+                "28.11.2026",
+                "05.12.2026",
+                "12.12.2026",
+                "19.12.2026",
+                "26.12.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 2,
+            "event_id": "1237_СБ_3_2"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Web-программирование",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "07.11.2026",
+                "14.11.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 1,
+            "event_id": "1237_СБ_4_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Web-программирование",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "21.11.2026",
+                "28.11.2026",
+                "05.12.2026",
+                "12.12.2026",
+                "19.12.2026",
+                "26.12.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 2,
+            "event_id": "1237_СБ_4_2"
         },
         {
             "group": "1237",
@@ -10312,7 +10524,7 @@
                 "05.10.2026",
                 "12.10.2026"
             ],
-            "rooms": "IV к. А204",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 1,
             "event_id": "1241_ПН_5_1"
@@ -10334,7 +10546,7 @@
                 "14.12.2026",
                 "21.12.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А204",
             "comment": "",
             "position": 2,
             "event_id": "1241_ПН_5_2"
@@ -11098,7 +11310,7 @@
                 "18.09.2026",
                 "25.09.2026"
             ],
-            "rooms": "IV к. А108",
+            "rooms": "I к. 15",
             "comment": "",
             "position": 1,
             "event_id": "1242_ПТ_4_1"
@@ -11122,7 +11334,7 @@
                 "23.10.2026",
                 "30.10.2026"
             ],
-            "rooms": "I к. 15",
+            "rooms": "IV к. А108",
             "comment": "",
             "position": 2,
             "event_id": "1242_ПТ_4_2"
@@ -11144,7 +11356,7 @@
                 "18.09.2026",
                 "25.09.2026"
             ],
-            "rooms": "IV к. А108",
+            "rooms": "I к. 15",
             "comment": "",
             "position": 1,
             "event_id": "1242_ПТ_5_1"
@@ -11168,7 +11380,7 @@
                 "23.10.2026",
                 "30.10.2026"
             ],
-            "rooms": "I к. 15",
+            "rooms": "IV к. А108",
             "comment": "",
             "position": 2,
             "event_id": "1242_ПТ_5_2"
@@ -11549,7 +11761,7 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -11576,7 +11788,7 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -11603,7 +11815,7 @@
             "time_end": "18:30",
             "pair_number": 6,
             "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Дацун Н.Н."
@@ -11809,7 +12021,7 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Бюджетирование ИТ-проектов -26ч",
+            "discipline": "Бюджетирование ИТ-проектов (лек. прак.) -26ч",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -11837,7 +12049,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Бюджетирование ИТ-проектов -26ч",
+            "discipline": "Бюджетирование ИТ-проектов (лек. прак.) -26ч",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -12305,7 +12517,7 @@
             "dates": [
                 "06.11.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "IV к. А112",
             "comment": "",
             "position": 1,
             "event_id": "1245_ПТ_3_1"
@@ -12330,7 +12542,7 @@
                 "18.12.2026",
                 "25.12.2026"
             ],
-            "rooms": "IV к. А112",
+            "rooms": "IV к. А",
             "comment": "",
             "position": 2,
             "event_id": "1245_ПТ_3_2"
@@ -13075,7 +13287,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Бюджетирование ИТ-проектов (лек. прак.) -26ч",
+            "discipline": "Бюджетирование ИТ-проектов -26ч",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -14692,5 +14904,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-09-24T09:54:30+00:00"
+    "generated_at": "2026-09-25T08:15:46+00:00"
 }
