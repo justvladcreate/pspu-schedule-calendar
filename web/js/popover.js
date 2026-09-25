@@ -4,6 +4,7 @@ import { MONTHS_GEN } from './config.js';
 import { escapeHtml, renderRoomsLinks } from './utils.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
+import { openShareMenu, buildTextForEvent } from './share.js';
 
 export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
@@ -110,15 +111,17 @@ function renderGroupDetailItem(ev, events, anchor, pop) {
 
 /* ---------- SHARE EVENT ---------- */
 
-async function shareEvent(ev) {
+function buildEventUrl(ev) {
     const params = new URLSearchParams();
     if (ev.group)    params.set('g', ev.group);
     if (ev.dateISO)  params.set('d', ev.dateISO);
     if (state.view)  params.set('v', state.view);
     if (ev.event_id) params.set('e', ev.event_id);
+    return location.origin + location.pathname + '?' + params.toString();
+}
 
-    const url = location.origin + location.pathname + '?' + params.toString();
-
+async function shareEventLink(ev) {
+    const url = buildEventUrl(ev);
     try {
         if (navigator.share) {
             await navigator.share({ url, title: ev.discipline });
@@ -135,11 +138,29 @@ async function shareEvent(ev) {
     }
 }
 
+async function copyEventText(ev) {
+    const text = buildTextForEvent(ev);
+    try {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+            showToast('Скопировано');
+        } else {
+            showToast('Не удалось скопировать');
+        }
+    } catch (e) {
+        console.warn('[copy] failed:', e);
+        showToast('Не удалось скопировать');
+    }
+}
+
 function attachShareHandler(pop, ev) {
     const btn = pop.querySelector('.popover-share');
     if (!btn) return;
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        shareEvent(ev);
+        openShareMenu(btn, {
+            onLink: () => shareEventLink(ev),
+            onText: () => copyEventText(ev),
+        });
     });
 }

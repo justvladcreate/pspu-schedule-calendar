@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v29';
+const CACHE = 'pspu-schedule-v30';
 
 const STATIC_ASSETS = [
   './',
@@ -37,6 +37,7 @@ const STATIC_ASSETS = [
   './js/changes.js',
   './js/changes-modal.js',
   './js/update-banner.js',
+  './js/share.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

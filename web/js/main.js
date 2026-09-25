@@ -26,6 +26,7 @@ import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
 import { showToast } from './toast.js';
+import { openShareMenu, buildTextForView } from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
@@ -385,12 +386,10 @@ function buildShareUrl() {
     return location.origin + location.pathname + '?' + params.toString();
 }
 
-async function shareState() {
-    const url = buildShareUrl();
-
+async function shareLink(url, title) {
     try {
         if (navigator.share) {
-            await navigator.share({ url, title: 'Расписание' });
+            await navigator.share({ url, title: title || 'Расписание' });
         } else if (navigator.clipboard) {
             await navigator.clipboard.writeText(url);
             showToast('Ссылка скопирована');
@@ -404,12 +403,41 @@ async function shareState() {
     }
 }
 
+async function copyText(text, emptyMessage) {
+    if (!text) {
+        showToast(emptyMessage || 'Нечего копировать');
+        return;
+    }
+    try {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+            showToast('Скопировано');
+        } else {
+            showToast('Не удалось скопировать');
+        }
+    } catch (e) {
+        console.warn('[copy] failed:', e);
+        showToast('Не удалось скопировать');
+    }
+}
+
 function setupShareButton() {
     const btn = document.getElementById('shareBtn');
     if (!btn) return;
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        shareState();
+
+        openShareMenu(btn, {
+            onLink: () => shareLink(buildShareUrl(), 'Расписание'),
+            onText: () => {
+                const text = buildTextForView(
+                    state.view,
+                    state.currentDate,
+                    state.filteredEvents
+                );
+                copyText(text, 'Нет мероприятий для копирования');
+            },
+        });
     });
 }
 
