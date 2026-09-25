@@ -10,7 +10,10 @@ import { escapeHtml } from './utils.js';
 import { loadData, expandEvents } from './data.js';
 
 import { render, updateDateLabel } from './render.js';
-import { applyFilters, setupUnifiedFilter, updateTriggerLabel, updateCounter } from './filters.js';
+import {
+    applyFilters, setupUnifiedFilter, updateTriggerLabel,
+    updateCounter, setupFavoritesButton,
+} from './filters.js';
 import {
     navigate, goToToday, cycleView, toggleTheme,
     updateViewButton, initTheme,
@@ -236,6 +239,7 @@ async function init() {
 
     applyFilters();
     setupUnifiedFilter();
+    setupFavoritesButton();
     const exportModal = setupExportModal();
     document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
 

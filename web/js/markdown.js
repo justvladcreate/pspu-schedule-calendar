@@ -1,6 +1,11 @@
 'use strict';
 
 export function renderMarkdown(src) {
+    // Нормализуем переносы строк: CRLF / CR → LF.
+    // Без этого `$` в регулярках не матчится перед `\r`, и все
+    // заголовки / списки / blockquotes разваливаются в один абзац.
+    src = String(src).replace(/\r\n?/g, '\n');
+
     const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     const inline = s => {
@@ -39,7 +44,8 @@ export function renderMarkdown(src) {
         const ol = line.match(/^\d+\.\s+(.*)$/);
         if (ol) { flushPara(); if (listType !== 'ol') { closeList(); out.push('<ol>'); listType = 'ol'; } out.push('<li>' + inline(ol[1]) + '</li>'); continue; }
 
-        const bq = line.match(/^>\s?(.*)$/);
+        // ">" уже превращён esc() в "&gt;", поэтому ищем именно эту форму.
+        const bq = line.match(/^&gt;\s?(.*)$/);
         if (bq) { flushPara(); closeList(); out.push('<blockquote>' + inline(bq[1]) + '</blockquote>'); continue; }
 
         if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) { flushPara(); closeList(); out.push('<hr>'); continue; }

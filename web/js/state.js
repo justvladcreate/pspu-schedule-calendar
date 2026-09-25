@@ -26,6 +26,13 @@ export const state = {
   teachers: [],
   selectedGroups: loadSetFromStorage('schedule-selected-groups'),
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
+
+  // === FAVORITES ===
+  favoritesGroups: loadSetFromStorage('schedule-favorites-groups'),
+  favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
+  prevFilter: null,
+  favoritesActive: false,
+
   currentDate: loadCurrentDate() || new Date(),
   view: localStorage.getItem('schedule-view') || 'week',
   theme: localStorage.getItem('schedule-theme') || 'auto',
