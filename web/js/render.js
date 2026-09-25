@@ -14,6 +14,7 @@ import {
 import { groupByDate } from './data.js';
 import { layoutDayEvents } from './layout.js';
 import { showEventDetails, showGroupDetails } from './popover.js';
+import { renderLoad } from './load-view.js';
 
 /* ---------- EMPTY STATE ---------- */
 export function hasActiveFilters() {
@@ -69,8 +70,10 @@ export function render(animation = null) {
     renderMonth(cal);
   } else if (state.view === 'week') {
     renderWeek(cal);
-  } else {
+  } else if (state.view === 'day') {
     renderDay(cal);
+  } else if (state.view === 'load') {
+    renderLoad(cal);
   }
 
   updateDateLabel();

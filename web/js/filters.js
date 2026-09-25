@@ -1,6 +1,11 @@
 'use strict';
 
-import { state, saveSetToStorage } from './state.js';
+import {
+    state,
+    saveSetToStorage,
+    saveFavoritesActive,
+    savePrevFilter,
+} from './state.js';
 import { render } from './render.js';
 import { refreshBanner } from './update-banner.js';
 import { showToast } from './toast.js';
@@ -173,11 +178,24 @@ function updateFavoritesButton() {
  *  COMMIT DRAFT → APPLIED + UNDO
  * ============================================================ */
 
+/** Сравнение двух Set по содержимому. */
+function setsEqual(a, b) {
+    if (a.size !== b.size) return false;
+    for (const v of a) if (!b.has(v)) return false;
+    return true;
+}
+
 function commitDrafts() {
-    // Снимок «как было» для кнопки «Вернуть».
+    // Снимок «как было» для кнопки «Вернуть» — включая режим избранного
+    // и prevFilter, чтобы «Отменить» откатывал и их тоже.
     state.undoFilter = {
-        groups:   [...state.selectedGroups],
-        teachers: [...state.selectedTeachers],
+        groups:          [...state.selectedGroups],
+        teachers:        [...state.selectedTeachers],
+        favoritesActive: state.favoritesActive,
+        prevFilter:      state.prevFilter ? {
+            groups:   [...state.prevFilter.groups],
+            teachers: [...state.prevFilter.teachers],
+        } : null,
     };
 
     // Применяем черновик.
@@ -194,14 +212,30 @@ function commitDrafts() {
         state.selectedTeachers = new Set(state.favoritesTeachers);
     }
 
+    // Если пользователь вручную поменял выбор (галочками «Выбрать все»,
+    // «Снять все» или отдельными чекбоксами, не трогая звёздочки),
+    // выбранное больше не совпадает с избранным — режим «только избранное»
+    // теряет смысл. Снимаем флаг, чтобы кнопка не оставалась залипшей.
+    const selectedEqFav =
+        setsEqual(state.selectedGroups, state.favoritesGroups) &&
+        setsEqual(state.selectedTeachers, state.favoritesTeachers);
+
+    if (state.favoritesActive && !selectedEqFav) {
+        state.favoritesActive = false;
+        state.prevFilter = null;
+    }
+
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
     saveSetToStorage(FAV_GROUPS_KEY,               state.favoritesGroups);
     saveSetToStorage(FAV_TEACHERS_KEY,             state.favoritesTeachers);
+    saveFavoritesActive(state.favoritesActive);
+    savePrevFilter(state.prevFilter);
 
     applyFilters();
     updateTriggerLabel();
     updateCounter();
+    updateFavoritesButton();   // ← раньше не вызывалось: кнопка не отражала сброс
     render();
     refreshBanner();
 
@@ -219,10 +253,19 @@ function undoFilterChange() {
 
     state.selectedGroups   = new Set(state.undoFilter.groups);
     state.selectedTeachers = new Set(state.undoFilter.teachers);
+    state.favoritesActive  = !!state.undoFilter.favoritesActive;
+    state.prevFilter       = state.undoFilter.prevFilter
+        ? {
+            groups:   [...state.undoFilter.prevFilter.groups],
+            teachers: [...state.undoFilter.prevFilter.teachers],
+        }
+        : null;
     state.undoFilter = null;
 
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+    saveFavoritesActive(state.favoritesActive);
+    savePrevFilter(state.prevFilter);
 
     applyFilters();
     updateTriggerLabel();
@@ -352,6 +395,8 @@ export function setupFavoritesButton() {
 
         saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
         saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+        saveFavoritesActive(state.favoritesActive);
+        savePrevFilter(state.prevFilter);
 
         applyFilters();
         updateTriggerLabel();

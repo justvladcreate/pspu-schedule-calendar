@@ -298,29 +298,86 @@ def remove_invalid_dates(text: str) -> str:
     return re.sub(r'\s+', ' ', text).strip()
 
 
+def _infer_semester_start_year(text: str, current_calendar_year: int) -> int:
+    """
+    Год начала учебного семестра (сентябрь).
+
+    Приоритет:
+      1. Явная дата с годом внутри самого текста:
+         месяц 9-12 → год начала семестра = этот год;
+         месяц 1-8  → год начала семестра = этот год минус 1
+                      (январь-август относится к весне того же уч. года).
+      2. Fallback по сегодняшней дате:
+         сентябрь-декабрь → текущий календарный год;
+         январь-август    → предыдущий год.
+    """
+    best: int | None = None
+    for m in re.finditer(rf'\b({_DATE})\b', text):
+        parts = m.group(1).split(".")
+        if len(parts) != 3:
+            continue
+        try:
+            mo, y = int(parts[1]), int(parts[2])
+        except ValueError:
+            continue
+        candidate = y if mo >= 9 else y - 1
+        if best is None or candidate > best:
+            best = candidate
+
+    if best is not None:
+        return best
+
+    today = date.today()
+    return current_calendar_year if today.month >= 9 else current_calendar_year - 1
+
+
 def add_year(text: str, current_year: int | None = None) -> str:
     """
     Проставляет год к каждой дате.
-    Правило для диапазона: если конец < начало по (месяц, день) — конец в след. году.
+
+    Учитывает, что учебный семестр начинается в сентябре и пересекает
+    границу календарного года: сентябрь-декабрь — год начала семестра,
+    январь-август — следующий год.
+
+    Контекст семестра определяется так:
+      1. Если в тексте уже есть явная дата с годом — берём её как якорь.
+      2. Иначе — по сегодняшней дате (сентябрь-декабрь → текущий год,
+         январь-август → предыдущий).
 
     "10.11 - 18.01"   -> "10.11.2026 - 18.01.2027"
     "15.09 - 13.10"   -> "15.09.2026 - 13.10.2026"
+    "05.11 - 03.12, 14.01, 21.01, 28.01"
+                      -> "05.11.2026 - 03.12.2026, 14.01.2027, 21.01.2027, 28.01.2027"
     "24.10.2026"      -> "24.10.2026"
     """
     if current_year is None:
         current_year = date.today().year
 
+    semester_start_year = _infer_semester_start_year(text, current_year)
+
+    def resolve_year(month: int) -> int:
+        # Сентябрь-декабрь → год начала семестра.
+        # Январь-август    → следующий год.
+        return semester_start_year if month >= 9 else semester_start_year + 1
+
     def range_repl(m: re.Match) -> str:
         a, b = m.group(1), m.group(2)
         d1, m1, y1 = _parse(a)
         d2, m2, y2 = _parse(b)
-        year1 = y1 or current_year
+
+        year1 = y1 if y1 is not None else resolve_year(m1)
+
         if y2 is not None:
             year2 = y2
         elif (m2, d2) < (m1, d1):
+            # Классический переход через новый год внутри диапазона.
+            year2 = year1 + 1
+        elif m1 >= 9 and m2 < 9:
+            # Осенне-зимний диапазон: сентябрь-декабрь → январь-август.
             year2 = year1 + 1
         else:
             year2 = year1
+
         return f"{d1:02d}.{m1:02d}.{year1} - {d2:02d}.{m2:02d}.{year2}"
 
     text = re.sub(rf'({_DATE})\s*[-–—]\s*({_DATE})', range_repl, text)
@@ -331,7 +388,7 @@ def add_year(text: str, current_year: int | None = None) -> str:
         if len(parts) == 3:
             return full                       # год уже есть
         d, mo = int(parts[0]), int(parts[1])
-        return f"{d:02d}.{mo:02d}.{current_year}"
+        return f"{d:02d}.{mo:02d}.{resolve_year(mo)}"
 
     text = re.sub(rf'\b{_DATE}\b', single_repl, text)
     return text

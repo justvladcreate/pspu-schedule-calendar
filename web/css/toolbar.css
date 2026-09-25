@@ -80,6 +80,7 @@
 .btn-icon[data-view="month"] .view-icon-month { display: block; }
 .btn-icon[data-view="week"]  .view-icon-week  { display: block; }
 .btn-icon[data-view="day"]   .view-icon-day   { display: block; }
+.btn-icon[data-view="load"]  .view-icon-load  { display: block; }
 
 /* Тема: light → auto → dark. */
 #themeBtn .theme-icon { display: none; }

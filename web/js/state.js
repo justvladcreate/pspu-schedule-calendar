@@ -24,6 +24,17 @@ export function saveSetToStorage(key, set) {
 
 const PENDING_CHANGES_KEY = 'schedule-pending-changes';
 
+/* ---------- favorites: ключи (объявлены ДО state) ----------
+ *
+ * state инициализируется вызовами loadFavoritesActive() / loadPrevFilter(),
+ * а те читают FAV_ACTIVE_KEY / PREV_FILTER_KEY. Если объявить const-ы ниже
+ * (после state), они попадут в TDZ, ReferenceError проглотится try/catch
+ * внутри load-функций, и мы молча получим favoritesActive = false на каждом
+ * reload — именно это и ломало сохранение состояния кнопки «Избранное».
+ */
+const FAV_ACTIVE_KEY = 'schedule-favorites-active';
+const PREV_FILTER_KEY = 'schedule-prev-filter';
+
 export function savePendingChanges(changes) {
   try {
     if (!Array.isArray(changes) || changes.length === 0) {
@@ -55,12 +66,12 @@ export const state = {
   selectedGroups: loadSetFromStorage('schedule-selected-groups'),
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
 
-  // === FAVORITES ===
-  favoritesGroups: loadSetFromStorage('schedule-favorites-groups'),
-  favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
-  prevFilter: null,
-  favoritesActive: false,
-  // =================
+   // === FAVORITES ===
+   favoritesGroups: loadSetFromStorage('schedule-favorites-groups'),
+   favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
+   prevFilter: loadPrevFilter(),
+   favoritesActive: loadFavoritesActive(),
+   // =================
 
   // === DRAFT (черновик фильтра, пока открыт дропдаун) ===
   draftGroups: new Set(),
@@ -190,6 +201,45 @@ export function loadGeneratedAt() {
   try { return localStorage.getItem('schedule-last-generated-at') || null; } catch { return null; }
 }
 
+/* ---------- favorites: активный режим + снимок для «Отменить» ---------- */
+/* Константы FAV_ACTIVE_KEY / PREV_FILTER_KEY объявлены выше, до state. */
+
+export function saveFavoritesActive(active) {
+  if (state.urlContext) return;
+  try { localStorage.setItem(FAV_ACTIVE_KEY, active ? '1' : '0'); } catch {}
+}
+
+export function loadFavoritesActive() {
+  try { return localStorage.getItem(FAV_ACTIVE_KEY) === '1'; } catch { return false; }
+}
+
+export function savePrevFilter(prevFilter) {
+  if (state.urlContext) return;
+  try {
+    if (prevFilter) {
+      localStorage.setItem(PREV_FILTER_KEY, JSON.stringify({
+        groups:   [...prevFilter.groups],
+        teachers: [...prevFilter.teachers],
+      }));
+    } else {
+      localStorage.removeItem(PREV_FILTER_KEY);
+    }
+  } catch {}
+}
+
+export function loadPrevFilter() {
+  try {
+    const raw = localStorage.getItem(PREV_FILTER_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj !== 'object') return null;
+    return {
+      groups:   Array.isArray(obj.groups)   ? obj.groups   : [],
+      teachers: Array.isArray(obj.teachers) ? obj.teachers : [],
+    };
+  } catch { return null; }
+}
+
 /* ============================================================
  *  URL CONTEXT (deep links)
  * ============================================================ */
@@ -218,7 +268,7 @@ export function applyUrlContext() {
 
   state.urlRaw = raw;
 
-  if (raw.v && ['month', 'week', 'day'].includes(raw.v)) {
+  if (raw.v && ['month', 'week', 'day', 'load'].includes(raw.v)) {
     state.view = raw.v;
   }
   if (raw.d) {
@@ -273,7 +323,7 @@ export function resolveUrlContext() {
   // --- view ---
   if (v !== null) {
     total++;
-    if (['month', 'week', 'day'].includes(v)) matched++;
+    if (['month', 'week', 'day', 'load'].includes(v)) matched++;
   }
 
   // --- date ---
@@ -302,6 +352,13 @@ export function resolveUrlContext() {
 
   state.urlContext = true;
   state.urlEventId = e || null;
+
+  // Просмотр по чужой ссылке — фильтр диктуется URL, а не избранным.
+  // Сбрасываем режим только в памяти: в localStorage не пишем
+  // (saveFavoritesActive сам пропустит запись при urlContext=true),
+  // так что при следующем обычном заходе избранное снова «вспомнится».
+  state.favoritesActive = false;
+
   return matched === total ? 'full' : 'partial';
 }
 

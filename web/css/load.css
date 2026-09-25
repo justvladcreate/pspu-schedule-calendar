@@ -1,0 +1,319 @@
+/* ============================================================
+ *  LOAD VIEW — нагрузка по семестру
+ * ============================================================ */
+
+.calendar.view-load {
+    overflow: auto;
+}
+
+.load-view {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 100%;
+    box-sizing: border-box;
+}
+
+/* ---------- STATS ---------- */
+.load-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.load-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.load-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.load-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- HEATMAP ---------- */
+.load-heatmap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.load-heatmap-header,
+.load-heatmap-row {
+    display: grid;
+    grid-template-columns: 42px repeat(7, minmax(36px, 1fr));
+    gap: 4px;
+}
+
+.load-heatmap-header {
+    margin-bottom: 4px;
+}
+
+.load-heatmap-weekday {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 0;
+}
+
+.load-heatmap-weeknum {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, color 0.12s;
+}
+.load-heatmap-weeknum:hover {
+    background: var(--surface-2);
+    color: var(--accent);
+}
+.load-heatmap-weeknum:active {
+    background: var(--surface-3);
+}
+
+.load-cell {
+    appearance: none;
+    border: none;
+    background: var(--surface-2);
+    border-radius: 6px;
+    min-height: 40px;
+    padding: 4px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--text);
+    transition: transform 0.08s, filter 0.15s;
+    position: relative;
+}
+
+.load-cell:hover:not(:disabled) {
+    filter: brightness(1.12);
+    z-index: 2;
+}
+.load-cell:active:not(:disabled) {
+    transform: scale(0.95);
+}
+.load-cell:disabled {
+    cursor: default;
+}
+
+.load-cell.is-empty {
+    color: var(--text-dim);
+    opacity: 0.55;
+}
+
+.load-cell.is-today {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.load-cell.is-dense .load-cell-day {
+    color: var(--text);
+    opacity: 0.85;
+}
+
+.load-cell-day {
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.load-cell-count {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    min-height: 12px;
+}
+
+/* ---------- LEGEND ---------- */
+.load-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 10.5px;
+    color: var(--text-muted);
+}
+
+.load-legend-text {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.load-legend-cells {
+    display: flex;
+    gap: 3px;
+}
+
+.load-legend-cells > span {
+    width: 16px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+/* ---------- WEEKLY BARS ---------- */
+.load-weekly {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.load-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 12px;
+}
+
+.load-bars {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    height: 150px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.load-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 32px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.load-bar-value {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.load-bar-fill-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 0;
+}
+
+.load-bar-fill {
+    width: 60%;
+    margin: 0 auto;
+    background: var(--accent);
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: filter 0.15s;
+}
+
+.load-bar:hover .load-bar-fill {
+    filter: brightness(1.15);
+}
+
+.load-bar-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 900px) {
+    .load-view {
+        padding: 10px;
+        gap: 12px;
+    }
+
+    .load-stat {
+        padding: 10px 12px;
+    }
+    .load-stat-value {
+        font-size: 18px;
+    }
+    .load-stat-label {
+        font-size: 10px;
+    }
+
+    .load-heatmap {
+        padding: 8px;
+    }
+
+    .load-heatmap-header,
+    .load-heatmap-row {
+        grid-template-columns: 34px repeat(7, minmax(30px, 1fr));
+        gap: 3px;
+    }
+
+    .load-cell {
+        min-height: 36px;
+        border-radius: 5px;
+        padding: 2px 1px;
+    }
+    .load-cell-day {
+        font-size: 9px;
+    }
+    .load-cell-count {
+        font-size: 11px;
+        min-height: 11px;
+    }
+
+    .load-legend {
+        gap: 6px;
+        font-size: 10px;
+    }
+    .load-legend-cells > span {
+        width: 13px;
+        height: 10px;
+    }
+
+    .load-bars {
+        height: 120px;
+    }
+    .load-bar {
+        min-width: 26px;
+    }
+    .load-bar-value {
+        font-size: 10px;
+    }
+    .load-bar-label {
+        font-size: 9px;
+    }
+}

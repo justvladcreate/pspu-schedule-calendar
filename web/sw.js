@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v30';
+const CACHE = 'pspu-schedule-v33';
 
 const STATIC_ASSETS = [
   './',
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   './css/toolbar.css',
   './css/filter.css',
   './css/calendar.css',
+  './css/load.css',
   './css/popover.css',
   './css/modals.css',
   './css/mobile.css',
@@ -22,6 +23,7 @@ const STATIC_ASSETS = [
   './js/utils.js',
   './js/data.js',
   './js/render.js',
+  './js/load-view.js',
   './js/layout.js',
   './js/navigation.js',
   './js/datepicker.js',

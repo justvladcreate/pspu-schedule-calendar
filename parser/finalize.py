@@ -1,4 +1,5 @@
 import itertools
+import re
 from typing import Dict, List, Optional, Any
 from datetime import time, date, timedelta, datetime, timezone
 
@@ -45,20 +46,68 @@ async def normalize_teachers(teacher_str: str) -> List[str]:
 # Нужны, чтобы отрезать висячие дефисы/точки/скобки по краям.
 _DATE_TRIM = " \t.,;:()[]{}–—-"
 
+# Полный шаблон даты: DD.MM или DD.MM.YYYY. Локальная копия,
+# чтобы не тянуть приватный символ из preprocess.py.
+_DATE_FULL = r'\d{1,2}\.\d{2}(?:\.\d{4})?'
+
+
+def _infer_semester_start_year(text: str, fallback_year: int) -> int:
+    """
+    Год начала учебного семестра (сентябрь).
+
+    Приоритет:
+      1. Явная дата с годом внутри текста:
+         месяц 9-12 → этот год;
+         месяц 1-8  → этот год минус 1.
+      2. Fallback по сегодняшней дате:
+         сентябрь-декабрь → текущий год;
+         январь-август    → предыдущий год.
+    """
+    best: int | None = None
+    for m in re.finditer(rf'\b({_DATE_FULL})\b', text):
+        parts = m.group(1).split(".")
+        if len(parts) != 3:
+            continue
+        try:
+            mo, y = int(parts[1]), int(parts[2])
+        except ValueError:
+            continue
+        candidate = y if mo >= 9 else y - 1
+        if best is None or candidate > best:
+            best = candidate
+
+    if best is not None:
+        return best
+
+    today = date.today()
+    return fallback_year if today.month >= 9 else fallback_year - 1
 
 def expand_dates(s: str, current_year: int | None = None) -> list[str]:
     """Разворачивает строку дат в список 'DD.MM.YYYY'.
+
+    Учитывает, что учебный семестр начинается в сентябре и пересекает
+    границу календарного года: сентябрь-декабрь — год начала семестра,
+    январь-август — следующий год.
 
     Устойчиво к неполным данным от LLM:
       "13.10-"        → ["13.10.2026"]         (висячий дефис — это одиночная дата)
       "13.10 - "      → ["13.10.2026"]
       "13.10-15"      → ["13.10.2026"]         (правая часть не дата)
       "13.10 - 20.10" → ["13.10.2026", "20.10.2026"]
+      "05.11 - 03.12, 14.01, 21.01, 28.01"
+                      → [..., "14.01.2027", "21.01.2027", "28.01.2027"]
       "13.10.2026"    → ["13.10.2026"]
       "-"             → []                     (плейсхолдер пустого поля)
     """
     if current_year is None:
         current_year = date.today().year
+
+    semester_start_year = _infer_semester_start_year(s, current_year)
+
+    def resolve_year(month: int) -> int:
+        # Сентябрь-декабрь → год начала семестра.
+        # Январь-август    → следующий год.
+        return semester_start_year if month >= 9 else semester_start_year + 1
 
     def parse(t: str) -> tuple[int, int, int | None] | None:
         """'13.10' → (13, 10, None); '13.10.2026' → (13, 10, 2026).
@@ -112,11 +161,14 @@ def expand_dates(s: str, current_year: int | None = None) -> list[str]:
             elif y2 is not None:
                 start_year = y2 if (m1, d1) <= (m2, d2) else y2 - 1
             else:
-                start_year = current_year
+                start_year = resolve_year(m1)
 
             if y2 is not None:
                 end_year = y2
             elif (m2, d2) < (m1, d1):
+                end_year = start_year + 1
+            elif m1 >= 9 and m2 < 9:
+                # Осенне-зимний диапазон: сентябрь-декабрь → январь-август.
                 end_year = start_year + 1
             else:
                 end_year = start_year
@@ -147,7 +199,8 @@ def expand_dates(s: str, current_year: int | None = None) -> list[str]:
             continue
         d, m, y = p
         try:
-            result.append(date(y or current_year, m, d).strftime("%d.%m.%Y"))
+            year = y if y is not None else resolve_year(m)
+            result.append(date(year, m, d).strftime("%d.%m.%Y"))
         except ValueError:
             # 30.02 или подобное — молча пропускаем
             pass
