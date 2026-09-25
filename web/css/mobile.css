@@ -61,19 +61,6 @@
         order: 8;
     }
 
-    .updated-btn {
-        min-width: 0;
-        max-width: 100%;
-        overflow: hidden;
-    }
-
-    .updated-btn #updatedTime {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        min-width: 0;
-    }
-
     .btn-icon {
         padding: 7px;
         min-width: 34px;
@@ -121,8 +108,16 @@
     }
 
     .footer {
-        padding: 4px 12px;
+        padding: 4px 8px;
+        gap: 2px;
     }
+
+    .footer-link {
+        padding: 6px 10px;
+        min-height: 34px;
+    }
+
+    .footer-link--icon { padding: 6px 8px; }
 
     .filter {
         position: static;

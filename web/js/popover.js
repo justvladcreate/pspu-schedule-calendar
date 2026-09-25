@@ -40,6 +40,7 @@ export function showEventDetails(ev, anchor) {
 export function hideEventDetails() {
     const pop = document.getElementById('eventPopover');
     pop.classList.remove('open', 'popover--group');
+    pop.innerHTML = '';
 }
 
 export function showGroupDetails(events, anchor) {

@@ -318,16 +318,26 @@
     padding: 6px 16px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     font-size: 12px;
 }
 .footer-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 5px 12px;
     border-radius: 6px;
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
+    line-height: 1;
     transition: background 0.15s, color 0.15s;
 }
 .footer-link:hover { background: var(--surface-2); color: var(--text); }
+
+/* Иконка GitHub — только иконка, без текста */
+.footer-link--icon { padding: 5px 8px; }
+.footer-link--icon svg { display: block; }
