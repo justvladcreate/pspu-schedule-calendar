@@ -168,8 +168,100 @@
     pointer-events: none;
     max-width: calc(100vw - 32px);
     transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 .toast.toast--visible {
     transform: translate(-50%, 0);
     opacity: 1;
+    pointer-events: auto;
+}
+
+/* Кнопка действия внутри тоста (например, «Вернуть») */
+.toast-action {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin: -4px -8px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.toast-action:hover {
+    background: var(--accent-soft);
+    color: var(--accent-hover);
+}
+.toast-action:active {
+    color: var(--accent);
+}
+
+/* Крестик закрытия тоста */
+.toast-close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    margin: -4px -8px -4px -2px;
+    border-radius: 6px;
+    opacity: 0.7;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+.toast-close:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    opacity: 1;
+}
+.toast-close:active {
+    background: var(--surface);
+}
+
+/* ---- мобильная адаптация тоста ---- */
+@media (max-width: 900px) {
+    .toast {
+        bottom: 16px;
+        padding: 8px 14px;
+        gap: 10px;
+        font-size: 13px;
+        border-radius: 20px;
+        max-width: calc(100vw - 16px);
+    }
+
+    .toast-text {
+        font-size: 13px;
+    }
+
+    .toast-action {
+        font-size: 13px;
+        padding: 3px 6px;
+        margin: -3px -6px;
+    }
+
+    .toast-close {
+        font-size: 11px;
+        padding: 3px 5px;
+        margin: -3px -6px -3px -1px;
+    }
+}
+
+/* Текст тоста — в одну строку */
+.toast-text {
+    min-width: 0;
+    white-space: nowrap;
 }

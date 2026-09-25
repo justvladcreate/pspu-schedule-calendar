@@ -32,6 +32,18 @@ export const state = {
   favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
   prevFilter: null,
   favoritesActive: false,
+  // =================
+
+  // === DRAFT (черновик фильтра, пока открыт дропдаун) ===
+  draftGroups: new Set(),
+  draftTeachers: new Set(),
+  draftFavoritesGroups: new Set(),
+  draftFavoritesTeachers: new Set(),
+  draftFavoritesDirty: false,
+
+  // Снимок предыдущего применённого состояния — для кнопки «Вернуть» в toast.
+  undoFilter: null,
+  // ======================================================
 
   currentDate: loadCurrentDate() || new Date(),
   view: localStorage.getItem('schedule-view') || 'week',

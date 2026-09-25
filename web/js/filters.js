@@ -3,6 +3,7 @@
 import { state, saveSetToStorage } from './state.js';
 import { render } from './render.js';
 import { refreshBanner } from './update-banner.js';
+import { showToast } from './toast.js';
 
 const FAV_GROUPS_KEY   = 'schedule-favorites-groups';
 const FAV_TEACHERS_KEY = 'schedule-favorites-teachers';
@@ -10,6 +11,39 @@ const FAV_TEACHERS_KEY = 'schedule-favorites-teachers';
 const TOOLTIP_TEXT =
     'Отметьте группы и преподавателей звёздочкой в фильтре, ' +
     'чтобы быстро возвращаться к ним';
+
+const UNDO_TIMEOUT_MS = 5000;
+
+/* ============================================================
+ *  ВСПОМОГАТЕЛЬНОЕ
+ * ============================================================ */
+
+function isFilterOpen() {
+    const root = document.getElementById('filterRoot');
+    return !!root && root.classList.contains('open');
+}
+
+/**
+ * Сколько событий попадёт под наборы групп/преподавателей.
+ * Не трогает state — чистый расчёт для превью в счётчике.
+ */
+function countMatchingEvents(groups, teachers) {
+    if (groups.size === 0 && teachers.size === 0) return 0;
+    let n = 0;
+    for (const ev of state.allEvents) {
+        if (groups.size > 0 && !groups.has(ev.group)) continue;
+        if (teachers.size > 0) {
+            const t = ev.teachers || [];
+            if (!t.some(x => teachers.has(x))) continue;
+        }
+        n++;
+    }
+    return n;
+}
+
+/* ============================================================
+ *  ПРИМЕНЕНИЕ ФИЛЬТРА
+ * ============================================================ */
 
 export function applyFilters() {
     const sg = state.selectedGroups;
@@ -30,13 +64,24 @@ export function applyFilters() {
     });
 }
 
+/* ============================================================
+ *  БЕЙДЖ НА КНОПКЕ ФИЛЬТРА
+ *
+ *  Закрыт  → число применённых.
+ *  Открыт  → число в draft.
+ * ============================================================ */
+
 export function updateTriggerLabel() {
     const trigger = document.querySelector('.filter-trigger');
     if (!trigger) return;
 
-    const total = state.selectedGroups.size + state.selectedTeachers.size;
     const badge = trigger.querySelector('.filter-badge');
     if (!badge) return;
+
+    const open = isFilterOpen();
+    const g = open ? state.draftGroups.size   : state.selectedGroups.size;
+    const t = open ? state.draftTeachers.size : state.selectedTeachers.size;
+    const total = g + t;
 
     const newText = total === 0 ? '' : (total > 99 ? '99+' : String(total));
     const changed = badge.textContent !== newText;
@@ -55,15 +100,27 @@ export function updateTriggerLabel() {
     }
 }
 
+/* ============================================================
+ *  СЧЁТЧИК
+ *
+ *  Открыт  → «Выбрано» из draft + превью «найдено» по draft.
+ *  Закрыт  → «Выбрано» из применённого + фактическое «найдено».
+ * ============================================================ */
+
 export function updateCounter() {
     const counterEl = document.getElementById('filterCounter');
     if (!counterEl) return;
 
-    const g = state.selectedGroups.size;
-    const t = state.selectedTeachers.size;
+    const open = isFilterOpen();
+    const g = open ? state.draftGroups.size   : state.selectedGroups.size;
+    const t = open ? state.draftTeachers.size : state.selectedTeachers.size;
+
     const totalG = state.groups.length;
     const totalT = state.teachers.length;
-    const found = state.filteredEvents.length;
+
+    const found = open
+        ? countMatchingEvents(state.draftGroups, state.draftTeachers)
+        : state.filteredEvents.length;
 
     let selectionText;
     if (g === 0 && t === 0) {
@@ -77,12 +134,25 @@ export function updateCounter() {
         selectionText = `Выбрано — ${parts.join(', ')}`;
     }
 
-    const foundText = `найдено: ${found}`;
-    counterEl.textContent = `${selectionText} · ${foundText}`;
+    counterEl.textContent = `${selectionText} · найдено: ${found}`;
 }
 
 /* ============================================================
- *  ИЗБРАННОЕ — вспомогательное
+ *  КНОПКА «ГОТОВО» — текст с числом draft
+ * ============================================================ */
+
+function updateDoneButton() {
+    const root = document.getElementById('filterRoot');
+    if (!root) return;
+    const doneBtn = root.querySelector('.filter-done');
+    if (!doneBtn) return;
+
+    const n = state.draftGroups.size + state.draftTeachers.size;
+    doneBtn.textContent = n > 0 ? `Готово (${n})` : 'Готово';
+}
+
+/* ============================================================
+ *  КНОПКА «ИЗБРАННОЕ» В ТУЛБАРЕ
  * ============================================================ */
 
 function updateFavoritesButton() {
@@ -99,12 +169,85 @@ function updateFavoritesButton() {
     );
 }
 
+/* ============================================================
+ *  COMMIT DRAFT → APPLIED + UNDO
+ * ============================================================ */
+
+function commitDrafts() {
+    // Снимок «как было» для кнопки «Вернуть».
+    state.undoFilter = {
+        groups:   [...state.selectedGroups],
+        teachers: [...state.selectedTeachers],
+    };
+
+    // Применяем черновик.
+    state.selectedGroups       = new Set(state.draftGroups);
+    state.selectedTeachers     = new Set(state.draftTeachers);
+    state.favoritesGroups      = new Set(state.draftFavoritesGroups);
+    state.favoritesTeachers    = new Set(state.draftFavoritesTeachers);
+
+    // Если сейчас активен режим «только избранное» и избранное правили —
+    // синхронизируем выделение с новым избранным (иначе снятая звезда
+    // не уберёт мероприятие из календаря).
+    if (state.favoritesActive && state.draftFavoritesDirty) {
+        state.selectedGroups   = new Set(state.favoritesGroups);
+        state.selectedTeachers = new Set(state.favoritesTeachers);
+    }
+
+    saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
+    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+    saveSetToStorage(FAV_GROUPS_KEY,               state.favoritesGroups);
+    saveSetToStorage(FAV_TEACHERS_KEY,             state.favoritesTeachers);
+
+    applyFilters();
+    updateTriggerLabel();
+    updateCounter();
+    render();
+    refreshBanner();
+
+    showToast('Фильтры применены...', {
+        duration: UNDO_TIMEOUT_MS,
+        action: {
+            label: 'Отменить',
+            onClick: undoFilterChange,
+        },
+    });
+}
+
+function undoFilterChange() {
+    if (!state.undoFilter) return;
+
+    state.selectedGroups   = new Set(state.undoFilter.groups);
+    state.selectedTeachers = new Set(state.undoFilter.teachers);
+    state.undoFilter = null;
+
+    saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
+    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+
+    applyFilters();
+    updateTriggerLabel();
+    updateCounter();
+    updateFavoritesButton();
+    render();
+    refreshBanner();
+}
+
+/* ============================================================
+ *  ЗВЁЗДОЧКА В СПИСКЕ ФИЛЬТРА
+ *
+ *  В draft-режиме — меняет ТОЛЬКО draftFavorites*.
+ *  Никаких saveSetToStorage, никакого render.
+ * ============================================================ */
+
 function makeFavoriteStar(type, value) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'favorite-star';
 
-    const set = type === 'group' ? state.favoritesGroups : state.favoritesTeachers;
+    const set = type === 'group'
+        ? state.draftFavoritesGroups
+        : state.draftFavoritesTeachers;
+
     const isFav = set.has(value);
     if (isFav) btn.classList.add('is-favorite');
 
@@ -122,41 +265,26 @@ function makeFavoriteStar(type, value) {
         e.preventDefault();
         e.stopPropagation();
 
-        const s = type === 'group' ? state.favoritesGroups : state.favoritesTeachers;
+        const s = type === 'group'
+            ? state.draftFavoritesGroups
+            : state.draftFavoritesTeachers;
+
         if (s.has(value)) s.delete(value);
         else s.add(value);
 
-        saveSetToStorage(
-            type === 'group' ? FAV_GROUPS_KEY : FAV_TEACHERS_KEY,
-            s,
-        );
+        state.draftFavoritesDirty = true;
 
         const nowFav = s.has(value);
         btn.classList.toggle('is-favorite', nowFav);
         btn.setAttribute('aria-label', nowFav ? 'Убрать из избранного' : 'В избранное');
         btn.querySelector('svg').setAttribute('fill', nowFav ? 'currentColor' : 'none');
-
-        if (state.favoritesActive) {
-            if (type === 'group') {
-                state.selectedGroups = new Set(state.favoritesGroups);
-                saveSetToStorage('schedule-selected-groups', state.selectedGroups);
-            } else {
-                state.selectedTeachers = new Set(state.favoritesTeachers);
-                saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
-            }
-            applyFilters();
-            updateTriggerLabel();
-            updateCounter();
-            render();
-            refreshBanner();
-        }
     });
 
     return btn;
 }
 
 /* ============================================================
- *  ИЗБРАННОЕ — кнопка в тулбаре
+ *  КНОПКА «ИЗБРАННОЕ» В ТУЛБАРЕ
  * ============================================================ */
 
 export function setupFavoritesButton() {
@@ -248,7 +376,7 @@ export function setupFavoritesButton() {
 }
 
 /* ============================================================
- *  ФИЛЬТР
+ *  ОСНОВНОЙ ФИЛЬТР (draft-режим)
  * ============================================================ */
 
 export function setupUnifiedFilter() {
@@ -262,6 +390,8 @@ export function setupUnifiedFilter() {
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
 
+    /* ---------- одна строка списка ---------- */
+
     function buildOption(value, type) {
         const row = document.createElement('label');
         row.className = 'filter-option';
@@ -269,24 +399,17 @@ export function setupUnifiedFilter() {
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.checked = type === 'group'
-            ? state.selectedGroups.has(value)
-            : state.selectedTeachers.has(value);
+            ? state.draftGroups.has(value)
+            : state.draftTeachers.has(value);
 
         cb.addEventListener('change', () => {
-            const set = type === 'group' ? state.selectedGroups : state.selectedTeachers;
+            const set = type === 'group' ? state.draftGroups : state.draftTeachers;
             if (cb.checked) set.add(value);
             else set.delete(value);
 
-            saveSetToStorage(
-                type === 'group' ? 'schedule-selected-groups' : 'schedule-selected-teachers',
-                set,
-            );
-
-            applyFilters();
             updateTriggerLabel();
             updateCounter();
-            render();
-            refreshBanner();
+            updateDoneButton();
         });
 
         const text = document.createElement('span');
@@ -300,6 +423,8 @@ export function setupUnifiedFilter() {
         row.appendChild(star);
         return row;
     }
+
+    /* ---------- перерисовка обоих списков ---------- */
 
     function renderLists(query = '') {
         const q = query.trim().toLowerCase();
@@ -327,24 +452,49 @@ export function setupUnifiedFilter() {
         }
     }
 
+    /* ---------- открытие: applied → draft ---------- */
+
     function openFilter() {
+        // Копируем всё «живое» состояние в черновик.
+        state.draftGroups           = new Set(state.selectedGroups);
+        state.draftTeachers         = new Set(state.selectedTeachers);
+        state.draftFavoritesGroups  = new Set(state.favoritesGroups);
+        state.draftFavoritesTeachers = new Set(state.favoritesTeachers);
+        state.draftFavoritesDirty   = false;
+
         document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
         root.classList.add('open');
+
         search.value = '';
         renderLists('');
+        updateTriggerLabel();   // теперь бейдж показывает draft
         updateCounter();
+        updateDoneButton();
+
         history.pushState({ filterOpen: true }, '');
         setTimeout(() => search.focus(), 50);
     }
 
+    /* ---------- закрытие без применения ---------- */
+
+    function resetBadgeAfterClose() {
+        // Draft отбрасывается — бейдж/счётчик возвращаются к applied.
+        updateTriggerLabel();
+        updateCounter();
+    }
+
     function closeFilter() {
         if (!root.classList.contains('open')) return;
+
         if (history.state && history.state.filterOpen) {
-            history.back();
+            history.back();   // popstate закроет и обновит бейдж
         } else {
             root.classList.remove('open');
+            resetBadgeAfterClose();
         }
     }
+
+    /* ---------- обработчики ---------- */
 
     trigger.addEventListener('click', e => {
         e.stopPropagation();
@@ -363,13 +513,21 @@ export function setupUnifiedFilter() {
     if (doneBtn) {
         doneBtn.addEventListener('click', e => {
             e.stopPropagation();
-            closeFilter();
+            commitDrafts();
+            // Закрываем дропдаун — те же ветки, что и в closeFilter,
+            // но без повторного обновления бейджа (commitDrafts уже сделал).
+            if (history.state && history.state.filterOpen) {
+                history.back();
+            } else {
+                root.classList.remove('open');
+            }
         });
     }
 
     window.addEventListener('popstate', () => {
         if (root.classList.contains('open')) {
             root.classList.remove('open');
+            resetBadgeAfterClose();
         }
     });
 
@@ -384,43 +542,36 @@ export function setupUnifiedFilter() {
     selectAllBtn.addEventListener('click', e => {
         e.stopPropagation();
 
-        state.selectedGroups.clear();
-        state.selectedTeachers.clear();
-        for (const g of state.groups)   state.selectedGroups.add(g);
-        for (const t of state.teachers) state.selectedTeachers.add(t);
+        state.draftGroups.clear();
+        state.draftTeachers.clear();
+        for (const g of state.groups)   state.draftGroups.add(g);
+        for (const t of state.teachers) state.draftTeachers.add(t);
 
-        saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
-        saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
-
-        applyFilters();
+        renderLists(search.value);
         updateTriggerLabel();
         updateCounter();
-        render();
-        renderLists(search.value);
-        refreshBanner();
+        updateDoneButton();
     });
 
     clearBtn.addEventListener('click', e => {
         e.stopPropagation();
-        state.selectedGroups.clear();
-        state.selectedTeachers.clear();
-        saveSetToStorage('schedule-selected-groups', state.selectedGroups);
-        saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
-        applyFilters();
+
+        state.draftGroups.clear();
+        state.draftTeachers.clear();
+
+        renderLists(search.value);
         updateTriggerLabel();
         updateCounter();
-        render();
-        renderLists(search.value);
-        refreshBanner();
+        updateDoneButton();
     });
 
     dropdown.addEventListener('click', e => e.stopPropagation());
 
     updateTriggerLabel();
     updateCounter();
+    updateDoneButton();
 
     window.addEventListener('resize', () => {
-        // updateDateLabel imported from render
         import('./render.js').then(m => m.updateDateLabel());
     });
 }
