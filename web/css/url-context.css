@@ -1,0 +1,67 @@
+/* ============ URL CONTEXT BANNER ============ */
+/* Появляется, когда страница открыта по share-ссылке.
+   Напоминает пользователю, что его личные настройки не тронуты. */
+
+.url-context-banner {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--accent-soft);
+    color: var(--text);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    text-align: center;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.url-context-banner[hidden] { display: none; }
+
+.url-context-banner:hover {
+    background: color-mix(in srgb, var(--accent-soft) 65%, var(--accent) 35%);
+}
+
+.url-context-banner:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.url-context-action {
+    color: var(--accent);
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    line-height: 1.3;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.url-context-banner:hover .url-context-action {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+@media (max-width: 900px) {
+    .url-context-banner {
+        font-size: 12px;
+        padding: 8px 12px;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .url-context-action {
+        padding: 3px 9px;
+    }
+}

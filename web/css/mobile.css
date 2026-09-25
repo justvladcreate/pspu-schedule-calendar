@@ -74,6 +74,11 @@
         order: 9;
     }
 
+    /* 10. Поделиться */
+    .toolbar-right > #shareBtn {
+        order: 10;
+    }
+
     .btn-icon {
         padding: 7px;
         min-width: 34px;

@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v28';
+const CACHE = 'pspu-schedule-v29';
 
 const STATIC_ASSETS = [
   './',
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   './css/mobile.css',
   './css/export-toast.css',
   './css/changes.css',
+  './css/url-context.css',
   './js/main.js',
   './js/state.js',
   './js/config.js',

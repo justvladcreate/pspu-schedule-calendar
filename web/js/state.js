@@ -14,6 +14,7 @@ export function loadSetFromStorage(key) {
 }
 
 export function saveSetToStorage(key, set) {
+    if (state.urlContext) return;
     try {
         localStorage.setItem(key, JSON.stringify([...set]));
     } catch {}
@@ -89,9 +90,19 @@ export const state = {
   // Живёт в localStorage, переживает reload, перезаписывается
   // только когда приходит новая порция изменений.
   pendingChanges: loadPendingChanges(),
+
+  // === URL CONTEXT (deep links) ===
+  // true — страница открыта по ссылке с параметрами. Пока true,
+  // ни одна save-функция не пишет в localStorage. Снимается при
+  // первом же клике пользователя.
+  urlContext: false,
+  urlEventId: null,
+  // Сырые параметры из URL, до валидации (см. resolveUrlContext).
+  urlRaw: null,
 };
 
 export function saveCurrentDate(d) {
+  if (state.urlContext) return;
   try { localStorage.setItem('schedule-current-date', toISO(d)); } catch {}
 }
 export function loadCurrentDate() {
@@ -105,6 +116,7 @@ export function loadCurrentDate() {
 }
 
 export function saveScrollMemory(view, data) {
+  if (state.urlContext) return;
   try { localStorage.setItem('schedule-scroll-' + view, JSON.stringify(data)); } catch {}
 }
 export function loadScrollMemory(view) {
@@ -156,6 +168,7 @@ function makeSnapshotEntry(ev) {
 }
 
 export function saveSnapshot(events) {
+  if (state.urlContext) return;
   try {
     localStorage.setItem('schedule-snapshot', JSON.stringify(events.map(makeSnapshotEntry)));
   } catch {}
@@ -170,8 +183,136 @@ export function loadSnapshot() {
 }
 
 export function saveGeneratedAt(iso) {
+  if (state.urlContext) return;
   try { if (iso) localStorage.setItem('schedule-last-generated-at', iso); } catch {}
 }
 export function loadGeneratedAt() {
   try { return localStorage.getItem('schedule-last-generated-at') || null; } catch { return null; }
+}
+
+/* ============================================================
+ *  URL CONTEXT (deep links)
+ * ============================================================ */
+
+/**
+ * ШАГ 1 — только парсинг. Не трогает selectedGroups/Teachers,
+ * потому что на этом этапе ещё нет state.groups/state.teachers.
+ *
+ * Сразу применяет v и d (они не зависят от данных), остальное
+ * складывает в state.urlRaw для последующей валидации.
+ *
+ * Возвращает true, если в URL был хотя бы один известный параметр.
+ */
+export function applyUrlContext() {
+  const params = new URLSearchParams(location.search);
+  const raw = {
+    g: params.get('g'),
+    t: params.get('t'),
+    v: params.get('v'),
+    d: params.get('d'),
+    e: params.get('e'),
+  };
+
+  const hasAny = Object.values(raw).some(v => v !== null);
+  if (!hasAny) return false;
+
+  state.urlRaw = raw;
+
+  if (raw.v && ['month', 'week', 'day'].includes(raw.v)) {
+    state.view = raw.v;
+  }
+  if (raw.d) {
+    const parts = raw.d.split('-').map(Number);
+    if (parts.length === 3 && parts.every(Number.isFinite)) {
+      state.currentDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+  }
+
+  return true;
+}
+
+/**
+ * ШАГ 2 — валидация. Вызывается ПОСЛЕ того, как построены
+ * state.groups, state.teachers и state.allEvents.
+ *
+ * Возвращает:
+ *   'empty'   — URL вообще без параметров (обычный заход);
+ *   'full'    — все параметры применились;
+ *   'partial' — что-то применилось, что-то отброшено как невалидное;
+ *   'none'    — параметры были, но ничего валидного, откатились.
+ */
+export function resolveUrlContext() {
+  if (!state.urlRaw) return 'empty';
+
+  const { g, t, v, d, e } = state.urlRaw;
+  const knownGroups   = new Set(state.groups);
+  const knownTeachers = new Set(state.teachers);
+
+  let total   = 0;
+  let matched = 0;
+
+  // --- groups ---
+  if (g !== null) {
+    total++;
+    const list = g ? g.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const kept = list.filter(x => knownGroups.has(x));
+    state.selectedGroups = new Set(kept);
+    // Пустая строка `?g=` — явный «без групп», считается применённой.
+    if (g === '' || kept.length > 0) matched++;
+  }
+
+  // --- teachers ---
+  if (t !== null) {
+    total++;
+    const list = t ? t.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const kept = list.filter(x => knownTeachers.has(x));
+    state.selectedTeachers = new Set(kept);
+    if (t === '' || kept.length > 0) matched++;
+  }
+
+  // --- view ---
+  if (v !== null) {
+    total++;
+    if (['month', 'week', 'day'].includes(v)) matched++;
+  }
+
+  // --- date ---
+  if (d !== null) {
+    total++;
+    const parts = d.split('-').map(Number);
+    if (parts.length === 3 && parts.every(Number.isFinite)) matched++;
+  }
+
+  // --- event ---
+  if (e) {
+    total++;
+    const exists = state.allEvents.some(ev => ev.event_id === e);
+    if (exists) matched++;
+    else state.urlEventId = null;
+  }
+
+  if (matched === 0) {
+    // Ничего валидного — полный откат в обычный режим.
+    restoreFromStorage();
+    state.urlRaw     = null;
+    state.urlContext = false;
+    state.urlEventId = null;
+    return 'none';
+  }
+
+  state.urlContext = true;
+  state.urlEventId = e || null;
+  return matched === total ? 'full' : 'partial';
+}
+
+/** Возвращает state к значениям из localStorage (для отката). */
+function restoreFromStorage() {
+  state.selectedGroups   = loadSetFromStorage('schedule-selected-groups');
+  state.selectedTeachers = loadSetFromStorage('schedule-selected-teachers');
+  state.view        = localStorage.getItem('schedule-view') || 'week';
+  state.currentDate = loadCurrentDate() || new Date();
+}
+
+export function disarmUrlContext() {
+  state.urlContext = false;
 }
