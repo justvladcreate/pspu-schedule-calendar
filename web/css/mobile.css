@@ -8,7 +8,8 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 6px 8px;
+        gap: 6px 6px;
+        row-gap: 8px;
         padding: 8px 10px;
     }
 
@@ -16,21 +17,35 @@
         order: 1;
         display: flex;
         align-items: center;
-        gap: 8px;
         min-width: 0;
+        flex: 0 1 auto;
     }
 
     .updated-wrap {
         order: 2;
         min-width: 0;
+        flex: 0 1 auto;
+        overflow: hidden;
+    }
+
+    /* Не даём updated растянуться и вытолкнуть стрелки на новую строку */
+    .updated-btn {
+        max-width: 100%;
+    }
+
+    /* Скрываем «Обновлено:» — иконки часов достаточно, а 75px экономии
+       как раз даёт стрелкам влезть в первую строку на узких экранах. */
+    .updated-prefix {
+        display: none;
     }
 
     .toolbar-center {
         order: 3;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         margin-left: auto;
+        flex-shrink: 0;
     }
 
     .toolbar-right {
@@ -86,6 +101,27 @@
     /* На мобилке разделители скрыты — там своя сетка. */
     .toolbar-divider {
         display: none;
+    }
+
+    /* Слегка уменьшаем кнопки в первой строке, чтобы точно влезли */
+    .date-label {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .updated-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .btn-arrow {
+        padding: 7px 10px;
+        min-width: 34px;
+    }
+
+    #todayBtn {
+        padding: 7px 10px;
+        font-size: 12px;
     }
 
     .view-switch {
