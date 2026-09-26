@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v36';
+const CACHE = 'pspu-schedule-v37';
 
 const STATIC_ASSETS = [
   './',
