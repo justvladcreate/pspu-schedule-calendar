@@ -57,6 +57,41 @@ export function shouldShowEmptyState() {
     return state.filteredEvents.length === 0;
 }
 
+/* ---------- LOAD VIEW: пульс выбранной ячейки ---------- */
+
+/**
+ * Единственная «анимация перехода» в виде «Нагрузка».
+ *
+ * Слайд здесь неуместен: сетка показывает весь семестр целиком,
+ * ничего никуда не уезжает. Вместо этого подсвечиваем ячейку,
+ * в которую переместился state.currentDate — так сразу видно,
+ * что именно переключилось.
+ */
+function pulseSelectedDay(cal) {
+    requestAnimationFrame(() => {
+        const cell = cal.querySelector('.load-hm-cell.is-selected-day');
+        if (!cell) return;
+
+        // Подтягиваем ячейку в видимую область — на широкой сетке
+        // семестра это важно, чтобы переход был заметен, даже если
+        // пользователь ушёл далеко от текущей позиции.
+        try {
+            cell.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+            });
+        } catch (_) { /* старые браузеры — без скролла, ничего страшного */ }
+
+        cell.classList.remove('load-cell-pulse');
+        void cell.offsetWidth;
+        cell.classList.add('load-cell-pulse');
+        cell.addEventListener('animationend', () => {
+            cell.classList.remove('load-cell-pulse');
+        }, { once: true });
+    });
+}
+
 /* ---------- RENDER DISPATCH ---------- */
 export function render(animation = null) {
   const cal = document.getElementById('calendar');
@@ -104,11 +139,17 @@ export function render(animation = null) {
   state.initialRenderDone = true;
 
   if (animation) {
-    void cal.offsetWidth;
-    cal.classList.add('anim-' + animation);
-    cal.addEventListener('animationend', () => {
-      cal.classList.remove('anim-' + animation);
-    }, { once: true });
+    if (state.view === 'load') {
+      // В «Нагрузке» — собственный отклик на навигацию:
+      // пульс на выбранной ячейке вместо общего слайда.
+      pulseSelectedDay(cal);
+    } else {
+      void cal.offsetWidth;
+      cal.classList.add('anim-' + animation);
+      cal.addEventListener('animationend', () => {
+        cal.classList.remove('anim-' + animation);
+      }, { once: true });
+    }
   }
 }
 

@@ -1,319 +1,855 @@
 /* ============================================================
- *  LOAD VIEW — нагрузка по семестру
+ *  LOAD VIEW — нагрузка за семестр
+ *  Heatmap: недели = колонки, дни = строки
  * ============================================================ */
 
-.calendar.view-load {
-    overflow: auto;
+:root[data-theme="dark"] {
+    --load-low:  #6ba3d4;
+    --load-mid:  #d9a24a;
+    --load-high: #e57373;
 }
+:root[data-theme="light"] {
+    --load-low:  #4a90e2;
+    --load-mid:  #e0902a;
+    --load-high: #e53935;
+}
+
+.calendar.view-load { overflow: auto; }
 
 .load-view {
-    padding: 16px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
     min-height: 100%;
     box-sizing: border-box;
+    max-width: min(1400px, calc(100vw - 32px));
+    margin: 0 auto;
+    width: 100%;
 }
 
-/* ---------- STATS ---------- */
-.load-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
+/* ============================================================
+ *  HEADER
+ * ============================================================ */
+
+.load-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
 }
 
-.load-stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
+.load-header-left { min-width: 0; flex: 1 1 auto; }
 
-.load-stat-value {
-    font-size: 22px;
-    font-weight: 700;
+.load-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
     color: var(--text);
+    margin: 0 0 2px;
     line-height: 1.1;
 }
 
-.load-stat-label {
-    font-size: 11px;
+.load-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+    font-size: 11.5px;
     color: var(--text-muted);
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    line-height: 1.3;
+}
+.load-summary b {
+    color: var(--text);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.load-summary-sep {
+    color: var(--text-dim);
+    user-select: none;
+    opacity: 0.6;
+}
+.load-summary-warn {
+    color: var(--load-high);
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-/* ---------- HEATMAP ---------- */
-.load-heatmap {
+.load-header-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.load-unit-toggle,
+.load-view-toggle {
+    display: inline-flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 2px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.load-unit-btn,
+.load-view-btn {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s, color 0.12s;
+}
+.load-unit-btn:hover,
+.load-view-btn:hover { color: var(--text); }
+.load-unit-btn.is-active,
+.load-view-btn.is-active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================
+ *  MAIN: two-column on desktop
+ * ============================================================ */
+
+.load-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 10px;
+    align-items: start;
+}
+
+/* ============================================================
+ *  HEATMAP CARD
+ * ============================================================ */
+
+.load-heatmap-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 12px;
+    padding: 10px 12px 8px;
+    min-width: 0;
 }
 
-.load-heatmap-header,
-.load-heatmap-row {
-    display: grid;
-    grid-template-columns: 42px repeat(7, minmax(36px, 1fr));
-    gap: 4px;
+.load-heatmap-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
-.load-heatmap-header {
-    margin-bottom: 4px;
-}
-
-.load-heatmap-weekday {
-    font-size: 10.5px;
-    color: var(--text-muted);
-    text-align: center;
+.load-heatmap-title {
+    font-size: 10px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 4px 0;
+    color: var(--text-muted);
 }
 
-.load-heatmap-weeknum {
+/* --- scroll wrapper --- */
+
+.load-heatmap-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+.load-heatmap-scroll::-webkit-scrollbar { height: 5px; }
+.load-heatmap-scroll::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
+}
+
+/* --- outer grid: левая колонка, недели, правая колонка --- */
+
+.load-heatmap {
+    display: grid;
+    grid-template-columns: auto repeat(var(--weeks), minmax(28px, 1fr)) auto;
+    gap: 3px;
+    align-items: stretch;
+    min-width: max-content;
+}
+
+/* --- боковая колонка (ПН..ВС + Σ) --- */
+
+.load-hm-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.load-hm-col--side {
+    width: 26px;
+    flex-shrink: 0;
+}
+.load-hm-col--side-right {
+    width: 36px;
+}
+
+/* --- колонка недели --- */
+
+.load-hm-col--week {
+    padding: 2px;
+    border-radius: 6px;
+    min-width: 0;
+    transition: background 0.15s;
+}
+
+/* Неделя, в которую попадает сегодня.
+   Намеренно без подсветки: маленькой точки «сегодня» на самой
+   ячейке достаточно, а фон колонки создавал визуальный шум. */
+.load-hm-col--week.is-current {
+    /* no-op */
+}
+
+/* Неделя, в которую попадает state.currentDate.
+   Очень тихий фон — только чтобы колонку выбранного дня можно
+   было найти взглядом на широкой сетке семестра. */
+.load-hm-col--week.is-selected {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+/* ============================================================
+ *  CELLS
+ * ============================================================ */
+
+.load-hm-corner { height: 20px; }
+
+.load-hm-weeknum {
     appearance: none;
     border: none;
-    background: transparent;
     font: inherit;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-dim);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    height: 20px;
+    padding: 0 6px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+    min-width: 0;
+}
+.load-hm-weeknum:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.load-hm-weeknum.is-current {
+    color: var(--accent);
+}
+.load-hm-weeknum.is-selected {
+    /* Мягкий чип: без сплошной заливки акцентом — это было громко. */
+    color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.load-hm-weeknum.is-selected:hover {
+    filter: brightness(1.1);
+}
+
+.load-hm-sigma-head {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.12s, color 0.12s;
+    height: 20px;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
-.load-heatmap-weeknum:hover {
+
+.load-hm-dow {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 2px;
+    height: 30px;
+}
+
+.load-hm-cell {
+    appearance: none;
+    border: none;
+    font: inherit;
+    padding: 0;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
     background: var(--surface-2);
+    color: var(--text-dim);
+    transition: filter 0.12s, transform 0.06s, box-shadow 0.15s;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+.load-hm-cell:disabled {
+    cursor: default;
+    background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    color: var(--text-dim);
+    opacity: 0.5;
+}
+.load-hm-cell:not(:disabled):hover {
+    filter: brightness(1.18);
+    z-index: 2;
+}
+.load-hm-cell:not(:disabled):active {
+    transform: scale(0.9);
+}
+
+/* уровни: 1–4 low, 5 mid, 6+ high */
+.load-hm-cell.is-low {
+    background: var(--surface-3);
+    color: var(--text);
+}
+.load-hm-cell.is-mid {
+    background: color-mix(in srgb, var(--load-mid) 24%, var(--surface-2));
+    color: var(--load-mid);
+}
+.load-hm-cell.is-high {
+    background: color-mix(in srgb, var(--load-high) 30%, var(--surface-2));
+    color: var(--load-high);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--load-high) 50%, transparent);
+}
+
+/* Сегодня: маленькая точка в углу ячейки вместо толстого outline.
+   Точка видна на любом фоне (уровни low/mid/high, выбранная ячейка). */
+.load-hm-cell.is-today::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--surface) 80%, transparent);
+    pointer-events: none;
+}
+
+/* Выбранный день (state.currentDate).
+   Тонкое акцентное кольцо ПОВЕРХ цвета уровня — mid/high/low
+   продолжают читаться, но видно, куда переключился пользователь.
+   Никакой заливки: это самый громкий источник шума в старой версии. */
+.load-hm-cell.is-selected-day {
+    outline: none;
+    box-shadow:
+        inset 0 0 0 2px var(--accent),
+        0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+    z-index: 3;
+}
+.load-hm-cell.is-selected-day:hover {
+    filter: brightness(1.1);
+}
+
+/* Пульс при навигации по дням. Срабатывает только на «навигационных»
+   рендерах (стрелки, datepicker, «Сегодня») — см. render.js. */
+@keyframes load-cell-pulse {
+    0% {
+        transform: scale(0.75);
+        box-shadow:
+            inset 0 0 0 2px var(--accent),
+            0 0 0 0 color-mix(in srgb, var(--accent) 65%, transparent);
+    }
+    55% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow:
+            inset 0 0 0 2px var(--accent),
+            0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+}
+
+.load-hm-cell.load-cell-pulse {
+    animation: load-cell-pulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .load-hm-cell.load-cell-pulse {
+        animation: none;
+    }
+}
+
+/* --- итоги по неделям --- */
+
+.load-hm-total {
+    appearance: none;
+    border: none;
+    font: inherit;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    background: transparent;
+    color: var(--text-muted);
+    transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+    min-width: 0;
+    padding: 0;
+}
+.load-hm-total.is-zero {
+    color: var(--text-dim);
+    opacity: 0.55;
+    cursor: default;
+}
+.load-hm-total.is-mid {
+    color: var(--load-mid);
+    background: color-mix(in srgb, var(--load-mid) 14%, transparent);
+}
+.load-hm-total.is-high {
+    color: var(--load-high);
+    background: color-mix(in srgb, var(--load-high) 18%, transparent);
+}
+.load-hm-total:not(.is-zero):hover {
+    background: var(--accent-soft);
     color: var(--accent);
 }
-.load-heatmap-weeknum:active {
+.load-hm-total.is-mid:not(.is-zero):hover {
+    background: color-mix(in srgb, var(--load-mid) 28%, transparent);
+    color: var(--load-mid);
+}
+.load-hm-total.is-high:not(.is-zero):hover {
+    background: color-mix(in srgb, var(--load-high) 32%, transparent);
+    color: var(--load-high);
+}
+.load-hm-total.is-selected {
+    background: var(--accent);
+    color: var(--accent-text);
+}
+.load-hm-total.is-selected:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    filter: brightness(1.1);
+}
+
+.load-hm-sum-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding-left: 2px;
+}
+
+.load-hm-row-sum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    border-radius: 5px;
+    background: var(--surface-2);
+}
+.load-hm-row-sum.is-mid  { color: var(--load-mid);  background: color-mix(in srgb, var(--load-mid) 14%, transparent); }
+.load-hm-row-sum.is-high { color: var(--load-high); background: color-mix(in srgb, var(--load-high) 18%, transparent); }
+
+.load-hm-grand-total {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    font-size: 10.5px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    border-radius: 4px;
     background: var(--surface-3);
 }
 
-.load-cell {
-    appearance: none;
-    border: none;
-    background: var(--surface-2);
-    border-radius: 6px;
-    min-height: 40px;
-    padding: 4px 2px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    cursor: pointer;
-    font: inherit;
-    color: var(--text);
-    transition: transform 0.08s, filter 0.15s;
-    position: relative;
-}
+/* ============================================================
+ *  STRIP VIEW — шкала по неделям
+ * ============================================================ */
 
-.load-cell:hover:not(:disabled) {
-    filter: brightness(1.12);
-    z-index: 2;
-}
-.load-cell:active:not(:disabled) {
-    transform: scale(0.95);
-}
-.load-cell:disabled {
-    cursor: default;
-}
-
-.load-cell.is-empty {
-    color: var(--text-dim);
-    opacity: 0.55;
-}
-
-.load-cell.is-today {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-}
-
-.load-cell.is-dense .load-cell-day {
-    color: var(--text);
-    opacity: 0.85;
-}
-
-.load-cell-day {
-    font-size: 10px;
-    color: var(--text-muted);
-    line-height: 1;
-}
-
-.load-cell-count {
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    min-height: 12px;
-}
-
-/* ---------- LEGEND ---------- */
-.load-legend {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 10px;
-    font-size: 10.5px;
-    color: var(--text-muted);
-}
-
-.load-legend-text {
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-}
-
-.load-legend-cells {
-    display: flex;
-    gap: 3px;
-}
-
-.load-legend-cells > span {
-    width: 16px;
-    height: 12px;
-    border-radius: 3px;
-    display: inline-block;
-}
-
-/* ---------- WEEKLY BARS ---------- */
-.load-weekly {
+.load-strip-view {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 10px 12px 8px;
+    min-width: 0;
 }
 
-.load-section-title {
-    font-size: 12px;
+.load-strip-view-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.load-strip-view-title {
+    font-size: 10px;
     font-weight: 700;
-    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 12px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
 }
 
-.load-bars {
+.load-strip-view-bars {
     display: flex;
     align-items: stretch;
-    gap: 4px;
-    height: 150px;
+    gap: 3px;
+    height: 130px;
     overflow-x: auto;
     padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+.load-strip-view-bars::-webkit-scrollbar { height: 5px; }
+.load-strip-view-bars::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
 }
 
-.load-bar {
+.load-strip-bar {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 2px 0;
+    cursor: pointer;
+    flex: 1 0 34px;
+    min-width: 34px;
+    max-width: 64px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    min-width: 32px;
-    height: 100%;
-    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 4px;
+    border-radius: 4px;
+    transition: background 0.12s;
 }
+.load-strip-bar:hover { background: var(--surface-2); }
 
-.load-bar-value {
-    font-size: 10.5px;
+.load-strip-bar-value {
+    font-size: 9.5px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
     line-height: 1;
     flex-shrink: 0;
 }
 
-.load-bar-fill-wrap {
+.load-strip-bar-fill-wrap {
     flex: 1;
     width: 100%;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    align-items: flex-end;
+    justify-content: center;
     min-height: 0;
 }
 
-.load-bar-fill {
+.load-strip-bar-fill {
     width: 60%;
-    margin: 0 auto;
-    background: var(--accent);
-    border-radius: 4px 4px 0 0;
-    min-height: 2px;
-    transition: filter 0.15s;
+    max-width: 26px;
+    min-height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--load-low);
+    transition: filter 0.12s, box-shadow 0.15s;
 }
-
-.load-bar:hover .load-bar-fill {
-    filter: brightness(1.15);
+.load-strip-bar-fill.is-mid  { background: var(--load-mid); }
+.load-strip-bar-fill.is-high {
+    background: var(--load-high);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--load-high) 60%, transparent);
 }
+.load-strip-bar:hover .load-strip-bar-fill { filter: brightness(1.15); }
 
-.load-bar-label {
-    font-size: 10px;
+.load-strip-bar-label {
+    font-size: 9px;
+    font-weight: 700;
     color: var(--text-dim);
     line-height: 1;
     flex-shrink: 0;
+    transition: color 0.12s;
+}
+.load-strip-bar:hover .load-strip-bar-label { color: var(--accent); }
+
+/* ============================================================
+ *  INSIGHTS PANEL
+ * ============================================================ */
+
+.load-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    max-height: 100%;
+    min-height: 0;
 }
 
-/* ---------- MOBILE ---------- */
-@media (max-width: 900px) {
-    .load-view {
-        padding: 10px;
-        gap: 12px;
-    }
+.load-insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px 10px;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+}
 
-    .load-stat {
-        padding: 10px 12px;
-    }
-    .load-stat-value {
-        font-size: 18px;
-    }
-    .load-stat-label {
-        font-size: 10px;
-    }
+.load-insight-card.has-overflow::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    pointer-events: none;
+    background: linear-gradient(
+        to top,
+        var(--surface) 30%,
+        transparent
+    );
+    border-radius: 0 0 10px 10px;
+}
+
+.load-insight-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 7px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.load-insight-count {
+    color: var(--text-dim);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.load-insight-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    max-height: 180px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    margin-right: -6px;
+    padding-right: 6px;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-3) transparent;
+}
+.load-insight-list::-webkit-scrollbar {
+    width: 6px;
+}
+.load-insight-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.load-insight-list::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
+}
+.load-insight-list::-webkit-scrollbar-thumb:hover {
+    background: var(--grid-line-strong);
+}
+
+.load-insight-item {
+    appearance: none;
+    background: transparent;
+    border: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    padding: 5px 7px;
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 8px;
+    align-items: center;
+    text-align: left;
+    min-width: 0;
+    transition: background 0.12s;
+}
+.load-insight-item:hover {
+    background: var(--surface-2);
+}
+.load-insight-item:active {
+    background: var(--surface-3);
+}
+
+.load-insight-item-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+.load-insight-item-date {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.load-insight-item-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.load-insight-item-value {
+    font-size: 11.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    white-space: nowrap;
+}
+.load-insight-item.is-mid  .load-insight-item-value { color: var(--load-mid); }
+.load-insight-item.is-high .load-insight-item-value { color: var(--load-high); }
+
+.load-insight-empty {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 4px 7px;
+}
+
+/* ============================================================
+ *  LEGEND (внутри heatmap-card / strip-view, сразу под сеткой)
+ * ============================================================ */
+
+.load-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 12px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.load-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.load-legend-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+.load-legend-dot.is-low  { background: var(--surface-3); }
+.load-legend-dot.is-mid  { background: var(--load-mid); }
+.load-legend-dot.is-high {
+    background: var(--load-high);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--load-high) 55%, transparent);
+}
+.load-legend-warn {
+    color: var(--load-high);
+    font-weight: 700;
+}
+
+/* ============================================================
+ *  MOBILE
+ * ============================================================ */
+
+@media (max-width: 900px) {
+    .load-view { padding: 8px; gap: 8px; max-width: none; }
+
+    .load-title { font-size: 10.5px; }
+    .load-summary { font-size: 11px; }
+
+    .load-unit-toggle,
+    .load-view-toggle { padding: 1px; }
+    .load-unit-btn,
+    .load-view-btn { font-size: 11px; padding: 3px 9px; }
+
+    .load-main { grid-template-columns: 1fr; }
+
+    .load-heatmap-card { padding: 8px 8px 6px; }
 
     .load-heatmap {
-        padding: 8px;
+        grid-template-columns: auto repeat(var(--weeks), minmax(24px, 1fr)) auto;
+        gap: 2px;
     }
+    .load-hm-col { gap: 2px; }
+    .load-hm-col--side { width: 22px; }
+    .load-hm-col--side-right { width: 32px; }
+    .load-hm-col--week { padding: 1px; border-radius: 5px; }
 
-    .load-heatmap-header,
-    .load-heatmap-row {
-        grid-template-columns: 34px repeat(7, minmax(30px, 1fr));
-        gap: 3px;
-    }
+    .load-hm-corner      { height: 18px; }
+    .load-hm-weeknum     { font-size: 9px; height: 18px; padding: 0 4px; }
+    .load-hm-sigma-head  { font-size: 9px; height: 18px; }
+    .load-hm-dow         { font-size: 9px; height: 26px; }
+    .load-hm-cell        { height: 26px; font-size: 10px; border-radius: 4px; }
+    .load-hm-total       { font-size: 9.5px; height: 20px; }
+    .load-hm-sum-label   { font-size: 9px; height: 20px; }
+    .load-hm-row-sum     { font-size: 10px; height: 26px; border-radius: 4px; }
+    .load-hm-grand-total { font-size: 10px; height: 20px; }
 
-    .load-cell {
-        min-height: 36px;
-        border-radius: 5px;
-        padding: 2px 1px;
-    }
-    .load-cell-day {
-        font-size: 9px;
-    }
-    .load-cell-count {
-        font-size: 11px;
-        min-height: 11px;
-    }
+    .load-insight-item-date  { font-size: 11px; }
+    .load-insight-item-value { font-size: 11px; }
 
-    .load-legend {
-        gap: 6px;
-        font-size: 10px;
+    /* на мобилке списки не перехватывают скролл */
+    .load-insight-list {
+        max-height: none;
+        overflow-y: visible;
+        overscroll-behavior: auto;
+        margin-right: 0;
+        padding-right: 0;
+        scrollbar-width: auto;
     }
-    .load-legend-cells > span {
-        width: 13px;
-        height: 10px;
-    }
+    .load-insight-list::-webkit-scrollbar { display: none; }
 
-    .load-bars {
-        height: 120px;
-    }
-    .load-bar {
-        min-width: 26px;
-    }
-    .load-bar-value {
-        font-size: 10px;
-    }
-    .load-bar-label {
-        font-size: 9px;
-    }
+    .load-insight-card.has-overflow::after { display: none; }
+
+    .load-legend { font-size: 9.5px; gap: 3px 10px; }
 }

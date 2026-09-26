@@ -2,22 +2,73 @@
 
 import { state } from './state.js';
 import { toISO, startOfWeek, addDays, isToday } from './utils.js';
-import { WEEKDAYS_SHORT, MONTHS_GEN } from './config.js';
+import { WEEKDAYS_SHORT, MONTHS_SHORT } from './config.js';
 import { groupByDate } from './data.js';
-import { showEventDetails, showGroupDetails } from './popover.js';
+import { navigateTo } from './navigation.js';
+import { pluralRu } from './version.js';
+
+/* ---------- константы ---------- */
+
+const UNIT_KEY = 'schedule-load-unit';
+const VIEW_KEY = 'schedule-load-view';
+const HOURS_PER_PAIR = 2;
+
+/**
+ * Абсолютные пороги плотности дня.
+ *   1–4 пары  → low  (2–8 ч)
+ *   5 пар     → mid  (10 ч)
+ *   6+ пар    → high (12+ ч) — перегруз
+ */
+const LEVELS = [
+    { maxPairs: 4,        level: 'low'  },
+    { maxPairs: 5,        level: 'mid'  },
+    { maxPairs: Infinity, level: 'high' },
+];
+
+function levelFor(pairs) {
+    if (pairs <= 0) return 'empty';
+    for (const l of LEVELS) {
+        if (pairs <= l.maxPairs) return l.level;
+    }
+    return 'high';
+}
+
+function unit() {
+    try {
+        const v = localStorage.getItem(UNIT_KEY);
+        return v === 'hours' ? 'hours' : 'pairs';
+    } catch { return 'pairs'; }
+}
+
+function saveUnit(v) {
+    try { localStorage.setItem(UNIT_KEY, v); } catch {}
+}
+
+function viewMode() {
+    try {
+        const v = localStorage.getItem(VIEW_KEY);
+        return v === 'strip' ? 'strip' : 'map';
+    } catch { return 'map'; }
+}
+
+function saveViewMode(v) {
+    try { localStorage.setItem(VIEW_KEY, v); } catch {}
+}
 
 /* ---------- helpers ---------- */
+
+function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+}
 
 function dateFromISO(iso) {
     const [y, m, d] = iso.split('-').map(Number);
     return new Date(y, m - 1, d);
 }
 
-/**
- * Кол-во пар в наборе событий.
- * Пара = уникальный pair_number (fallback — time_start).
- * Подгруппы одной пары считаются одной парой.
- */
 function countPairs(events) {
     const keys = new Set();
     for (const ev of events) {
@@ -29,9 +80,23 @@ function countPairs(events) {
     return keys.size;
 }
 
+function formatWeekRange(start, end) {
+    const sameMonth = start.getMonth() === end.getMonth();
+    const sameYear  = start.getFullYear() === end.getFullYear();
+    const mS = MONTHS_SHORT[start.getMonth()];
+    const mE = MONTHS_SHORT[end.getMonth()];
+
+    if (sameMonth && sameYear) return `${start.getDate()}–${end.getDate()} ${mS}`;
+    if (sameYear) return `${start.getDate()} ${mS} – ${end.getDate()} ${mE}`;
+
+    const yS = String(start.getFullYear()).slice(-2);
+    const yE = String(end.getFullYear()).slice(-2);
+    return `${start.getDate()} ${mS} ${yS} – ${end.getDate()} ${mE} ${yE}`;
+}
+
 function buildWeeks(byDate) {
     const dates = [...byDate.keys()].sort();
-    if (dates.length === 0) return { weeks: [], maxPairs: 0, maxWeekPairs: 0 };
+    if (dates.length === 0) return { weeks: [] };
 
     const first = dateFromISO(dates[0]);
     const last  = dateFromISO(dates[dates.length - 1]);
@@ -39,9 +104,6 @@ function buildWeeks(byDate) {
     const end   = addDays(startOfWeek(last), 6);
 
     const weeks = [];
-    let maxPairs = 0;
-    let maxWeekPairs = 0;
-
     let cursor = new Date(start);
     let num = 1;
 
@@ -53,52 +115,64 @@ function buildWeeks(byDate) {
             const iso = toISO(day);
             const events = byDate.get(iso) || [];
             const pairs = countPairs(events);
-            if (pairs > maxPairs) maxPairs = pairs;
             weekPairs += pairs;
             days.push({ date: day, iso, events, pairs });
         }
-        if (weekPairs > maxWeekPairs) maxWeekPairs = weekPairs;
-        weeks.push({ num, start: new Date(cursor), days, pairs: weekPairs });
+        weeks.push({
+            num,
+            start: new Date(cursor),
+            end:   addDays(cursor, 6),
+            days,
+            pairs: weekPairs,
+        });
         num++;
         cursor = addDays(cursor, 7);
     }
 
-    return { weeks, maxPairs, maxWeekPairs };
+    return { weeks };
 }
 
-function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text != null) node.textContent = text;
-    return node;
+function toUnitValue(pairs, u) {
+    return u === 'hours' ? pairs * HOURS_PER_PAIR : pairs;
 }
 
-function intensityStyle(pairs, maxPairs) {
-    if (pairs <= 0) return null;
-    const ratio = maxPairs > 0 ? pairs / maxPairs : 0;
-    const pct = Math.round(10 + ratio * 80); // 10%..90%
-    return {
-        pct,
-        background: `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-2))`,
-        dense: pct >= 55,
-    };
+function unitShort(u) {
+    return u === 'hours' ? 'ч' : 'пар';
+}
+
+function worstLevelOf(week) {
+    let worst = 'empty';
+    for (const d of week.days) {
+        const lvl = levelFor(d.pairs);
+        if (lvl === 'high') return 'high';
+        if (lvl === 'mid' && worst !== 'high') worst = 'mid';
+        if (lvl === 'low' && worst === 'empty') worst = 'low';
+    }
+    return worst;
 }
 
 /* ---------- публичный рендер ---------- */
 
 export function renderLoad(root) {
+    const u = unit();
     const byDate = groupByDate(state.filteredEvents);
-    const { weeks, maxPairs, maxWeekPairs } = buildWeeks(byDate);
+    const { weeks } = buildWeeks(byDate);
 
     if (weeks.length === 0) {
         root.appendChild(el('div', 'empty-state', 'Нет данных о нагрузке'));
         return;
     }
 
-    const totalPairs = weeks.reduce((s, w) => s + w.pairs, 0);
+    let totalPairs = 0;
     let activeDays = 0;
     let maxDayPairs = 0;
+    let maxWeekPairs = 0;
+    let overloadWeeks = 0;
+
     for (const w of weeks) {
+        totalPairs += w.pairs;
+        if (w.pairs > maxWeekPairs) maxWeekPairs = w.pairs;
+        if (w.days.some(d => levelFor(d.pairs) === 'high')) overloadWeeks++;
         for (const d of w.days) {
             if (d.pairs > 0) {
                 activeDays++;
@@ -106,151 +180,501 @@ export function renderLoad(root) {
             }
         }
     }
-    const avgPerActiveDay = activeDays > 0 ? (totalPairs / activeDays) : 0;
+    const avgPairs = activeDays > 0 ? totalPairs / activeDays : 0;
 
     const wrap = el('div', 'load-view');
-    wrap.appendChild(buildStats({
+    wrap.appendChild(buildHeader({
+        u,
         totalPairs,
-        weeks: weeks.length,
+        weeksCount: weeks.length,
         activeDays,
-        avgPerActiveDay,
-        maxDayPairs,
+        avgPairs,
+        overloadWeeks,
     }));
-    wrap.appendChild(buildHeatmap(weeks, maxPairs));
-    wrap.appendChild(buildBars(weeks, maxWeekPairs));
+
+    const mode = viewMode();
+    const main = el('div', 'load-main');
+
+    if (mode === 'strip') {
+        main.appendChild(buildStripView(weeks, u, maxWeekPairs));
+    } else {
+        main.appendChild(buildHeatmapCard(weeks, u));
+    }
+
+    main.appendChild(buildInsights(weeks, u));
+    wrap.appendChild(main);
 
     root.appendChild(wrap);
 }
 
-/* ---------- stats ---------- */
+/* ============================================================
+ *  HEADER
+ * ============================================================ */
 
-function buildStats({ totalPairs, weeks, activeDays, avgPerActiveDay, maxDayPairs }) {
-    const box = el('div', 'load-stats');
-    const items = [
-        { value: totalPairs,                label: 'всего пар' },
-        { value: weeks,                     label: 'недель' },
-        { value: activeDays,                label: 'дней с занятиями' },
-        { value: avgPerActiveDay.toFixed(1), label: 'в среднем в день' },
-        { value: maxDayPairs,               label: 'макс. в день' },
-    ];
-    for (const it of items) {
-        const item = el('div', 'load-stat');
-        item.appendChild(el('div', 'load-stat-value', String(it.value)));
-        item.appendChild(el('div', 'load-stat-label', it.label));
-        box.appendChild(item);
+function buildHeader({ u, totalPairs, weeksCount, activeDays, avgPairs, overloadWeeks }) {
+    const header = el('div', 'load-header');
+
+    const left = el('div', 'load-header-left');
+    left.appendChild(el('h2', 'load-title', 'Нагрузка за семестр'));
+
+    const summary = el('div', 'load-summary');
+    const sep = () => summary.appendChild(el('span', 'load-summary-sep', '·'));
+    const add = (value, label) => {
+        summary.appendChild(el('b', null, String(value)));
+        summary.appendChild(el('span', null, ' ' + label));
+    };
+
+    const totalV = toUnitValue(totalPairs, u);
+    const avgV   = toUnitValue(avgPairs, u);
+
+    const totalWord = u === 'hours'
+        ? pluralRu(totalV, 'час', 'часа', 'часов')
+        : pluralRu(totalV, 'пара', 'пары', 'пар');
+
+    add(totalV, totalWord);
+    sep();
+    add(weeksCount, pluralRu(weeksCount, 'неделя', 'недели', 'недель'));
+    sep();
+    add(activeDays, 'дней занятий');
+    sep();
+    add(avgV.toFixed(1), 'в среднем в день');
+
+    if (overloadWeeks > 0) {
+        sep();
+        const warn = el('span', 'load-summary-warn');
+        warn.textContent =
+            `⚠ ${overloadWeeks} ` +
+            pluralRu(overloadWeeks, 'неделя', 'недели', 'недель') +
+            ' с перегрузом';
+        summary.appendChild(warn);
     }
+
+    left.appendChild(summary);
+    header.appendChild(left);
+
+    const controls = el('div', 'load-header-controls');
+    controls.appendChild(buildUnitToggle(u));
+    controls.appendChild(buildViewToggle(viewMode()));
+    header.appendChild(controls);
+
+    return header;
+}
+
+function buildUnitToggle(current) {
+    const box = el('div', 'load-unit-toggle');
+    box.setAttribute('role', 'tablist');
+    box.setAttribute('aria-label', 'Единицы измерения');
+
+    const btn = (value, label) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'load-unit-btn' + (current === value ? ' is-active' : '');
+        b.dataset.unit = value;
+        b.textContent = label;
+        b.setAttribute('aria-pressed', current === value ? 'true' : 'false');
+        b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (unit() === value) return;
+            saveUnit(value);
+            import('./render.js').then(m => m.render());
+        });
+        return b;
+    };
+
+    box.appendChild(btn('pairs', 'Пары'));
+    box.appendChild(btn('hours', 'Часы'));
     return box;
 }
 
-/* ---------- heatmap ---------- */
+function buildViewToggle(current) {
+    const box = el('div', 'load-view-toggle');
+    box.setAttribute('role', 'tablist');
+    box.setAttribute('aria-label', 'Вид нагрузки');
 
-function buildHeatmap(weeks, maxPairs) {
-    const box = el('div', 'load-heatmap');
+    const btn = (value, label) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'load-view-btn' + (current === value ? ' is-active' : '');
+        b.dataset.view = value;
+        b.textContent = label;
+        b.setAttribute('aria-pressed', current === value ? 'true' : 'false');
+        b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (viewMode() === value) return;
+            saveViewMode(value);
+            import('./render.js').then(m => m.render());
+        });
+        return b;
+    };
 
-    const header = el('div', 'load-heatmap-header');
-    header.appendChild(el('div', 'load-heatmap-corner'));
+    box.appendChild(btn('map', 'Карта'));
+    box.appendChild(btn('strip', 'Шкала'));
+    return box;
+}
+
+/* ============================================================
+ *  HEATMAP CARD
+ * ============================================================ */
+
+function buildHeatmapCard(weeks, u) {
+    const card = el('section', 'load-heatmap-card');
+
+    const head = el('div', 'load-heatmap-head');
+    head.appendChild(el('span', 'load-heatmap-title', 'Карта нагрузки'));
+    card.appendChild(head);
+
+    const scroll = el('div', 'load-heatmap-scroll');
+    const grid = el('div', 'load-heatmap');
+    grid.style.setProperty('--weeks', String(weeks.length));
+    scroll.appendChild(grid);
+    card.appendChild(scroll);
+
+    const todayIso = toISO(new Date());
+    const selectedIso = toISO(state.currentDate);
+
+    /* --- левая боковая колонка: ПН..ВС + Σ --- */
+    const left = el('div', 'load-hm-col load-hm-col--side');
+    left.appendChild(el('div', 'load-hm-corner'));
     for (const name of WEEKDAYS_SHORT) {
-        header.appendChild(el('div', 'load-heatmap-weekday', name));
+        left.appendChild(el('div', 'load-hm-dow', name));
     }
-    box.appendChild(header);
+    left.appendChild(el('div', 'load-hm-sum-label', 'Σ'));
+    grid.appendChild(left);
 
+    /* --- колонки недель --- */
     for (const w of weeks) {
-        const row = el('div', 'load-heatmap-row');
+        grid.appendChild(buildWeekColumn(w, u, todayIso, selectedIso));
+    }
 
-        const label = document.createElement('button');
-        label.type = 'button';
-        label.className = 'load-heatmap-weeknum';
-        label.textContent = String(w.num);
-        label.title = `Неделя ${w.num}: ${w.pairs} пар`;
-        label.addEventListener('click', async () => {
-            const { navigateTo } = await import('./navigation.js');
+    /* --- правая боковая колонка: Σ + row sums + grand total --- */
+    const right = el('div', 'load-hm-col load-hm-col--side load-hm-col--side-right');
+    right.appendChild(el('div', 'load-hm-sigma-head', 'Σ'));
+
+    let grandTotal = 0;
+    for (let dow = 0; dow < 7; dow++) {
+        let dowSum = 0;
+        for (const w of weeks) dowSum += w.days[dow].pairs;
+        right.appendChild(buildRowSumCell(dowSum, u));
+    }
+    for (const w of weeks) grandTotal += w.pairs;
+    right.appendChild(el('div', 'load-hm-grand-total', String(toUnitValue(grandTotal, u))));
+    grid.appendChild(right);
+
+    /* --- легенда --- */
+    card.appendChild(buildLegend(u));
+
+    return card;
+}
+
+function buildWeekColumn(w, u, todayIso, selectedIso) {
+    const containsToday    = w.days.some(d => d.iso === todayIso);
+    const containsSelected = w.days.some(d => d.iso === selectedIso);
+
+    const col = el('div', 'load-hm-col load-hm-col--week');
+    if (containsToday)    col.classList.add('is-current');
+    if (containsSelected) col.classList.add('is-selected');
+
+    /* номер недели */
+    const numBtn = document.createElement('button');
+    numBtn.type = 'button';
+    numBtn.className = 'load-hm-weeknum';
+    if (containsToday)    numBtn.classList.add('is-current');
+    if (containsSelected) numBtn.classList.add('is-selected');
+    numBtn.textContent = String(w.num);
+    numBtn.title = `Неделя ${w.num} (${formatWeekRange(w.start, w.end)}) — открыть`;
+    numBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateTo('week', w.start);
+    });
+    col.appendChild(numBtn);
+
+    /* 7 дней */
+    for (const d of w.days) {
+        col.appendChild(buildDayCell(d, u, selectedIso));
+    }
+
+    /* итог недели */
+    col.appendChild(buildTotalCell(w, u, containsSelected));
+
+    return col;
+}
+
+function buildDayCell(d, u, selectedIso) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'load-hm-cell';
+
+    const level = levelFor(d.pairs);
+    const isSelected = d.iso === selectedIso;
+    const isTodayCell = isToday(d.date);
+
+    if (d.pairs > 0) {
+        btn.classList.add('is-' + level);
+        btn.textContent = String(toUnitValue(d.pairs, u));
+    }
+
+    if (isTodayCell) btn.classList.add('is-today');
+    if (isSelected)  btn.classList.add('is-selected-day');
+
+    if (d.pairs > 0) {
+        const label = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}`;
+        const val = u === 'hours'
+            ? `${toUnitValue(d.pairs, u)} ч`
+            : `${d.pairs} пар`;
+        btn.title = `${label}: ${val} — открыть день`;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateTo('day', d.date);
+        });
+    } else {
+        btn.disabled = true;
+        btn.title = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}: занятий нет`;
+    }
+
+    return btn;
+}
+
+function buildTotalCell(w, u, isSelected) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'load-hm-total';
+
+    const worst = worstLevelOf(w);
+
+    if (w.pairs === 0)         btn.classList.add('is-zero');
+    else if (worst === 'high') btn.classList.add('is-high');
+    else if (worst === 'mid')  btn.classList.add('is-mid');
+
+    if (isSelected && w.pairs > 0) btn.classList.add('is-selected');
+
+    const v = toUnitValue(w.pairs, u);
+    btn.textContent = String(v);
+
+    btn.title = w.pairs > 0
+        ? `Неделя ${w.num}: ${v} ${unitShort(u)} — открыть`
+        : `Неделя ${w.num}: занятий нет`;
+
+    if (w.pairs === 0) {
+        btn.disabled = true;
+    } else {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             navigateTo('week', w.start);
         });
-        row.appendChild(label);
-
-        for (const d of w.days) {
-            const cell = document.createElement('button');
-            cell.type = 'button';
-            cell.className = 'load-cell';
-
-            if (isToday(d.date)) cell.classList.add('is-today');
-            if (d.pairs === 0) cell.classList.add('is-empty');
-
-            const style = intensityStyle(d.pairs, maxPairs);
-            if (style) {
-                cell.style.background = style.background;
-                if (style.dense) cell.classList.add('is-dense');
-            }
-
-            cell.appendChild(el('span', 'load-cell-day', String(d.date.getDate())));
-            cell.appendChild(el('span', 'load-cell-count', d.pairs > 0 ? String(d.pairs) : ''));
-
-            const dayLabel = `${d.date.getDate()} ${MONTHS_GEN[d.date.getMonth()]}`;
-            cell.title = d.pairs > 0
-                ? `${dayLabel}: ${d.pairs} пар`
-                : `${dayLabel}: занятий нет`;
-
-            if (d.events.length > 0) {
-                cell.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (d.events.length === 1) {
-                        showEventDetails(d.events[0], cell);
-                    } else {
-                        showGroupDetails(d.events, cell);
-                    }
-                });
-            } else {
-                cell.disabled = true;
-            }
-
-            row.appendChild(cell);
-        }
-
-        box.appendChild(row);
     }
 
-    /* ----- легенда ----- */
-    const legend = el('div', 'load-legend');
-    legend.appendChild(el('span', 'load-legend-text', 'меньше'));
-    const scale = el('div', 'load-legend-cells');
-    for (const pct of [15, 30, 50, 70, 88]) {
-        const s = document.createElement('span');
-        s.style.background = `color-mix(in srgb, var(--accent) ${pct}%, var(--surface-2))`;
-        scale.appendChild(s);
-    }
-    legend.appendChild(scale);
-    legend.appendChild(el('span', 'load-legend-text', 'больше'));
-    box.appendChild(legend);
-
-    return box;
+    return btn;
 }
 
-/* ---------- weekly bars ---------- */
+function buildRowSumCell(dowSumPairs, u) {
+    const cell = el('div', 'load-hm-row-sum');
+    const v = toUnitValue(dowSumPairs, u);
+    cell.textContent = v > 0 ? String(v) : '·';
 
-function buildBars(weeks, maxWeekPairs) {
-    const box = el('div', 'load-weekly');
-    box.appendChild(el('h3', 'load-section-title', 'Нагрузка по неделям'));
+    if (dowSumPairs >= 6 * 6) cell.classList.add('is-high');
+    else if (dowSumPairs >= 5 * 5) cell.classList.add('is-mid');
 
-    const bars = el('div', 'load-bars');
+    return cell;
+}
+
+/* ============================================================
+ *  STRIP VIEW — шкала по неделям
+ * ============================================================ */
+
+function buildStripView(weeks, u, maxWeekPairs) {
+    const card = el('section', 'load-strip-view');
+
+    const head = el('div', 'load-strip-view-head');
+    head.appendChild(el('span', 'load-strip-view-title', 'Шкала по неделям'));
+    card.appendChild(head);
+
+    const bars = el('div', 'load-strip-view-bars');
     for (const w of weeks) {
-        const bar = el('div', 'load-bar');
-        bar.title = `Неделя ${w.num}: ${w.pairs} пар`;
-
-        const value = el('div', 'load-bar-value', String(w.pairs));
-
-        const fillWrap = el('div', 'load-bar-fill-wrap');
-        const fill = el('div', 'load-bar-fill');
-        const pct = maxWeekPairs > 0 ? (w.pairs / maxWeekPairs) * 100 : 0;
-        fill.style.height = Math.max(pct, w.pairs > 0 ? 3 : 0) + '%';
-        fillWrap.appendChild(fill);
-
-        const label = el('div', 'load-bar-label', String(w.num));
-
-        bar.appendChild(value);
-        bar.appendChild(fillWrap);
-        bar.appendChild(label);
-        bars.appendChild(bar);
+        bars.appendChild(buildStripBar(w, u, maxWeekPairs));
     }
-    box.appendChild(bars);
+    card.appendChild(bars);
+
+    card.appendChild(buildLegend(u));
+
+    return card;
+}
+
+function buildStripBar(w, u, maxWeekPairs) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'load-strip-bar';
+
+    const ratio = maxWeekPairs > 0 ? w.pairs / maxWeekPairs : 0;
+    const h = w.pairs > 0 ? Math.max(4, Math.round(4 + ratio * 88)) : 3;
+
+    const worst = worstLevelOf(w);
+
+    const v = toUnitValue(w.pairs, u);
+    btn.appendChild(el('div', 'load-strip-bar-value', String(v)));
+
+    const fillWrap = el('div', 'load-strip-bar-fill-wrap');
+    const fill = el('div', 'load-strip-bar-fill');
+    if (worst === 'mid')  fill.classList.add('is-mid');
+    if (worst === 'high') fill.classList.add('is-high');
+    fill.style.height = h + '%';
+    fillWrap.appendChild(fill);
+    btn.appendChild(fillWrap);
+
+    btn.appendChild(el('div', 'load-strip-bar-label', String(w.num)));
+
+    btn.title = `Неделя ${w.num} (${formatWeekRange(w.start, w.end)}) · ${v} ${unitShort(u)}`;
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigateTo('week', w.start);
+    });
+
+    return btn;
+}
+
+/* ============================================================
+ *  INSIGHTS PANEL
+ * ============================================================ */
+
+function buildInsights(weeks, u) {
+    const aside = el('aside', 'load-insights');
+
+    const allDays = [];
+    for (const w of weeks) {
+        for (const d of w.days) {
+            if (d.pairs > 0) allDays.push({ ...d, weekNum: w.num });
+        }
+    }
+    const top = [...allDays].sort((a, b) => b.pairs - a.pairs).slice(0, 5);
+    aside.appendChild(buildTopDaysCard(top, u));
+
+    const overloaded = weeks
+        .filter(w => w.days.some(d => levelFor(d.pairs) === 'high'))
+        .map(w => ({
+            week: w,
+            highDays: w.days.filter(d => levelFor(d.pairs) === 'high').length,
+        }));
+    aside.appendChild(buildOverloadCard(overloaded, u));
+
+    return aside;
+}
+
+function markOverflow(card, list) {
+    requestAnimationFrame(() => {
+        if (list.scrollHeight > list.clientHeight + 2) {
+            card.classList.add('has-overflow');
+        }
+    });
+}
+
+function buildTopDaysCard(days, u) {
+    const card = el('section', 'load-insight-card');
+    const head = el('h3', 'load-insight-title', 'Топ загруженных дней');
+    card.appendChild(head);
+
+    if (days.length === 0) {
+        card.appendChild(el('div', 'load-insight-empty', 'Нет данных'));
+        return card;
+    }
+
+    const list = el('ul', 'load-insight-list');
+    for (const d of days) {
+        const level = levelFor(d.pairs);
+        const li = el('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'load-insight-item'
+            + (level === 'high' ? ' is-high' : level === 'mid' ? ' is-mid' : '');
+
+        const main = el('div', 'load-insight-item-main');
+        const dowName = WEEKDAYS_SHORT[(d.date.getDay() + 6) % 7];
+        const dateStr = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}`;
+        main.appendChild(el('div', 'load-insight-item-date', `${dowName}, ${dateStr}`));
+        main.appendChild(el('div', 'load-insight-item-sub', `Неделя ${d.weekNum}`));
+        btn.appendChild(main);
+
+        const v = toUnitValue(d.pairs, u);
+        btn.appendChild(el('div', 'load-insight-item-value', `${v} ${unitShort(u)}`));
+
+        btn.title = `Открыть ${dateStr}`;
+        btn.addEventListener('click', () => navigateTo('day', d.date));
+
+        li.appendChild(btn);
+        list.appendChild(li);
+    }
+    card.appendChild(list);
+    markOverflow(card, list);
+
+    return card;
+}
+
+function buildOverloadCard(items, u) {
+    const card = el('section', 'load-insight-card');
+    const head = el('h3', 'load-insight-title');
+    head.appendChild(el('span', null, 'Недели с перегрузом'));
+    head.appendChild(el('span', 'load-insight-count', String(items.length)));
+    card.appendChild(head);
+
+    if (items.length === 0) {
+        card.appendChild(el('div', 'load-insight-empty', 'Перегруженных недель нет'));
+        return card;
+    }
+
+    const list = el('ul', 'load-insight-list');
+    for (const { week, highDays } of items) {
+        const li = el('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'load-insight-item is-high';
+
+        const main = el('div', 'load-insight-item-main');
+        main.appendChild(el('div', 'load-insight-item-date', `Неделя ${week.num}`));
+        main.appendChild(el('div', 'load-insight-item-sub',
+            `${highDays} ${pluralRu(highDays, 'день', 'дня', 'дней')} с 6+ парами`));
+        btn.appendChild(main);
+
+        const v = toUnitValue(week.pairs, u);
+        btn.appendChild(el('div', 'load-insight-item-value', `${v} ${unitShort(u)}`));
+
+        btn.title = `Открыть неделю ${week.num} (${formatWeekRange(week.start, week.end)})`;
+        btn.addEventListener('click', () => navigateTo('week', week.start));
+
+        li.appendChild(btn);
+        list.appendChild(li);
+    }
+    card.appendChild(list);
+    markOverflow(card, list);
+
+    return card;
+}
+
+/* ============================================================
+ *  LEGEND
+ * ============================================================ */
+
+function buildLegend(u) {
+    const box = el('div', 'load-legend');
+
+    const item = (level, text, warn) => {
+        const it = el('span', 'load-legend-item');
+        it.appendChild(el('span', 'load-legend-dot is-' + level));
+        if (warn) {
+            it.appendChild(el('span', 'load-legend-warn', text));
+        } else {
+            it.appendChild(el('span', null, text));
+        }
+        return it;
+    };
+
+    if (u === 'hours') {
+        box.appendChild(item('low',  '2–8 ч'));
+        box.appendChild(item('mid',  '10 ч'));
+        box.appendChild(item('high', '12+ ч — перегруз', true));
+    } else {
+        box.appendChild(item('low',  '1–4 пары'));
+        box.appendChild(item('mid',  '5 пар'));
+        box.appendChild(item('high', '6+ пар — перегруз', true));
+    }
+
     return box;
 }
