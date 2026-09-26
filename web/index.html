@@ -74,6 +74,7 @@
                 </svg>
                 <span>Экспорт</span>
             </button>
+            <span class="toolbar-divider" aria-hidden="true"></span>
             <div class="filter" id="filterRoot">
                 <button class="btn btn-icon filter-trigger" type="button" aria-label="Фильтр">
                     <svg class="icon" viewBox="0 0 24 24" width="18" height="18"
@@ -127,6 +128,32 @@
                 </svg>
             </button>
 
+            <span class="toolbar-divider" aria-hidden="true"></span>
+            <div class="view-switch" id="viewSwitch" role="tablist" aria-label="Режим отображения">
+                <button class="view-switch-btn is-active" id="calendarModeBtn" type="button"
+                        role="tab" aria-selected="true" aria-label="Календарь">
+                    <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <path d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                    <span class="view-switch-label">Календарь</span>
+                </button>
+                <button class="view-switch-btn" id="loadBtn" type="button"
+                        role="tab" aria-selected="false" aria-label="Нагрузка за семестр">
+                    <svg class="icon" viewBox="0 0 24 24" width="16" height="16"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="21" x2="21" y2="21"/>
+                        <rect x="4.5" y="13" width="3" height="6" rx="0.6"/>
+                        <rect x="10.5" y="8" width="3" height="11" rx="0.6"/>
+                        <rect x="16.5" y="11" width="3" height="8" rx="0.6"/>
+                    </svg>
+                    <span class="view-switch-label">Нагрузка</span>
+                </button>
+            </div>
+
             <button class="btn btn-icon" id="viewBtn" type="button"
                     data-view="week" aria-label="Переключить вид">
                 <svg class="icon view-icon view-icon-month" viewBox="0 0 24 24" width="18" height="18"
@@ -160,6 +187,7 @@
                 </svg>
             </button>
 
+            <span class="toolbar-divider" aria-hidden="true"></span>
             <button class="btn btn-icon" id="themeBtn" type="button"
                     data-theme-current="auto" aria-label="Тема: авто">
                 <svg class="icon theme-icon theme-icon-sun" viewBox="0 0 24 24" width="18" height="18"

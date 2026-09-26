@@ -18,6 +18,7 @@ import {
 import {
     navigate, goToToday, cycleView, toggleTheme,
     updateViewButton, initTheme,
+    switchToCalendar, switchToLoad,
 } from './navigation.js';
 import { setupUpdatedButton, updateUpdatedLabel } from './version.js';
 import { setupOnlineStatus, updateOnlineStatus } from './online.js';
@@ -54,17 +55,6 @@ function isValidScheduleData(data) {
     return data && typeof data === 'object' && Array.isArray(data.events);
 }
 
-/**
- * Достаёт события из localStorage-снапшота — последний рубеж,
- * когда ни data.json, ни old_data.json не отдались.
- *
- * Снапшот пишется в формате makeSnapshotEntry (state.js): те же поля,
- * что у raw event, плюс служебный `key`. expandEvents() спокойно
- * переварит лишнее поле — просто скопирует его дальше.
- *
- * generated_at берётся из отдельного LS-ключа schedule-last-generated-at,
- * который пишется при каждой успешной загрузке data.json / old_data.json.
- */
 function loadSnapshotData() {
     const events = loadSnapshot();
     if (!Array.isArray(events) || events.length === 0) return null;
@@ -75,16 +65,6 @@ function loadSnapshotData() {
     };
 }
 
-/**
- * Порядок загрузки:
- *   1. data.json      — свежак, сеть / SW-кэш.
- *   2. old_data.json  — прошлая публикация.
- *   3. LS snapshot    — последний успешный визит на этом устройстве.
- *   4. null           — совсем пусто.
- *
- * usedFallback=true только когда ОНЛАЙН и не получилось взять свежак.
- * В оффлайне всегда false: там ⚡ уже сигналит статус, не нужно дублировать.
- */
 async function loadInitialData() {
     const online = navigator.onLine !== false;
 
@@ -138,6 +118,7 @@ function resetToToday() {
     state.currentDate = new Date();
     saveCurrentDate(state.currentDate);
     state.view = 'week';
+    state.navStep = 'week';
     if (!state.urlContext) {
         localStorage.setItem('schedule-view', 'week');
     }
@@ -154,13 +135,8 @@ async function init() {
 
     initTheme();
 
-    // Подтягиваем последнюю известную версию из LS ДО setupOnlineStatus,
-    // чтобы первый updateOnlineStatus() уже отрисовал корректное время,
-    // а не «—».
     state.displayedIso = loadGeneratedAt();
 
-    // Deep links: читаем URL-параметры до всего остального — они
-    // перетирают то, что подгрузилось из localStorage.
     applyUrlContext();
 
     updateViewButton();
@@ -177,8 +153,6 @@ async function init() {
 
     if (!loaded.data) {
         state.fallbackActive = loaded.usedFallback;
-        // Данных нет — валидировать URL не с чем, просто гасим контекст,
-        // чтобы плашка не висела вхолостую.
         state.urlContext = false;
         state.urlRaw     = null;
         state.urlEventId = null;
@@ -202,13 +176,9 @@ async function init() {
         document.documentElement.style.setProperty('--m-day-col', savedColWidth + 'px');
     }
 
-    // ВАЖНО: savedGenAt читаем ДО saveGeneratedAt — иначе сравнение
-    // ниже всегда даст «ничего не изменилось», и resetToToday() никогда
-    // не сработает ни на первом визите, ни при смене версии data.json.
     const savedGenAt = loadGeneratedAt();
     const currentGenAt = loaded.data.generated_at;
 
-    // Синхронизируем LS со свежим значением (переживёт reload в оффлайне).
     if (currentGenAt) {
         saveGeneratedAt(currentGenAt);
     }
@@ -229,12 +199,9 @@ async function init() {
         if (oldSnapshot) {
             const changes = compareEvents(oldSnapshot, loaded.data.events || []);
             if (changes.length > 0) {
-                // Есть свежая порция — перезаписываем постоянный список.
                 state.pendingChanges = sortChanges(changes);
                 savePendingChanges(state.pendingChanges);
             }
-            // Если изменений нет — state.pendingChanges уже подгружен
-            // из localStorage в state.js, и мы его НЕ трогаем.
         }
 
         saveSnapshot(loaded.data.events || []);
@@ -258,16 +225,10 @@ async function init() {
     saveSetToStorage('schedule-selected-groups', state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 
-    // Deep links: валидируем URL-параметры против реальных данных.
-    // 'empty'   — обычный заход, ничего не делаем.
-    // 'none'    — параметры были, но не сматчились → откат + тост.
-    // 'full'/'partial' — применяем как есть.
     const urlResult = resolveUrlContext();
     if (urlResult === 'none') {
         state.urlContext = false;
         updateViewButton();
-        // Показываем тост после render — чтобы он не перекрывался
-        // первой отрисовкой пустого календаря.
         setTimeout(() => showToast('Ссылка недействительна или устарела'), 300);
     }
 
@@ -281,6 +242,8 @@ async function init() {
     document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
     document.getElementById('todayBtn').addEventListener('click', goToToday);
     document.getElementById('viewBtn').addEventListener('click', cycleView);
+    document.getElementById('calendarModeBtn').addEventListener('click', switchToCalendar);
+    document.getElementById('loadBtn').addEventListener('click', switchToLoad);
     document.getElementById('themeBtn').addEventListener('click', toggleTheme);
     document.getElementById('dateLabel').addEventListener('click', openDatePicker);
 
@@ -341,9 +304,6 @@ async function init() {
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
 
-    // updatedBtn: в норме — открывает модалку изменений.
-    // В оффлайне и в fallback клик перехватывает online.js в capture-фазе,
-    // до этого обработчика управление не доходит.
     setupUpdatedButton({
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
@@ -358,8 +318,6 @@ async function init() {
     setupUrlContextBanner();
     openUrlContextEvent();
 
-    // Один раз на сессию: любой клик пользователя снимает urlContext,
-    // после этого все save-функции снова пишут в localStorage.
     document.addEventListener('click', () => {
         disarmUrlContext();
     }, true);
@@ -463,9 +421,6 @@ function openUrlContextEvent() {
     const eventId = state.urlEventId;
     const targetIso = toISO(state.currentDate);
 
-    // Событие может быть скрыто фильтром g/t или не совпасть по дате —
-    // в этом случае молча ничего не открываем (баннер уже объясняет,
-    // почему вид не такой, как в личных настройках).
     const target =
         state.filteredEvents.find(ev => ev.event_id === eventId && ev.dateISO === targetIso) ||
         state.filteredEvents.find(ev => ev.event_id === eventId);

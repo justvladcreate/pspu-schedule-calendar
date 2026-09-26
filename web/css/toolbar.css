@@ -32,6 +32,22 @@
 .updated-wrap   { order: 3; }
 .toolbar-right  { order: 4; }
 
+/* ---- Разделители между смысловыми группами ----
+ *
+ *   [Экспорт]  │  [Фильтр] [Избранное]  │  [Календарь/Нагрузка] [Вид]  │  [Тема] [Поделиться]
+ */
+
+.toolbar-divider {
+    align-self: center;
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 2px;
+    border-radius: 1px;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
 .btn {
     appearance: none;
     border: 1px solid var(--border);
@@ -87,6 +103,66 @@
 #themeBtn[data-theme-current="light"] .theme-icon-sun  { display: block; }
 #themeBtn[data-theme-current="auto"]  .theme-icon-auto { display: block; }
 #themeBtn[data-theme-current="dark"]  .theme-icon-moon { display: block; }
+
+/* ============================================================
+ *  ПЕРЕКЛЮЧАТЕЛЬ «КАЛЕНДАРЬ / НАГРУЗКА»
+ *
+ *  Segmented control — тот же визуальный язык, что у
+ *  «Пары/Часы» и «Карта/Шкала» в шапке вида «Нагрузка».
+ * ============================================================ */
+
+.view-switch {
+    display: inline-flex;
+    align-items: stretch;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 3px;
+    gap: 2px;
+    min-height: 36px;
+    flex-shrink: 0;
+}
+
+.view-switch-btn {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.view-switch-btn:hover {
+    color: var(--text);
+}
+
+.view-switch-btn:active {
+    transform: scale(0.98);
+}
+
+.view-switch-btn.is-active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.view-switch-btn .icon {
+    color: currentColor;
+    flex-shrink: 0;
+    display: block;
+}
 
 .filter-badge {
     position: absolute;
@@ -199,13 +275,6 @@
     margin-right: 2px;
 }
 
-/* ============================================================
- *  Иконки updatedBtn по состояниям
- *
- *  Норма    → clock
- *  Оффлайн  → bolt
- *  Fallback → warn
- * ============================================================ */
 .updated-wrap .updated-icon-bolt { display: none; }
 .updated-wrap .updated-icon-warn { display: none; }
 
@@ -217,7 +286,6 @@
 .updated-wrap.is-fallback .updated-icon-bolt  { display: none; }
 .updated-wrap.is-fallback .updated-icon-warn  { display: block; }
 
-/* ---- Оффлайн ---- */
 .updated-wrap.is-offline .updated-btn {
     border-color: var(--grid-line-strong);
     background: var(--surface-2);
@@ -226,7 +294,6 @@
 .updated-wrap.is-offline .updated-btn .icon,
 .updated-wrap.is-offline .updated-prefix { color: var(--text-muted); }
 
-/* ---- Fallback (онлайн + data.json не загрузился) ---- */
 .updated-wrap.is-fallback .updated-btn {
     border-color: var(--danger);
     background: var(--danger-bg);
@@ -339,7 +406,6 @@
 }
 .footer-link:hover { background: var(--surface-2); color: var(--text); }
 
-/* Иконка GitHub — только иконка, без текста */
 .footer-link--icon { padding: 5px 8px; }
 .footer-link--icon svg { display: block; }
 

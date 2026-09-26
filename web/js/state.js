@@ -20,20 +20,36 @@ export function saveSetToStorage(key, set) {
     } catch {}
 }
 
-/* ---------- pending changes: жить между визитами ---------- */
+/* ---------- pending changes ---------- */
 
 const PENDING_CHANGES_KEY = 'schedule-pending-changes';
 
-/* ---------- favorites: ключи (объявлены ДО state) ----------
- *
- * state инициализируется вызовами loadFavoritesActive() / loadPrevFilter(),
- * а те читают FAV_ACTIVE_KEY / PREV_FILTER_KEY. Если объявить const-ы ниже
- * (после state), они попадут в TDZ, ReferenceError проглотится try/catch
- * внутри load-функций, и мы молча получим favoritesActive = false на каждом
- * reload — именно это и ломало сохранение состояния кнопки «Избранное».
- */
+/* ---------- favorites: ключи (объявлены ДО state) ---------- */
+
 const FAV_ACTIVE_KEY = 'schedule-favorites-active';
 const PREV_FILTER_KEY = 'schedule-prev-filter';
+
+/* ---------- view / navStep: читаем ДО state ---------- */
+
+function loadViewFromStorage() {
+    try {
+        const v = localStorage.getItem('schedule-view');
+        if (v === 'month' || v === 'week' || v === 'day' || v === 'load') {
+            return v;
+        }
+    } catch {}
+    return 'week';
+}
+
+function loadNavStepFromStorage() {
+    try {
+        const v = localStorage.getItem('schedule-nav-step');
+        if (v === 'month' || v === 'week' || v === 'day') return v;
+    } catch {}
+    const view = loadViewFromStorage();
+    if (view === 'month' || view === 'week' || view === 'day') return view;
+    return 'week';
+}
 
 export function savePendingChanges(changes) {
   try {
@@ -66,49 +82,37 @@ export const state = {
   selectedGroups: loadSetFromStorage('schedule-selected-groups'),
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
 
-   // === FAVORITES ===
-   favoritesGroups: loadSetFromStorage('schedule-favorites-groups'),
-   favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
-   prevFilter: loadPrevFilter(),
-   favoritesActive: loadFavoritesActive(),
-   // =================
+  favoritesGroups: loadSetFromStorage('schedule-favorites-groups'),
+  favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
+  prevFilter: loadPrevFilter(),
+  favoritesActive: loadFavoritesActive(),
 
-  // === DRAFT (черновик фильтра, пока открыт дропдаун) ===
   draftGroups: new Set(),
   draftTeachers: new Set(),
   draftFavoritesGroups: new Set(),
   draftFavoritesTeachers: new Set(),
   draftFavoritesDirty: false,
 
-  // Снимок предыдущего применённого состояния — для кнопки «Вернуть» в toast.
   undoFilter: null,
-  // ======================================================
 
   currentDate: loadCurrentDate() || new Date(),
-  view: localStorage.getItem('schedule-view') || 'week',
+  view: loadViewFromStorage(),
+
+  // Шаг навигации стрелками (когда view === 'load').
+  navStep: loadNavStepFromStorage(),
+
   theme: localStorage.getItem('schedule-theme') || 'auto',
 
-  // true — только когда: онлайн + data.json битый.
-  // В оффлайне фоллбэк на old_data.json всегда тихий.
   fallbackActive: false,
-
   currentData: null,
   displayedIso: null,
   initialRenderDone: false,
   scrollToNow: false,
 
-  // Постоянный список изменений «с прошлого визита».
-  // Живёт в localStorage, переживает reload, перезаписывается
-  // только когда приходит новая порция изменений.
   pendingChanges: loadPendingChanges(),
 
-  // === URL CONTEXT (deep links) ===
-  // true — страница открыта по ссылке с параметрами. Пока true,
-  // ни одна save-функция не пишет в localStorage. Снимается при
-  // первом же клике пользователя.
   urlContext: false,
   urlEventId: null,
-  // Сырые параметры из URL, до валидации (см. resolveUrlContext).
   urlRaw: null,
 };
 
@@ -116,6 +120,7 @@ export function saveCurrentDate(d) {
   if (state.urlContext) return;
   try { localStorage.setItem('schedule-current-date', toISO(d)); } catch {}
 }
+
 export function loadCurrentDate() {
   try {
     const s = localStorage.getItem('schedule-current-date');
@@ -130,6 +135,7 @@ export function saveScrollMemory(view, data) {
   if (state.urlContext) return;
   try { localStorage.setItem('schedule-scroll-' + view, JSON.stringify(data)); } catch {}
 }
+
 export function loadScrollMemory(view) {
   try {
     const raw = localStorage.getItem('schedule-scroll-' + view);
@@ -140,12 +146,20 @@ export function loadScrollMemory(view) {
 export function saveDayColWidth(px) {
   try { localStorage.setItem('schedule-day-col-width', String(px)); } catch {}
 }
+
 export function loadDayColWidth() {
   try {
     const s = localStorage.getItem('schedule-day-col-width');
     const n = parseFloat(s);
     return Number.isFinite(n) ? n : null;
   } catch { return null; }
+}
+
+/** Шаг навигации для «Нагрузки». Допустимо только month/week/day. */
+export function saveNavStep(step) {
+  if (state.urlContext) return;
+  if (step !== 'month' && step !== 'week' && step !== 'day') return;
+  try { localStorage.setItem('schedule-nav-step', step); } catch {}
 }
 
 export function normalizeKey(ev) {
@@ -184,6 +198,7 @@ export function saveSnapshot(events) {
     localStorage.setItem('schedule-snapshot', JSON.stringify(events.map(makeSnapshotEntry)));
   } catch {}
 }
+
 export function loadSnapshot() {
   try {
     const raw = localStorage.getItem('schedule-snapshot');
@@ -197,12 +212,12 @@ export function saveGeneratedAt(iso) {
   if (state.urlContext) return;
   try { if (iso) localStorage.setItem('schedule-last-generated-at', iso); } catch {}
 }
+
 export function loadGeneratedAt() {
   try { return localStorage.getItem('schedule-last-generated-at') || null; } catch { return null; }
 }
 
-/* ---------- favorites: активный режим + снимок для «Отменить» ---------- */
-/* Константы FAV_ACTIVE_KEY / PREV_FILTER_KEY объявлены выше, до state. */
+/* ---------- favorites ---------- */
 
 export function saveFavoritesActive(active) {
   if (state.urlContext) return;
@@ -244,15 +259,6 @@ export function loadPrevFilter() {
  *  URL CONTEXT (deep links)
  * ============================================================ */
 
-/**
- * ШАГ 1 — только парсинг. Не трогает selectedGroups/Teachers,
- * потому что на этом этапе ещё нет state.groups/state.teachers.
- *
- * Сразу применяет v и d (они не зависят от данных), остальное
- * складывает в state.urlRaw для последующей валидации.
- *
- * Возвращает true, если в URL был хотя бы один известный параметр.
- */
 export function applyUrlContext() {
   const params = new URLSearchParams(location.search);
   const raw = {
@@ -270,6 +276,7 @@ export function applyUrlContext() {
 
   if (raw.v && ['month', 'week', 'day', 'load'].includes(raw.v)) {
     state.view = raw.v;
+    if (raw.v !== 'load') state.navStep = raw.v;
   }
   if (raw.d) {
     const parts = raw.d.split('-').map(Number);
@@ -281,16 +288,6 @@ export function applyUrlContext() {
   return true;
 }
 
-/**
- * ШАГ 2 — валидация. Вызывается ПОСЛЕ того, как построены
- * state.groups, state.teachers и state.allEvents.
- *
- * Возвращает:
- *   'empty'   — URL вообще без параметров (обычный заход);
- *   'full'    — все параметры применились;
- *   'partial' — что-то применилось, что-то отброшено как невалидное;
- *   'none'    — параметры были, но ничего валидного, откатились.
- */
 export function resolveUrlContext() {
   if (!state.urlRaw) return 'empty';
 
@@ -301,17 +298,14 @@ export function resolveUrlContext() {
   let total   = 0;
   let matched = 0;
 
-  // --- groups ---
   if (g !== null) {
     total++;
     const list = g ? g.split(',').map(s => s.trim()).filter(Boolean) : [];
     const kept = list.filter(x => knownGroups.has(x));
     state.selectedGroups = new Set(kept);
-    // Пустая строка `?g=` — явный «без групп», считается применённой.
     if (g === '' || kept.length > 0) matched++;
   }
 
-  // --- teachers ---
   if (t !== null) {
     total++;
     const list = t ? t.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -320,20 +314,17 @@ export function resolveUrlContext() {
     if (t === '' || kept.length > 0) matched++;
   }
 
-  // --- view ---
   if (v !== null) {
     total++;
     if (['month', 'week', 'day', 'load'].includes(v)) matched++;
   }
 
-  // --- date ---
   if (d !== null) {
     total++;
     const parts = d.split('-').map(Number);
     if (parts.length === 3 && parts.every(Number.isFinite)) matched++;
   }
 
-  // --- event ---
   if (e) {
     total++;
     const exists = state.allEvents.some(ev => ev.event_id === e);
@@ -342,7 +333,6 @@ export function resolveUrlContext() {
   }
 
   if (matched === 0) {
-    // Ничего валидного — полный откат в обычный режим.
     restoreFromStorage();
     state.urlRaw     = null;
     state.urlContext = false;
@@ -352,21 +342,16 @@ export function resolveUrlContext() {
 
   state.urlContext = true;
   state.urlEventId = e || null;
-
-  // Просмотр по чужой ссылке — фильтр диктуется URL, а не избранным.
-  // Сбрасываем режим только в памяти: в localStorage не пишем
-  // (saveFavoritesActive сам пропустит запись при urlContext=true),
-  // так что при следующем обычном заходе избранное снова «вспомнится».
   state.favoritesActive = false;
 
   return matched === total ? 'full' : 'partial';
 }
 
-/** Возвращает state к значениям из localStorage (для отката). */
 function restoreFromStorage() {
   state.selectedGroups   = loadSetFromStorage('schedule-selected-groups');
   state.selectedTeachers = loadSetFromStorage('schedule-selected-teachers');
-  state.view        = localStorage.getItem('schedule-view') || 'week';
+  state.view        = loadViewFromStorage();
+  state.navStep     = loadNavStepFromStorage();
   state.currentDate = loadCurrentDate() || new Date();
 }
 

@@ -14,7 +14,7 @@ const VIEW_KEY = 'schedule-load-view';
 const HOURS_PER_PAIR = 2;
 
 /**
- * Абсолютные пороги плотности дня.
+ * Абсолютные пороги плотности ДНЯ (в парах).
  *   1–4 пары  → low  (2–8 ч)
  *   5 пар     → mid  (10 ч)
  *   6+ пар    → high (12+ ч) — перегруз
@@ -31,6 +31,49 @@ function levelFor(pairs) {
         if (pairs <= l.maxPairs) return l.level;
     }
     return 'high';
+}
+
+/**
+ * Пороги плотности НЕДЕЛИ (в парах).
+ *   54 ч (27 пар) — официальный максимум недельной нагрузки.
+ *   Ниже 60% от него (16 пар ≈ 32 ч) — комфортная неделя.
+ *
+ * Оценка идёт по СУММЕ часов за неделю, а не по худшему дню:
+ * одна загруженная суббота больше не красит всю неделю в красный.
+ */
+const WEEK_MAX_PAIRS = 27;
+const WEEK_LOW_PAIRS = Math.round(WEEK_MAX_PAIRS * 0.6);
+
+function weekLevelFor(pairs) {
+    if (pairs <= 0) return 'empty';
+    if (pairs > WEEK_MAX_PAIRS) return 'high';
+    if (pairs > WEEK_LOW_PAIRS) return 'mid';
+    return 'low';
+}
+
+/**
+ * Нормы СЕМЕСТРА.
+ *
+ *   semesterMax = 27 пар (54 ч) × кол-во недель
+ *   dowMax      = semesterMax / 7   — на один день недели за весь семестр
+ *
+ * Пороги mid/low — те же 60 % / 100 % от максимума, что и у недели,
+ * чтобы визуальный язык оставался единым.
+ */
+function semesterLevelFor(pairs, numWeeks) {
+    if (pairs <= 0 || numWeeks <= 0) return 'empty';
+    const max = WEEK_MAX_PAIRS * numWeeks;
+    if (pairs > max)        return 'high';
+    if (pairs > max * 0.6)  return 'mid';
+    return 'low';
+}
+
+function dowLevelFor(pairs, numWeeks) {
+    if (pairs <= 0 || numWeeks <= 0) return 'empty';
+    const max = (WEEK_MAX_PAIRS * numWeeks) / 7;
+    if (pairs > max)        return 'high';
+    if (pairs > max * 0.6)  return 'mid';
+    return 'low';
 }
 
 function unit() {
@@ -86,12 +129,12 @@ function formatWeekRange(start, end) {
     const mS = MONTHS_SHORT[start.getMonth()];
     const mE = MONTHS_SHORT[end.getMonth()];
 
-    if (sameMonth && sameYear) return `${start.getDate()}–${end.getDate()} ${mS}`;
-    if (sameYear) return `${start.getDate()} ${mS} – ${end.getDate()} ${mE}`;
+    if (sameMonth && sameYear) return start.getDate() + '–' + end.getDate() + ' ' + mS;
+    if (sameYear) return start.getDate() + ' ' + mS + ' – ' + end.getDate() + ' ' + mE;
 
     const yS = String(start.getFullYear()).slice(-2);
     const yE = String(end.getFullYear()).slice(-2);
-    return `${start.getDate()} ${mS} ${yS} – ${end.getDate()} ${mE} ${yE}`;
+    return start.getDate() + ' ' + mS + ' ' + yS + ' – ' + end.getDate() + ' ' + mE + ' ' + yE;
 }
 
 function buildWeeks(byDate) {
@@ -140,17 +183,6 @@ function unitShort(u) {
     return u === 'hours' ? 'ч' : 'пар';
 }
 
-function worstLevelOf(week) {
-    let worst = 'empty';
-    for (const d of week.days) {
-        const lvl = levelFor(d.pairs);
-        if (lvl === 'high') return 'high';
-        if (lvl === 'mid' && worst !== 'high') worst = 'mid';
-        if (lvl === 'low' && worst === 'empty') worst = 'low';
-    }
-    return worst;
-}
-
 /* ---------- публичный рендер ---------- */
 
 export function renderLoad(root) {
@@ -165,19 +197,15 @@ export function renderLoad(root) {
 
     let totalPairs = 0;
     let activeDays = 0;
-    let maxDayPairs = 0;
     let maxWeekPairs = 0;
     let overloadWeeks = 0;
 
     for (const w of weeks) {
         totalPairs += w.pairs;
         if (w.pairs > maxWeekPairs) maxWeekPairs = w.pairs;
-        if (w.days.some(d => levelFor(d.pairs) === 'high')) overloadWeeks++;
+        if (weekLevelFor(w.pairs) === 'high') overloadWeeks++;
         for (const d of w.days) {
-            if (d.pairs > 0) {
-                activeDays++;
-                if (d.pairs > maxDayPairs) maxDayPairs = d.pairs;
-            }
+            if (d.pairs > 0) activeDays++;
         }
     }
     const avgPairs = activeDays > 0 ? totalPairs / activeDays : 0;
@@ -243,7 +271,7 @@ function buildHeader({ u, totalPairs, weeksCount, activeDays, avgPairs, overload
         sep();
         const warn = el('span', 'load-summary-warn');
         warn.textContent =
-            `⚠ ${overloadWeeks} ` +
+            '⚠ ' + overloadWeeks + ' ' +
             pluralRu(overloadWeeks, 'неделя', 'недели', 'недель') +
             ' с перегрузом';
         summary.appendChild(warn);
@@ -350,14 +378,20 @@ function buildHeatmapCard(weeks, u) {
     const right = el('div', 'load-hm-col load-hm-col--side load-hm-col--side-right');
     right.appendChild(el('div', 'load-hm-sigma-head', 'Σ'));
 
+    const numWeeks = weeks.length;
     let grandTotal = 0;
     for (let dow = 0; dow < 7; dow++) {
         let dowSum = 0;
         for (const w of weeks) dowSum += w.days[dow].pairs;
-        right.appendChild(buildRowSumCell(dowSum, u));
+        right.appendChild(buildRowSumCell(dowSum, u, numWeeks));
     }
     for (const w of weeks) grandTotal += w.pairs;
-    right.appendChild(el('div', 'load-hm-grand-total', String(toUnitValue(grandTotal, u))));
+
+    const grandTotalEl = el('div', 'load-hm-grand-total', String(toUnitValue(grandTotal, u)));
+    const gtLevel = semesterLevelFor(grandTotal, numWeeks);
+    if (gtLevel === 'mid')       grandTotalEl.classList.add('is-mid');
+    else if (gtLevel === 'high') grandTotalEl.classList.add('is-high');
+    right.appendChild(grandTotalEl);
     grid.appendChild(right);
 
     /* --- легенда --- */
@@ -381,7 +415,7 @@ function buildWeekColumn(w, u, todayIso, selectedIso) {
     if (containsToday)    numBtn.classList.add('is-current');
     if (containsSelected) numBtn.classList.add('is-selected');
     numBtn.textContent = String(w.num);
-    numBtn.title = `Неделя ${w.num} (${formatWeekRange(w.start, w.end)}) — открыть`;
+    numBtn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') — открыть';
     numBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         navigateTo('week', w.start);
@@ -417,18 +451,18 @@ function buildDayCell(d, u, selectedIso) {
     if (isSelected)  btn.classList.add('is-selected-day');
 
     if (d.pairs > 0) {
-        const label = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}`;
+        const label = d.date.getDate() + ' ' + MONTHS_SHORT[d.date.getMonth()];
         const val = u === 'hours'
-            ? `${toUnitValue(d.pairs, u)} ч`
-            : `${d.pairs} пар`;
-        btn.title = `${label}: ${val} — открыть день`;
+            ? toUnitValue(d.pairs, u) + ' ч'
+            : d.pairs + ' пар';
+        btn.title = label + ': ' + val + ' — открыть день';
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             navigateTo('day', d.date);
         });
     } else {
         btn.disabled = true;
-        btn.title = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}: занятий нет`;
+        btn.title = d.date.getDate() + ' ' + MONTHS_SHORT[d.date.getMonth()] + ': занятий нет';
     }
 
     return btn;
@@ -439,11 +473,13 @@ function buildTotalCell(w, u, isSelected) {
     btn.type = 'button';
     btn.className = 'load-hm-total';
 
-    const worst = worstLevelOf(w);
+    // Уровень недели — по СУММЕ часов (пар) за неделю,
+    // а не по худшему дню. Порог 54 ч = 27 пар.
+    const level = weekLevelFor(w.pairs);
 
-    if (w.pairs === 0)         btn.classList.add('is-zero');
-    else if (worst === 'high') btn.classList.add('is-high');
-    else if (worst === 'mid')  btn.classList.add('is-mid');
+    if (level === 'empty')      btn.classList.add('is-zero');
+    else if (level === 'high')  btn.classList.add('is-high');
+    else if (level === 'mid')   btn.classList.add('is-mid');
 
     if (isSelected && w.pairs > 0) btn.classList.add('is-selected');
 
@@ -451,8 +487,8 @@ function buildTotalCell(w, u, isSelected) {
     btn.textContent = String(v);
 
     btn.title = w.pairs > 0
-        ? `Неделя ${w.num}: ${v} ${unitShort(u)} — открыть`
-        : `Неделя ${w.num}: занятий нет`;
+        ? 'Неделя ' + w.num + ': ' + v + ' ' + unitShort(u) + ' — открыть'
+        : 'Неделя ' + w.num + ': занятий нет';
 
     if (w.pairs === 0) {
         btn.disabled = true;
@@ -466,13 +502,14 @@ function buildTotalCell(w, u, isSelected) {
     return btn;
 }
 
-function buildRowSumCell(dowSumPairs, u) {
+function buildRowSumCell(dowSumPairs, u, numWeeks) {
     const cell = el('div', 'load-hm-row-sum');
     const v = toUnitValue(dowSumPairs, u);
     cell.textContent = v > 0 ? String(v) : '·';
 
-    if (dowSumPairs >= 6 * 6) cell.classList.add('is-high');
-    else if (dowSumPairs >= 5 * 5) cell.classList.add('is-mid');
+    const level = dowLevelFor(dowSumPairs, numWeeks);
+    if (level === 'high')      cell.classList.add('is-high');
+    else if (level === 'mid')  cell.classList.add('is-mid');
 
     return cell;
 }
@@ -507,22 +544,23 @@ function buildStripBar(w, u, maxWeekPairs) {
     const ratio = maxWeekPairs > 0 ? w.pairs / maxWeekPairs : 0;
     const h = w.pairs > 0 ? Math.max(4, Math.round(4 + ratio * 88)) : 3;
 
-    const worst = worstLevelOf(w);
+    // Уровень — по сумме за неделю, аналогично клеткам Σ.
+    const level = weekLevelFor(w.pairs);
 
     const v = toUnitValue(w.pairs, u);
     btn.appendChild(el('div', 'load-strip-bar-value', String(v)));
 
     const fillWrap = el('div', 'load-strip-bar-fill-wrap');
     const fill = el('div', 'load-strip-bar-fill');
-    if (worst === 'mid')  fill.classList.add('is-mid');
-    if (worst === 'high') fill.classList.add('is-high');
+    if (level === 'mid')  fill.classList.add('is-mid');
+    if (level === 'high') fill.classList.add('is-high');
     fill.style.height = h + '%';
     fillWrap.appendChild(fill);
     btn.appendChild(fillWrap);
 
     btn.appendChild(el('div', 'load-strip-bar-label', String(w.num)));
 
-    btn.title = `Неделя ${w.num} (${formatWeekRange(w.start, w.end)}) · ${v} ${unitShort(u)}`;
+    btn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') · ' + v + ' ' + unitShort(u);
 
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -548,8 +586,9 @@ function buildInsights(weeks, u) {
     const top = [...allDays].sort((a, b) => b.pairs - a.pairs).slice(0, 5);
     aside.appendChild(buildTopDaysCard(top, u));
 
+    // Перегруженные недели — по той же логике, что и цвет клеток Σ.
     const overloaded = weeks
-        .filter(w => w.days.some(d => levelFor(d.pairs) === 'high'))
+        .filter(w => weekLevelFor(w.pairs) === 'high')
         .map(w => ({
             week: w,
             highDays: w.days.filter(d => levelFor(d.pairs) === 'high').length,
@@ -588,15 +627,15 @@ function buildTopDaysCard(days, u) {
 
         const main = el('div', 'load-insight-item-main');
         const dowName = WEEKDAYS_SHORT[(d.date.getDay() + 6) % 7];
-        const dateStr = `${d.date.getDate()} ${MONTHS_SHORT[d.date.getMonth()]}`;
-        main.appendChild(el('div', 'load-insight-item-date', `${dowName}, ${dateStr}`));
-        main.appendChild(el('div', 'load-insight-item-sub', `Неделя ${d.weekNum}`));
+        const dateStr = d.date.getDate() + ' ' + MONTHS_SHORT[d.date.getMonth()];
+        main.appendChild(el('div', 'load-insight-item-date', dowName + ', ' + dateStr));
+        main.appendChild(el('div', 'load-insight-item-sub', 'Неделя ' + d.weekNum));
         btn.appendChild(main);
 
         const v = toUnitValue(d.pairs, u);
-        btn.appendChild(el('div', 'load-insight-item-value', `${v} ${unitShort(u)}`));
+        btn.appendChild(el('div', 'load-insight-item-value', v + ' ' + unitShort(u)));
 
-        btn.title = `Открыть ${dateStr}`;
+        btn.title = 'Открыть ' + dateStr;
         btn.addEventListener('click', () => navigateTo('day', d.date));
 
         li.appendChild(btn);
@@ -621,22 +660,24 @@ function buildOverloadCard(items, u) {
     }
 
     const list = el('ul', 'load-insight-list');
-    for (const { week, highDays } of items) {
+    for (const item of items) {
+        const week = item.week;
+        const highDays = item.highDays;
         const li = el('li');
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'load-insight-item is-high';
 
         const main = el('div', 'load-insight-item-main');
-        main.appendChild(el('div', 'load-insight-item-date', `Неделя ${week.num}`));
+        main.appendChild(el('div', 'load-insight-item-date', 'Неделя ' + week.num));
         main.appendChild(el('div', 'load-insight-item-sub',
-            `${highDays} ${pluralRu(highDays, 'день', 'дня', 'дней')} с 6+ парами`));
+            highDays + ' ' + pluralRu(highDays, 'день', 'дня', 'дней') + ' с 6+ парами'));
         btn.appendChild(main);
 
         const v = toUnitValue(week.pairs, u);
-        btn.appendChild(el('div', 'load-insight-item-value', `${v} ${unitShort(u)}`));
+        btn.appendChild(el('div', 'load-insight-item-value', v + ' ' + unitShort(u)));
 
-        btn.title = `Открыть неделю ${week.num} (${formatWeekRange(week.start, week.end)})`;
+        btn.title = 'Открыть неделю ' + week.num + ' (' + formatWeekRange(week.start, week.end) + ')';
         btn.addEventListener('click', () => navigateTo('week', week.start));
 
         li.appendChild(btn);

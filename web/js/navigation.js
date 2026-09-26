@@ -1,14 +1,23 @@
 'use strict';
 
-import { state, saveCurrentDate, saveScrollMemory } from './state.js';
+import { state, saveCurrentDate, saveScrollMemory, saveNavStep } from './state.js';
 import { addDays, addMonths } from './utils.js';
 import { render } from './render.js';
 
+/* ============================================================
+ *  НАВИГАЦИЯ
+ *
+ *  step = view, если вид — month/week/day.
+ *  Если вид — load, шаг берётся из state.navStep
+ *  (каким был последний обычный вид).
+ * ============================================================ */
 
 export function navigate(delta) {
-  if (state.view === 'month') {
+  const step = state.view === 'load' ? state.navStep : state.view;
+
+  if (step === 'month') {
     state.currentDate = addMonths(state.currentDate, delta);
-  } else if (state.view === 'week') {
+  } else if (step === 'week') {
     state.currentDate = addDays(state.currentDate, delta * 7);
   } else {
     state.currentDate = addDays(state.currentDate, delta);
@@ -27,13 +36,53 @@ export function viewLabel(v) {
     return { month: 'Месяц', week: 'Неделя', day: 'День', load: 'Нагрузка' }[v];
 }
 
+/* ============================================================
+ *  КНОПКА ВИДА (иконка интервала)
+ *
+ *  - вне нагрузки viewBtn переключает сам view (month/week/day);
+ *  - в нагрузке viewBtn переключает только navStep (шаг навигации
+ *    стрелками). Вид остаётся 'load'.
+ * ============================================================ */
+
 export function updateViewButton() {
     const btn = document.getElementById('viewBtn');
-    btn.dataset.view = state.view;
-    btn.setAttribute('aria-label', `Вид: ${viewLabel(state.view)}`);
+    if (btn) {
+        const displayView = state.view === 'load' ? state.navStep : state.view;
+        btn.dataset.view = displayView;
+
+        const label = state.view === 'load'
+            ? 'Шаг навигации: ' + viewLabel(displayView) + '. Нажмите, чтобы сменить'
+            : 'Вид: ' + viewLabel(state.view) + '. Нажмите, чтобы сменить';
+        btn.setAttribute('aria-label', label);
+    }
+
+    // Пилюля «Календарь / Нагрузка».
+    const calModeBtn = document.getElementById('calendarModeBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const isLoad = state.view === 'load';
+
+    if (calModeBtn) {
+        calModeBtn.classList.toggle('is-active', !isLoad);
+        calModeBtn.setAttribute('aria-selected', isLoad ? 'false' : 'true');
+    }
+    if (loadBtn) {
+        loadBtn.classList.toggle('is-active', isLoad);
+        loadBtn.setAttribute('aria-selected', isLoad ? 'true' : 'false');
+    }
 }
 
+const VIEW_CYCLE = ['month', 'week', 'day'];
+
 export function cycleView() {
+    // В нагрузке кнопка вида управляет шагом навигации стрелками.
+    if (state.view === 'load') {
+        const idx = VIEW_CYCLE.indexOf(state.navStep);
+        state.navStep = VIEW_CYCLE[(idx + 1) % VIEW_CYCLE.length];
+        saveNavStep(state.navStep);
+        updateViewButton();
+        return;
+    }
+
     const cal = document.getElementById('calendar');
     if (state.initialRenderDone && (state.view === 'week' || state.view === 'day')) {
         saveScrollMemory(state.view, {
@@ -41,24 +90,49 @@ export function cycleView() {
             left: cal.scrollLeft,
         });
     }
-    const order = ['month', 'week', 'day', 'load'];
-    const idx = order.indexOf(state.view);
-    state.view = order[(idx + 1) % order.length];
-    localStorage.setItem('schedule-view', state.view);
+
+    const idx = VIEW_CYCLE.indexOf(state.view);
+    state.view = VIEW_CYCLE[(idx + 1) % VIEW_CYCLE.length];
+    state.navStep = state.view;
+    try { localStorage.setItem('schedule-view', state.view); } catch {}
+    saveNavStep(state.navStep);
     updateViewButton();
     render('fade');
+}
+
+/* ============================================================
+ *  ПИЛЮЛЯ «КАЛЕНДАРЬ / НАГРУЗКА»
+ * ============================================================ */
+
+export function switchToCalendar() {
+    if (state.view !== 'load') return;   // уже в календаре — no-op
+    state.view = state.navStep;
+    try { localStorage.setItem('schedule-view', state.view); } catch {}
+    saveNavStep(state.navStep);
+    updateViewButton();
+    render('fade');
+}
+
+export function switchToLoad() {
+    if (state.view === 'load') return;   // уже в нагрузке — no-op
+    state.navStep = state.view;
+    state.view = 'load';
+    try { localStorage.setItem('schedule-view', state.view); } catch {}
+    saveNavStep(state.navStep);
+    updateViewButton();
+    render('fade');
+}
+
+/** @deprecated — используй switchToCalendar / switchToLoad. */
+export function toggleLoadView() {
+    if (state.view === 'load') switchToCalendar();
+    else switchToLoad();
 }
 
 /* ============================================================
  *  ТЕМА
  *
  *  Цикл кликов:  light → auto → dark → light → ...
- *
- *  data-theme-current = текущий режим.
- *  Иконка на кнопке = текущий режим:
- *      current=light → sun
- *      current=auto  → circle with A
- *      current=dark  → moon
  * ============================================================ */
 
 const THEME_CYCLE = ['light', 'auto', 'dark'];
@@ -69,7 +143,6 @@ function systemPrefersDark() {
     return window.matchMedia(DARK_MQ).matches;
 }
 
-/** 'light' | 'auto' | 'dark' → 'light' | 'dark' (эффективная тема). */
 function effectiveTheme(mode) {
     if (mode === 'auto') return systemPrefersDark() ? 'dark' : 'light';
     return mode;
@@ -125,7 +198,6 @@ function setupThemeSystemListener() {
     else if (media.addListener) media.addListener(handler);
 }
 
-/** Вызывается один раз из main.js до первой отрисовки. */
 export function initTheme() {
     applyTheme();
     updateThemeButton();
@@ -134,10 +206,13 @@ export function initTheme() {
 
 /**
  * Переключает вид (и при необходимости дату) и перерисовывает.
- * Используется, в частности, из load-view при клике на номер недели.
  */
 export function navigateTo(view, date) {
     state.view = view;
+    if (view !== 'load') {
+        state.navStep = view;
+        saveNavStep(state.navStep);
+    }
     if (date) state.currentDate = new Date(date);
     if (!state.urlContext) {
         try { localStorage.setItem('schedule-view', view); } catch {}

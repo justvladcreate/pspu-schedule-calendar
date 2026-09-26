@@ -52,29 +52,37 @@
     line-height: 1.1;
 }
 
+/* Сводка — принципиально в одну строку без переноса.
+   Появление/исчезновение «⚠ N недель с перегрузом» не должно
+   менять высоту заголовка: иначе вся таблица уезжает вниз. */
 .load-summary {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: baseline;
     gap: 2px 6px;
     font-size: 11.5px;
     color: var(--text-muted);
     line-height: 1.3;
+    min-width: 0;
+    overflow: hidden;
 }
 .load-summary b {
     color: var(--text);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 .load-summary-sep {
     color: var(--text-dim);
     user-select: none;
     opacity: 0.6;
+    white-space: nowrap;
 }
 .load-summary-warn {
     color: var(--load-high);
     font-weight: 700;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .load-header-controls {
@@ -212,7 +220,7 @@
    Намеренно без подсветки: маленькой точки «сегодня» на самой
    ячейке достаточно, а фон колонки создавал визуальный шум. */
 .load-hm-col--week.is-current {
-    /* no-op */
+    /* no-op — намеренно пусто */
 }
 
 /* Неделя, в которую попадает state.currentDate.
@@ -336,8 +344,7 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--load-high) 50%, transparent);
 }
 
-/* Сегодня: маленькая точка в углу ячейки вместо толстого outline.
-   Точка видна на любом фоне (уровни low/mid/high, выбранная ячейка). */
+/* Сегодня: маленькая точка в углу ячейки вместо толстого outline. */
 .load-hm-cell.is-today::after {
     content: '';
     position: absolute;
@@ -353,8 +360,7 @@
 
 /* Выбранный день (state.currentDate).
    Тонкое акцентное кольцо ПОВЕРХ цвета уровня — mid/high/low
-   продолжают читаться, но видно, куда переключился пользователь.
-   Никакой заливки: это самый громкий источник шума в старой версии. */
+   продолжают читаться, но видно, куда переключился пользователь. */
 .load-hm-cell.is-selected-day {
     outline: none;
     box-shadow:
@@ -366,8 +372,9 @@
     filter: brightness(1.1);
 }
 
-/* Пульс при навигации по дням. Срабатывает только на «навигационных»
-   рендерах (стрелки, datepicker, «Сегодня») — см. render.js. */
+/* Пульс при навигации по дням/неделям/месяцам.
+   Заменяет slide-анимацию: в «Нагрузке» ничего не уезжает,
+   поэтому сдвиг неуместен. */
 @keyframes load-cell-pulse {
     0% {
         transform: scale(0.75);
@@ -489,6 +496,15 @@
     color: var(--text);
     border-radius: 4px;
     background: var(--surface-3);
+}
+.load-hm-grand-total.is-mid {
+    color: var(--load-mid);
+    background: color-mix(in srgb, var(--load-mid) 18%, transparent);
+}
+.load-hm-grand-total.is-high {
+    color: var(--load-high);
+    background: color-mix(in srgb, var(--load-high) 22%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--load-high) 45%, transparent);
 }
 
 /* ============================================================
@@ -756,7 +772,7 @@
 }
 
 /* ============================================================
- *  LEGEND (внутри heatmap-card / strip-view, сразу под сеткой)
+ *  LEGEND
  * ============================================================ */
 
 .load-legend {
@@ -805,7 +821,15 @@
     .load-view { padding: 8px; gap: 8px; max-width: none; }
 
     .load-title { font-size: 10.5px; }
-    .load-summary { font-size: 11px; }
+
+    /* На мобилке разрешаем перенос — там свои приоритеты,
+       но за высоту уже никто не борется, потому что таблица
+       стоит под свитком. */
+    .load-summary {
+        flex-wrap: wrap;
+        overflow: visible;
+        font-size: 11px;
+    }
 
     .load-unit-toggle,
     .load-view-toggle { padding: 1px; }
@@ -838,7 +862,6 @@
     .load-insight-item-date  { font-size: 11px; }
     .load-insight-item-value { font-size: 11px; }
 
-    /* на мобилке списки не перехватывают скролл */
     .load-insight-list {
         max-height: none;
         overflow-y: visible;

@@ -20,7 +20,6 @@
         min-width: 0;
     }
 
-    /* «Обновлено» переезжает наверх — вторым после даты */
     .updated-wrap {
         order: 2;
         min-width: 0;
@@ -58,25 +57,46 @@
         order: 6;
     }
 
-    /* 7. Экспорт — уезжает вправо, слева от вида */
-    .toolbar-right > #exportIcsBtn {
+    /* 7. Календарь/Нагрузка — между избранным и экспортом */
+    .toolbar-right > #viewSwitch {
         order: 7;
+    }
+
+    /* 8. Экспорт — уезжает вправо */
+    .toolbar-right > #exportIcsBtn {
+        order: 8;
         margin-left: auto;
     }
 
-    /* 8. Смена вида */
+    /* 9. Смена вида */
     .toolbar-right > #viewBtn {
-        order: 8;
-    }
-
-    /* 9. Тема */
-    .toolbar-right > #themeBtn {
         order: 9;
     }
 
-    /* 10. Поделиться */
-    .toolbar-right > #shareBtn {
+    /* 10. Тема */
+    .toolbar-right > #themeBtn {
         order: 10;
+    }
+
+    /* 11. Поделиться */
+    .toolbar-right > #shareBtn {
+        order: 11;
+    }
+
+    /* На мобилке разделители скрыты — там своя сетка. */
+    .toolbar-divider {
+        display: none;
+    }
+
+    .view-switch {
+        min-height: 34px;
+        padding: 2px;
+        border-radius: 8px;
+    }
+    .view-switch-btn {
+        padding: 0 11px;
+        font-size: 12px;
+        border-radius: 5px;
     }
 
     .btn-icon {
@@ -288,5 +308,19 @@
     .readme {
         width: calc(100vw - 16px);
         max-height: 90dvh;
+    }
+}
+
+/* На очень узких экранах — прячем текстовые метки у сегментов,
+   оставляем только иконки. Иначе строка тулбара ломается. */
+@media (max-width: 600px) {
+    .view-switch-btn {
+        padding: 0 10px;
+        min-width: 34px;
+        justify-content: center;
+        gap: 0;
+    }
+    .view-switch-label {
+        display: none;
     }
 }
