@@ -209,35 +209,6 @@ def _chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-# --- сортировка AI-строк (по enumerator → подгруппе → строке подгруппы) ---
-
-_ENUMERATOR_RE = re.compile(r'^\s*\[\s*(\d+)\s*\]')
-_SUBGROUP_RE   = re.compile(r'п\s*[/\\]?\s*г\s*(\d+)', re.IGNORECASE)
-
-
-def _line_sort_key(line: str) -> tuple:
-    """
-    Детерминированный порядок AI-строк внутри одного enumerator'а.
-
-    Порядок сравнения:
-      1. Enumerator — номер исходной ячейки [N].
-      2. Номер подгруппы (п/г N). Строки без подгруппы (subgroup_num=0)
-         идут раньше всех. Это нужно, чтобы позиционное распределение
-         комнат стабильно связывало п/г 1 с первой комнатой, п/г 2 со
-         второй и т.д.
-      3. Строка подгруппы — как tiebreaker для одинаковых номеров.
-    """
-    m = _ENUMERATOR_RE.match(line)
-    enum = int(m.group(1)) if m else 0
-
-    parts = line.split(";")
-    subgroup = parts[7].strip() if len(parts) > 7 else ""
-
-    sm = _SUBGROUP_RE.search(subgroup)
-    subgroup_num = int(sm.group(1)) if sm else 0
-
-    return (enum, subgroup_num, subgroup)
-
 
 def _add_90_minutes(time_start: str) -> str:
     """time_start + 1.5ч в формате HH:MM. Пусто, если не распарсилось."""
@@ -524,7 +495,8 @@ async def process_schedule(
             await asyncio.sleep(0.5)
 
         new_cache[key] = lines
-        lines = sorted(lines, key=_line_sort_key)
+        # Deprecated feature
+        # lines = sorted(lines, key=_line_sort_key)
 
         merged: list[dict] = []
         enum_counts = Counter()

@@ -35,11 +35,10 @@ def get_pair_number(time_str: str) -> Optional[int]:
 
 
 async def normalize_teachers(teacher_str: str) -> List[str]:
-    return [
-        remove_academic_titles(t.strip())
-        for t in teacher_str.split(",")
-        if remove_academic_titles(t.strip())
-    ]
+    cleaned = remove_academic_titles(teacher_str)   # уже возвращает "ФИО1, ФИО2, ..."
+    if not cleaned:
+        return []
+    return [t.strip() for t in cleaned.split(",") if t.strip()]
 
 
 # Символы-обёртки, которые не являются частью даты.
@@ -255,8 +254,6 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
             temp_events, key=lambda e: (e["group"], e["weekday"], e["pair_number"])
     ):
         slot_events = list(slot_events_it)
-        # Сортировка внутри слота
-        slot_events.sort(key=lambda e: (e["discipline"], e["type"], e["subgroup"]))
         for idx, ev in enumerate(slot_events, start=1):
             ev["position"] = idx
             ev["event_id"] = f"{group}_{weekday}_{pair_number}_{idx}"

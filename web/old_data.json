@@ -118,6 +118,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Основы работы электронными библиотечными системами",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Костицина А.В."
+            ],
+            "dates": [
+                "14.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_ПН_3_1"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Возрастная анатомия, физиология и культура здоровья",
             "type": "лек.",
             "subgroup": "",
@@ -130,50 +150,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_ПН_3_1"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПН",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы медицинских знаний",
-            "type": "прак.лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Отавина М.Л."
-            ],
-            "dates": [
-                "07.12.2026",
-                "14.12.2026",
-                "21.12.2026"
-            ],
-            "rooms": "IV к. А331",
-            "comment": "",
             "position": 2,
             "event_id": "1211_ПН_3_2"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПН",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы работы электронными библиотечными системами",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Костицина А.В."
-            ],
-            "dates": [
-                "14.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
-            "comment": "",
-            "position": 3,
-            "event_id": "1211_ПН_3_3"
         },
         {
             "group": "1211",
@@ -198,6 +176,28 @@
                 "23.11.2026"
             ],
             "rooms": "IV к. А111",
+            "comment": "",
+            "position": 3,
+            "event_id": "1211_ПН_3_3"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы медицинских знаний",
+            "type": "прак.лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "07.12.2026",
+                "14.12.2026",
+                "21.12.2026"
+            ],
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 4,
             "event_id": "1211_ПН_3_4"
@@ -229,28 +229,6 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы медицинских знаний",
-            "type": "прак.лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Отавина М.Л."
-            ],
-            "dates": [
-                "07.12.2026",
-                "14.12.2026",
-                "21.12.2026"
-            ],
-            "rooms": "IV к. А331",
-            "comment": "",
-            "position": 2,
-            "event_id": "1211_ПН_4_2"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПН",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Программирование",
             "type": "лек.прак.",
             "subgroup": "",
@@ -269,8 +247,51 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "position": 2,
+            "event_id": "1211_ПН_4_2"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы медицинских знаний",
+            "type": "прак.лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "07.12.2026",
+                "14.12.2026",
+                "21.12.2026"
+            ],
+            "rooms": "IV к. А331",
+            "comment": "",
             "position": 3,
             "event_id": "1211_ПН_4_3"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПН",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Современная образовательная среда (ДНК и Кванториум)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Ширинкина К.А.",
+                "Ганщук С.В."
+            ],
+            "dates": [
+                "05.10.2026"
+            ],
+            "rooms": "IV к. холл 2 эт.",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_ПН_5_1"
         },
         {
             "group": "1211",
@@ -292,37 +313,6 @@
                 "16.11.2026"
             ],
             "rooms": "IV к. А111",
-            "comment": "",
-            "position": 1,
-            "event_id": "1211_ПН_5_1"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПН",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Иностранный язык",
-            "type": "прак.",
-            "subgroup": "п/г 2",
-            "teachers": [
-                "Марьюсик П.С."
-            ],
-            "dates": [
-                "02.11.2026",
-                "09.11.2026",
-                "16.11.2026",
-                "23.11.2026",
-                "30.11.2026",
-                "07.12.2026",
-                "14.12.2026",
-                "21.12.2026",
-                "28.12.2026",
-                "04.01.2027",
-                "11.01.2027",
-                "18.01.2027"
-            ],
-            "rooms": "",
             "comment": "",
             "position": 2,
             "event_id": "1211_ПН_5_2"
@@ -382,17 +372,27 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Современная образовательная среда (ДНК и Кванториум)",
-            "type": "",
-            "subgroup": "",
+            "discipline": "Иностранный язык",
+            "type": "прак.",
+            "subgroup": "п/г 2",
             "teachers": [
-                "Ширинкина К.А.",
-                "Ганщук С.В."
+                "Марьюсик П.С."
             ],
             "dates": [
-                "05.10.2026"
+                "02.11.2026",
+                "09.11.2026",
+                "16.11.2026",
+                "23.11.2026",
+                "30.11.2026",
+                "07.12.2026",
+                "14.12.2026",
+                "21.12.2026",
+                "28.12.2026",
+                "04.01.2027",
+                "11.01.2027",
+                "18.01.2027"
             ],
-            "rooms": "IV к. холл 2 эт.",
+            "rooms": "",
             "comment": "",
             "position": 5,
             "event_id": "1211_ПН_5_5"
@@ -445,6 +445,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Современная образовательная среда (Технопарк)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Терехина А.В."
+            ],
+            "dates": [
+                "11.09.2026"
+            ],
+            "rooms": "IV к. А305",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_ПТ_3_1"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
             "type": "",
             "subgroup": "",
@@ -456,8 +476,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_ПТ_3_1"
+            "position": 2,
+            "event_id": "1211_ПТ_3_2"
         },
         {
             "group": "1211",
@@ -477,15 +497,15 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_ПТ_3_2"
+            "position": 3,
+            "event_id": "1211_ПТ_3_3"
         },
         {
             "group": "1211",
             "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Современная образовательная среда (Технопарк)",
             "type": "",
             "subgroup": "",
@@ -496,31 +516,6 @@
                 "11.09.2026"
             ],
             "rooms": "IV к. А305",
-            "comment": "",
-            "position": 3,
-            "event_id": "1211_ПТ_3_3"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Дискретные модели в информатике",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Ефремова Е.А."
-            ],
-            "dates": [
-                "20.11.2026",
-                "27.11.2026",
-                "04.12.2026",
-                "11.12.2026",
-                "18.12.2026",
-                "25.12.2026"
-            ],
-            "rooms": "IV к. А111",
             "comment": "",
             "position": 1,
             "event_id": "1211_ПТ_4_1"
@@ -551,6 +546,27 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
+            "discipline": "Основы медицинских знаний",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "09.10.2026",
+                "16.10.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
+            "position": 3,
+            "event_id": "1211_ПТ_4_3"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Математические основы информатики",
             "type": "лек.прак.",
             "subgroup": "",
@@ -566,27 +582,6 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 3,
-            "event_id": "1211_ПТ_4_3"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Основы медицинских знаний",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Отавина М.Л."
-            ],
-            "dates": [
-                "09.10.2026",
-                "16.10.2026"
-            ],
-            "rooms": "IV к. В103",
-            "comment": "",
             "position": 4,
             "event_id": "1211_ПТ_4_4"
         },
@@ -596,29 +591,9 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Современная образовательная среда (Технопарк)",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Терехина А.В."
-            ],
-            "dates": [
-                "11.09.2026"
-            ],
-            "rooms": "IV к. А305",
-            "comment": "",
-            "position": 5,
-            "event_id": "1211_ПТ_4_5"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
             "discipline": "Дискретные модели в информатике",
-            "type": "лаб.",
-            "subgroup": "п/г 1",
+            "type": "лек.",
+            "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
@@ -629,6 +604,26 @@
                 "11.12.2026",
                 "18.12.2026",
                 "25.12.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 5,
+            "event_id": "1211_ПТ_4_5"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Современная образовательная среда (Демоцентр)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Полякова О.В."
+            ],
+            "dates": [
+                "11.09.2026"
             ],
             "rooms": "IV к. А111",
             "comment": "",
@@ -665,19 +660,48 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Современная образовательная среда (Демоцентр)",
-            "type": "",
-            "subgroup": "",
+            "discipline": "Дискретные модели в информатике",
+            "type": "лаб.",
+            "subgroup": "п/г 1",
             "teachers": [
-                "Полякова О.В."
+                "Ефремова Е.А."
             ],
             "dates": [
-                "11.09.2026"
+                "20.11.2026",
+                "27.11.2026",
+                "04.12.2026",
+                "11.12.2026",
+                "18.12.2026",
+                "25.12.2026"
             ],
             "rooms": "IV к. А111",
             "comment": "",
             "position": 3,
             "event_id": "1211_ПТ_5_3"
+        },
+        {
+            "group": "1211",
+            "weekday": "ПТ",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
+            "discipline": "Математические основы информатики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Ефремова Е.А."
+            ],
+            "dates": [
+                "25.09.2026",
+                "02.10.2026",
+                "23.10.2026",
+                "30.10.2026",
+                "13.11.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_ПТ_6_1"
         },
         {
             "group": "1211",
@@ -701,30 +725,6 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_ПТ_6_1"
-        },
-        {
-            "group": "1211",
-            "weekday": "ПТ",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Математические основы информатики",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Ефремова Е.А."
-            ],
-            "dates": [
-                "25.09.2026",
-                "02.10.2026",
-                "23.10.2026",
-                "30.10.2026",
-                "13.11.2026"
-            ],
-            "rooms": "IV к. А111",
-            "comment": "",
             "position": 2,
             "event_id": "1211_ПТ_6_2"
         },
@@ -734,16 +734,35 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "discipline": "Физическая культура и спорт",
             "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Худякова А.В."
+                "Сиротин А.Б."
             ],
             "dates": [
-                "03.10.2026"
+                "05.09.2026",
+                "12.09.2026",
+                "19.09.2026",
+                "26.09.2026",
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "31.10.2026",
+                "07.11.2026",
+                "14.11.2026",
+                "21.11.2026",
+                "28.11.2026",
+                "05.12.2026",
+                "12.12.2026",
+                "19.12.2026",
+                "26.12.2026",
+                "02.01.2027",
+                "09.01.2027",
+                "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 1,
             "event_id": "1211_СБ_2_1"
@@ -754,6 +773,26 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
+            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Худякова А.В."
+            ],
+            "dates": [
+                "03.10.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1211_СБ_2_2"
+        },
+        {
+            "group": "1211",
+            "weekday": "СБ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
             "discipline": "Программное обеспечение систем и сетей",
             "type": "лек.прак.",
             "subgroup": "",
@@ -772,15 +811,15 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_СБ_2_2"
+            "position": 3,
+            "event_id": "1211_СБ_2_3"
         },
         {
             "group": "1211",
             "weekday": "СБ",
-            "time_start": "09:45",
-            "time_end": "11:15",
-            "pair_number": 2,
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Физическая культура и спорт",
             "type": "лек.",
             "subgroup": "",
@@ -811,8 +850,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
-            "position": 3,
-            "event_id": "1211_СБ_2_3"
+            "position": 1,
+            "event_id": "1211_СБ_3_1"
         },
         {
             "group": "1211",
@@ -831,8 +870,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_СБ_3_1"
+            "position": 2,
+            "event_id": "1211_СБ_3_2"
         },
         {
             "group": "1211",
@@ -857,45 +896,6 @@
                 "28.11.2026"
             ],
             "rooms": "IV к. А111",
-            "comment": "",
-            "position": 2,
-            "event_id": "1211_СБ_3_2"
-        },
-        {
-            "group": "1211",
-            "weekday": "СБ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Физическая культура и спорт",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Сиротин А.Б."
-            ],
-            "dates": [
-                "05.09.2026",
-                "12.09.2026",
-                "19.09.2026",
-                "26.09.2026",
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026",
-                "31.10.2026",
-                "07.11.2026",
-                "14.11.2026",
-                "21.11.2026",
-                "28.11.2026",
-                "05.12.2026",
-                "12.12.2026",
-                "19.12.2026",
-                "26.12.2026",
-                "02.01.2027",
-                "09.01.2027",
-                "16.01.2027"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 3,
             "event_id": "1211_СБ_3_3"
@@ -1015,27 +1015,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Всеобщая история",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Горбушина А.А."
-            ],
-            "dates": [
-                "21.10.2026",
-                "28.10.2026"
-            ],
-            "rooms": "IV к. В103",
-            "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_3_1"
-        },
-        {
-            "group": "1211",
-            "weekday": "СР",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "лек.",
             "subgroup": "",
@@ -1048,15 +1027,15 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_СР_3_2"
+            "position": 1,
+            "event_id": "1211_СР_3_1"
         },
         {
             "group": "1211",
             "weekday": "СР",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Всеобщая история",
             "type": "лек.",
             "subgroup": "",
@@ -1069,8 +1048,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_4_1"
+            "position": 2,
+            "event_id": "1211_СР_3_2"
         },
         {
             "group": "1211",
@@ -1091,6 +1070,27 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "position": 1,
+            "event_id": "1211_СР_4_1"
+        },
+        {
+            "group": "1211",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Всеобщая история",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Горбушина А.А."
+            ],
+            "dates": [
+                "21.10.2026",
+                "28.10.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
             "position": 2,
             "event_id": "1211_СР_4_2"
         },
@@ -1100,41 +1100,19 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 1",
+            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "type": "прак.",
+            "subgroup": "",
             "teachers": [
-                "Гаврилова И.Н."
+                "Мехедов В.В."
             ],
             "dates": [
-                "25.11.2026",
-                "02.12.2026"
+                "30.09.2026"
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
             "position": 1,
             "event_id": "1211_СР_5_1"
-        },
-        {
-            "group": "1211",
-            "weekday": "СР",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 2",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [
-                "09.12.2026",
-                "16.12.2026"
-            ],
-            "rooms": "IV к. А214, IV к. А331",
-            "comment": "",
-            "position": 2,
-            "event_id": "1211_СР_5_2"
         },
         {
             "group": "1211",
@@ -1159,6 +1137,27 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "position": 2,
+            "event_id": "1211_СР_5_2"
+        },
+        {
+            "group": "1211",
+            "weekday": "СР",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 1",
+            "teachers": [
+                "Гаврилова И.Н."
+            ],
+            "dates": [
+                "25.11.2026",
+                "02.12.2026"
+            ],
+            "rooms": "IV к. А214, IV к. А331",
+            "comment": "",
             "position": 3,
             "event_id": "1211_СР_5_3"
         },
@@ -1168,6 +1167,27 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 2",
+            "teachers": [
+                "Гаврилова И.Н."
+            ],
+            "dates": [
+                "09.12.2026",
+                "16.12.2026"
+            ],
+            "rooms": "IV к. А214, IV к. А331",
+            "comment": "",
+            "position": 4,
+            "event_id": "1211_СР_5_4"
+        },
+        {
+            "group": "1211",
+            "weekday": "СР",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "прак.",
             "subgroup": "",
@@ -1175,12 +1195,13 @@
                 "Мехедов В.В."
             ],
             "dates": [
-                "30.09.2026"
+                "30.09.2026",
+                "07.10.2026"
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1211_СР_5_4"
+            "position": 1,
+            "event_id": "1211_СР_6_1"
         },
         {
             "group": "1211",
@@ -1197,8 +1218,8 @@
             "dates": [],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_6_1"
+            "position": 2,
+            "event_id": "1211_СР_6_2"
         },
         {
             "group": "1211",
@@ -1218,8 +1239,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1211_СР_6_2"
+            "position": 3,
+            "event_id": "1211_СР_6_3"
         },
         {
             "group": "1211",
@@ -1236,27 +1257,6 @@
             "dates": [
                 "09.12.2026",
                 "16.12.2026"
-            ],
-            "rooms": "IV к. А214, IV к. А331",
-            "comment": "",
-            "position": 3,
-            "event_id": "1211_СР_6_3"
-        },
-        {
-            "group": "1211",
-            "weekday": "СР",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Основы работы в электронной информационно-образовательной среде",
-            "type": "прак.",
-            "subgroup": "",
-            "teachers": [
-                "Мехедов В.В."
-            ],
-            "dates": [
-                "30.09.2026",
-                "07.10.2026"
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
@@ -1551,15 +1551,14 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Основы медицинских знаний",
-            "type": "лаб.",
-            "subgroup": "п/г 1, 2",
+            "discipline": "Основы работы электронными библиотечными системами",
+            "type": "лек.",
+            "subgroup": "",
             "teachers": [
-                "Масалева А.А."
+                "Костицина А.В."
             ],
             "dates": [
-                "07.12.2026",
-                "14.12.2026"
+                "14.09.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), IV к. А331",
             "comment": "",
@@ -1592,40 +1591,20 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Основы работы электронными библиотечными системами",
-            "type": "лек.",
-            "subgroup": "",
+            "discipline": "Основы медицинских знаний",
+            "type": "лаб.",
+            "subgroup": "п/г 1, 2",
             "teachers": [
-                "Костицина А.В."
+                "Масалева А.А."
             ],
             "dates": [
-                "14.09.2026"
+                "07.12.2026",
+                "14.12.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), IV к. А331",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_2_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПН",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [
-                "21.09.2026",
-                "28.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
-            "comment": "",
-            "position": 1,
-            "event_id": "1212_ПН_3_1"
         },
         {
             "group": "1212",
@@ -1644,8 +1623,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПН_3_2"
+            "position": 1,
+            "event_id": "1212_ПН_3_1"
         },
         {
             "group": "1212",
@@ -1663,6 +1642,27 @@
                 "14.09.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ПН_3_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Гаврилова И.Н."
+            ],
+            "dates": [
+                "21.09.2026",
+                "28.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_3_3"
@@ -1773,7 +1773,7 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026 Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -1784,6 +1784,26 @@
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_2_1"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Современная образовательная среда (Демоцентр)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Полякова О.В."
+            ],
+            "dates": [
+                "11.09.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_ПТ_3_1"
         },
         {
             "group": "1212",
@@ -1802,8 +1822,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 1,
-            "event_id": "1212_ПТ_3_1"
+            "position": 2,
+            "event_id": "1212_ПТ_3_2"
         },
         {
             "group": "1212",
@@ -1823,15 +1843,15 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_3_2"
+            "position": 3,
+            "event_id": "1212_ПТ_3_3"
         },
         {
             "group": "1212",
             "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Современная образовательная среда (Демоцентр)",
             "type": "",
             "subgroup": "",
@@ -1843,27 +1863,6 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_3_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 1",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [
-                "04.12.2026",
-                "11.12.2026"
-            ],
-            "rooms": "IV к. А331",
-            "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_4_1"
         },
@@ -1873,20 +1872,40 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 2",
+            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
+            "type": "",
+            "subgroup": "",
             "teachers": [
-                "Гаврилова И.Н."
+                "Порозов В.А."
             ],
             "dates": [
-                "18.12.2026",
-                "25.12.2026"
+                "18.09.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПТ_4_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы медицинских знаний",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "09.10.2026",
+                "16.10.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
+            "position": 3,
+            "event_id": "1212_ПТ_4_3"
         },
         {
             "group": "1212",
@@ -1910,26 +1929,6 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_4_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Порозов В.А."
-            ],
-            "dates": [
-                "18.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
             "position": 4,
             "event_id": "1212_ПТ_4_4"
         },
@@ -1939,17 +1938,17 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы медицинских знаний",
-            "type": "лек.",
-            "subgroup": "",
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 1",
             "teachers": [
-                "Отавина М.Л."
+                "Гаврилова И.Н."
             ],
             "dates": [
-                "09.10.2026",
-                "16.10.2026"
+                "04.12.2026",
+                "11.12.2026"
             ],
-            "rooms": "IV к. В103",
+            "rooms": "IV к. А331",
             "comment": "",
             "position": 5,
             "event_id": "1212_ПТ_4_5"
@@ -1960,19 +1959,40 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Современная образовательная среда (Демоцентр)",
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 2",
+            "teachers": [
+                "Гаврилова И.Н."
+            ],
+            "dates": [
+                "18.12.2026",
+                "25.12.2026"
+            ],
+            "rooms": "IV к. А331",
+            "comment": "",
+            "position": 6,
+            "event_id": "1212_ПТ_4_6"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Современная образовательная среда (Технопарк)",
             "type": "",
             "subgroup": "",
             "teachers": [
-                "Полякова О.В."
+                "Терехина А.В."
             ],
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А305, IV к. А331",
             "comment": "",
-            "position": 6,
-            "event_id": "1212_ПТ_4_6"
+            "position": 1,
+            "event_id": "1212_ПТ_5_1"
         },
         {
             "group": "1212",
@@ -1989,8 +2009,8 @@
             "dates": [],
             "rooms": "IV к. А305, IV к. А331",
             "comment": "",
-            "position": 1,
-            "event_id": "1212_ПТ_5_1"
+            "position": 2,
+            "event_id": "1212_ПТ_5_2"
         },
         {
             "group": "1212",
@@ -2010,8 +2030,8 @@
             ],
             "rooms": "IV к. А305, IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_5_2"
+            "position": 3,
+            "event_id": "1212_ПТ_5_3"
         },
         {
             "group": "1212",
@@ -2031,26 +2051,6 @@
             ],
             "rooms": "IV к. А305, IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_5_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Современная образовательная среда (Технопарк)",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Терехина А.В."
-            ],
-            "dates": [
-                "11.09.2026"
-            ],
-            "rooms": "IV к. А305, IV к. А331",
-            "comment": "",
             "position": 4,
             "event_id": "1212_ПТ_5_4"
         },
@@ -2060,16 +2060,35 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "discipline": "Физическая культура и спорт",
             "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Худякова А.В."
+                "Сиротин А.Б."
             ],
             "dates": [
-                "03.10.2026"
+                "05.09.2026",
+                "12.09.2026",
+                "19.09.2026",
+                "26.09.2026",
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "31.10.2026",
+                "07.11.2026",
+                "14.11.2026",
+                "21.11.2026",
+                "28.11.2026",
+                "05.12.2026",
+                "12.12.2026",
+                "19.12.2026",
+                "26.12.2026",
+                "02.01.2027",
+                "09.01.2027",
+                "16.01.2027"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 1,
             "event_id": "1212_СБ_2_1"
@@ -2080,6 +2099,26 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
+            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Худякова А.В."
+            ],
+            "dates": [
+                "03.10.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_СБ_2_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Физическая культура и спорт",
             "type": "лек.",
             "subgroup": "",
@@ -2110,8 +2149,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_СБ_2_2"
+            "position": 1,
+            "event_id": "1212_СБ_3_1"
         },
         {
             "group": "1212",
@@ -2130,45 +2169,6 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
-            "position": 1,
-            "event_id": "1212_СБ_3_1"
-        },
-        {
-            "group": "1212",
-            "weekday": "СБ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Физическая культура и спорт",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Сиротин А.Б."
-            ],
-            "dates": [
-                "05.09.2026",
-                "12.09.2026",
-                "19.09.2026",
-                "26.09.2026",
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026",
-                "31.10.2026",
-                "07.11.2026",
-                "14.11.2026",
-                "21.11.2026",
-                "28.11.2026",
-                "05.12.2026",
-                "12.12.2026",
-                "19.12.2026",
-                "26.12.2026",
-                "02.01.2027",
-                "09.01.2027",
-                "16.01.2027"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
-            "comment": "",
             "position": 2,
             "event_id": "1212_СБ_3_2"
         },
@@ -2178,7 +2178,7 @@
             "time_start": "14:00",
             "time_end": "15:30",
             "pair_number": 4,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В)",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В) Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -2239,27 +2239,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Всеобщая история",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Горбушина А.А."
-            ],
-            "dates": [
-                "21.10.2026",
-                "28.10.2026"
-            ],
-            "rooms": "IV к. В103",
-            "comment": "",
-            "position": 1,
-            "event_id": "1212_СР_3_1"
-        },
-        {
-            "group": "1212",
-            "weekday": "СР",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "лек.",
             "subgroup": "",
@@ -2272,15 +2251,15 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_СР_3_2"
+            "position": 1,
+            "event_id": "1212_СР_3_1"
         },
         {
             "group": "1212",
             "weekday": "СР",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Всеобщая история",
             "type": "лек.",
             "subgroup": "",
@@ -2293,8 +2272,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 1,
-            "event_id": "1212_СР_4_1"
+            "position": 2,
+            "event_id": "1212_СР_3_2"
         },
         {
             "group": "1212",
@@ -2312,6 +2291,27 @@
                 "16.09.2026"
             ],
             "rooms": "IV к. А214",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_СР_4_1"
+        },
+        {
+            "group": "1212",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Всеобщая история",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Горбушина А.А."
+            ],
+            "dates": [
+                "21.10.2026",
+                "28.10.2026"
+            ],
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1212_СР_4_2"
@@ -2684,6 +2684,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Основы работы электронными библиотечными системами",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Костицина А.В."
+            ],
+            "dates": [
+                "14.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ПН_3_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Возрастная анатомия, физиология и культура здоровья",
             "type": "лек.",
             "subgroup": "",
@@ -2696,8 +2716,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
-            "position": 1,
-            "event_id": "1214_ПН_3_1"
+            "position": 2,
+            "event_id": "1214_ПН_3_2"
         },
         {
             "group": "1214",
@@ -2726,26 +2746,6 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1214_ПН_3_2"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПН",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы работы электронными библиотечными системами",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Костицина А.В."
-            ],
-            "dates": [
-                "14.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
-            "comment": "",
             "position": 3,
             "event_id": "1214_ПН_3_3"
         },
@@ -2755,41 +2755,19 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 1",
+            "discipline": "Основы медицинских знаний",
+            "type": "прак.",
+            "subgroup": "",
             "teachers": [
-                "Гаврилова И.Н."
+                "Масалева А.А."
             ],
             "dates": [
-                "30.11.2026",
-                "07.12.2026"
+                "14.09.2026"
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
             "position": 1,
             "event_id": "1214_ПН_4_1"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПН",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
-            "subgroup": "п/г 2",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [
-                "14.12.2026",
-                "21.12.2026"
-            ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
-            "comment": "",
-            "position": 2,
-            "event_id": "1214_ПН_4_2"
         },
         {
             "group": "1214",
@@ -2806,6 +2784,27 @@
             "dates": [
                 "21.09.2026",
                 "28.09.2026"
+            ],
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
+            "comment": "",
+            "position": 2,
+            "event_id": "1214_ПН_4_2"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Современная образовательная среда (ДНК и Кванториум)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Ширинкина К.А.",
+                "Ганщук С.В."
+            ],
+            "dates": [
+                "05.10.2026"
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
@@ -2844,14 +2843,15 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Информатика",
-            "type": "прак.",
-            "subgroup": "",
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 1",
             "teachers": [
-                "Дацун Н.Н."
+                "Гаврилова И.Н."
             ],
             "dates": [
-                "02.11.2026"
+                "30.11.2026",
+                "07.12.2026"
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
@@ -2864,14 +2864,15 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы медицинских знаний",
-            "type": "прак.",
-            "subgroup": "",
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
+            "subgroup": "п/г 2",
             "teachers": [
-                "Масалева А.А."
+                "Гаврилова И.Н."
             ],
             "dates": [
-                "14.09.2026"
+                "14.12.2026",
+                "21.12.2026"
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
@@ -2884,20 +2885,39 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Современная образовательная среда (ДНК и Кванториум)",
-            "type": "",
+            "discipline": "Информатика",
+            "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Ширинкина К.А.",
-                "Ганщук С.В."
+                "Дацун Н.Н."
             ],
             "dates": [
-                "05.10.2026"
+                "02.11.2026"
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
             "position": 7,
             "event_id": "1214_ПН_4_7"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПН",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Основы медицинских знаний",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Масалева А.А."
+            ],
+            "dates": [
+                "14.09.2026"
+            ],
+            "rooms": "IV к. А331",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ПН_5_1"
         },
         {
             "group": "1214",
@@ -2918,26 +2938,6 @@
                 "16.11.2026"
             ],
             "rooms": "IV к. А101",
-            "comment": "",
-            "position": 1,
-            "event_id": "1214_ПН_5_1"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПН",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Основы медицинских знаний",
-            "type": "прак.",
-            "subgroup": "",
-            "teachers": [
-                "Масалева А.А."
-            ],
-            "dates": [
-                "14.09.2026"
-            ],
-            "rooms": "IV к. А331",
             "comment": "",
             "position": 2,
             "event_id": "1214_ПН_5_2"
@@ -2971,7 +2971,7 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Рефлексия по занятию от 12.09.2026 Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -3009,27 +3009,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Основы медицинских знаний",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Отавина М.Л."
-            ],
-            "dates": [
-                "09.10.2026",
-                "16.10.2026"
-            ],
-            "rooms": "IV к. В103",
-            "comment": "",
-            "position": 2,
-            "event_id": "1214_ПТ_3_2"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "прак.",
             "subgroup": "",
@@ -3041,6 +3020,27 @@
                 "02.10.2026"
             ],
             "rooms": "IV к. А214",
+            "comment": "",
+            "position": 2,
+            "event_id": "1214_ПТ_3_2"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы медицинских знаний",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "09.10.2026",
+                "16.10.2026"
+            ],
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 3,
             "event_id": "1214_ПТ_3_3"
@@ -3095,27 +3095,6 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы медицинских знаний",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Отавина М.Л."
-            ],
-            "dates": [
-                "09.10.2026",
-                "16.10.2026"
-            ],
-            "rooms": "IV к. В103",
-            "comment": "",
-            "position": 2,
-            "event_id": "1214_ПТ_4_2"
-        },
-        {
-            "group": "1214",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "прак.",
             "subgroup": "",
@@ -3127,6 +3106,27 @@
                 "02.10.2026"
             ],
             "rooms": "IV к. А214",
+            "comment": "",
+            "position": 2,
+            "event_id": "1214_ПТ_4_2"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы медицинских знаний",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Отавина М.Л."
+            ],
+            "dates": [
+                "09.10.2026",
+                "16.10.2026"
+            ],
+            "rooms": "IV к. В103",
             "comment": "",
             "position": 3,
             "event_id": "1214_ПТ_4_3"
@@ -3206,23 +3206,17 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Алгоритмы и структуры данных",
-            "type": "прак.",
+            "discipline": "Физическая культура и спорт",
+            "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Шаронов Н.С."
+                "Сиротин А.Б."
             ],
             "dates": [
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026",
-                "31.10.2026",
-                "07.11.2026",
-                "14.11.2026",
-                "21.11.2026",
-                "28.11.2026"
+                "12.09.2026",
+                "26.09.2026"
             ],
-            "rooms": "IV к. А204",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 1,
             "event_id": "1214_СБ_2_1"
@@ -3253,27 +3247,6 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Физическая культура и спорт",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Сиротин А.Б."
-            ],
-            "dates": [
-                "12.09.2026",
-                "26.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
-            "comment": "",
-            "position": 3,
-            "event_id": "1214_СБ_2_3"
-        },
-        {
-            "group": "1214",
-            "weekday": "СБ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Алгоритмы и структуры данных",
             "type": "прак.",
             "subgroup": "",
@@ -3291,6 +3264,27 @@
                 "28.11.2026"
             ],
             "rooms": "IV к. А204",
+            "comment": "",
+            "position": 3,
+            "event_id": "1214_СБ_2_3"
+        },
+        {
+            "group": "1214",
+            "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Физическая культура и спорт",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Сиротин А.Б."
+            ],
+            "dates": [
+                "12.09.2026",
+                "26.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
             "position": 1,
             "event_id": "1214_СБ_3_1"
@@ -3321,17 +3315,23 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Физическая культура и спорт",
-            "type": "лек.",
+            "discipline": "Алгоритмы и структуры данных",
+            "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Сиротин А.Б."
+                "Шаронов Н.С."
             ],
             "dates": [
-                "12.09.2026",
-                "26.09.2026"
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "31.10.2026",
+                "07.11.2026",
+                "14.11.2026",
+                "21.11.2026",
+                "28.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
+            "rooms": "IV к. А204",
             "comment": "",
             "position": 3,
             "event_id": "1214_СБ_3_3"
@@ -3342,7 +3342,7 @@
             "time_start": "14:00",
             "time_end": "15:30",
             "pair_number": 4,
-            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В)",
+            "discipline": "Практическое занятие Культурно-просветительский практикум Тема: Народы Прикамья. Взаимное влияние и культурный обмен. на базе Пермской региональной общественной организации содействия развитию культуры Дом дружбы (Комсомольский проспект, д. 15 В) Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [],
@@ -3402,6 +3402,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Худякова А.В."
+            ],
+            "dates": [
+                "23.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_СР_3_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "СР",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Всеобщая история",
             "type": "лек.",
             "subgroup": "",
@@ -3413,26 +3433,6 @@
                 "28.10.2026"
             ],
             "rooms": "IV к. В103",
-            "comment": "",
-            "position": 1,
-            "event_id": "1214_СР_3_1"
-        },
-        {
-            "group": "1214",
-            "weekday": "СР",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы работы в электронной информационно-образовательной среде",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Худякова А.В."
-            ],
-            "dates": [
-                "23.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
             "position": 2,
             "event_id": "1214_СР_3_2"
@@ -3491,6 +3491,26 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
+            "discipline": "Современная образовательная среда (Демоцентр)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Полякова О.В."
+            ],
+            "dates": [
+                "17.09.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ЧТ_4_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ЧТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Введение в искусственный интеллект",
             "type": "лек.прак.",
             "subgroup": "",
@@ -3509,28 +3529,28 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
-            "position": 1,
-            "event_id": "1214_ЧТ_4_1"
+            "position": 2,
+            "event_id": "1214_ЧТ_4_2"
         },
         {
             "group": "1214",
             "weekday": "ЧТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Современная образовательная среда (Демоцентр)",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Современная образовательная среда (Технопарк)",
             "type": "",
             "subgroup": "",
             "teachers": [
-                "Полякова О.В."
+                "Терехина А.В."
             ],
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А305",
             "comment": "",
-            "position": 2,
-            "event_id": "1214_ЧТ_4_2"
+            "position": 1,
+            "event_id": "1214_ЧТ_5_1"
         },
         {
             "group": "1214",
@@ -3553,26 +3573,6 @@
                 "29.10.2026"
             ],
             "rooms": "IV к. А101",
-            "comment": "",
-            "position": 1,
-            "event_id": "1214_ЧТ_5_1"
-        },
-        {
-            "group": "1214",
-            "weekday": "ЧТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Современная образовательная среда (Технопарк)",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Терехина А.В."
-            ],
-            "dates": [
-                "17.09.2026"
-            ],
-            "rooms": "IV к. А305",
             "comment": "",
             "position": 2,
             "event_id": "1214_ЧТ_5_2"
@@ -3933,6 +3933,27 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
+            "discipline": "Технологии цифрового образования",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Мехедов В.В."
+            ],
+            "dates": [
+                "28.09.2026",
+                "05.10.2026"
+            ],
+            "rooms": "IV к. А214",
+            "comment": "",
+            "position": 2,
+            "event_id": "1221_ПН_4_2"
+        },
+        {
+            "group": "1221",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Прикладная механика",
             "type": "лек.прак.",
             "subgroup": "",
@@ -3952,27 +3973,6 @@
                 "14.12.2026"
             ],
             "rooms": "IV к. А301",
-            "comment": "",
-            "position": 2,
-            "event_id": "1221_ПН_4_2"
-        },
-        {
-            "group": "1221",
-            "weekday": "ПН",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Технологии цифрового образования",
-            "type": "прак.",
-            "subgroup": "",
-            "teachers": [
-                "Мехедов В.В."
-            ],
-            "dates": [
-                "28.09.2026",
-                "05.10.2026"
-            ],
-            "rooms": "IV к. А214",
             "comment": "",
             "position": 3,
             "event_id": "1221_ПН_4_3"
@@ -4487,32 +4487,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "История научно-технологического прогресса",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Смертин П.Р.",
-                "Шмуратко Д.В.",
-                "Скорнякова А.Ю.",
-                "Селиванов А.Е.",
-                "Вяткин А.А."
-            ],
-            "dates": [
-                "24.09.2026",
-                "01.10.2026",
-                "08.10.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 2,
-            "event_id": "1221_ЧТ_3_2"
-        },
-        {
-            "group": "1221",
-            "weekday": "ЧТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Технологии цифрового образования",
             "type": "лек.",
             "subgroup": "",
@@ -4524,15 +4498,15 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u2rIdbNq1gf_dJBqIlqKG2seTF3RR1RNyLiekXn8wLY)",
             "comment": "",
-            "position": 3,
-            "event_id": "1221_ЧТ_3_3"
+            "position": 2,
+            "event_id": "1221_ЧТ_3_2"
         },
         {
             "group": "1221",
             "weekday": "ЧТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "История научно-технологического прогресса",
             "type": "лек.",
             "subgroup": "",
@@ -4550,8 +4524,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 1,
-            "event_id": "1221_ЧТ_4_1"
+            "position": 3,
+            "event_id": "1221_ЧТ_3_3"
         },
         {
             "group": "1221",
@@ -4570,8 +4544,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
-            "position": 2,
-            "event_id": "1221_ЧТ_4_2"
+            "position": 1,
+            "event_id": "1221_ЧТ_4_1"
         },
         {
             "group": "1221",
@@ -4589,6 +4563,32 @@
                 "17.09.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u2rIdbNq1gf_dJBqIlqKG2seTF3RR1RNyLiekXn8wLY)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1221_ЧТ_4_2"
+        },
+        {
+            "group": "1221",
+            "weekday": "ЧТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "История научно-технологического прогресса",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Смертин П.Р.",
+                "Шмуратко Д.В.",
+                "Скорнякова А.Ю.",
+                "Селиванов А.Е.",
+                "Вяткин А.А."
+            ],
+            "dates": [
+                "24.09.2026",
+                "01.10.2026",
+                "08.10.2026"
+            ],
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 3,
             "event_id": "1221_ЧТ_4_3"
@@ -4620,6 +4620,27 @@
             "time_start": "08:00",
             "time_end": "09:30",
             "pair_number": 1,
+            "discipline": "Общая педагогика",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Рогожникова Р.А."
+            ],
+            "dates": [
+                "22.09.2026",
+                "29.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1222_ВТ_1_2"
+        },
+        {
+            "group": "1222",
+            "weekday": "ВТ",
+            "time_start": "08:00",
+            "time_end": "09:30",
+            "pair_number": 1,
             "discipline": "Дидактические концепции профессионального образования",
             "type": "лек.",
             "subgroup": "",
@@ -4632,27 +4653,6 @@
                 "20.10.2026"
             ],
             "rooms": "II к.",
-            "comment": "",
-            "position": 2,
-            "event_id": "1222_ВТ_1_2"
-        },
-        {
-            "group": "1222",
-            "weekday": "ВТ",
-            "time_start": "08:00",
-            "time_end": "09:30",
-            "pair_number": 1,
-            "discipline": "Общая педагогика",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Рогожникова Р.А."
-            ],
-            "dates": [
-                "22.09.2026",
-                "29.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_1_3"
@@ -4684,6 +4684,27 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
+            "discipline": "Общая педагогика",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Рогожникова Р.А."
+            ],
+            "dates": [
+                "22.09.2026",
+                "29.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1222_ВТ_2_2"
+        },
+        {
+            "group": "1222",
+            "weekday": "ВТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
             "discipline": "Дидактические концепции профессионального образования",
             "type": "лек.",
             "subgroup": "",
@@ -4696,27 +4717,6 @@
                 "20.10.2026"
             ],
             "rooms": "II к.",
-            "comment": "",
-            "position": 2,
-            "event_id": "1222_ВТ_2_2"
-        },
-        {
-            "group": "1222",
-            "weekday": "ВТ",
-            "time_start": "09:45",
-            "time_end": "11:15",
-            "pair_number": 2,
-            "discipline": "Общая педагогика",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Рогожникова Р.А."
-            ],
-            "dates": [
-                "22.09.2026",
-                "29.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_2_3"
@@ -4847,26 +4847,6 @@
         {
             "group": "1222",
             "weekday": "ПН",
-            "time_start": "13:00",
-            "time_end": "14:30",
-            "pair_number": 3,
-            "discipline": "КУРАТОРСКИЙ ЧАС",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Селезнева С.М."
-            ],
-            "dates": [
-                "28.09.2026"
-            ],
-            "rooms": "IV к. А201",
-            "comment": "",
-            "position": 1,
-            "event_id": "1222_ПН_3_1"
-        },
-        {
-            "group": "1222",
-            "weekday": "ПН",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
@@ -4881,6 +4861,26 @@
                 "21.09.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1222_ПН_3_1"
+        },
+        {
+            "group": "1222",
+            "weekday": "ПН",
+            "time_start": "13:00",
+            "time_end": "14:30",
+            "pair_number": 3,
+            "discipline": "КУРАТОРСКИЙ ЧАС",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Селезнева С.М."
+            ],
+            "dates": [
+                "28.09.2026"
+            ],
+            "rooms": "IV к. А201",
             "comment": "",
             "position": 2,
             "event_id": "1222_ПН_3_2"
@@ -5084,6 +5084,26 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
+            "discipline": "Методы проектной и исследовательской деятельности",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Шуминская С.И."
+            ],
+            "dates": [
+                "25.09.2026"
+            ],
+            "rooms": "IV к. В103",
+            "comment": "",
+            "position": 1,
+            "event_id": "1222_ПТ_5_1"
+        },
+        {
+            "group": "1222",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
             "discipline": "Возрастная и педагогическая психология практикумом",
             "type": "прак.лаб.",
             "subgroup": "",
@@ -5102,26 +5122,6 @@
                 "20.11.2026"
             ],
             "rooms": "II к. 314",
-            "comment": "",
-            "position": 1,
-            "event_id": "1222_ПТ_5_1"
-        },
-        {
-            "group": "1222",
-            "weekday": "ПТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Методы проектной и исследовательской деятельности",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Шуминская С.И."
-            ],
-            "dates": [
-                "25.09.2026"
-            ],
-            "rooms": "IV к. В103",
             "comment": "",
             "position": 2,
             "event_id": "1222_ПТ_5_2"
@@ -5308,16 +5308,14 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Нормативно-правовые основы профессиональной деятельности и антикоррупционное поведение",
+            "discipline": "Общая педагогика",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Коваленко А.С."
+                "Липкина Н.Г."
             ],
             "dates": [
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
+                "04.11.2026"
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
@@ -5330,14 +5328,16 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Общая педагогика",
+            "discipline": "Нормативно-правовые основы профессиональной деятельности и антикоррупционное поведение",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Липкина Н.Г."
+                "Коваленко А.С."
             ],
             "dates": [
-                "04.11.2026"
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
@@ -5371,18 +5371,19 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Нормативно-правовые основы профессиональной деятельности и антикоррупционное поведение",
+            "discipline": "Технологии образования в системе СПО",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Коваленко А.С."
+                "Мехедов В.В."
             ],
             "dates": [
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
+                "30.09.2026",
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026"
             ],
-            "rooms": "II к. 302",
+            "rooms": "IV к. А214",
             "comment": "",
             "position": 2,
             "event_id": "1222_СР_5_2"
@@ -5413,19 +5414,18 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Технологии образования в системе СПО",
+            "discipline": "Нормативно-правовые основы профессиональной деятельности и антикоррупционное поведение",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
-                "Мехедов В.В."
+                "Коваленко А.С."
             ],
             "dates": [
-                "30.09.2026",
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026"
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
-            "rooms": "IV к. А214",
+            "rooms": "II к. 302",
             "comment": "",
             "position": 4,
             "event_id": "1222_СР_5_4"
@@ -5543,6 +5543,26 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
+            "discipline": "Общая педагогика",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Рогожникова Р.А."
+            ],
+            "dates": [
+                "10.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1222_ЧТ_4_1"
+        },
+        {
+            "group": "1222",
+            "weekday": "ЧТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "История научно-технологического прогресса",
             "type": "лек.",
             "subgroup": "",
@@ -5559,26 +5579,6 @@
                 "08.10.2026"
             ],
             "rooms": "IV к. В105",
-            "comment": "",
-            "position": 1,
-            "event_id": "1222_ЧТ_4_1"
-        },
-        {
-            "group": "1222",
-            "weekday": "ЧТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Общая педагогика",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Рогожникова Р.А."
-            ],
-            "dates": [
-                "10.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
             "position": 2,
             "event_id": "1222_ЧТ_4_2"
@@ -6064,7 +6064,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
+            "discipline": "Компьютерная и информационная безопасность",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -6084,7 +6084,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
+            "discipline": "Компьютерная и информационная безопасность",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -6109,7 +6109,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерная и информационная безопасность (прак.) -22ч",
+            "discipline": "Компьютерная и информационная безопасность",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -7666,7 +7666,7 @@
             "time_start": "08:00",
             "time_end": "09:30",
             "pair_number": 1,
-            "discipline": "Основы военной подготовки - Тир",
+            "discipline": "Основы военной подготовки",
             "type": "лаб.",
             "subgroup": "",
             "teachers": [],
@@ -7675,7 +7675,7 @@
                 "17.11.2026",
                 "24.11.2026"
             ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
+            "rooms": "Тир",
             "comment": "",
             "position": 1,
             "event_id": "1232_ВТ_1_1"
@@ -7686,7 +7686,7 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "Основы военной подготовки - Мед. помощь",
+            "discipline": "Основы военной подготовки",
             "type": "лаб.",
             "subgroup": "",
             "teachers": [],
@@ -7695,10 +7695,30 @@
                 "17.11.2026",
                 "24.11.2026"
             ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
+            "rooms": "Мед. помощь",
             "comment": "",
             "position": 1,
             "event_id": "1232_ВТ_2_1"
+        },
+        {
+            "group": "1232",
+            "weekday": "ВТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы военной подготовки",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "10.11.2026",
+                "17.11.2026",
+                "24.11.2026"
+            ],
+            "rooms": "Строевая",
+            "comment": "",
+            "position": 1,
+            "event_id": "1232_ВТ_3_1"
         },
         {
             "group": "1232",
@@ -7717,26 +7737,6 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 1,
-            "event_id": "1232_ВТ_3_1"
-        },
-        {
-            "group": "1232",
-            "weekday": "ВТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы военной подготовки - Строевая",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "10.11.2026",
-                "17.11.2026",
-                "24.11.2026"
-            ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
-            "comment": "",
             "position": 2,
             "event_id": "1232_ВТ_3_2"
         },
@@ -7746,7 +7746,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы военной подготовки - Хим. защита",
+            "discipline": "Основы военной подготовки",
             "type": "лаб.",
             "subgroup": "",
             "teachers": [],
@@ -7755,7 +7755,7 @@
                 "17.11.2026",
                 "24.11.2026"
             ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
+            "rooms": "Хим. защита",
             "comment": "",
             "position": 1,
             "event_id": "1232_ВТ_4_1"
@@ -7912,22 +7912,14 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Математические методы в экономике",
-            "type": "лаб.",
-            "subgroup": "п/г 1, 2",
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 5",
+            "type": "лек.",
+            "subgroup": "",
             "teachers": [
-                "Аликина Е.Б."
+                "Коробкова В.В."
             ],
             "dates": [
-                "05.10.2026",
-                "12.10.2026",
-                "19.10.2026",
-                "26.10.2026",
-                "02.11.2026",
-                "09.11.2026",
-                "16.11.2026",
-                "23.11.2026",
-                "30.11.2026"
+                "28.09.2026"
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
@@ -7981,14 +7973,22 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 5",
-            "type": "лек.",
-            "subgroup": "",
+            "discipline": "Математические методы в экономике",
+            "type": "лаб.",
+            "subgroup": "п/г 1, 2",
             "teachers": [
-                "Коробкова В.В."
+                "Аликина Е.Б."
             ],
             "dates": [
-                "28.09.2026"
+                "05.10.2026",
+                "12.10.2026",
+                "19.10.2026",
+                "26.10.2026",
+                "02.11.2026",
+                "09.11.2026",
+                "16.11.2026",
+                "23.11.2026",
+                "30.11.2026"
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
@@ -8077,17 +8077,16 @@
             "time_start": "08:00",
             "time_end": "09:30",
             "pair_number": 1,
-            "discipline": "Основы государственной политики в сфере межэтнических и межконфессиональных отношений",
+            "discipline": "Психология воспитательных практик",
             "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Шаяхметова Л.А."
+                "Вяткина Л.Б."
             ],
             "dates": [
-                "18.09.2026",
-                "25.09.2026"
+                "11.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/O9LwDuY6zga52TWQgHXmX1omvAhX2NTEH0HvZ5DOr50)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
             "position": 1,
             "event_id": "1232_ПТ_1_1"
@@ -8098,6 +8097,27 @@
             "time_start": "08:00",
             "time_end": "09:30",
             "pair_number": 1,
+            "discipline": "Основы государственной политики в сфере межэтнических и межконфессиональных отношений",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Шаяхметова Л.А."
+            ],
+            "dates": [
+                "18.09.2026",
+                "25.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/O9LwDuY6zga52TWQgHXmX1omvAhX2NTEH0HvZ5DOr50)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1232_ПТ_1_2"
+        },
+        {
+            "group": "1232",
+            "weekday": "ПТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
             "discipline": "Психология воспитательных практик",
             "type": "лек.",
             "subgroup": "",
@@ -8109,8 +8129,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
-            "position": 2,
-            "event_id": "1232_ПТ_1_2"
+            "position": 1,
+            "event_id": "1232_ПТ_2_1"
         },
         {
             "group": "1232",
@@ -8130,15 +8150,15 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/O9LwDuY6zga52TWQgHXmX1omvAhX2NTEH0HvZ5DOr50)",
             "comment": "",
-            "position": 1,
-            "event_id": "1232_ПТ_2_1"
+            "position": 2,
+            "event_id": "1232_ПТ_2_2"
         },
         {
             "group": "1232",
             "weekday": "ПТ",
-            "time_start": "09:45",
-            "time_end": "11:15",
-            "pair_number": 2,
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Психология воспитательных практик",
             "type": "лек.",
             "subgroup": "",
@@ -8150,8 +8170,48 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "position": 1,
+            "event_id": "1232_ПТ_3_1"
+        },
+        {
+            "group": "1232",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 2",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Коробкова В.В."
+            ],
+            "dates": [
+                "18.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
+            "comment": "",
             "position": 2,
-            "event_id": "1232_ПТ_2_2"
+            "event_id": "1232_ПТ_3_2"
+        },
+        {
+            "group": "1232",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 3",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Галиева С.Ю."
+            ],
+            "dates": [
+                "25.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
+            "comment": "",
+            "position": 3,
+            "event_id": "1232_ПТ_3_3"
         },
         {
             "group": "1232",
@@ -8171,66 +8231,6 @@
                 "23.10.2026"
             ],
             "rooms": "IV к. А202",
-            "comment": "",
-            "position": 1,
-            "event_id": "1232_ПТ_3_1"
-        },
-        {
-            "group": "1232",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Психология воспитательных практик",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Вяткина Л.Б."
-            ],
-            "dates": [
-                "11.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
-            "comment": "",
-            "position": 2,
-            "event_id": "1232_ПТ_3_2"
-        },
-        {
-            "group": "1232",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 2",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Коробкова В.В."
-            ],
-            "dates": [
-                "18.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
-            "comment": "",
-            "position": 3,
-            "event_id": "1232_ПТ_3_3"
-        },
-        {
-            "group": "1232",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 3",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Галиева С.Ю."
-            ],
-            "dates": [
-                "25.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
             "comment": "",
             "position": 4,
             "event_id": "1232_ПТ_3_4"
@@ -8269,28 +8269,6 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Методика финансово-экономического образования",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Пфлюг В.П."
-            ],
-            "dates": [
-                "09.10.2026",
-                "16.10.2026",
-                "23.10.2026"
-            ],
-            "rooms": "IV к. 202",
-            "comment": "",
-            "position": 1,
-            "event_id": "1232_ПТ_4_1"
-        },
-        {
-            "group": "1232",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Технология и организация воспитательных практик (классное руководство), часть 1",
             "type": "лек.",
             "subgroup": "",
@@ -8302,8 +8280,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/0RtePHjo1J_WRSlFvANfbntZt5Wlp13JjzYxv4Hm0yM)",
             "comment": "",
-            "position": 2,
-            "event_id": "1232_ПТ_4_2"
+            "position": 1,
+            "event_id": "1232_ПТ_4_1"
         },
         {
             "group": "1232",
@@ -8322,8 +8300,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
             "comment": "",
-            "position": 3,
-            "event_id": "1232_ПТ_4_3"
+            "position": 2,
+            "event_id": "1232_ПТ_4_2"
         },
         {
             "group": "1232",
@@ -8341,6 +8319,28 @@
                 "25.09.2026"
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
+            "comment": "",
+            "position": 3,
+            "event_id": "1232_ПТ_4_3"
+        },
+        {
+            "group": "1232",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Методика финансово-экономического образования",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Пфлюг В.П."
+            ],
+            "dates": [
+                "09.10.2026",
+                "16.10.2026",
+                "23.10.2026"
+            ],
+            "rooms": "IV к. 202",
             "comment": "",
             "position": 4,
             "event_id": "1232_ПТ_4_4"
@@ -8494,26 +8494,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "КОМПЕТЕНТНОСТНОЕ ТЕСТИРОВАНИЕ ПО ФИН, ГРАМОТНОСТИ",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Тихонова И.Ю."
-            ],
-            "dates": [
-                "23.09.2026"
-            ],
-            "rooms": "IV к. А101",
-            "comment": "",
-            "position": 1,
-            "event_id": "1232_СР_3_1"
-        },
-        {
-            "group": "1232",
-            "weekday": "СР",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Психология воспитательных практик",
             "type": "лек.",
             "subgroup": "",
@@ -8527,6 +8507,26 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "position": 1,
+            "event_id": "1232_СР_3_1"
+        },
+        {
+            "group": "1232",
+            "weekday": "СР",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "КОМПЕТЕНТНОСТНОЕ ТЕСТИРОВАНИЕ ПО ФИН, ГРАМОТНОСТИ ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Тихонова И.Ю."
+            ],
+            "dates": [
+                "23.09.2026"
+            ],
+            "rooms": "IV к. А101",
+            "comment": "",
             "position": 2,
             "event_id": "1232_СР_3_2"
         },
@@ -8536,23 +8536,16 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Основы менеджмента",
-            "type": "лек.прак.",
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 4",
+            "type": "лек.",
             "subgroup": "",
             "teachers": [
-                "Носков А.А."
+                "Рогожникова Р.А."
             ],
             "dates": [
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026",
-                "18.11.2026",
-                "25.11.2026"
+                "23.09.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
             "position": 1,
             "event_id": "1232_СР_4_1"
@@ -8563,26 +8556,6 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 4",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Рогожникова Р.А."
-            ],
-            "dates": [
-                "23.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
-            "comment": "",
-            "position": 2,
-            "event_id": "1232_СР_4_2"
-        },
-        {
-            "group": "1232",
-            "weekday": "СР",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Технология и организация воспитательных практик (классное руководство), часть 6",
             "type": "лек.",
             "subgroup": "",
@@ -8594,8 +8567,75 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
+            "position": 2,
+            "event_id": "1232_СР_4_2"
+        },
+        {
+            "group": "1232",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы менеджмента",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Носков А.А."
+            ],
+            "dates": [
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026",
+                "28.10.2026",
+                "04.11.2026",
+                "11.11.2026",
+                "18.11.2026",
+                "25.11.2026"
+            ],
+            "rooms": "IV к. А",
+            "comment": "",
             "position": 3,
             "event_id": "1232_СР_4_3"
+        },
+        {
+            "group": "1232",
+            "weekday": "СР",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 4",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Рогожникова Р.А."
+            ],
+            "dates": [
+                "23.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
+            "comment": "",
+            "position": 1,
+            "event_id": "1232_СР_5_1"
+        },
+        {
+            "group": "1232",
+            "weekday": "СР",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 6",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Груздева И.В."
+            ],
+            "dates": [
+                "30.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
+            "comment": "",
+            "position": 2,
+            "event_id": "1232_СР_5_2"
         },
         {
             "group": "1232",
@@ -8620,46 +8660,6 @@
                 "25.11.2026"
             ],
             "rooms": "IV к. А",
-            "comment": "",
-            "position": 1,
-            "event_id": "1232_СР_5_1"
-        },
-        {
-            "group": "1232",
-            "weekday": "СР",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 4",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Рогожникова Р.А."
-            ],
-            "dates": [
-                "23.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
-            "comment": "",
-            "position": 2,
-            "event_id": "1232_СР_5_2"
-        },
-        {
-            "group": "1232",
-            "weekday": "СР",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Технология и организация воспитательных практик (классное руководство), часть 6",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Груздева И.В."
-            ],
-            "dates": [
-                "30.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
             "position": 3,
             "event_id": "1232_СР_5_3"
@@ -8769,7 +8769,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Технология и организация воспитательных практик (классное руководство) -6ч",
+            "discipline": "Технология и организация воспитательных практик (классное руководство)",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -8818,7 +8818,7 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Технология и организация воспитательных практик (классное руководство) -6ч",
+            "discipline": "Технология и организация воспитательных практик (классное руководство)",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -8862,6 +8862,46 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Основы военной подготовки - Тир",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "20.10.2026",
+                "27.10.2026",
+                "03.11.2026"
+            ],
+            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1233_ВТ_3_1"
+        },
+        {
+            "group": "1233",
+            "weekday": "ВТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы военной подготовки",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Селиванов А.Е."
+            ],
+            "dates": [
+                "08.09.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 2,
+            "event_id": "1233_ВТ_3_2"
+        },
+        {
+            "group": "1233",
+            "weekday": "ВТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Операционные системы",
             "type": "лек.",
             "subgroup": "",
@@ -8877,8 +8917,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 1,
-            "event_id": "1233_ВТ_3_1"
+            "position": 3,
+            "event_id": "1233_ВТ_3_3"
         },
         {
             "group": "1233",
@@ -8900,36 +8940,16 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
-            "position": 2,
-            "event_id": "1233_ВТ_3_2"
+            "position": 4,
+            "event_id": "1233_ВТ_3_4"
         },
         {
             "group": "1233",
             "weekday": "ВТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы военной подготовки",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Селиванов А.Е."
-            ],
-            "dates": [
-                "08.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 3,
-            "event_id": "1233_ВТ_3_3"
-        },
-        {
-            "group": "1233",
-            "weekday": "ВТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Основы военной подготовки - Тир",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы военной подготовки - Мед. помощь",
             "type": "лаб.",
             "subgroup": "",
             "teachers": [],
@@ -8940,8 +8960,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
-            "position": 4,
-            "event_id": "1233_ВТ_3_4"
+            "position": 1,
+            "event_id": "1233_ВТ_4_1"
         },
         {
             "group": "1233",
@@ -8964,8 +8984,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
-            "position": 1,
-            "event_id": "1233_ВТ_4_1"
+            "position": 2,
+            "event_id": "1233_ВТ_4_2"
         },
         {
             "group": "1233",
@@ -8990,31 +9010,11 @@
                 "15.12.2026",
                 "22.12.2026",
                 "29.12.2026",
-                "05.01.2026",
-                "12.01.2026",
-                "18.01.2026"
+                "05.01.2027",
+                "12.01.2027",
+                "18.01.2027"
             ],
             "rooms": "IV к. А316",
-            "comment": "",
-            "position": 2,
-            "event_id": "1233_ВТ_4_2"
-        },
-        {
-            "group": "1233",
-            "weekday": "ВТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Основы военной подготовки - Мед. помощь",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "20.10.2026",
-                "27.10.2026",
-                "03.11.2026"
-            ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
             "position": 3,
             "event_id": "1233_ВТ_4_3"
@@ -9199,7 +9199,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Промт-инжиниринг и методы обработки естественного языка -8 ч",
+            "discipline": "Промт-инжиниринг и методы обработки естественного языка",
             "type": "лек.",
             "subgroup": "",
             "teachers": [
@@ -9637,17 +9637,22 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Компьютерное зрение",
+            "discipline": "Обработка больших данных",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Бочкарев А.М."
             ],
             "dates": [
-                "02.12.2026",
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026"
+                "16.09.2026",
+                "23.09.2026",
+                "30.09.2026",
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026",
+                "28.10.2026",
+                "04.11.2026",
+                "11.11.2026"
             ],
             "rooms": "IV к. А306",
             "comment": "",
@@ -9660,22 +9665,17 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Обработка больших данных",
+            "discipline": "Компьютерное зрение",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Бочкарев А.М."
             ],
             "dates": [
-                "16.09.2026",
-                "23.09.2026",
-                "30.09.2026",
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026"
+                "02.12.2026",
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026"
             ],
             "rooms": "IV к. А306",
             "comment": "",
@@ -9688,52 +9688,6 @@
             "time_start": "18:45",
             "time_end": "20:15",
             "pair_number": 7,
-            "discipline": "Компьютерное зрение",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Бочкарев А.М."
-            ],
-            "dates": [
-                "02.12.2026",
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026"
-            ],
-            "rooms": "IV к. А306",
-            "comment": "",
-            "position": 1,
-            "event_id": "1233_СР_7_1"
-        },
-        {
-            "group": "1233",
-            "weekday": "СР",
-            "time_start": "20:00",
-            "time_end": "21:30",
-            "pair_number": 7,
-            "discipline": "Компьютерное зрение",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Бочкарев А.М."
-            ],
-            "dates": [
-                "02.12.2026",
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
-            "comment": "",
-            "position": 2,
-            "event_id": "1233_СР_7_2"
-        },
-        {
-            "group": "1233",
-            "weekday": "СР",
-            "time_start": "18:45",
-            "time_end": "20:15",
-            "pair_number": 7,
             "discipline": "Обработка больших данных",
             "type": "лек.прак.",
             "subgroup": "",
@@ -9753,8 +9707,31 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
-            "position": 3,
-            "event_id": "1233_СР_7_3"
+            "position": 1,
+            "event_id": "1233_СР_7_1"
+        },
+        {
+            "group": "1233",
+            "weekday": "СР",
+            "time_start": "18:45",
+            "time_end": "20:15",
+            "pair_number": 7,
+            "discipline": "Компьютерное зрение",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Бочкарев А.М."
+            ],
+            "dates": [
+                "02.12.2026",
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026"
+            ],
+            "rooms": "IV к. А306",
+            "comment": "",
+            "position": 2,
+            "event_id": "1233_СР_7_2"
         },
         {
             "group": "1233",
@@ -9778,6 +9755,29 @@
                 "28.10.2026",
                 "04.11.2026",
                 "11.11.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
+            "comment": "",
+            "position": 3,
+            "event_id": "1233_СР_7_3"
+        },
+        {
+            "group": "1233",
+            "weekday": "СР",
+            "time_start": "20:00",
+            "time_end": "21:30",
+            "pair_number": 7,
+            "discipline": "Компьютерное зрение",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Бочкарев А.М."
+            ],
+            "dates": [
+                "02.12.2026",
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026"
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
             "comment": "",
@@ -9864,27 +9864,19 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Операционные системы",
-            "type": "прак.",
+            "discipline": "Проектирование и программирование беспилотных летательных аппаратов",
+            "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
-                "Щипицын В.Д."
+                "Шаронов Н.С."
             ],
             "dates": [
-                "24.09.2026",
                 "01.10.2026",
-                "08.10.2026",
                 "15.10.2026",
-                "22.10.2026",
                 "29.10.2026",
-                "05.11.2026",
                 "12.11.2026",
-                "19.11.2026",
-                "26.11.2026",
                 "03.12.2026",
-                "10.12.2026",
-                "17.12.2026",
-                "24.12.2026"
+                "17.12.2026"
             ],
             "rooms": "IV к. Б406",
             "comment": "",
@@ -9897,6 +9889,39 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
+            "discipline": "Операционные системы",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Щипицын В.Д."
+            ],
+            "dates": [
+                "24.09.2026",
+                "01.10.2026",
+                "08.10.2026",
+                "15.10.2026",
+                "22.10.2026",
+                "29.10.2026",
+                "05.11.2026",
+                "12.11.2026",
+                "19.11.2026",
+                "26.11.2026",
+                "03.12.2026",
+                "10.12.2026",
+                "17.12.2026",
+                "24.12.2026"
+            ],
+            "rooms": "IV к. А316",
+            "comment": "",
+            "position": 2,
+            "event_id": "1233_ЧТ_4_2"
+        },
+        {
+            "group": "1233",
+            "weekday": "ЧТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
             "discipline": "Проектирование и программирование беспилотных летательных аппаратов",
             "type": "лек.прак.",
             "subgroup": "",
@@ -9911,10 +9936,10 @@
                 "03.12.2026",
                 "17.12.2026"
             ],
-            "rooms": "IV к. А316",
+            "rooms": "IV к. Б406",
             "comment": "",
-            "position": 2,
-            "event_id": "1233_ЧТ_4_2"
+            "position": 1,
+            "event_id": "1233_ЧТ_5_1"
         },
         {
             "group": "1233",
@@ -9944,31 +9969,6 @@
                 "17.12.2026",
                 "24.12.2026"
             ],
-            "rooms": "IV к. Б406",
-            "comment": "",
-            "position": 1,
-            "event_id": "1233_ЧТ_5_1"
-        },
-        {
-            "group": "1233",
-            "weekday": "ЧТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Проектирование и программирование беспилотных летательных аппаратов",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Шаронов Н.С."
-            ],
-            "dates": [
-                "01.10.2026",
-                "15.10.2026",
-                "29.10.2026",
-                "12.11.2026",
-                "03.12.2026",
-                "17.12.2026"
-            ],
             "rooms": "IV к. А316",
             "comment": "",
             "position": 2,
@@ -9980,7 +9980,7 @@
             "time_start": "18:00",
             "time_end": "19:30",
             "pair_number": 6,
-            "discipline": "Web-программирование -8ч",
+            "discipline": "Web-программирование",
             "type": "прак.",
             "subgroup": "",
             "teachers": [
@@ -10022,8 +10022,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 3,
-            "event_id": "1237_ВТ_3_3"
+            "position": 1,
+            "event_id": "1237_ВТ_3_1"
         },
         {
             "group": "1237",
@@ -10350,6 +10350,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Основы военной подготовки - Хим. защита",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026"
+            ],
+            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1237_СБ_3_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Web-программирование",
             "type": "лек.",
             "subgroup": "",
@@ -10363,31 +10383,6 @@
                 "24.10.2026",
                 "07.11.2026",
                 "14.11.2026"
-            ],
-            "rooms": "дистанционно онлайн",
-            "comment": "",
-            "position": 1,
-            "event_id": "1237_СБ_3_1"
-        },
-        {
-            "group": "1237",
-            "weekday": "СБ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Web-программирование",
-            "type": "прак.",
-            "subgroup": "",
-            "teachers": [
-                "Кудреватых В.А."
-            ],
-            "dates": [
-                "21.11.2026",
-                "28.11.2026",
-                "05.12.2026",
-                "12.12.2026",
-                "19.12.2026",
-                "26.12.2026"
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
@@ -10400,51 +10395,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Основы военной подготовки - Хим. защита",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [],
-            "dates": [
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026"
-            ],
-            "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
-            "comment": "",
-            "position": 3,
-            "event_id": "1237_СБ_3_3"
-        },
-        {
-            "group": "1237",
-            "weekday": "СБ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Web-программирование",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Кудреватых В.А."
-            ],
-            "dates": [
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026",
-                "07.11.2026",
-                "14.11.2026"
-            ],
-            "rooms": "дистанционно онлайн",
-            "comment": "",
-            "position": 1,
-            "event_id": "1237_СБ_4_1"
-        },
-        {
-            "group": "1237",
-            "weekday": "СБ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Web-программирование",
             "type": "прак.",
             "subgroup": "",
@@ -10461,8 +10411,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "position": 2,
-            "event_id": "1237_СБ_4_2"
+            "position": 3,
+            "event_id": "1237_СБ_3_3"
         },
         {
             "group": "1237",
@@ -10481,6 +10431,56 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "position": 1,
+            "event_id": "1237_СБ_4_1"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Web-программирование",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026",
+                "07.11.2026",
+                "14.11.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
+            "position": 2,
+            "event_id": "1237_СБ_4_2"
+        },
+        {
+            "group": "1237",
+            "weekday": "СБ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Web-программирование",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Кудреватых В.А."
+            ],
+            "dates": [
+                "21.11.2026",
+                "28.11.2026",
+                "05.12.2026",
+                "12.12.2026",
+                "19.12.2026",
+                "26.12.2026"
+            ],
+            "rooms": "дистанционно онлайн",
+            "comment": "",
             "position": 3,
             "event_id": "1237_СБ_4_3"
         },
@@ -10490,17 +10490,22 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Проектирование и разработка компьютерных игр",
+            "discipline": "Спецпрактикум GameDev",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Худорожков Л.Ю."
             ],
             "dates": [
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026",
-                "30.12.2026"
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026",
+                "28.10.2026",
+                "04.11.2026",
+                "11.11.2026",
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -10513,22 +10518,17 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Спецпрактикум GameDev",
+            "discipline": "Проектирование и разработка компьютерных игр",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Худорожков Л.Ю."
             ],
             "dates": [
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026",
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026",
+                "30.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -10541,17 +10541,22 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Проектирование и разработка компьютерных игр",
+            "discipline": "Спецпрактикум GameDev",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Худорожков Л.Ю."
             ],
             "dates": [
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026",
-                "30.12.2026"
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026",
+                "28.10.2026",
+                "04.11.2026",
+                "11.11.2026",
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -10564,22 +10569,17 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Спецпрактикум GameDev",
+            "discipline": "Проектирование и разработка компьютерных игр",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Худорожков Л.Ю."
             ],
             "dates": [
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026",
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026",
+                "30.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -10592,17 +10592,22 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Проектирование и разработка компьютерных игр",
+            "discipline": "Спецпрактикум GameDev",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Худорожков Л.Ю."
             ],
             "dates": [
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026",
-                "30.12.2026"
+                "07.10.2026",
+                "14.10.2026",
+                "21.10.2026",
+                "28.10.2026",
+                "04.11.2026",
+                "11.11.2026",
+                "18.11.2026",
+                "25.11.2026",
+                "02.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -10615,6 +10620,29 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
+            "discipline": "Проектирование и разработка компьютерных игр",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Худорожков Л.Ю."
+            ],
+            "dates": [
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026",
+                "30.12.2026"
+            ],
+            "rooms": "IV к. А305",
+            "comment": "",
+            "position": 2,
+            "event_id": "1237_СР_5_2"
+        },
+        {
+            "group": "1237",
+            "weekday": "СР",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
             "discipline": "Спецпрактикум GameDev",
             "type": "лек.прак.",
             "subgroup": "",
@@ -10634,8 +10662,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
-            "position": 2,
-            "event_id": "1237_СР_5_2"
+            "position": 1,
+            "event_id": "1237_СР_6_1"
         },
         {
             "group": "1237",
@@ -10654,34 +10682,6 @@
                 "16.12.2026",
                 "23.12.2026",
                 "30.12.2026"
-            ],
-            "rooms": "IV к. А305",
-            "comment": "",
-            "position": 1,
-            "event_id": "1237_СР_6_1"
-        },
-        {
-            "group": "1237",
-            "weekday": "СР",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Спецпрактикум GameDev",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Худорожков Л.Ю."
-            ],
-            "dates": [
-                "07.10.2026",
-                "14.10.2026",
-                "21.10.2026",
-                "28.10.2026",
-                "04.11.2026",
-                "11.11.2026",
-                "18.11.2026",
-                "25.11.2026",
-                "02.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -11005,6 +11005,30 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Современные образовательные технологии обучения в системе дополнительного образования детей",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Худякова А.В."
+            ],
+            "dates": [
+                "04.09.2026",
+                "11.09.2026",
+                "18.09.2026",
+                "25.09.2026",
+                "02.10.2026"
+            ],
+            "rooms": "IV к. А112",
+            "comment": "",
+            "position": 1,
+            "event_id": "1241_ПТ_3_1"
+        },
+        {
+            "group": "1241",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Методика обучения по программам дополнительного образования",
             "type": "прак.",
             "subgroup": "",
@@ -11017,8 +11041,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
-            "position": 1,
-            "event_id": "1241_ПТ_3_1"
+            "position": 2,
+            "event_id": "1241_ПТ_3_2"
         },
         {
             "group": "1241",
@@ -11042,15 +11066,15 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
-            "position": 2,
-            "event_id": "1241_ПТ_3_2"
+            "position": 3,
+            "event_id": "1241_ПТ_3_3"
         },
         {
             "group": "1241",
             "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
             "discipline": "Современные образовательные технологии обучения в системе дополнительного образования детей",
             "type": "лек.прак.",
             "subgroup": "",
@@ -11066,8 +11090,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
-            "position": 3,
-            "event_id": "1241_ПТ_3_3"
+            "position": 1,
+            "event_id": "1241_ПТ_4_1"
         },
         {
             "group": "1241",
@@ -11086,8 +11110,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
-            "position": 1,
-            "event_id": "1241_ПТ_4_1"
+            "position": 2,
+            "event_id": "1241_ПТ_4_2"
         },
         {
             "group": "1241",
@@ -11109,30 +11133,6 @@
                 "11.12.2026",
                 "18.12.2026",
                 "25.12.2026"
-            ],
-            "rooms": "IV к. А112",
-            "comment": "",
-            "position": 2,
-            "event_id": "1241_ПТ_4_2"
-        },
-        {
-            "group": "1241",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Современные образовательные технологии обучения в системе дополнительного образования детей",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Худякова А.В."
-            ],
-            "dates": [
-                "04.09.2026",
-                "11.09.2026",
-                "18.09.2026",
-                "25.09.2026",
-                "02.10.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -12186,18 +12186,20 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
-            "subgroup": "доц. Дацун Н.Н.",
-            "teachers": [],
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Дацун Н.Н."
+            ],
             "dates": [
                 "23.11.2026",
                 "30.11.2026",
                 "07.12.2026",
                 "14.12.2026",
                 "21.12.2026",
-                "11.01.2026",
-                "18.01.2026",
-                "25.01.2026"
+                "11.01.2027",
+                "18.01.2027",
+                "25.01.2027"
             ],
             "rooms": "IV к. А308",
             "comment": "",
@@ -12211,45 +12213,25 @@
             "time_end": "16:45",
             "pair_number": 5,
             "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
-            "subgroup": "доц. Дацун Н.Н.",
-            "teachers": [],
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Дацун Н.Н."
+            ],
             "dates": [
                 "23.11.2026",
                 "30.11.2026",
                 "07.12.2026",
                 "14.12.2026",
                 "21.12.2026",
-                "11.01.2026",
-                "18.01.2026",
-                "25.01.2026"
+                "11.01.2027",
+                "18.01.2027",
+                "25.01.2027"
             ],
             "rooms": "IV к. А305",
             "comment": "",
             "position": 1,
             "event_id": "1243_ПН_5_1"
-        },
-        {
-            "group": "1243",
-            "weekday": "ПН",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Методы математического моделирования информационных процессов и систем",
-            "type": "лек.прак",
-            "subgroup": "доц. Дацун Н.Н.",
-            "teachers": [],
-            "dates": [
-                "23.11.2026",
-                "30.11.2026",
-                "07.12.2026",
-                "14.12.2026",
-                "21.12.2026"
-            ],
-            "rooms": "IV к. А305",
-            "comment": "",
-            "position": 1,
-            "event_id": "1243_ПН_6_1"
         },
         {
             "group": "1243",
@@ -12273,6 +12255,30 @@
                 "02.11.2026",
                 "09.11.2026",
                 "16.11.2026"
+            ],
+            "rooms": "IV к. А305",
+            "comment": "",
+            "position": 1,
+            "event_id": "1243_ПН_6_1"
+        },
+        {
+            "group": "1243",
+            "weekday": "ПН",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
+            "discipline": "Методы математического моделирования информационных процессов и систем",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Дацун Н.Н."
+            ],
+            "dates": [
+                "23.11.2026",
+                "30.11.2026",
+                "07.12.2026",
+                "14.12.2026",
+                "21.12.2026"
             ],
             "rooms": "IV к. А305",
             "comment": "",
@@ -12314,6 +12320,26 @@
             "time_end": "13:00",
             "pair_number": 3,
             "discipline": "Облачные вычисления",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Щипицын В.Д."
+            ],
+            "dates": [
+                "11.09.2026"
+            ],
+            "rooms": "IV к. А306",
+            "comment": "",
+            "position": 1,
+            "event_id": "1243_ПТ_3_1"
+        },
+        {
+            "group": "1243",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Облачные вычисления",
             "type": "лаб.",
             "subgroup": "",
             "teachers": [
@@ -12335,56 +12361,14 @@
                 "11.12.2026",
                 "18.12.2026",
                 "25.12.2026",
-                "15.01.2026",
-                "22.01.2026",
-                "29.01.2026"
-            ],
-            "rooms": "IV к. А306",
-            "comment": "",
-            "position": 1,
-            "event_id": "1243_ПТ_3_1"
-        },
-        {
-            "group": "1243",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
-            "discipline": "Облачные вычисления",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Щипицын В.Д."
-            ],
-            "dates": [
-                "11.09.2026"
+                "15.01.2027",
+                "22.01.2027",
+                "29.01.2027"
             ],
             "rooms": "IV к. А306",
             "comment": "",
             "position": 2,
             "event_id": "1243_ПТ_3_2"
-        },
-        {
-            "group": "1243",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Облачные вычисления",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Щипицын В.Д."
-            ],
-            "dates": [
-                "15.01.2026",
-                "22.01.2026",
-                "29.01.2026"
-            ],
-            "rooms": "IV к. А306",
-            "comment": "",
-            "position": 1,
-            "event_id": "1243_ПТ_4_1"
         },
         {
             "group": "1243",
@@ -12407,8 +12391,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
-            "position": 2,
-            "event_id": "1243_ПТ_4_2"
+            "position": 1,
+            "event_id": "1243_ПТ_4_1"
         },
         {
             "group": "1243",
@@ -12431,6 +12415,28 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "position": 2,
+            "event_id": "1243_ПТ_4_2"
+        },
+        {
+            "group": "1243",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Облачные вычисления",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Щипицын В.Д."
+            ],
+            "dates": [
+                "15.01.2027",
+                "22.01.2027",
+                "29.01.2027"
+            ],
+            "rooms": "IV к. А306",
+            "comment": "",
             "position": 3,
             "event_id": "1243_ПТ_4_3"
         },
@@ -12440,7 +12446,7 @@
             "time_start": "15:15",
             "time_end": "16:45",
             "pair_number": 5,
-            "discipline": "Бюджетирование ИТ-проектов -28ч",
+            "discipline": "Бюджетирование ИТ-проектов",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -12468,7 +12474,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Бюджетирование ИТ-проектов -28ч",
+            "discipline": "Бюджетирование ИТ-проектов",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -12579,36 +12585,6 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Интеллектуальные системы и технологии",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Кузаев А.Ф."
-            ],
-            "dates": [
-                "02.12.2026",
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026",
-                "30.12.2026",
-                "06.01.2027",
-                "13.01.2027",
-                "20.01.2027",
-                "27.01.2027",
-                "03.02.2027",
-                "10.02.2027"
-            ],
-            "rooms": "IV к. А111",
-            "comment": "",
-            "position": 1,
-            "event_id": "1243_СР_4_1"
-        },
-        {
-            "group": "1243",
-            "weekday": "СР",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Интеллектуальные системы и технологии",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -12628,6 +12604,36 @@
                 "11.11.2026",
                 "18.11.2026",
                 "25.11.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1243_СР_4_1"
+        },
+        {
+            "group": "1243",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Интеллектуальные системы и технологии",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Кузаев А.Ф."
+            ],
+            "dates": [
+                "02.12.2026",
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026",
+                "30.12.2026",
+                "06.01.2027",
+                "13.01.2027",
+                "20.01.2027",
+                "27.01.2027",
+                "03.02.2027",
+                "10.02.2027"
             ],
             "rooms": "IV к. А111",
             "comment": "",
@@ -12674,31 +12680,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Безопасность объектов критической информационной инфраструктуры",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Казаринова Н.Л."
-            ],
-            "dates": [
-                "19.11.2026",
-                "26.11.2026",
-                "03.12.2026",
-                "10.12.2026",
-                "17.12.2026",
-                "24.12.2026"
-            ],
-            "rooms": "IV к. А308",
-            "comment": "",
-            "position": 1,
-            "event_id": "1243_ЧТ_3_1"
-        },
-        {
-            "group": "1243",
-            "weekday": "ЧТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Программная инженерия",
             "type": "лек.",
             "subgroup": "",
@@ -12716,6 +12697,31 @@
                 "29.10.2026"
             ],
             "rooms": "IV к. А202",
+            "comment": "",
+            "position": 1,
+            "event_id": "1243_ЧТ_3_1"
+        },
+        {
+            "group": "1243",
+            "weekday": "ЧТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Безопасность объектов критической информационной инфраструктуры",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Казаринова Н.Л."
+            ],
+            "dates": [
+                "19.11.2026",
+                "26.11.2026",
+                "03.12.2026",
+                "10.12.2026",
+                "17.12.2026",
+                "24.12.2026"
+            ],
+            "rooms": "IV к. А308",
             "comment": "",
             "position": 2,
             "event_id": "1243_ЧТ_3_2"
@@ -12927,26 +12933,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Теория алгоритмов",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Ефремова Е.А."
-            ],
-            "dates": [
-                "06.11.2026"
-            ],
-            "rooms": "IV к. А112",
-            "comment": "",
-            "position": 1,
-            "event_id": "1245_ПТ_3_1"
-        },
-        {
-            "group": "1245",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Экономика России",
             "type": "лек.прак.",
             "subgroup": "",
@@ -12962,6 +12948,26 @@
                 "25.12.2026"
             ],
             "rooms": "IV к. А",
+            "comment": "",
+            "position": 1,
+            "event_id": "1245_ПТ_3_1"
+        },
+        {
+            "group": "1245",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Теория алгоритмов",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Ефремова Е.А."
+            ],
+            "dates": [
+                "06.11.2026"
+            ],
+            "rooms": "IV к. А112",
             "comment": "",
             "position": 2,
             "event_id": "1245_ПТ_3_2"
@@ -13012,17 +13018,17 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Дискретные модели в информатике",
+            "discipline": "Математические основы информатики",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
             "dates": [
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026"
+                "12.09.2026",
+                "19.09.2026",
+                "26.09.2026",
+                "03.10.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -13035,17 +13041,17 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Математические основы информатики",
+            "discipline": "Дискретные модели в информатике",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
             "dates": [
-                "12.09.2026",
-                "19.09.2026",
-                "26.09.2026",
-                "03.10.2026"
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -13080,17 +13086,17 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Дискретные модели в информатике",
+            "discipline": "Математические основы информатики",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
             "dates": [
-                "03.10.2026",
-                "10.10.2026",
-                "17.10.2026",
-                "24.10.2026"
+                "12.09.2026",
+                "19.09.2026",
+                "26.09.2026",
+                "03.10.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -13100,8 +13106,8 @@
         {
             "group": "1245",
             "weekday": "СБ",
-            "time_start": "15:00",
-            "time_end": "16:30",
+            "time_start": "13:30",
+            "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Дискретные модели в информатике",
             "type": "лек.прак.",
@@ -13126,17 +13132,16 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Математические основы информатики",
+            "discipline": "Теория алгоритмов",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
             "dates": [
-                "12.09.2026",
-                "19.09.2026",
-                "26.09.2026",
-                "03.10.2026"
+                "24.10.2026",
+                "31.10.2026",
+                "07.11.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -13169,19 +13174,20 @@
         {
             "group": "1245",
             "weekday": "СБ",
-            "time_start": "13:30",
-            "time_end": "15:00",
+            "time_start": "15:00",
+            "time_end": "16:30",
             "pair_number": 4,
-            "discipline": "Теория алгоритмов",
+            "discipline": "Дискретные модели в информатике",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
                 "Ефремова Е.А."
             ],
             "dates": [
-                "24.10.2026",
-                "31.10.2026",
-                "07.11.2026"
+                "03.10.2026",
+                "10.10.2026",
+                "17.10.2026",
+                "24.10.2026"
             ],
             "rooms": "IV к. А112",
             "comment": "",
@@ -13216,7 +13222,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Архитектура компьютера -8ч",
+            "discipline": "Архитектура компьютера",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -13290,6 +13296,27 @@
         {
             "group": "1245",
             "weekday": "СР",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Теоретические основы информатики",
+            "type": "прак.",
+            "subgroup": "",
+            "teachers": [
+                "Мехедов В.В."
+            ],
+            "dates": [
+                "23.09.2026",
+                "07.10.2026"
+            ],
+            "rooms": "IV к. А204",
+            "comment": "",
+            "position": 1,
+            "event_id": "1245_СР_5_1"
+        },
+        {
+            "group": "1245",
+            "weekday": "СР",
             "time_start": "16:00",
             "time_end": "17:30",
             "pair_number": 5,
@@ -13303,27 +13330,6 @@
                 "30.09.2026",
                 "14.10.2026",
                 "28.10.2026"
-            ],
-            "rooms": "IV к. А204",
-            "comment": "",
-            "position": 1,
-            "event_id": "1245_СР_5_1"
-        },
-        {
-            "group": "1245",
-            "weekday": "СР",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Теоретические основы информатики",
-            "type": "прак.",
-            "subgroup": "",
-            "teachers": [
-                "Мехедов В.В."
-            ],
-            "dates": [
-                "23.09.2026",
-                "07.10.2026"
             ],
             "rooms": "IV к. А204",
             "comment": "",
@@ -13382,6 +13388,33 @@
         {
             "group": "1245",
             "weekday": "ЧТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Программирование",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Половина И.П."
+            ],
+            "dates": [
+                "10.09.2026",
+                "17.09.2026",
+                "24.09.2026",
+                "01.10.2026",
+                "08.10.2026",
+                "15.10.2026",
+                "22.10.2026",
+                "29.10.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1245_ЧТ_4_1"
+        },
+        {
+            "group": "1245",
+            "weekday": "ЧТ",
             "time_start": "15:00",
             "time_end": "16:30",
             "pair_number": 4,
@@ -13396,8 +13429,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
-            "position": 1,
-            "event_id": "1245_ЧТ_4_1"
+            "position": 2,
+            "event_id": "1245_ЧТ_4_2"
         },
         {
             "group": "1245",
@@ -13421,33 +13454,6 @@
                 "29.10.2026"
             ],
             "rooms": "IV к. А201",
-            "comment": "",
-            "position": 2,
-            "event_id": "1245_ЧТ_4_2"
-        },
-        {
-            "group": "1245",
-            "weekday": "ЧТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Программирование",
-            "type": "лек.прак.",
-            "subgroup": "",
-            "teachers": [
-                "Половина И.П."
-            ],
-            "dates": [
-                "10.09.2026",
-                "17.09.2026",
-                "24.09.2026",
-                "01.10.2026",
-                "08.10.2026",
-                "15.10.2026",
-                "22.10.2026",
-                "29.10.2026"
-            ],
-            "rooms": "IV к. А111",
             "comment": "",
             "position": 3,
             "event_id": "1245_ЧТ_4_3"
@@ -13560,12 +13566,12 @@
                 "15.12.2026",
                 "22.12.2026",
                 "29.12.2026",
-                "05.01.2026",
-                "12.01.2026",
-                "19.01.2026",
-                "26.01.2026",
-                "02.02.2026",
-                "05.02.2026"
+                "05.01.2027",
+                "12.01.2027",
+                "19.01.2027",
+                "26.01.2027",
+                "02.02.2027",
+                "05.02.2027"
             ],
             "rooms": "IV к. А204",
             "comment": "",
@@ -13760,9 +13766,9 @@
                 "11.12.2026",
                 "18.12.2026",
                 "25.12.2026",
-                "15.01.2026",
-                "22.01.2026",
-                "29.01.2026"
+                "15.01.2027",
+                "22.01.2027",
+                "29.01.2027"
             ],
             "rooms": "IV к. А306",
             "comment": "",
@@ -13824,35 +13830,6 @@
             "time_end": "15:00",
             "pair_number": 4,
             "discipline": "Интеллектуальные системы и технологии",
-            "type": "лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Кузаев А.Ф."
-            ],
-            "dates": [
-                "02.12.2026",
-                "09.12.2026",
-                "16.12.2026",
-                "23.12.2026",
-                "30.12.2026",
-                "06.01.2027",
-                "13.01.2027",
-                "20.01.2027",
-                "27.01.2027",
-                "03.02.2027"
-            ],
-            "rooms": "IV к. А111",
-            "comment": "",
-            "position": 1,
-            "event_id": "1247_СР_4_1"
-        },
-        {
-            "group": "1247",
-            "weekday": "СР",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
-            "discipline": "Интеллектуальные системы и технологии",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -13872,6 +13849,35 @@
                 "11.11.2026",
                 "18.11.2026",
                 "25.11.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1247_СР_4_1"
+        },
+        {
+            "group": "1247",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Интеллектуальные системы и технологии",
+            "type": "лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Кузаев А.Ф."
+            ],
+            "dates": [
+                "02.12.2026",
+                "09.12.2026",
+                "16.12.2026",
+                "23.12.2026",
+                "30.12.2026",
+                "06.01.2027",
+                "13.01.2027",
+                "20.01.2027",
+                "27.01.2027",
+                "03.02.2027"
             ],
             "rooms": "IV к. А111",
             "comment": "",
@@ -14023,7 +14029,7 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
-            "discipline": "Бюджетирование ИТ-проектов -34ч",
+            "discipline": "Бюджетирование ИТ-проектов",
             "type": "лек.прак.",
             "subgroup": "",
             "teachers": [
@@ -14209,7 +14215,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Информатика",
+            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Информатика ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
             "type": "",
             "subgroup": "",
             "teachers": [
@@ -14329,7 +14335,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Экономика",
+            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Экономика ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
             "type": "",
             "subgroup": "",
             "teachers": [
@@ -14591,7 +14597,7 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Экономика",
+            "discipline": "УСТАНОВОЧНАЯ КОНФЕРЕНЦИЯ по Производственной (педагогической) стажерской практике Предметно-методический модуль Экономика ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
             "type": "",
             "subgroup": "",
             "teachers": [
@@ -14906,6 +14912,26 @@
             "time_start": "17:00",
             "time_end": "18:30",
             "pair_number": 6,
+            "discipline": "Основы работы в электронной информационно-образовательной среде",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Ильин Р.В."
+            ],
+            "dates": [
+                "04.09.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/I1copujnM569P9PDDiO1Pn9E3nejnjzzWVz1jez41rc)",
+            "comment": "",
+            "position": 1,
+            "event_id": "М1217_ПТ_6_1"
+        },
+        {
+            "group": "М1217",
+            "weekday": "ПТ",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
             "discipline": "Методология и методы научного исследования",
             "type": "лек.прак.",
             "subgroup": "",
@@ -14927,26 +14953,6 @@
                 "27.11.2026"
             ],
             "rooms": "II к. 101",
-            "comment": "",
-            "position": 1,
-            "event_id": "М1217_ПТ_6_1"
-        },
-        {
-            "group": "М1217",
-            "weekday": "ПТ",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Основы работы в электронной информационно-образовательной среде",
-            "type": "лек.",
-            "subgroup": "",
-            "teachers": [
-                "Ильин Р.В."
-            ],
-            "dates": [
-                "04.09.2026"
-            ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/I1copujnM569P9PDDiO1Pn9E3nejnjzzWVz1jez41rc)",
             "comment": "",
             "position": 2,
             "event_id": "М1217_ПТ_6_2"
@@ -15063,11 +15069,11 @@
                 "17.11.2026",
                 "24.11.2026",
                 "01.12.2026",
-                "12.01.2026",
-                "19.01.2026",
-                "26.01.2026",
-                "02.02.2026",
-                "09.02.2026"
+                "12.01.2027",
+                "19.01.2027",
+                "26.01.2027",
+                "02.02.2027",
+                "09.02.2027"
             ],
             "rooms": "IV к. А202",
             "comment": "",
@@ -15095,11 +15101,11 @@
                 "17.11.2026",
                 "24.11.2026",
                 "01.12.2026",
-                "12.01.2026",
-                "19.01.2026",
-                "26.01.2026",
-                "02.02.2026",
-                "09.02.2026"
+                "12.01.2027",
+                "19.01.2027",
+                "26.01.2027",
+                "02.02.2027",
+                "09.02.2027"
             ],
             "rooms": "IV к. А202",
             "comment": "",
@@ -15127,11 +15133,11 @@
                 "17.11.2026",
                 "24.11.2026",
                 "01.12.2026",
-                "12.01.2026",
-                "19.01.2026",
-                "26.01.2026",
-                "02.02.2026",
-                "09.02.2026"
+                "12.01.2027",
+                "19.01.2027",
+                "26.01.2027",
+                "02.02.2027",
+                "09.02.2027"
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/35156028489152)",
             "comment": "",
@@ -15308,9 +15314,9 @@
                 "19.11.2026",
                 "26.11.2026",
                 "03.12.2026",
-                "14.01.2026",
-                "21.01.2026",
-                "28.01.2026"
+                "14.01.2027",
+                "21.01.2027",
+                "28.01.2027"
             ],
             "rooms": "",
             "comment": "",
@@ -15355,9 +15361,9 @@
                 "19.11.2026",
                 "26.11.2026",
                 "03.12.2026",
-                "14.01.2026",
-                "21.01.2026",
-                "28.01.2026"
+                "14.01.2027",
+                "21.01.2027",
+                "28.01.2027"
             ],
             "rooms": "",
             "comment": "",
@@ -15402,9 +15408,9 @@
                 "19.11.2026",
                 "26.11.2026",
                 "03.12.2026",
-                "14.01.2026",
-                "21.01.2026",
-                "28.01.2026"
+                "14.01.2027",
+                "21.01.2027",
+                "28.01.2027"
             ],
             "rooms": "",
             "comment": "",
@@ -15412,5 +15418,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-09-26T10:19:54+00:00"
+    "generated_at": "2026-09-27T10:37:38+00:00"
 }

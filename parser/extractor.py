@@ -198,8 +198,17 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
                 if pd.isna(room_val) or str(room_val).strip() == "" or room_val is None:
                     room_val = ""
 
-                subject_val = set(subject_val)
-                subject_val = " ".join([str(x).strip() for x in subject_val if pd.notna(x)]).strip()
+                seen_parts: set = set()
+                ordered_parts: list[str] = []
+                for x in subject_val:
+                    if pd.isna(x):
+                        continue
+                    s = str(x).strip()
+                    if s and s not in seen_parts:
+                        seen_parts.add(s)
+                        ordered_parts.append(s)
+                subject_val = " ".join(ordered_parts)
+
                 if not subject_val:
                     continue
 
