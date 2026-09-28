@@ -3703,7 +3703,7 @@
                 "22.09.2026",
                 "29.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А",
             "comment": "",
             "position": 1,
             "event_id": "1221_ВТ_3_1"
@@ -3752,6 +3752,30 @@
         {
             "group": "1221",
             "weekday": "ВТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Инженерная и компьютерная графика",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Власова О.А."
+            ],
+            "dates": [
+                "27.10.2026",
+                "03.11.2026",
+                "10.11.2026",
+                "17.11.2026",
+                "24.11.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А",
+            "comment": "",
+            "position": 4,
+            "event_id": "1221_ВТ_3_4"
+        },
+        {
+            "group": "1221",
+            "weekday": "ВТ",
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
@@ -3766,7 +3790,7 @@
                 "22.09.2026",
                 "29.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А",
             "comment": "",
             "position": 1,
             "event_id": "1221_ВТ_4_1"
@@ -3811,6 +3835,30 @@
             "comment": "",
             "position": 3,
             "event_id": "1221_ВТ_4_3"
+        },
+        {
+            "group": "1221",
+            "weekday": "ВТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Инженерная и компьютерная графика",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Власова О.А."
+            ],
+            "dates": [
+                "27.10.2026",
+                "03.11.2026",
+                "10.11.2026",
+                "17.11.2026",
+                "24.11.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А",
+            "comment": "",
+            "position": 4,
+            "event_id": "1221_ВТ_4_4"
         },
         {
             "group": "1221",
@@ -4774,6 +4822,26 @@
             "event_id": "1221_ЧТ_4_3"
         },
         {
+            "group": "1221",
+            "weekday": "ЧТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "КОНСУЛЬТАЦИЯ по практикам История научно-технологического прогресса",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Скорнякова А.Ю."
+            ],
+            "dates": [
+                "01.10.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 1,
+            "event_id": "1221_ЧТ_5_1"
+        },
+        {
             "group": "1222",
             "weekday": "ВТ",
             "time_start": "08:00",
@@ -4830,7 +4898,9 @@
             "dates": [
                 "06.10.2026",
                 "13.10.2026",
-                "20.10.2026"
+                "20.10.2026",
+                "27.10.2026",
+                "03.11.2026"
             ],
             "rooms": "II к.",
             "comment": "",
@@ -4892,9 +4962,7 @@
                 "Подорова В.А."
             ],
             "dates": [
-                "06.10.2026",
-                "13.10.2026",
-                "20.10.2026"
+                "03.11.2026"
             ],
             "rooms": "II к.",
             "comment": "",
@@ -5365,24 +5433,6 @@
             "comment": "",
             "position": 1,
             "event_id": "1222_СБ_4_1"
-        },
-        {
-            "group": "1222",
-            "weekday": "СБ",
-            "time_start": "17:00",
-            "time_end": "18:30",
-            "pair_number": 6,
-            "discipline": "Нормативно-правовые основы профессиональной деятельности в системе СПО и антикоррупционное поведение",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Довгяло В.К."
-            ],
-            "dates": [],
-            "rooms": "",
-            "comment": "",
-            "position": 1,
-            "event_id": "1222_СБ_6_1"
         },
         {
             "group": "1222",
@@ -5881,10 +5931,30 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214",
             "comment": "",
             "position": 1,
             "event_id": "1222_ЧТ_5_1"
+        },
+        {
+            "group": "1222",
+            "weekday": "ЧТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "КОНСУЛЬТАЦИЯ по практикам История научно-технологического прогресса",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Скорнякова А.Ю."
+            ],
+            "dates": [
+                "01.10.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214",
+            "comment": "",
+            "position": 2,
+            "event_id": "1222_ЧТ_5_2"
         },
         {
             "group": "1222",
@@ -5903,10 +5973,10 @@
                 "01.10.2026",
                 "08.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214",
             "comment": "",
-            "position": 2,
-            "event_id": "1222_ЧТ_5_2"
+            "position": 3,
+            "event_id": "1222_ЧТ_5_3"
         },
         {
             "group": "1222",
@@ -5923,7 +5993,7 @@
             "dates": [
                 "17.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214",
             "comment": "",
             "position": 1,
             "event_id": "1222_ЧТ_6_1"
@@ -5943,7 +6013,7 @@
             "dates": [
                 "24.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. А111, IV к. А214",
+            "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214",
             "comment": "",
             "position": 2,
             "event_id": "1222_ЧТ_6_2"
@@ -15958,5 +16028,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-09-28T12:51:29+00:00"
+    "generated_at": "2026-09-28T14:52:03+00:00"
 }
