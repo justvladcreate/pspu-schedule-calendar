@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v37';
+const CACHE = 'pspu-schedule-v39';
 
 const STATIC_ASSETS = [
   './',
@@ -40,10 +40,10 @@ const STATIC_ASSETS = [
   './js/changes-modal.js',
   './js/update-banner.js',
   './js/share.js',
+  './js/more-menu.js',       // ← добавлено
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
-
 const SW_LOCATION = self.location.href;
 const INDEX_URL   = new URL('./index.html', SW_LOCATION).href;
 const ROOT_URL    = new URL('./',           SW_LOCATION).href;

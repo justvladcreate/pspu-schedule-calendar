@@ -21,7 +21,10 @@ import {
     switchToCalendar, switchToLoad,
 } from './navigation.js';
 import { setupUpdatedButton, updateUpdatedLabel } from './version.js';
-import { setupOnlineStatus, updateOnlineStatus } from './online.js';
+import {
+    setupOnlineStatus,
+    updateOnlineStatus,
+} from './online.js';
 import { compareEvents, sortChanges } from './changes.js';
 import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
@@ -30,6 +33,7 @@ import { showToast } from './toast.js';
 import { openShareMenu, buildTextForView } from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
+import { setupMoreMenu } from './more-menu.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import { hideEventDetails, showEventDetails } from './popover.js';
 
@@ -141,6 +145,7 @@ async function init() {
 
     updateViewButton();
 
+    setupMoreMenu();       // ← сначала layout, чтобы online.js знал раскладку
     setupOnlineStatus();
 
     let loaded;

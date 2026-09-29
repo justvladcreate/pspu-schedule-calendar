@@ -60,12 +60,14 @@ export function updateOnlineStatus() {
     wrap.classList.remove('is-offline');
 
     const iso = getDisplayedIso();
+    const compact = window.innerWidth <= 500;
 
     // 1. Оффлайн
     if (!isOnline()) {
         wrap.classList.add('is-offline');
-        prefix.textContent = 'Оффлайн ·';
-        btn.setAttribute('aria-label', 'Оффлайн режим. Нажмите для подробностей.');
+        prefix.textContent = compact ? 'Офл.' : 'Оффлайн:';
+        btn.setAttribute('aria-label',
+            'Оффлайн режим. Нажмите для подробностей.');
         if (iso) updateUpdatedLabel(iso);
         else if (timeEl) timeEl.textContent = '—';
         return;
@@ -74,7 +76,7 @@ export function updateOnlineStatus() {
     // 2. Fallback
     if (state.fallbackActive) {
         wrap.classList.add('is-fallback');
-        prefix.textContent = 'Не загрузилось ·';
+        prefix.textContent = compact ? 'Ош.' : 'Ошибка:';
         btn.setAttribute('aria-label',
             'Свежая версия не загрузилась, показана прошлая. Нажмите, чтобы повторить.');
         if (timeEl) timeEl.textContent = 'обновить';
@@ -82,11 +84,12 @@ export function updateOnlineStatus() {
     }
 
     // 3. Норма
-    prefix.textContent = 'Обновлено:';
+    prefix.textContent = compact ? 'Обн.' : 'Обновлено:';
     btn.setAttribute('aria-label', 'Обновлено. Нажмите, чтобы посмотреть изменения.');
     if (iso) updateUpdatedLabel(iso);
     else if (timeEl) timeEl.textContent = '—';
 }
+
 
 function openOfflineModal() {
     const modal = document.getElementById('offlineModal');
@@ -167,6 +170,13 @@ export function setupOnlineStatus() {
 
     window.addEventListener('online',  updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
+
+    // Пересчёт префикса при повороте/ресайзе.
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateOnlineStatus, 120);
+    });
 
     updateOnlineStatus();
 }

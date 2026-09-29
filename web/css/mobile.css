@@ -1,16 +1,33 @@
+/* ============================================================
+ *  mobile.css — адаптив
+ *
+ *  Три порога (см. расчёт):
+ *    > 500px   — full:      «Обновлено: N дн назад», все кнопки
+ *    401–500px — compact:   «Обн. N дн назад»,     все кнопки
+ *    ≤ 400px   — collapsed: «Обн. Nд»,              «⋯» вместо
+ *                                                     экспорт/тема/share
+ *
+ *  Расчёт (грубые пиксели):
+ *    full row-1    ~500px  → порог 500
+ *    compact row-1 ~410px  → порог 400
+ *    collapsed     ~350px  → влезает и в 360
+ * ============================================================ */
+
+
+/* ============================================================
+ *  ≤900px — структурная мобильная сетка
+ * ============================================================ */
+
 @media (max-width: 900px) {
-    .app {
-        height: 100vh;
-        height: 100dvh;
-    }
+    .app { height: 100vh; height: 100dvh; }
 
     .toolbar {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 6px 6px;
+        gap: 8px;
         row-gap: 8px;
-        padding: 8px 10px;
+        padding: 8px 12px;
     }
 
     .toolbar-left {
@@ -25,122 +42,11 @@
         order: 2;
         min-width: 0;
         flex: 0 1 auto;
-        overflow: hidden;
     }
 
-    /* Не даём updated растянуться и вытолкнуть стрелки на новую строку */
-    .updated-btn {
-        max-width: 100%;
-    }
-
-    /* Скрываем «Обновлено:» — иконки часов достаточно, а 75px экономии
-       как раз даёт стрелкам влезть в первую строку на узких экранах. */
-    .updated-prefix {
-        display: none;
-    }
-
-    .toolbar-center {
-        order: 3;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-left: auto;
-        flex-shrink: 0;
-    }
-
-    .toolbar-right {
-        display: contents;
-    }
-
-    /* Разрыв строки: всё, что с order >= 5, уедет вниз */
-    .toolbar::after {
-        content: "";
-        order: 4;
-        flex-basis: 100%;
-        height: 0;
-    }
-
-    /* ---- Нижняя строка ---- */
-
-    /* 5. Фильтр */
-    .toolbar-right > .filter {
-        order: 5;
-    }
-
-    /* 6. Звезда — сразу справа от фильтра */
-    .toolbar-right > #favoritesBtn {
-        order: 6;
-    }
-
-    /* 7. Календарь/Нагрузка — между избранным и экспортом */
-    .toolbar-right > #viewSwitch {
-        order: 7;
-    }
-
-    /* 8. Экспорт — уезжает вправо */
-    .toolbar-right > #exportIcsBtn {
-        order: 8;
-        margin-left: auto;
-    }
-
-    /* 9. Смена вида */
-    .toolbar-right > #viewBtn {
-        order: 9;
-    }
-
-    /* 10. Тема */
-    .toolbar-right > #themeBtn {
-        order: 10;
-    }
-
-    /* 11. Поделиться */
-    .toolbar-right > #shareBtn {
-        order: 11;
-    }
-
-    /* На мобилке разделители скрыты — там своя сетка. */
-    .toolbar-divider {
-        display: none;
-    }
-
-    /* Слегка уменьшаем кнопки в первой строке, чтобы точно влезли */
-    .date-label {
-        font-size: 13px;
-        padding: 6px 8px;
-    }
-
-    .updated-btn {
-        padding: 6px 10px;
-        font-size: 12px;
-    }
-
-    .btn-arrow {
-        padding: 7px 10px;
-        min-width: 34px;
-    }
-
-    #todayBtn {
-        padding: 7px 10px;
-        font-size: 12px;
-    }
-
-    .view-switch {
-        min-height: 34px;
-        padding: 2px;
-        border-radius: 8px;
-    }
-    .view-switch-btn {
-        padding: 0 11px;
-        font-size: 12px;
-        border-radius: 5px;
-    }
-
-    .btn-icon {
-        padding: 7px;
-        min-width: 34px;
-        min-height: 34px;
-    }
-
+    /* Критично: снимаем min-width: 200px из toolbar.css,
+       иначе кнопка даты раздувается до 200+px и выдавливает
+       «Обновлено» и стрелки. */
     .date-label {
         width: auto;
         min-width: 0;
@@ -149,62 +55,45 @@
         white-space: nowrap;
     }
 
-    .btn {
-        padding: 7px 10px;
-        font-size: 12px;
+    .toolbar-center {
+        order: 3;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
-    .updated-btn {
-        padding: 7px 12px;
-        font-size: 12px;
-        min-width: 0;
-        max-width: 100%;
-        overflow: hidden;
+    .toolbar-right { display: contents; }
+
+    .toolbar::after {
+        content: "";
+        order: 4;
+        flex-basis: 100%;
+        height: 0;
     }
 
-    .updated-btn #updatedTime {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        min-width: 0;
-    }
+    /* Порядок во второй строке */
+    .toolbar-right > .filter        { order: 5; }
+    .toolbar-right > #favoritesBtn  { order: 6; }
+    .toolbar-right > #viewSwitch    { order: 7; }
+    .toolbar-right > #exportIcsBtn  { order: 8; }
+    .toolbar-right > #viewBtn       { order: 9; }
+    .toolbar-right > #themeBtn      { order: 10; }
+    .toolbar-right > #shareBtn      { order: 11; }
 
-    .warning-banner {
-        font-size: 12px;
-        padding: 6px 12px 6px 10px;
-        gap: 8px;
-    }
+    /* «⋯» и меню — прямые дети .toolbar (не .toolbar-right!) */
+    .toolbar > #moreBtn  { order: 12; }
+    .toolbar > #moreMenu { order: 13; }
 
-    .warning-icon {
-        width: 18px;
-        height: 18px;
-        font-size: 14px;
-    }
+    .toolbar-divider { display: none; }
 
-    .footer {
-        padding: 4px 8px;
-        gap: 2px;
-    }
-
-    .footer-link {
-        padding: 6px 10px;
-        min-height: 34px;
-    }
-
-    .footer-link--icon { padding: 6px 8px; }
-
-    .filter {
-        position: static;
-    }
-
+    /* Фильтр во весь экран */
+    .filter { position: static; }
     .filter-dropdown {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        max-width: none;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100%; max-width: none;
         border-radius: 0;
         padding: 16px;
         padding-top: max(16px, env(safe-area-inset-top));
@@ -212,151 +101,243 @@
         overflow-y: auto;
         z-index: 500;
     }
-
     .filter-mobile-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 4px 0 12px;
-        margin-bottom: 8px;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 4px 0 12px; margin-bottom: 8px;
         border-bottom: 1px solid var(--border);
     }
-
-    .filter-mobile-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--text);
-    }
-
+    .filter-mobile-title { font-size: 16px; font-weight: 700; color: var(--text); }
     .filter-close {
-        appearance: none;
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        font-size: 22px;
-        line-height: 1;
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        font-family: inherit;
-        transition: background 0.15s, color 0.15s;
+        appearance: none; background: transparent; border: none;
+        color: var(--text-muted); font-size: 22px; line-height: 1;
+        cursor: pointer; width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 8px; font-family: inherit;
     }
-    .filter-close:hover,
-    .filter-close:active {
-        background: var(--surface-2);
-        color: var(--text);
+    .filter-close:hover, .filter-close:active {
+        background: var(--surface-2); color: var(--text);
     }
-
-    .filter-columns {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .filter-options {
-        height: auto;
-        max-height: 200px;
-    }
-
-    .filter-quick-actions {
-        padding: 0 0 12px;
-        font-size: 13px;
-    }
-
+    .filter-columns { grid-template-columns: 1fr; gap: 10px; }
+    .filter-options { height: auto; max-height: 200px; }
+    .filter-quick-actions { padding: 0 0 12px; font-size: 13px; }
     .filter-footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding-top: 12px;
+        flex-direction: column; align-items: stretch;
+        gap: 10px; padding-top: 12px;
     }
+    .filter-counter { order: 1; text-align: center; padding: 0; font-size: 12px; }
+    .filter-actions { order: 2; width: 100%; justify-content: stretch; }
+    .filter-done { width: 100%; min-height: 46px; font-size: 15px; padding: 12px; }
+    .filter-search { font-size: 15px; padding: 10px 12px; }
 
-    .filter-counter {
-        order: 1;
-        text-align: center;
-        padding: 0;
-        font-size: 12px;
-    }
-
-    .filter-actions {
-        order: 2;
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .filter-done {
-        width: 100%;
-        min-height: 46px;
-        font-size: 15px;
-        padding: 12px;
-    }
-
-    .filter-search {
-        font-size: 15px;
-        padding: 10px 12px;
-    }
-
-    .calendar.view-week {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
+    /* Календарь */
+    .calendar.view-week { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .cal-header.week {
         grid-template-columns: 56px repeat(7, var(--m-day-col));
         min-width: calc(56px + 7 * var(--m-day-col));
     }
-
     .cal-body.week {
         grid-template-columns: 56px calc(7 * var(--m-day-col));
         min-width: calc(56px + 7 * var(--m-day-col));
     }
+    .cal-body.week .day-grid { grid-template-columns: repeat(7, var(--m-day-col)); }
 
-    .cal-body.week .day-grid {
-        grid-template-columns: repeat(7, var(--m-day-col));
-    }
-
-    .event-block {
-        padding: 2px 5px;
-        border-left-width: 2px;
-    }
-    .event-block .event-title {
-        font-size: 11px;
-        line-height: 1.2;
-        -webkit-line-clamp: 3;
-    }
+    .event-block { padding: 2px 5px; border-left-width: 2px; }
+    .event-block .event-title { font-size: 11px; line-height: 1.2; -webkit-line-clamp: 3; }
     .event-block .event-room,
-    .event-block .event-time {
-        font-size: 9.5px;
-    }
+    .event-block .event-time { font-size: 9.5px; }
 
-    .month-event {
-        font-size: 10px;
-        padding: 1px 3px;
-    }
-    .month-day-num {
-        font-size: 11px;
-        min-width: 18px;
-        height: 18px;
-    }
+    .month-event { font-size: 10px; padding: 1px 3px; }
+    .month-day-num { font-size: 11px; min-width: 18px; height: 18px; }
 
-    .readme {
-        width: calc(100vw - 16px);
-        max-height: 90dvh;
-    }
+    .readme { width: calc(100vw - 16px); max-height: 90dvh; }
 }
 
-/* На очень узких экранах — прячем текстовые метки у сегментов,
-   оставляем только иконки. Иначе строка тулбара ломается. */
-@media (max-width: 600px) {
-    .view-switch-btn {
-        padding: 0 10px;
-        min-width: 34px;
-        justify-content: center;
-        gap: 0;
+
+/* ============================================================
+ *  «⋯» по умолчанию скрыта
+ * ============================================================ */
+
+#moreBtn { display: none; }
+
+
+/* ============================================================
+ *  ≤500px — COMPACT
+ *
+ *  Все кнопки остаются, но размеры и текст короче.
+ * ============================================================ */
+
+@media (max-width: 500px) {
+    .toolbar {
+        padding: 6px 10px;
+        gap: 6px;
+        row-gap: 6px;
     }
-    .view-switch-label {
-        display: none;
+
+    .date-label {
+        font-size: 12.5px;
+        padding: 5px 8px;
+        min-height: 32px;
     }
+    .date-label::after { margin-left: 5px; }
+
+    .updated-btn {
+        padding: 5px 9px;
+        font-size: 12px;
+        min-height: 32px;
+        gap: 5px;
+    }
+    .updated-btn .icon {
+        width: 15px; height: 15px;
+        margin: 0 1px;
+    }
+    .updated-prefix { margin-right: 1px; }
+    #updatedTime    { margin-left: 1px; }
+
+    .btn { padding: 5px 9px; font-size: 12px; }
+    .btn-arrow {
+        padding: 5px 7px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    .btn-arrow::before { width: 7px; height: 7px; border-width: 2px; }
+    #todayBtn { padding: 5px 9px; font-size: 12px; min-height: 32px; }
+    .toolbar-center { gap: 4px; }
+
+    .btn-icon {
+        padding: 6px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    .btn-icon .icon { width: 17px; height: 17px; }
+
+    .view-switch { min-height: 32px; padding: 2px; border-radius: 8px; }
+    .view-switch-btn { padding: 0 8px; min-width: 30px; }
+    .view-switch-label { display: none; }
+}
+
+
+/* ============================================================
+ *  ≤400px — COLLAPSED
+ *
+ *  Экспорт / Тема / Share прячутся в «⋯».
+ * ============================================================ */
+
+@media (max-width: 400px) {
+    #exportIcsBtn,
+    #themeBtn,
+    #shareBtn { display: none; }
+
+    #moreBtn { display: inline-flex; }
+
+    .toolbar {
+        padding: 6px 10px;
+        gap: 6px;
+        row-gap: 6px;
+    }
+
+    .date-label {
+        font-size: 12px;
+        padding: 5px 7px;
+        min-height: 32px;
+    }
+    .date-label::after { margin-left: 4px; width: 6px; height: 6px; }
+
+    .updated-btn {
+        padding: 5px 8px;
+        font-size: 11.5px;
+        min-height: 32px;
+        gap: 4px;
+    }
+    .updated-btn .icon {
+        width: 14px; height: 14px;
+        margin: 0 1px;
+    }
+
+    .btn { padding: 5px 8px; font-size: 11.5px; }
+    .btn-arrow {
+        padding: 5px 6px;
+        min-width: 30px;
+        min-height: 32px;
+    }
+    .btn-arrow::before { width: 6px; height: 6px; border-width: 2px; }
+    #todayBtn { padding: 5px 8px; font-size: 11.5px; min-height: 32px; }
+    .toolbar-center { gap: 3px; }
+
+    .btn-icon {
+        padding: 5px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    .btn-icon .icon { width: 16px; height: 16px; }
+
+    .view-switch { min-height: 32px; padding: 2px; border-radius: 8px; }
+    .view-switch-btn { padding: 0 7px; min-width: 28px; }
+}
+
+
+/* ============================================================
+ *  ≤360px — «Сегодня» → «Сег.»
+ * ============================================================ */
+
+@media (max-width: 360px) {
+    #todayBtn {
+        font-size: 0;
+        padding: 5px 8px;
+        min-width: 32px;
+    }
+    #todayBtn::before {
+        content: 'Сег.';
+        font-size: 11.5px;
+        line-height: 1;
+    }
+    .date-label { font-size: 11.5px; padding: 5px 6px; }
+    .updated-btn { padding: 5px 7px; font-size: 11px; gap: 3px; }
+    .updated-btn .icon { width: 13px; height: 13px; margin: 0 1px; }
+}
+
+
+/* ============================================================
+ *  МЕНЮ «⋯»
+ * ============================================================ */
+
+.more-menu {
+    position: fixed;
+    display: none;
+    flex-direction: column;
+    min-width: 0;
+    width: max-content;
+    max-width: 210px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 4px;
+    z-index: 3000;
+}
+.more-menu.open { display: flex; }
+
+.more-menu-item {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 11px 13px;
+    border-radius: 7px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    white-space: nowrap;
+    transition: background 0.12s;
+}
+.more-menu-item:hover,
+.more-menu-item:active { background: var(--surface-2); }
+.more-menu-item .icon {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    width: 16px; height: 16px;
 }
