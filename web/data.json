@@ -15769,6 +15769,24 @@
         },
         {
             "group": "М1217",
+            "weekday": "СР",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
+            "discipline": "Основы программирования на языке Python",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Боярко С.А."
+            ],
+            "dates": [],
+            "rooms": "",
+            "comment": "",
+            "position": 1,
+            "event_id": "М1217_СР_6_1"
+        },
+        {
+            "group": "М1217",
             "weekday": "ЧТ",
             "time_start": "17:00",
             "time_end": "18:30",
@@ -16197,5 +16215,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-01T05:17:04+00:00"
+    "generated_at": "2026-10-01T07:17:18+00:00"
 }
