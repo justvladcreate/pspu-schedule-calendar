@@ -15,20 +15,18 @@ PAIR_INTERVALS = [
     (time(15, 15), time(17, 0)),  # 5-я пара
     (time(17, 0),  time(18, 45)), # 6-я пара
     (time(18, 45), time(20, 15)), # 7-я пара
+    (time(20, 15), time(21, 45)), # 8-я пара
 ]
 
 
 def get_pair_number(time_str: str) -> Optional[int]:
-    """Возвращает номер пары (1-7) для времени в формате HH:MM или None."""
+    """Возвращает номер пары (1-8) для времени в формате HH:MM или None."""
     try:
         h, m = map(int, time_str.strip().split(':'))
         t = time(h, m)
         for i, (start, end) in enumerate(PAIR_INTERVALS, start=1):
             if start <= t < end:
                 return i
-        # Особая проверка на точное время окончания 7-й пары (20:15)
-        if t == time(20, 15):
-            return 7
     except (ValueError, AttributeError):
         pass
     return None
