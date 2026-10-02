@@ -1394,7 +1394,7 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "РАЗГОВОРЫ О ВАЖНОМ МОЯ САМОСТОЯТЕЛЬНАЯ СТУДЕНЧЕСКАЯ ЖИЗНЬ Явка студентов на занятие строго обязательна",
+            "discipline": "РАЗГОВОРЫ О ВАЖНОМ МОЯ САМОСТОЯТЕЛЬНАЯ СТУДЕНЧЕСКАЯ ЖИЗНЬ Региональный центр финансовой грамотности Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [
@@ -1660,7 +1660,7 @@
             "dates": [
                 "07.09.2026"
             ],
-            "rooms": "IV к. А331",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПН_3_1"
@@ -1680,7 +1680,7 @@
             "dates": [
                 "14.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПН_3_2"
@@ -1701,7 +1701,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_3_3"
@@ -1719,9 +1719,66 @@
                 "Иванова О.Г."
             ],
             "dates": [
-                "05.10.2026",
-                "12.10.2026",
-                "19.10.2026",
+                "05.10.2026"
+            ],
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "comment": "",
+            "position": 4,
+            "event_id": "1212_ПН_3_4"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "12.10.2026"
+            ],
+            "rooms": "IV к. А201",
+            "comment": "",
+            "position": 5,
+            "event_id": "1212_ПН_3_5"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "19.10.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 6,
+            "event_id": "1212_ПН_3_6"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
                 "26.10.2026",
                 "02.11.2026",
                 "09.11.2026",
@@ -1730,10 +1787,10 @@
                 "30.11.2026",
                 "07.12.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПН_3_4"
+            "position": 7,
+            "event_id": "1212_ПН_3_7"
         },
         {
             "group": "1212",
@@ -1751,7 +1808,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПН_4_1"
@@ -1769,9 +1826,66 @@
                 "Иванова О.Г."
             ],
             "dates": [
-                "05.10.2026",
-                "12.10.2026",
-                "19.10.2026",
+                "05.10.2026"
+            ],
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ПН_4_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "12.10.2026"
+            ],
+            "rooms": "IV к. А201",
+            "comment": "",
+            "position": 3,
+            "event_id": "1212_ПН_4_3"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "19.10.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 4,
+            "event_id": "1212_ПН_4_4"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Основы статистики",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
                 "26.10.2026",
                 "02.11.2026",
                 "09.11.2026",
@@ -1780,10 +1894,30 @@
                 "30.11.2026",
                 "07.12.2026"
             ],
-            "rooms": "IV к. А",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПН_4_2"
+            "position": 5,
+            "event_id": "1212_ПН_4_5"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПН",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Основы маркетинга",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Рожнёва И.В."
+            ],
+            "dates": [
+                "23.11.2026"
+            ],
+            "rooms": "IV к. А202",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_ПН_5_1"
         },
         {
             "group": "1212",
@@ -2028,10 +2162,34 @@
             "dates": [
                 "11.09.2026"
             ],
-            "rooms": "IV к. А305, IV к. А331",
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_5_1"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Основы маркетинга",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Рожнёва И.В."
+            ],
+            "dates": [
+                "23.10.2026",
+                "30.10.2026",
+                "06.11.2026",
+                "13.11.2026",
+                "20.11.2026"
+            ],
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ПТ_5_2"
         },
         {
             "group": "1212",
@@ -2046,10 +2204,10 @@
                 "Гаврилова И.Н."
             ],
             "dates": [],
-            "rooms": "IV к. А305, IV к. А331",
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_5_2"
+            "position": 3,
+            "event_id": "1212_ПТ_5_3"
         },
         {
             "group": "1212",
@@ -2067,10 +2225,10 @@
                 "04.12.2026",
                 "11.12.2026"
             ],
-            "rooms": "IV к. А305, IV к. А331",
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_5_3"
+            "position": 4,
+            "event_id": "1212_ПТ_5_4"
         },
         {
             "group": "1212",
@@ -2088,10 +2246,34 @@
                 "18.12.2026",
                 "25.12.2026"
             ],
-            "rooms": "IV к. А305, IV к. А331",
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПТ_5_4"
+            "position": 5,
+            "event_id": "1212_ПТ_5_5"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "17:00",
+            "time_end": "18:30",
+            "pair_number": 6,
+            "discipline": "Основы маркетинга",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Рожнёва И.В."
+            ],
+            "dates": [
+                "23.10.2026",
+                "30.10.2026",
+                "06.11.2026",
+                "13.11.2026",
+                "20.11.2026"
+            ],
+            "rooms": "IV к. А202",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_ПТ_6_1"
         },
         {
             "group": "1212",
@@ -10082,7 +10264,6 @@
                 "Кудреватых В.А."
             ],
             "dates": [
-                "03.10.2026",
                 "10.10.2026",
                 "17.10.2026",
                 "24.10.2026",
@@ -10107,7 +10288,6 @@
                 "Кудреватых В.А."
             ],
             "dates": [
-                "03.10.2026",
                 "10.10.2026",
                 "17.10.2026",
                 "24.10.2026",
@@ -13228,15 +13408,15 @@
                 "Рожнёва И.В."
             ],
             "dates": [
-                "30.10.2026",
-                "06.11.2026",
-                "13.11.2026",
-                "20.11.2026",
                 "27.11.2026",
                 "04.12.2026",
                 "11.12.2026",
                 "18.12.2026",
-                "25.12.2026"
+                "25.12.2026",
+                "16.01.2027",
+                "23.01.2027",
+                "30.01.2027",
+                "06.02.2027"
             ],
             "rooms": "IV к. А304, или А308",
             "comment": "",
@@ -13256,15 +13436,15 @@
                 "Рожнёва И.В."
             ],
             "dates": [
-                "30.10.2026",
-                "06.11.2026",
-                "13.11.2026",
-                "20.11.2026",
                 "27.11.2026",
                 "04.12.2026",
                 "11.12.2026",
                 "18.12.2026",
-                "25.12.2026"
+                "25.12.2026",
+                "16.01.2027",
+                "23.01.2027",
+                "30.01.2027",
+                "06.02.2027"
             ],
             "rooms": "IV к. А304, или А308",
             "comment": "",
@@ -14820,12 +15000,44 @@
                 "03.12.2026",
                 "10.12.2026",
                 "17.12.2026",
-                "24.12.2026"
+                "24.12.2026",
+                "15.01.2027",
+                "22.01.2027",
+                "29.01.2027",
+                "05.02.2027"
             ],
             "rooms": "IV к. А308",
             "comment": "",
             "position": 1,
             "event_id": "1247_ЧТ_6_1"
+        },
+        {
+            "group": "1247",
+            "weekday": "ЧТ",
+            "time_start": "18:45",
+            "time_end": "20:15",
+            "pair_number": 7,
+            "discipline": "Бюджетирование ИТ-проектов",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Рожнёва И.В."
+            ],
+            "dates": [
+                "26.11.2026",
+                "03.12.2026",
+                "10.12.2026",
+                "17.12.2026",
+                "24.12.2026",
+                "15.01.2027",
+                "22.01.2027",
+                "29.01.2027",
+                "05.02.2027"
+            ],
+            "rooms": "IV к. А308",
+            "comment": "",
+            "position": 1,
+            "event_id": "1247_ЧТ_7_1"
         },
         {
             "group": "1251",
@@ -16367,5 +16579,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-02T09:45:39+00:00"
+    "generated_at": "2026-10-02T11:46:21+00:00"
 }
