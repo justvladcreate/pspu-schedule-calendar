@@ -62,6 +62,7 @@ html, body {
 }
 
 body { overflow: hidden; }
+body.modal-open { overflow: visible; }
 
 .app {
     height: 100vh;

@@ -430,6 +430,64 @@
  *  Полноэкранная модалка с iframe Google Таблицы.
  * ============================================================ */
 
+/* ============================================================
+ *  ORIGINAL SHEET TABS — кастомная панель листов над iframe
+ * ============================================================ */
+
+.original-sheet-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+.original-sheet-tabs[hidden] { display: none; }
+
+.original-sheet-tabs::-webkit-scrollbar { height: 5px; }
+.original-sheet-tabs::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
+}
+
+.original-sheet-tab {
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 5px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.original-sheet-tab:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+.original-sheet-tab:active { transform: scale(0.98); }
+.original-sheet-tab.is-active {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+.original-sheet-tab.is-active:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
 .original-modal {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -582,13 +640,35 @@
 /* --- мобильная адаптация --- */
 @media (max-width: 900px) {
     .original-modal {
-        width: calc(100vw - 8px);
-        height: calc(100dvh - 8px);
-        border-radius: 10px;
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+        border: none;
     }
-    .original-header { padding: 10px 12px; }
+    .original-sheet-tabs {
+        padding: 6px 8px;
+        gap: 3px;
+    }
+    .original-sheet-tab {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    .original-header {
+        padding: 10px 12px;
+        padding-top: max(10px, env(safe-area-inset-top));
+    }
     .original-title { font-size: 14px; }
-    .original-close { width: 40px; height: 40px; }
+    .original-close { width: 44px; height: 44px; }
+    .original-body {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    /* Подложка на мобилке не видна — модалка занимает весь экран */
+    .modal-backdrop {
+        background: var(--surface);
+    }
 }
 
 /* --- кнопка «Оригинал» в футере --- */
