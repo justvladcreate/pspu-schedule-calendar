@@ -14,6 +14,22 @@
 const SHEETS_CACHE_KEY = 'pspu-original-sheets';
 const SHEETS_CACHE_TTL = 24 * 60 * 60 * 1000; // сутки
 const LAST_GID_KEY     = 'pspu-original-last-gid';
+const ZOOM_KEY         = 'pspu-original-zoom';
+
+/** Дефолтный масштаб: 0.5 = «отдалено в 2 раза». 1.0 = обычный размер. */
+function defaultZoom() {
+    return window.innerWidth <= 900 ? 0.45 : 1.0;
+}
+function getZoom() {
+    try {
+        const v = parseFloat(localStorage.getItem(ZOOM_KEY));
+        if (Number.isFinite(v) && v >= 0.2 && v <= 1.5) return v;
+    } catch {}
+    return defaultZoom();
+}
+function saveZoom(v) {
+    try { localStorage.setItem(ZOOM_KEY, String(v)); } catch {}
+}
 
 const URL_META_SELECTOR      = 'meta[name="original-schedule-url"]';
 const EXTERNAL_META_SELECTOR = 'meta[name="original-schedule-external"]';
@@ -102,6 +118,7 @@ export function setupOriginalModal() {
     const offline  = document.getElementById('originalOffline');
     const external = document.getElementById('originalExternal');
     const tabsBox  = document.getElementById('originalSheetTabs');
+    const zoomBox  = document.getElementById('originalZoomControls');
 
     const internalUrl   = getMeta('original-schedule-url');
     const externalUrl   = getMeta('original-schedule-external') || internalUrl;
@@ -154,7 +171,33 @@ export function setupOriginalModal() {
             });
             tabsBox.appendChild(b);
         }
+
     }
+
+    /* ---------- кнопки зума (плавающие поверх iframe) ---------- */
+
+    function setupZoomControls() {
+        if (!zoomBox) return;
+
+        zoomBox.querySelectorAll('.original-zoom-btn').forEach(b => {
+            b.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dir = b.dataset.zoom;
+                const cur = getZoom();
+                let z;
+                if (dir === 'in') {
+                    z = Math.min(1.5, +(cur + 0.1).toFixed(2));
+                } else {
+                    z = Math.max(0.2, +(cur - 0.1).toFixed(2));
+                }
+                if (z === cur) return;
+                saveZoom(z);
+                applyZoom();
+            });
+        });
+    }
+
+    setupZoomControls();
 
     /* ---------- показ листа ---------- */
 
@@ -165,6 +208,41 @@ export function setupOriginalModal() {
         frame.src = buildSheetUrl(spreadsheetId, gid);
         setActiveTab(gid);
     }
+
+    /* ---------- зум: iframe больше контейнера + scale вниз ---------- */
+
+    function applyZoom() {
+        const body = frame.parentElement;   // .original-body
+        if (!body) return;
+
+        const scale = getZoom();
+        const w = body.clientWidth  / scale;
+        const h = body.clientHeight / scale;
+
+        Object.assign(frame.style, {
+            position:        'absolute',
+            top:             '0',
+            left:            '0',
+            right:           'auto',
+            bottom:          'auto',
+            width:           w + 'px',
+            height:          h + 'px',
+            transformOrigin: '0 0',
+            transform:       `scale(${scale})`,
+            border:          'none',
+        });
+
+        // Плавающие кнопки зума показываем только когда есть iframe
+        if (zoomBox) zoomBox.hidden = !frame.src || frame.src === 'about:blank';
+    }
+
+    // Пересчёт при ресайзе/повороте экрана
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (!modal.classList.contains('open')) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(applyZoom, 120);
+    });
 
     /* ---------- загрузка списка ---------- */
 
@@ -195,10 +273,12 @@ export function setupOriginalModal() {
         if (!isOnline()) {
             if (offline) offline.hidden = false;
             frame.style.display = 'none';
+            if (zoomBox) zoomBox.hidden = true;
             return;
         }
         if (offline) offline.hidden = true;
         frame.style.display = '';
+        if (zoomBox) zoomBox.hidden = false;
 
         // Тянем список листов (один раз за сессию)
         await ensureSheets();
@@ -216,6 +296,9 @@ export function setupOriginalModal() {
             frame.dataset.gid = gid;
             showSheet(gid);
         }
+
+        // Применяем зум к контейнеру iframe
+        applyZoom();
 
         dialog.classList.add('is-loaded');
     }

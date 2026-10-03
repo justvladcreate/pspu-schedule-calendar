@@ -488,6 +488,61 @@
     border-color: var(--accent-hover);
 }
 
+/* ============================================================
+ *  ORIGINAL ZOOM CONTROLS — плавающие кнопки поверх iframe
+ * ============================================================ */
+
+.original-zoom-controls {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: auto;
+}
+.original-zoom-controls[hidden] { display: none; }
+
+.original-zoom-btn {
+    appearance: none;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.06s;
+}
+.original-zoom-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--grid-line-strong);
+}
+.original-zoom-btn:active {
+    transform: scale(0.94);
+    background: var(--surface-3);
+}
+.original-zoom-btn svg { display: block; pointer-events: none; }
+
+@media (max-width: 900px) {
+    .original-zoom-controls {
+        right: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        gap: 8px;
+    }
+    .original-zoom-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+    }
+}
+
 .original-modal {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -551,7 +606,7 @@
     flex: 1;
     min-height: 0;
     background: var(--surface-2);
-    overflow: auto;
+    overflow: hidden;                 /* ← было auto: iframe сам больше контейнера */
     -webkit-overflow-scrolling: touch;
     touch-action: auto;
     overscroll-behavior: contain;
