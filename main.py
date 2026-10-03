@@ -8,7 +8,7 @@ from parser.process import process_schedule
 
 logger = logging.getLogger(__name__)
 
-CHECK_CHANGES_TIMER: int = 60 * 60 * 2
+CHECK_CHANGES_TIMER: int = 60 * 15
 WORK_HOUR_START:    int = 7
 WORK_HOUR_END:      int = 22
 LOCAL_TZ = ZoneInfo("Asia/Yekaterinburg")

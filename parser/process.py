@@ -196,6 +196,30 @@ def _read_json(path: Path) -> dict:
         return {}
 
 
+def _events_equal(a: list, b: list) -> bool:
+    """
+    Сравнивает два списка events без учёта порядка и без timestamp.
+
+    Сортирует по event_id и сравнивает как обычные dict-ы.
+    Это позволяет отличить «расписание реально изменилось»
+    от «парсер просто прогнался ещё раз».
+    """
+    if not isinstance(a, list) or not isinstance(b, list):
+        return False
+    if len(a) != len(b):
+        return False
+
+    def key(ev):
+        return (
+            str(ev.get("event_id", "")),
+            str(ev.get("group", "")),
+            str(ev.get("weekday", "")),
+            int(ev.get("pair_number", 0) or 0),
+        )
+
+    return sorted(a, key=key) == sorted(b, key=key)
+
+
 # ================================================================
 # merge helpers
 # ================================================================
@@ -549,6 +573,26 @@ async def process_schedule(
     # 6. ручные правки
     rules = load_overrides(OVERRIDES_PATH)
     parsed["events"] = await apply_overrides(parsed["events"], rules)
+
+    # 6.5. Сравниваем с предыдущей версией.
+    #      Если события идентичны — не перезаписываем файлы и не коммитим.
+    prev = _read_json(latest_parsed_path)
+    prev_events = prev.get("events", []) if isinstance(prev, dict) else []
+    changed = not _events_equal(prev_events, parsed["events"])
+
+    if not changed:
+        if prev.get("generated_at"):
+            parsed["generated_at"] = prev["generated_at"]
+
+        logger.info(
+            f"Расписание не изменилось "
+            f"({len(parsed['events'])} событий) — пропускаю запись и коммит."
+        )
+        return parsed
+
+    logger.info(
+        f"Расписание изменилось: было {len(prev_events)}, стало {len(parsed['events'])}."
+    )
 
     await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
 
