@@ -424,3 +424,192 @@
         max-height: 90dvh;
     }
 }
+
+/* ============================================================
+ *  ORIGINAL TABLE MODAL
+ *  Полноэкранная модалка с iframe Google Таблицы.
+ * ============================================================ */
+
+.original-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: min(1400px, calc(100vw - 24px));
+    height: min(90vh, 900px);
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    isolation: isolate;
+}
+
+.original-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    flex-shrink: 0;
+    background: var(--surface);
+}
+
+.original-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.original-close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+.original-close:hover,
+.original-close:active {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.original-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: var(--surface-2);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
+    overscroll-behavior: contain;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.original-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #fff; /* Google Docs всегда светлый */
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+    pointer-events: none;
+    z-index: 1;
+    touch-action: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.original-modal.is-loaded .original-frame {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+.original-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.original-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: original-spin 0.8s linear infinite;
+}
+
+@keyframes original-spin {
+    to { transform: rotate(360deg); }
+}
+
+.original-offline {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    z-index: 2;
+    background: var(--surface);
+}
+.original-offline[hidden] {
+    display: none;
+    pointer-events: none;
+}
+.original-offline p { margin: 0; max-width: 320px; line-height: 1.5; }
+
+.original-modal.is-loaded .original-placeholder { display: none; }
+
+/* --- мобильная адаптация --- */
+@media (max-width: 900px) {
+    .original-modal {
+        width: calc(100vw - 8px);
+        height: calc(100dvh - 8px);
+        border-radius: 10px;
+    }
+    .original-header { padding: 10px 12px; }
+    .original-title { font-size: 14px; }
+    .original-close { width: 40px; height: 40px; }
+}
+
+/* --- кнопка «Оригинал» в футере --- */
+.footer-original-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
+}
+.footer-original-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+.footer-original-btn svg { flex-shrink: 0; }

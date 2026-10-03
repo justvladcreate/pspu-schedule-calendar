@@ -55,6 +55,7 @@ export function setupCalendarGestures() {
 
     const SWIPE_THRESHOLD = 60;
     let startX = 0, startY = 0, tracking = false;
+    let startTarget = null;
 
     calendar.addEventListener('touchstart', e => {
         if (e.touches.length >= 2) {
@@ -67,6 +68,7 @@ export function setupCalendarGestures() {
         }
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
+        startTarget = e.target;
         tracking = true;
     }, { passive: true });
 
@@ -97,6 +99,21 @@ export function setupCalendarGestures() {
 
         const dir = dx < 0 ? 1 : -1;
 
+        // В виде «Нагрузка» есть собственные горизонтальные скроллеры
+        // (карта и шкала). Если палец начал движение внутри такого
+        // контейнера, и он реально скроллится — блокируем навигацию
+        // полностью. Пользователь может переключать даты стрелками
+        // или «Сегодня». Иначе render() пересоздаёт DOM и сбрасывает
+        // scrollLeft в 0 — а нам это как раз и не нужно.
+        if (startTarget) {
+            const scroller = startTarget.closest(
+                '.load-heatmap-scroll, .load-strip-view-bars'
+            );
+            if (scroller && scroller.scrollWidth > scroller.clientWidth + 1) {
+                return;
+            }
+        }
+
         if (state.view === 'week') {
             const atLeft  = calendar.scrollLeft <= 1;
             const atRight = calendar.scrollLeft + calendar.clientWidth
@@ -111,6 +128,7 @@ export function setupCalendarGestures() {
     calendar.addEventListener('touchcancel', () => {
         pinchStartDist = 0;
         tracking = false;
+        startTarget = null;
     });
 
     window.addEventListener('resize', () => {

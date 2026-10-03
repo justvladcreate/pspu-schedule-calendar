@@ -28,6 +28,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Расписание">
+    <!-- URL для модалки «Оригинал». Замените на свои.
+     original-schedule-url — то, что грузится в iframe (embed-версия).
+     original-schedule-external — публичная ссылка для «открыть в новой вкладке». -->
+    <meta name="original-schedule-url"
+          content="https://docs.google.com/spreadsheets/d/1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg/preview?rm=minimal&amp;embedded=true">
+    <meta name="original-schedule-external"
+          content="https://docs.google.com/spreadsheets/d/1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg/edit?usp=sharing">
 
     <link rel="stylesheet" href="css/base.css?v=20260924-07">
     <link rel="stylesheet" href="css/toolbar.css?v=20260924-07">
@@ -273,6 +280,16 @@
     <main class="calendar" id="calendar"></main>
 
     <footer class="footer">
+        <button class="footer-link footer-original-btn" id="originalBtn"
+                type="button" aria-label="Оригинальное расписание">
+            <span>Оригинал</span>
+            <svg viewBox="0 0 24 24" width="16" height="16"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+            </svg>
+        </button>
         <a class="footer-link footer-link--icon" id="githubLink"
            href="https://github.com/justvladcreate/pspu-schedule-calendar"
            target="_blank" rel="noopener"
@@ -310,6 +327,35 @@
             <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
         </div>
         <div class="picker-grid" id="pickerGrid"></div>
+    </div>
+</div>
+
+
+<div class="modal-backdrop" id="originalModal">
+    <div class="original-modal" role="dialog" aria-labelledby="originalTitle">
+        <div class="original-header">
+            <h2 class="original-title" id="originalTitle">Оригинальное расписание</h2>
+            <button class="original-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="original-body">
+            <!-- iframe подгрузится из JS при первом открытии -->
+            <div class="original-placeholder" id="originalPlaceholder">
+                <div class="original-spinner"></div>
+                <p>Загрузка таблицы…</p>
+            </div>
+            <iframe class="original-frame" id="originalFrame"
+                    src="about:blank"
+                    loading="lazy"
+                    referrerpolicy="no-referrer"
+                    title="Оригинальное расписание"></iframe>
+
+            <div class="original-offline" id="originalOffline" hidden>
+                <p>Для просмотра оригинала нужен интернет.</p>
+                <a class="btn" id="originalExternal" href="#" target="_blank" rel="noopener">
+                    Открыть в новой вкладке
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 

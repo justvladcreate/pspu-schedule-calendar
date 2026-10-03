@@ -66,6 +66,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-decoration: none;
 }
 .btn:hover { background: var(--surface-2); border-color: var(--grid-line-strong); }
 .btn:active { background: var(--surface-3); }
@@ -388,9 +389,15 @@
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 4px;
     font-size: 12px;
+}
+
+/* Кнопка «Оригинал» — прижата к правому краю футера */
+.footer #originalBtn {
+    order: 1;
+    margin-left: auto;
 }
 .footer-link {
     display: inline-flex;

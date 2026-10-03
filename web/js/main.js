@@ -34,6 +34,7 @@ import { openShareMenu, buildTextForView } from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { setupMoreMenu } from './more-menu.js';
+import { setupOriginalModal } from './original.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import { hideEventDetails, showEventDetails } from './popover.js';
 
@@ -303,6 +304,7 @@ async function init() {
     }, { passive: true });
 
     setupReadmeModal();
+    setupOriginalModal();
 
     changesModalApi = setupChangesModal();
     updateBannerApi = setupUpdateBanner({
