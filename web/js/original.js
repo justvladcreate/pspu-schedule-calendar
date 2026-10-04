@@ -3,7 +3,7 @@
 /**
  * Модалка «Оригинал» — просмотр исходной Google Таблицы.
  *
- *   • iframe остаётся как есть (preview-эндпоинт);
+ *   • iframe остаётся как есть (htmlview/sheet);
  *   • список листов автоматически тянется из htmlview и кэшируется;
  *   • над iframe строится горизонтальная панель вкладок;
  *   • смена листа = подмена gid в src;
@@ -31,9 +31,6 @@ function saveZoom(v) {
     try { localStorage.setItem(ZOOM_KEY, String(v)); } catch {}
 }
 
-const URL_META_SELECTOR      = 'meta[name="original-schedule-url"]';
-const EXTERNAL_META_SELECTOR = 'meta[name="original-schedule-external"]';
-
 let sheetsPromise = null;   // единый промис загрузки списка листов
 let sheets = [];            // [{ name, gid }, ...]
 let currentGid = null;      // активный лист
@@ -56,9 +53,6 @@ function extractSpreadsheetId(url) {
 
 /**
  * URL отдельного листа для iframe.
- * Оставляем preview-эндпоинт (как было), но добавляем gid.
- * Если вдруг переключение не сработает — замените на:
- *   .../htmlview/sheet?headers=true&gid=${gid}
  */
 function buildSheetUrl(spreadsheetId, gid) {
     return `https://docs.google.com/spreadsheets/d/${spreadsheetId}`
@@ -71,19 +65,31 @@ function buildSheetUrl(spreadsheetId, gid) {
  */
 async function fetchSheetList(spreadsheetId) {
     // 1) Кэш
+    let cachedList = null;
+    let cacheAge = Infinity;
     try {
         const raw = localStorage.getItem(SHEETS_CACHE_KEY);
         if (raw) {
             const { at, id, list } = JSON.parse(raw);
-            if (id === spreadsheetId &&
-                Array.isArray(list) && list.length &&
-                Date.now() - at < SHEETS_CACHE_TTL) {
-                return list;
+            if (id === spreadsheetId && Array.isArray(list) && list.length) {
+                cachedList = list;
+                cacheAge = Date.now() - at;
+                if (cacheAge < SHEETS_CACHE_TTL) return list;   // свежий — ок
             }
         }
     } catch {}
 
-    // 2) Сеть
+    // 2) Кэш просрочен — отдаём СРАЗУ, обновляем в фоне (stale-while-revalidate)
+    if (cachedList) {
+        fetchSheetListFromNetwork(spreadsheetId).catch(() => {});
+        return cachedList;
+    }
+
+    // 3) Холодный старт — ждём сеть
+    return fetchSheetListFromNetwork(spreadsheetId);
+}
+
+async function fetchSheetListFromNetwork(spreadsheetId) {
     const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/htmlview`;
     const html = await (await fetch(url)).text();
 
@@ -171,7 +177,6 @@ export function setupOriginalModal() {
             });
             tabsBox.appendChild(b);
         }
-
     }
 
     /* ---------- кнопки зума (плавающие поверх iframe) ---------- */
@@ -251,14 +256,15 @@ export function setupOriginalModal() {
         if (!spreadsheetId) return Promise.resolve([]);
 
         sheetsPromise = fetchSheetList(spreadsheetId)
-            .catch((e) => {
-                console.warn('[original] не удалось получить список листов:', e);
-                return [];
-            })
             .then((list) => {
                 sheets = list || [];
                 buildTabs();
                 return sheets;
+            })
+            .catch((e) => {
+                console.warn('[original] не удалось получить список листов:', e);
+                sheetsPromise = null;   // сбрасываем, чтобы была повторная попытка
+                return [];
             });
         return sheetsPromise;
     }
@@ -280,27 +286,27 @@ export function setupOriginalModal() {
         frame.style.display = '';
         if (zoomBox) zoomBox.hidden = false;
 
-        // Тянем список листов (один раз за сессию)
-        await ensureSheets();
-
-        // Что показываем: последний открытый → первый из списка → gid=0
+        // 1) Сразу грузим iframe — НЕ ждём список листов.
+        //    gid берём из памяти, localStorage или дефолтный «ГРУППЫ».
         let gid = currentGid;
         if (!gid) {
             try { gid = localStorage.getItem(LAST_GID_KEY); } catch {}
         }
-        if (!gid && sheets.length > 0) gid = sheets[0].gid;
         if (!gid) gid = '0';
 
-        // Подменяем src только если реально меняется
         if (frame.dataset.gid !== gid) {
             frame.dataset.gid = gid;
             showSheet(gid);
         }
 
-        // Применяем зум к контейнеру iframe
         applyZoom();
-
         dialog.classList.add('is-loaded');
+
+        // 2) Параллельно тянем список листов для панели вкладок.
+        //    Когда придёт — просто подсветим нужную вкладку.
+        ensureSheets().then(() => {
+            if (currentGid) setActiveTab(currentGid);
+        });
     }
 
     function close() {
@@ -320,4 +326,14 @@ export function setupOriginalModal() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.classList.contains('open')) close();
     });
+
+    // Прогреваем список листов в фоне, пока пользователь ещё не нажал
+    // «Оригинал». К моменту клика список уже в памяти / localStorage →
+    // вкладки появляются мгновенно, iframe не блокируется.
+    const warmup = () => { ensureSheets(); };
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(warmup, { timeout: 3000 });
+    } else {
+        setTimeout(warmup, 1500);
+    }
 }
