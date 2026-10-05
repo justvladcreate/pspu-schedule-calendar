@@ -1660,7 +1660,7 @@
             "dates": [
                 "07.09.2026"
             ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПН_3_1"
@@ -1680,7 +1680,7 @@
             "dates": [
                 "14.09.2026"
             ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 2,
             "event_id": "1212_ПН_3_2"
@@ -1701,7 +1701,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_3_3"
@@ -1721,7 +1721,7 @@
             "dates": [
                 "05.10.2026"
             ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 4,
             "event_id": "1212_ПН_3_4"
@@ -1741,7 +1741,7 @@
             "dates": [
                 "12.10.2026"
             ],
-            "rooms": "IV к. А201",
+            "rooms": "II к. 104",
             "comment": "",
             "position": 5,
             "event_id": "1212_ПН_3_5"
@@ -1787,7 +1787,7 @@
                 "30.11.2026",
                 "07.12.2026"
             ],
-            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
+            "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
             "position": 7,
             "event_id": "1212_ПН_3_7"
@@ -1848,7 +1848,7 @@
             "dates": [
                 "12.10.2026"
             ],
-            "rooms": "IV к. А201",
+            "rooms": "II к. 104",
             "comment": "",
             "position": 3,
             "event_id": "1212_ПН_4_3"
@@ -16657,5 +16657,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-05T06:27:15+00:00"
+    "generated_at": "2026-10-05T06:42:25+00:00"
 }
