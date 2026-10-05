@@ -1013,6 +1013,24 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
+            "discipline": "Психологический тренинг Явка строго обязательна",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "07.10.2026"
+            ],
+            "rooms": "IV к. А201",
+            "comment": "",
+            "position": 1,
+            "event_id": "1211_СР_2_1"
+        },
+        {
+            "group": "1211",
+            "weekday": "СР",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
             "discipline": "Основы работы в электронной информационно-образовательной среде",
             "type": "лек.",
             "subgroup": "",
@@ -1025,8 +1043,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
-            "position": 1,
-            "event_id": "1211_СР_2_1"
+            "position": 2,
+            "event_id": "1211_СР_2_2"
         },
         {
             "group": "1211",
@@ -1394,7 +1412,7 @@
             "time_start": "09:45",
             "time_end": "11:15",
             "pair_number": 2,
-            "discipline": "РАЗГОВОРЫ О ВАЖНОМ МОЯ САМОСТОЯТЕЛЬНАЯ СТУДЕНЧЕСКАЯ ЖИЗНЬ Региональный центр финансовой грамотности Явка студентов на занятие строго обязательна",
+            "discipline": "РАЗГОВОРЫ О ВАЖНОМ МОЯ САМОСТОЯТЕЛЬНАЯ СТУДЕНЧЕСКАЯ ЖИЗНЬ Явка студентов на занятие строго обязательна",
             "type": "",
             "subgroup": "",
             "teachers": [
@@ -1407,6 +1425,24 @@
             "comment": "",
             "position": 1,
             "event_id": "1212_ВТ_2_1"
+        },
+        {
+            "group": "1212",
+            "weekday": "ВТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Психологический тренинг Явка строго обязательна",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "13.10.2026"
+            ],
+            "rooms": "IV к. А201",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ВТ_2_2"
         },
         {
             "group": "1212",
@@ -1980,9 +2016,9 @@
         {
             "group": "1212",
             "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
+            "time_start": "11:09",
+            "time_end": "12:39",
+            "pair_number": 2,
             "discipline": "Современная образовательная среда (Демоцентр)",
             "type": "",
             "subgroup": "",
@@ -1993,6 +2029,46 @@
                 "11.09.2026"
             ],
             "rooms": "IV к. А111",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ПТ_2_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "11:09",
+            "time_end": "12:39",
+            "pair_number": 2,
+            "discipline": "Современная образовательная среда (Демоцентр)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Полякова О.В."
+            ],
+            "dates": [
+                "11.09.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 3,
+            "event_id": "1212_ПТ_2_3"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Порозов В.А."
+            ],
+            "dates": [
+                "18.09.2026"
+            ],
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_3_1"
@@ -2003,26 +2079,6 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Порозов В.А."
-            ],
-            "dates": [
-                "18.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_3_2"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "11:30",
-            "time_end": "13:00",
-            "pair_number": 3,
             "discipline": "Основы медицинских знаний",
             "type": "лек.",
             "subgroup": "",
@@ -2035,8 +2091,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_3_3"
+            "position": 2,
+            "event_id": "1212_ПТ_3_2"
         },
         {
             "group": "1212",
@@ -2044,16 +2100,16 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Современная образовательная среда (Демоцентр)",
+            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
             "type": "",
             "subgroup": "",
             "teachers": [
-                "Полякова О.В."
+                "Порозов В.А."
             ],
             "dates": [
-                "11.09.2026"
+                "18.09.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. В105",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_4_1"
@@ -2064,26 +2120,6 @@
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
-            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Порозов В.А."
-            ],
-            "dates": [
-                "18.09.2026"
-            ],
-            "rooms": "IV к. В105",
-            "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_4_2"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "13:30",
-            "time_end": "15:00",
-            "pair_number": 4,
             "discipline": "Основы медицинских знаний",
             "type": "лек.",
             "subgroup": "",
@@ -2096,8 +2132,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_4_3"
+            "position": 2,
+            "event_id": "1212_ПТ_4_2"
         },
         {
             "group": "1212",
@@ -2121,8 +2157,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПТ_4_4"
+            "position": 3,
+            "event_id": "1212_ПТ_4_3"
         },
         {
             "group": "1212",
@@ -2142,8 +2178,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 5,
-            "event_id": "1212_ПТ_4_5"
+            "position": 4,
+            "event_id": "1212_ПТ_4_4"
         },
         {
             "group": "1212",
@@ -2163,8 +2199,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 6,
-            "event_id": "1212_ПТ_4_6"
+            "position": 5,
+            "event_id": "1212_ПТ_4_5"
         },
         {
             "group": "1212",
@@ -2218,24 +2254,6 @@
             "pair_number": 5,
             "discipline": "Возрастная анатомия, физиология и культура здоровья",
             "type": "лаб.",
-            "subgroup": "",
-            "teachers": [
-                "Гаврилова И.Н."
-            ],
-            "dates": [],
-            "rooms": "IV к. А305, IV к. А202, IV к. А331",
-            "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_5_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "15:15",
-            "time_end": "16:45",
-            "pair_number": 5,
-            "discipline": "Возрастная анатомия, физиология и культура здоровья",
-            "type": "лаб.",
             "subgroup": "п/г 1",
             "teachers": [
                 "Гаврилова И.Н."
@@ -2246,8 +2264,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПТ_5_4"
+            "position": 3,
+            "event_id": "1212_ПТ_5_3"
         },
         {
             "group": "1212",
@@ -2267,8 +2285,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
-            "position": 5,
-            "event_id": "1212_ПТ_5_5"
+            "position": 4,
+            "event_id": "1212_ПТ_5_4"
         },
         {
             "group": "1212",
@@ -2725,6 +2743,24 @@
             "comment": "",
             "position": 1,
             "event_id": "1212_ЧТ_5_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ВТ",
+            "time_start": "09:45",
+            "time_end": "11:15",
+            "pair_number": 2,
+            "discipline": "Психологический тренинг Явка строго обязательна",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "06.10.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1214_ВТ_2_1"
         },
         {
             "group": "1214",
@@ -16674,5 +16710,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-05T07:43:07+00:00"
+    "generated_at": "2026-10-05T07:58:49+00:00"
 }

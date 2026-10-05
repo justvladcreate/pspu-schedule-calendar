@@ -5246,7 +5246,7 @@
                 "27.10.2026",
                 "03.11.2026"
             ],
-            "rooms": "II к.",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b9oBkeySWYjLsvCaBj6AIJzQ9xafdOYde3Dg7PBJcgk)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_1_3"
@@ -5308,7 +5308,7 @@
             "dates": [
                 "03.11.2026"
             ],
-            "rooms": "II к.",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/b9oBkeySWYjLsvCaBj6AIJzQ9xafdOYde3Dg7PBJcgk)",
             "comment": "",
             "position": 3,
             "event_id": "1222_ВТ_2_3"
@@ -16710,5 +16710,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-05T07:58:49+00:00"
+    "generated_at": "2026-10-05T12:31:09+00:00"
 }
