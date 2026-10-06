@@ -60,7 +60,7 @@ function isValidScheduleData(data) {
     return data && typeof data === 'object' && Array.isArray(data.events);
 }
 
-function loadSnapshotData() {
+function loadCachedData() {
     const events = loadSnapshot();
     if (!Array.isArray(events) || events.length === 0) return null;
 
@@ -70,36 +70,108 @@ function loadSnapshotData() {
     };
 }
 
-async function loadInitialData() {
+async function loadFreshData() {
     const online = navigator.onLine !== false;
 
     try {
-        const data = await loadData('data.json');
+        const data = await loadData('data.json', { timeout: 20000 });
         if (isValidScheduleData(data)) {
             return { data, usedFallback: false };
         }
-        console.warn('[init] data.json невалиден');
+        console.warn('[load] data.json невалиден');
     } catch (e) {
-        console.warn('[init] data.json недоступен:', e.message || e);
+        console.warn('[load] data.json недоступен:', e.message || e);
     }
 
     try {
-        const data = await loadData('old_data.json');
+        const data = await loadData('old_data.json', { timeout: 20000 });
         if (isValidScheduleData(data)) {
             return { data, usedFallback: online };
         }
-        console.warn('[init] old_data.json невалиден');
+        console.warn('[load] old_data.json невалиден');
     } catch (e) {
-        console.warn('[init] old_data.json недоступен:', e.message || e);
+        console.warn('[load] old_data.json недоступен:', e.message || e);
     }
 
-    const snap = loadSnapshotData();
-    if (snap) {
-        console.info('[init] Использую локальный snapshot');
-        return { data: snap, usedFallback: online };
-    }
+    return null;
+}
 
-    return { data: null, usedFallback: online };
+function applyDataToState(data, usedFallback) {
+    state.currentData = data;
+    state.displayedIso = data.generated_at || state.displayedIso;
+    state.allEvents = expandEvents(data.events || []);
+    state.fallbackActive = !!usedFallback;
+
+    updateUpdatedLabel(state.displayedIso);
+    updateOnlineStatus();
+}
+
+function rebuildGroups() {
+    const groups = new Set();
+    const teachers = new Set();
+    for (const ev of state.allEvents) {
+        if (ev.group) groups.add(ev.group);
+        (ev.teachers || []).forEach(t => teachers.add(t));
+    }
+    state.groups = [...groups].sort();
+    state.teachers = [...teachers].sort();
+
+    for (const g of [...state.selectedGroups]) {
+        if (!state.groups.includes(g)) state.selectedGroups.delete(g);
+    }
+    for (const t of [...state.selectedTeachers]) {
+        if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
+    }
+    saveSetToStorage('schedule-selected-groups', state.selectedGroups);
+    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
+}
+
+/**
+ * Индикатор «Обновление…»:
+ *   • показывается с задержкой 400 мс — если данные пришли раньше,
+ *     пользователь вообще ничего не увидит (никаких миганий);
+ *   • перед показом выставляем [hidden]=false, потом в следующем
+ *     кадре добавляем .is-visible — так срабатывает CSS-переход.
+ */
+let updatingHintTimer = null;
+
+function showUpdatingHint() {
+    const el = document.getElementById('updatingHint');
+    if (!el) return;
+
+    if (updatingHintTimer) clearTimeout(updatingHintTimer);
+    updatingHintTimer = setTimeout(() => {
+        updatingHintTimer = null;
+        el.hidden = false;
+        requestAnimationFrame(() => el.classList.add('is-visible'));
+    }, 400);
+}
+
+function hideUpdatingHint() {
+    const el = document.getElementById('updatingHint');
+    if (!el) return;
+
+    if (updatingHintTimer) {
+        clearTimeout(updatingHintTimer);
+        updatingHintTimer = null;
+    }
+    el.classList.remove('is-visible');
+
+    // Даём анимации доиграть, потом прячем совсем
+    setTimeout(() => {
+        if (!el.classList.contains('is-visible')) el.hidden = true;
+    }, 200);
+}
+
+function showLoadingState() {
+    const cal = document.getElementById('calendar');
+    cal.innerHTML = `
+        <div class="empty-state empty-state--loading">
+            <div class="empty-state-spinner" aria-hidden="true"></div>
+            <p class="empty-state-title">Загрузка расписания…</p>
+            <p class="empty-state-hint">Это может занять несколько секунд</p>
+        </div>
+    `;
 }
 
 function showNoDataState() {
@@ -135,112 +207,11 @@ function resetToToday() {
  *  init
  * ============================================================ */
 
-async function init() {
-    stripReloadMarker();
+/* ============================================================
+ *  UI, независимый от данных
+ * ============================================================ */
 
-    initTheme();
-
-    state.displayedIso = loadGeneratedAt();
-
-    applyUrlContext();
-
-    updateViewButton();
-
-    setupMoreMenu();       // ← сначала layout, чтобы online.js знал раскладку
-    setupOnlineStatus();
-
-    let loaded;
-    try {
-        loaded = await loadInitialData();
-    } catch (e) {
-        showFatalError(e.message || String(e));
-        return;
-    }
-
-    if (!loaded.data) {
-        state.fallbackActive = loaded.usedFallback;
-        state.urlContext = false;
-        state.urlRaw     = null;
-        state.urlEventId = null;
-        showNoDataState();
-        updateOnlineStatus();
-        setupShareButton();
-        setupUrlContextBanner();
-        registerServiceWorker();
-        return;
-    }
-
-    state.fallbackActive = loaded.usedFallback;
-    state.currentData = loaded.data;
-    state.displayedIso = loaded.data.generated_at || state.displayedIso;
-    state.allEvents = expandEvents(loaded.data.events || []);
-    updateUpdatedLabel(state.displayedIso);
-    updateOnlineStatus();
-
-    const savedColWidth = loadDayColWidth();
-    if (savedColWidth) {
-        document.documentElement.style.setProperty('--m-day-col', savedColWidth + 'px');
-    }
-
-    const savedGenAt = loadGeneratedAt();
-    const currentGenAt = loaded.data.generated_at;
-
-    if (currentGenAt) {
-        saveGeneratedAt(currentGenAt);
-    }
-
-    if (state.fallbackActive) {
-        if (!state.urlContext) resetToToday();
-    } else {
-        const isFirstVisit = !savedGenAt;
-        const hasChanged = savedGenAt && savedGenAt !== currentGenAt;
-
-        if (!state.urlContext && (isFirstVisit || hasChanged)) {
-            resetToToday();
-            localStorage.removeItem('schedule-scroll-week');
-            localStorage.removeItem('schedule-scroll-day');
-        }
-
-        const oldSnapshot = loadSnapshot();
-        if (oldSnapshot) {
-            const changes = compareEvents(oldSnapshot, loaded.data.events || []);
-            if (changes.length > 0) {
-                state.pendingChanges = sortChanges(changes);
-                savePendingChanges(state.pendingChanges);
-            }
-        }
-
-        saveSnapshot(loaded.data.events || []);
-    }
-
-    const groups = new Set();
-    const teachers = new Set();
-    for (const ev of state.allEvents) {
-        if (ev.group) groups.add(ev.group);
-        (ev.teachers || []).forEach(t => teachers.add(t));
-    }
-    state.groups = [...groups].sort();
-    state.teachers = [...teachers].sort();
-
-    for (const g of [...state.selectedGroups]) {
-        if (!state.groups.includes(g)) state.selectedGroups.delete(g);
-    }
-    for (const t of [...state.selectedTeachers]) {
-        if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
-    }
-    saveSetToStorage('schedule-selected-groups', state.selectedGroups);
-    saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
-
-    const urlResult = resolveUrlContext();
-    if (urlResult === 'none') {
-        state.urlContext = false;
-        updateViewButton();
-        setTimeout(() => showToast('Ссылка недействительна или устарела'), 300);
-    }
-
-    applyFilters();
-    setupUnifiedFilter();
-    setupFavoritesButton();
+function setupAllUI() {
     const exportModal = setupExportModal();
     document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
 
@@ -315,21 +286,153 @@ async function init() {
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
 
-    if (!state.fallbackActive) {
-        updateBannerApi.refresh();
-    }
-
-    render();
+    setupUnifiedFilter();
+    setupFavoritesButton();
 
     setupShareButton();
     setupUrlContextBanner();
-    openUrlContextEvent();
 
     document.addEventListener('click', () => {
         disarmUrlContext();
     }, true);
 
     setInterval(updateOnlineStatus, 60 * 1000);
+}
+
+/* ============================================================
+ *  Пост-обработка после того, как данные уже в state
+ * ============================================================ */
+
+function finalizeWithData() {
+    const currentEvents = (state.currentData && state.currentData.events) || [];
+
+    // Снимок и сравнение — только когда мы не в fallback
+    if (!state.fallbackActive) {
+        const oldSnapshot = loadSnapshot();
+        if (oldSnapshot && !state.urlContext) {
+            const changes = compareEvents(oldSnapshot, currentEvents);
+            if (changes.length > 0) {
+                state.pendingChanges = sortChanges(changes);
+                savePendingChanges(state.pendingChanges);
+            }
+        }
+        saveSnapshot(currentEvents);
+        if (state.displayedIso) saveGeneratedAt(state.displayedIso);
+    }
+
+    // Ширина колонки дня
+    const savedColWidth = loadDayColWidth();
+    if (savedColWidth) {
+        document.documentElement.style.setProperty('--m-day-col', savedColWidth + 'px');
+    }
+
+    // Применяем фильтры к свежим данным
+    applyFilters();
+    updateTriggerLabel();
+    updateCounter();
+
+    // Баннер изменений
+    if (!state.fallbackActive && updateBannerApi) {
+        updateBannerApi.refresh();
+    }
+
+    render();
+
+    // Баннер «вы смотрите по ссылке» (мог обновиться после resolveUrlContext)
+    setupUrlContextBanner();
+
+    // Открыть попап события, если пришли по deep-link
+    openUrlContextEvent();
+}
+
+/* ============================================================
+ *  init
+ * ============================================================ */
+
+async function init() {
+    stripReloadMarker();
+    initTheme();
+
+    state.displayedIso = loadGeneratedAt();
+    applyUrlContext();
+    updateViewButton();
+    setupMoreMenu();
+    setupOnlineStatus();
+
+    // Настраиваем UI — независимо от того, есть ли уже данные
+    setupAllUI();
+
+    const cached = loadCachedData();
+
+    if (cached) {
+        // === Мгновенный старт с кэша ===
+        const wasFirstVisit = !state.displayedIso;
+
+        applyDataToState(cached, false);
+        rebuildGroups();
+
+        const urlResult = resolveUrlContext();
+        if (urlResult === 'none') {
+            state.urlContext = false;
+            updateViewButton();
+            setTimeout(() => showToast('Ссылка недействительна или устарела'), 300);
+        }
+
+        if (!state.urlContext && wasFirstVisit) {
+            resetToToday();
+        }
+
+        finalizeWithData();
+
+        // Фоновое обновление — только если сеть вроде как есть
+        if (navigator.onLine !== false) {
+            fetchAndApply({ showIndicator: true }).then(result => {
+                if (!result.ok) {
+                    state.fallbackActive = true;
+                    updateOnlineStatus();
+                }
+            });
+        }
+    } else {
+        // === Холодный старт: нет кэша — спиннер в календаре, блокирующий fetch ===
+        showLoadingState();
+
+        let loaded = null;
+        try {
+            loaded = await loadFreshData();
+        } catch (e) {
+            console.warn('[init] load failed:', e);
+        }
+
+        if (!loaded || !loaded.data) {
+            state.fallbackActive = navigator.onLine !== false;
+            state.urlContext = false;
+            state.urlRaw     = null;
+            state.urlEventId = null;
+            showNoDataState();
+            updateOnlineStatus();
+            registerServiceWorker();
+            return;
+        }
+
+        applyDataToState(loaded.data, loaded.usedFallback);
+        rebuildGroups();
+
+        const urlResult = resolveUrlContext();
+        if (urlResult === 'none') {
+            state.urlContext = false;
+            updateViewButton();
+            setTimeout(() => showToast('Ссылка недействительна или устарела'), 300);
+        }
+
+        if (!state.urlContext) {
+            resetToToday();
+            localStorage.removeItem('schedule-scroll-week');
+            localStorage.removeItem('schedule-scroll-day');
+        }
+
+        finalizeWithData();
+    }
 
     registerServiceWorker();
 }
@@ -476,44 +579,68 @@ function registerServiceWorker() {
 
 const UPDATE_INTERVAL = 30 * 60 * 1000;
 
-async function checkForUpdates() {
-    if (state.fallbackActive) return;
+/**
+ * Загружает свежие данные и, если они отличаются от текущих,
+ * обновляет state и перерисовывает.
+ *
+ * @param {Object}  [opts]
+ * @param {boolean} [opts.showIndicator=false] — показывать ли «Обновление…»
+ * @returns {Promise<{ok: boolean, changed?: boolean, count?: number, reason?: string}>}
+ */
+async function fetchAndApply({ showIndicator = false } = {}) {
+    if (showIndicator) showUpdatingHint();
 
-    let fresh;
     try {
-        const resp = await fetch('data.json?t=' + Date.now());
-        if (!resp.ok) return;
-        fresh = await resp.json();
+        const fresh = await loadFreshData();
+        if (!fresh) {
+            return { ok: false, reason: 'no data' };
+        }
+
+        const incoming = fresh.data;
+
+        if (incoming.generated_at === state.displayedIso) {
+            return { ok: true, changed: false };
+        }
+
+        const oldSnapshot = loadSnapshot();
+        const changes = oldSnapshot && !state.urlContext
+            ? compareEvents(oldSnapshot, incoming.events || [])
+            : [];
+
+        state.currentData = incoming;
+        state.allEvents = expandEvents(incoming.events || []);
+        state.displayedIso = incoming.generated_at;
+        state.fallbackActive = !!fresh.usedFallback;
+
+        updateUpdatedLabel(state.displayedIso);
+        updateOnlineStatus();
+        saveGeneratedAt(state.displayedIso);
+
+        rebuildGroups();
+        applyFilters();
+        updateTriggerLabel();
+        updateCounter();
+        render();
+        saveSnapshot(incoming.events || []);
+
+        if (changes.length > 0) {
+            state.pendingChanges = sortChanges(changes);
+            savePendingChanges(state.pendingChanges);
+            if (updateBannerApi) updateBannerApi.refresh();
+        }
+
+        return { ok: true, changed: true, count: changes.length };
     } catch (e) {
-        console.warn('[auto-update] fetch failed:', e);
-        return;
+        console.warn('[refresh] failed:', e);
+        return { ok: false, reason: e.message || String(e) };
+    } finally {
+        if (showIndicator) hideUpdatingHint();
     }
-
-    if (!isValidScheduleData(fresh)) return;
-    if (fresh.generated_at === state.displayedIso) return;
-
-    const oldSnapshot = loadSnapshot();
-    const changes = oldSnapshot ? compareEvents(oldSnapshot, fresh.events || []) : [];
-
-    state.currentData = fresh;
-    state.allEvents = expandEvents(fresh.events || []);
-    state.displayedIso = fresh.generated_at;
-    updateUpdatedLabel(fresh.generated_at);
-    saveGeneratedAt(fresh.generated_at);
-    applyFilters();
-    render();
-    saveSnapshot(fresh.events || []);
-
-    if (changes.length === 0) return;
-
-    state.pendingChanges = sortChanges(changes);
-    savePendingChanges(state.pendingChanges);
-    if (updateBannerApi) updateBannerApi.refresh();
 }
 
-window.__checkForUpdates = checkForUpdates;
+window.__checkForUpdates = fetchAndApply;
 
-setInterval(checkForUpdates, UPDATE_INTERVAL);
+setInterval(() => fetchAndApply({ showIndicator: false }), UPDATE_INTERVAL);
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

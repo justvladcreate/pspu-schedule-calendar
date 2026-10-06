@@ -3,32 +3,40 @@
 import { PAIR_MINUTES } from './config.js';
 import { pad, addMinutes } from './utils.js';
 
-export async function loadData(url = 'data.json') {
+export async function loadData(url = 'data.json', { timeout = 20000 } = {}) {
     const bust = localStorage.getItem('schedule-cache-bust') || '0';
-    // cache: 'no-store' — не даём браузеру отдать data.json из своего
-    // HTTP-кэша. На python -m http.server (нет Cache-Control) это
-    // критично: иначе правки в data.json не долетают до страницы.
-    const resp = await fetch(`${url}?v=${bust}`, { cache: 'no-store' });
 
-    if (!resp.ok) {
-        throw new Error(`HTTP ${resp.status}`);
-    }
-
-    let text;
-    try {
-        text = await resp.text();
-    } catch {
-        throw new Error('не удалось прочитать ответ');
-    }
-
-    if (!text || !text.trim()) {
-        throw new Error('пустой ответ');
-    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
 
     try {
-        return JSON.parse(text);
-    } catch {
-        throw new Error('некорректный JSON');
+        const resp = await fetch(`${url}?v=${bust}`, {
+            cache: 'no-store',
+            signal: controller.signal,
+        });
+
+        if (!resp.ok) {
+            throw new Error(`HTTP ${resp.status}`);
+        }
+
+        let text;
+        try {
+            text = await resp.text();
+        } catch {
+            throw new Error('не удалось прочитать ответ');
+        }
+
+        if (!text || !text.trim()) {
+            throw new Error('пустой ответ');
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            throw new Error('некорректный JSON');
+        }
+    } finally {
+        clearTimeout(timer);
     }
 }
 

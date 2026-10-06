@@ -254,12 +254,81 @@
     border-color: var(--grid-line-strong);
 }
 .date-label:hover::after { border-color: var(--text); }
-
 .updated-wrap {
     position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* ============================================================
+ *  «Обновление…» — тихий индикатор фоновой загрузки
+ *
+ *  position: fixed — не участвует в flex-раскладке тулбара,
+ *  поэтому его появление/исчезновение не двигает ни одну кнопку.
+ *  Живёт в правом нижнем углу, как мини-тост о синхронизации.
+ * ============================================================ */
+
+.updating-hint {
+    position: fixed;
+    right: 16px;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    z-index: 200;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    white-space: nowrap;
+    line-height: 1;
+    user-select: none;
+    pointer-events: none;
+
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+.updating-hint[hidden] { display: none; }
+.updating-hint.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.updating-hint-spinner {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: updating-spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes updating-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .updating-hint-spinner { animation-duration: 2s; }
+    .updating-hint { transition: none; }
+}
+
+@media (max-width: 700px) {
+    .updating-hint {
+        right: 12px;
+        bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+        padding: 4px 10px;
+        gap: 5px;
+        font-size: 10.5px;
+    }
+    .updating-hint-spinner { width: 9px; height: 9px; }
 }
 
 .updated-btn {

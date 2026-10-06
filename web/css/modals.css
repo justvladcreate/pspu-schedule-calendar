@@ -267,6 +267,24 @@
     font-size: 14px;
 }
 
+.empty-state-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: empty-state-spin 0.8s linear infinite;
+    margin-bottom: 4px;
+}
+
+@keyframes empty-state-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .empty-state-spinner { animation-duration: 2s; }
+}
+
 /* Внутри календаря пустое состояние растянуто на всю область.
    flex-direction: column — чтобы несколько параграфов (title + hint)
    вставали друг под друга, а не в ряд. */
