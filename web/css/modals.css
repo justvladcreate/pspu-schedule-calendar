@@ -738,8 +738,11 @@
         border-bottom-right-radius: 0;
         padding-bottom: env(safe-area-inset-bottom);
     }
-    /* Подложка на мобилке не видна — модалка занимает весь экран */
-    .modal-backdrop {
+    /* Только для «Оригинала»: на мобилке модалка занимает весь
+       экран, подложка не видна. Остальные модалки (оффлайн, readme,
+       изменения, экспорт, date picker) сохраняют полупрозрачный
+       чёрный backdrop. */
+    #originalModal.modal-backdrop {
         background: var(--surface);
     }
 }
