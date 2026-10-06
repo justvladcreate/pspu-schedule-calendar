@@ -657,3 +657,44 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+/* ============================================================
+ *  TOP PROGRESS — тонкая полоска загрузки вверху страницы
+ *
+ *  Показывается при любом сетевом запросе данных:
+ *    • холодный старт (нет кэша);
+ *    • фоновое обновление после показа кэша;
+ *    • pull-to-refresh.
+ *
+ *  Логика анимации — в main.js: start() / done().
+ *  Здесь только визуал: позиция, цвет, толщина.
+ * ============================================================ */
+
+.top-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    opacity: 1;
+    z-index: 10000;
+    pointer-events: none;
+    will-change: transform, opacity;
+    box-shadow:
+        0 0 6px color-mix(in srgb, var(--accent) 60%, transparent),
+        0 0 2px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.top-progress[hidden] { display: none; }
+
+@media (max-width: 900px) {
+    .top-progress { height: 2.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .top-progress {
+        box-shadow: none;
+    }
+}

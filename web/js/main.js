@@ -236,6 +236,110 @@ function flushPendingSyncBanner() {
     setTimeout(() => showSyncBanner(mode), 120);
 }
 
+/* ============================================================
+ *  TOP PROGRESS — тонкая полоска загрузки сверху
+ *
+ *  API: topProgressStart() / topProgressDone()
+ *
+ *  Логика роста:
+ *    • 0 → 10% мгновенно (мгновенный отклик на «начало»);
+ *    • 10% → 85% — плавно замедляясь, интервал 180 мс
+ *      (создаёт ощущение «работает, но не знает когда конец»);
+ *    • done() → 100% и fade-out за ~0.5 с.
+ *
+ *  Одновременные start/done не ломают друг друга: каждый start
+ *  отменяет старый таймер, done — тоже.
+ * ============================================================ */
+
+let topProgressEl       = null;
+let topProgressInterval = null;
+let topProgressHideTimer = null;
+let topProgressValue    = 0;
+
+function _topProgressEl() {
+    if (!topProgressEl) {
+        topProgressEl = document.getElementById('topProgress');
+    }
+    return topProgressEl;
+}
+
+function topProgressStart() {
+    const el = _topProgressEl();
+    if (!el) return;
+
+    // 1) Убиваем всё, что могло остаться с прошлого раза
+    if (topProgressInterval) {
+        clearInterval(topProgressInterval);
+        topProgressInterval = null;
+    }
+    if (topProgressHideTimer) {
+        clearTimeout(topProgressHideTimer);
+        topProgressHideTimer = null;
+    }
+
+    // 2) Показываем элемент и сбрасываем в 0
+    //    БЕЗ transition — чтобы рестарт был мгновенным и предсказуемым.
+    el.hidden = false;
+    el.style.transition = 'none';
+    el.style.transform  = 'scaleX(0)';
+    el.style.opacity    = '1';
+    topProgressValue    = 0;
+
+    // 3) Форсируем reflow — заставляем браузер «применить»
+    //    scaleX(0), прежде чем перейти к следующему значению.
+    //    Без этого шага два изменения стиля могут слиться в одно,
+    //    и анимации не будет вовсе (или будет резкий скачок).
+    void el.offsetWidth;
+
+    // 4) Мгновенный рывок до 10% — синхронно, без RAF.
+    //    RAF не срабатывает во фоновых вкладках и на некоторых
+    //    мобильных браузерах — именно из-за этого полоска
+    //    «не всегда появлялась».
+    el.style.transition = 'transform 0.25s ease-out';
+    topProgressValue     = 0.1;
+    el.style.transform   = 'scaleX(0.1)';
+
+    // 5) Дальше — медленный рост к 85% с асимптотическим замедлением
+    topProgressInterval = setInterval(() => {
+        if (topProgressValue >= 0.85) return;
+        topProgressValue += (0.85 - topProgressValue) * 0.08;
+        el.style.transform = `scaleX(${topProgressValue.toFixed(4)})`;
+    }, 180);
+}
+
+function topProgressDone() {
+    const el = _topProgressEl();
+    if (!el) return;
+
+    // 1) Останавливаем рост
+    if (topProgressInterval) {
+        clearInterval(topProgressInterval);
+        topProgressInterval = null;
+    }
+    if (topProgressHideTimer) {
+        clearTimeout(topProgressHideTimer);
+        topProgressHideTimer = null;
+    }
+
+    // 2) Форсируем reflow — чтобы transition точно сработал
+    //    от текущего значения, а не «слипся» с предыдущим.
+    void el.offsetWidth;
+
+    // 3) Догоняем до 100% и плавно прячем
+    el.style.transition =
+        'transform 0.25s ease-out, opacity 0.3s ease-out 0.2s';
+    el.style.transform = 'scaleX(1)';
+    el.style.opacity   = '0';
+
+    topProgressHideTimer = setTimeout(() => {
+        el.hidden = true;
+        el.style.transition = 'none';
+        el.style.transform  = 'scaleX(0)';
+        el.style.opacity    = '1';
+        topProgressHideTimer = null;
+    }, 600);
+}
+
 function showLoadingState() {
     const cal = document.getElementById('calendar');
 
@@ -514,6 +618,7 @@ async function init() {
     } else {
         // === Холодный старт: нет кэша — спиннер в календаре, блокирующий fetch ===
         showLoadingState();
+        topProgressStart();
 
         // Кэшируем ссылку на hint один раз — не дёргаем DOM на каждом тике
         const hintEl = document.querySelector(
@@ -536,6 +641,8 @@ async function init() {
         } catch (e) {
             console.warn('[init] load failed:', e);
         }
+
+        topProgressDone();
 
         if (!loaded || !loaded.data) {
             state.fallbackActive = navigator.onLine !== false;
@@ -722,11 +829,15 @@ const UPDATE_INTERVAL = 30 * 60 * 1000;
  */
 async function fetchAndApply({ showIndicator = false } = {}) {
     const online = navigator.onLine !== false;
+    const trackProgress = showIndicator && online;
 
     // Показываем loading только если онлайн: в оффлайне
     // кнопка «Обновлено» и так переключится в «Оффлайн»,
     // а баннер ошибки был бы лишним шумом.
-    if (showIndicator && online) showSyncBanner('loading');
+    if (trackProgress) {
+        showSyncBanner('loading');
+        topProgressStart();
+    }
 
     let result;
     try {
@@ -804,7 +915,8 @@ async function fetchAndApply({ showIndicator = false } = {}) {
     }
 
     // Финальное состояние баннера синхронизации
-    if (showIndicator && online) {
+    if (trackProgress) {
+        topProgressDone();
         if (result.ok) hideSyncBanner();
         else           showSyncBanner('error');
     }
