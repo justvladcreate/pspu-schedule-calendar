@@ -252,16 +252,18 @@
                 </svg>
                 <span id="updatedTime">—</span>
             </button>
-            <span class="updating-hint" id="updatingHint" hidden aria-live="polite">
-                <span class="updating-hint-spinner" aria-hidden="true"></span>
-                <span class="updating-hint-text">Обновление</span>
-            </span>
         </div>
         <div class="update-banner" id="updateBanner" role="button" tabindex="0" aria-label="Посмотреть изменения в расписании">
             <span class="update-banner-icon" aria-hidden="true">⟳</span>
             <span class="update-banner-text" id="updateBannerText">Изменения в расписании</span>
             <span class="update-banner-arrow" aria-hidden="true">→</span>
             <button class="update-banner-close" id="updateBannerClose" type="button" aria-label="Скрыть">✕</button>
+        </div>
+        <div class="sync-banner" id="syncBanner" role="status" aria-live="polite">
+            <span class="sync-banner-icon" aria-hidden="true"></span>
+            <span class="sync-banner-text" id="syncBannerText">Обновление…</span>
+            <button class="sync-banner-action" id="syncBannerAction" type="button" hidden>Повторить</button>
+            <button class="sync-banner-close" id="syncBannerClose" type="button" aria-label="Скрыть">✕</button>
         </div>
 
         <button class="btn btn-icon" id="moreBtn" type="button"

@@ -3,7 +3,7 @@
 import { PAIR_MINUTES } from './config.js';
 import { pad, addMinutes } from './utils.js';
 
-export async function loadData(url = 'data.json', { timeout = 20000 } = {}) {
+export async function loadData(url = 'data.json', { timeout = 30000 } = {}) {
     const bust = localStorage.getItem('schedule-cache-bust') || '0';
 
     const controller = new AbortController();

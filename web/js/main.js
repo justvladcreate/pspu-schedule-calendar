@@ -127,40 +127,97 @@ function rebuildGroups() {
 }
 
 /**
- * Индикатор «Обновление…»:
- *   • показывается с задержкой 400 мс — если данные пришли раньше,
- *     пользователь вообще ничего не увидит (никаких миганий);
- *   • перед показом выставляем [hidden]=false, потом в следующем
- *     кадре добавляем .is-visible — так срабатывает CSS-переход.
+ * Баннер синхронизации под тулбаром.
+ *
+ *   showSyncBanner('loading') — «Обновление…»
+ *   showSyncBanner('error')   — «Ошибка обновления» + кнопка «Повторить»
+ *   hideSyncBanner()          — скрыть
+ *
+ * Loading показывается с задержкой 400 мс: если данные пришли раньше,
+ * пользователь вообще ничего не увидит. Error — сразу.
+ *
+ * Если уже показан error и мы стартуем новую попытку —
+ * переключаемся на loading мгновенно (без задержки).
+ * Приоритет с update-banner: пока update-banner открыт, sync-banner
+ * скрывается через CSS-селектор — JS об этом не думает.
  */
-let updatingHintTimer = null;
+let syncBannerTimer = null;
+let syncBannerMode  = null;   // 'loading' | 'error' | null
+let pendingSyncMode = null;   // что показать, когда закроется update-banner
 
-function showUpdatingHint() {
-    const el = document.getElementById('updatingHint');
-    if (!el) return;
-
-    if (updatingHintTimer) clearTimeout(updatingHintTimer);
-    updatingHintTimer = setTimeout(() => {
-        updatingHintTimer = null;
-        el.hidden = false;
-        requestAnimationFrame(() => el.classList.add('is-visible'));
-    }, 400);
+function isUpdateBannerOpen() {
+    const el = document.getElementById('updateBanner');
+    return !!el && el.classList.contains('open');
 }
 
-function hideUpdatingHint() {
-    const el = document.getElementById('updatingHint');
+function showSyncBanner(mode) {
+    const el = document.getElementById('syncBanner');
     if (!el) return;
 
-    if (updatingHintTimer) {
-        clearTimeout(updatingHintTimer);
-        updatingHintTimer = null;
+    if (syncBannerTimer) {
+        clearTimeout(syncBannerTimer);
+        syncBannerTimer = null;
     }
-    el.classList.remove('is-visible');
 
-    // Даём анимации доиграть, потом прячем совсем
-    setTimeout(() => {
-        if (!el.classList.contains('is-visible')) el.hidden = true;
-    }, 200);
+    // Пока открыт update-banner (изменения в расписании) — они
+    // делят одну точку под тулбаром. Откладываем показ: как только
+    // пользователь закроет update-banner, покажем отложенное.
+    if (isUpdateBannerOpen()) {
+        pendingSyncMode = mode;
+        return;
+    }
+
+    // Уже показано то же состояние — не мигаем
+    if (syncBannerMode === mode && el.classList.contains('is-visible')) return;
+
+    const apply = () => {
+        syncBannerTimer = null;
+
+        el.classList.toggle('is-loading', mode === 'loading');
+        el.classList.toggle('is-error',   mode === 'error');
+
+        const text   = document.getElementById('syncBannerText');
+        const action = document.getElementById('syncBannerAction');
+
+        if (text)   text.textContent = (mode === 'error') ? 'Ошибка обновления' : 'Обновление…';
+        if (action) action.hidden    = (mode !== 'error');
+
+        syncBannerMode = mode;
+        el.classList.add('is-visible');
+    };
+
+    // Loading — с задержкой, если не идёт смена с error.
+    // Error — мгновенно.
+    if (mode === 'loading' && syncBannerMode !== 'error') {
+        syncBannerTimer = setTimeout(apply, 400);
+    } else {
+        apply();
+    }
+}
+
+function hideSyncBanner() {
+    const el = document.getElementById('syncBanner');
+    if (!el) return;
+
+    if (syncBannerTimer) {
+        clearTimeout(syncBannerTimer);
+        syncBannerTimer = null;
+    }
+    syncBannerMode = null;
+    pendingSyncMode = null;
+    el.classList.remove('is-visible', 'is-loading', 'is-error');
+}
+
+/**
+ * Вызывается при закрытии update-banner (крестик или клик).
+ * Если во время показа update-banner мы отложили sync — показываем.
+ */
+function flushPendingSyncBanner() {
+    if (pendingSyncMode === null) return;
+    const mode = pendingSyncMode;
+    pendingSyncMode = null;
+    // Небольшая задержка, чтобы не мигало в момент анимации
+    setTimeout(() => showSyncBanner(mode), 120);
 }
 
 function showLoadingState() {
@@ -289,12 +346,47 @@ function setupAllUI() {
     setupUnifiedFilter();
     setupFavoritesButton();
 
+    // Когда пользователь закрывает баннер изменений — показываем
+    // отложенный баннер синхронизации (если он был отложен).
+    const updateBannerClose = document.getElementById('updateBannerClose');
+    if (updateBannerClose) {
+        updateBannerClose.addEventListener('click', () => {
+            setTimeout(flushPendingSyncBanner, 60);
+        });
+    }
+    const updateBannerEl = document.getElementById('updateBanner');
+    if (updateBannerEl) {
+        // Клик по баннеру (не по крестику) тоже закрывает его
+        updateBannerEl.addEventListener('click', (e) => {
+            if (e.target.closest('#updateBannerClose')) return;
+            setTimeout(flushPendingSyncBanner, 60);
+        });
+    }
     setupShareButton();
     setupUrlContextBanner();
 
     document.addEventListener('click', () => {
         disarmUrlContext();
     }, true);
+
+    // Кнопки баннера синхронизации
+    const syncAction = document.getElementById('syncBannerAction');
+    if (syncAction) {
+        syncAction.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Новая попытка. showSyncBanner('loading') сам
+            // переключит текущий error → loading мгновенно.
+            fetchAndApply({ showIndicator: true });
+        });
+    }
+
+    const syncClose = document.getElementById('syncBannerClose');
+    if (syncClose) {
+        syncClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hideSyncBanner();
+        });
+    }
 
     setInterval(updateOnlineStatus, 60 * 1000);
 }
@@ -588,54 +680,95 @@ const UPDATE_INTERVAL = 30 * 60 * 1000;
  * @returns {Promise<{ok: boolean, changed?: boolean, count?: number, reason?: string}>}
  */
 async function fetchAndApply({ showIndicator = false } = {}) {
-    if (showIndicator) showUpdatingHint();
+    const online = navigator.onLine !== false;
 
+    // Показываем loading только если онлайн: в оффлайне
+    // кнопка «Обновлено» и так переключится в «Оффлайн»,
+    // а баннер ошибки был бы лишним шумом.
+    if (showIndicator && online) showSyncBanner('loading');
+
+    let result;
     try {
         const fresh = await loadFreshData();
+
         if (!fresh) {
-            return { ok: false, reason: 'no data' };
+            // Данных не получили. Если онлайн — это ошибка сети/сервера,
+            // выставляем fallbackActive, чтобы кнопка стала «Ошибка · обновить».
+            if (online) {
+                state.fallbackActive = true;
+                updateOnlineStatus();
+            }
+            result = { ok: false, reason: 'no data' };
+        } else {
+            const incoming = fresh.data;
+            const usedFallback = !!fresh.usedFallback;
+
+            // state.fallbackActive управляет видом кнопки «Обновлено/Ошибка».
+            state.fallbackActive = usedFallback;
+            updateOnlineStatus();
+
+            // ВАЖНО: fallback (данные из old_data.json) — это тоже
+            // «неуспех» с точки зрения баннера. Пользователь должен
+            // видеть, что свежая версия не пришла, даже если старые
+            // данные успешно подгружены.
+            if (usedFallback) {
+                result = {
+                    ok: false,
+                    reason: 'fallback',
+                    changed: false,
+                };
+                // НЕ трогаем state.currentData и не сохраняем снимок —
+                // оставляем базу такой, какой её видел пользователь.
+                // Fallback-копия не должна перетирать UI.
+                // ⚠️ Без return: управление должно дойти до финального
+                // блока, который переключит баннер loading → error.
+            } else if (incoming.generated_at === state.displayedIso) {
+                result = { ok: true, changed: false };
+            } else {
+                const oldSnapshot = loadSnapshot();
+                const changes = oldSnapshot && !state.urlContext
+                    ? compareEvents(oldSnapshot, incoming.events || [])
+                    : [];
+
+                state.currentData = incoming;
+                state.allEvents = expandEvents(incoming.events || []);
+                state.displayedIso = incoming.generated_at;
+
+                updateUpdatedLabel(state.displayedIso);
+                saveGeneratedAt(state.displayedIso);
+
+                rebuildGroups();
+                applyFilters();
+                updateTriggerLabel();
+                updateCounter();
+                render();
+                saveSnapshot(incoming.events || []);
+
+                if (changes.length > 0) {
+                    state.pendingChanges = sortChanges(changes);
+                    savePendingChanges(state.pendingChanges);
+                    if (updateBannerApi) updateBannerApi.refresh();
+                }
+
+                result = { ok: true, changed: true, count: changes.length };
+            }
         }
-
-        const incoming = fresh.data;
-
-        if (incoming.generated_at === state.displayedIso) {
-            return { ok: true, changed: false };
-        }
-
-        const oldSnapshot = loadSnapshot();
-        const changes = oldSnapshot && !state.urlContext
-            ? compareEvents(oldSnapshot, incoming.events || [])
-            : [];
-
-        state.currentData = incoming;
-        state.allEvents = expandEvents(incoming.events || []);
-        state.displayedIso = incoming.generated_at;
-        state.fallbackActive = !!fresh.usedFallback;
-
-        updateUpdatedLabel(state.displayedIso);
-        updateOnlineStatus();
-        saveGeneratedAt(state.displayedIso);
-
-        rebuildGroups();
-        applyFilters();
-        updateTriggerLabel();
-        updateCounter();
-        render();
-        saveSnapshot(incoming.events || []);
-
-        if (changes.length > 0) {
-            state.pendingChanges = sortChanges(changes);
-            savePendingChanges(state.pendingChanges);
-            if (updateBannerApi) updateBannerApi.refresh();
-        }
-
-        return { ok: true, changed: true, count: changes.length };
     } catch (e) {
         console.warn('[refresh] failed:', e);
-        return { ok: false, reason: e.message || String(e) };
-    } finally {
-        if (showIndicator) hideUpdatingHint();
+        if (online) {
+            state.fallbackActive = true;
+            updateOnlineStatus();
+        }
+        result = { ok: false, reason: e.message || String(e) };
     }
+
+    // Финальное состояние баннера синхронизации
+    if (showIndicator && online) {
+        if (result.ok) hideSyncBanner();
+        else           showSyncBanner('error');
+    }
+
+    return result;
 }
 
 window.__checkForUpdates = fetchAndApply;
