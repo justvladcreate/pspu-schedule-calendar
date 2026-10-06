@@ -70,11 +70,25 @@ function loadCachedData() {
     };
 }
 
-async function loadFreshData() {
+async function loadFreshData({ onProgress = null } = {}) {
     const online = navigator.onLine !== false;
 
+    // Обёртка: если пришёл свежий source — прогресс без изменений,
+    // если fallback — сбрасываем в «Загрузка резервной копии…».
+    let currentSource = 'main';
+    const safeProgress = typeof onProgress === 'function'
+        ? (pct) => {
+            if (currentSource === 'fallback' && pct < 50) {
+                // Первый тик после сброса — переименовываем
+                onProgress(pct, { fallback: true });
+            } else {
+                onProgress(pct, { fallback: currentSource === 'fallback' });
+            }
+        }
+        : null;
+
     try {
-        const data = await loadData('data.json', { timeout: 20000 });
+        const data = await loadData('data.json', { onProgress: safeProgress });
         if (isValidScheduleData(data)) {
             return { data, usedFallback: false };
         }
@@ -83,8 +97,10 @@ async function loadFreshData() {
         console.warn('[load] data.json недоступен:', e.message || e);
     }
 
+    currentSource = 'fallback';
+
     try {
-        const data = await loadData('old_data.json', { timeout: 20000 });
+        const data = await loadData('old_data.json', { onProgress: safeProgress });
         if (isValidScheduleData(data)) {
             return { data, usedFallback: online };
         }
@@ -222,11 +238,21 @@ function flushPendingSyncBanner() {
 
 function showLoadingState() {
     const cal = document.getElementById('calendar');
+
+    const conn = navigator.connection
+              || navigator.mozConnection
+              || navigator.webkitConnection;
+    const slow = conn && ['slow-2g', '2g'].includes(conn.effectiveType);
+
     cal.innerHTML = `
         <div class="empty-state empty-state--loading">
             <div class="empty-state-spinner" aria-hidden="true"></div>
             <p class="empty-state-title">Загрузка расписания…</p>
-            <p class="empty-state-hint">Это может занять несколько секунд</p>
+            <p class="empty-state-hint">
+                ${slow
+                    ? 'Медленное соединение — это может занять до минуты'
+                    : 'Это может занять несколько секунд'}
+            </p>
         </div>
     `;
 }
@@ -489,9 +515,24 @@ async function init() {
         // === Холодный старт: нет кэша — спиннер в календаре, блокирующий fetch ===
         showLoadingState();
 
+        // Кэшируем ссылку на hint один раз — не дёргаем DOM на каждом тике
+        const hintEl = document.querySelector(
+            '.empty-state--loading .empty-state-hint'
+        );
+
         let loaded = null;
         try {
-            loaded = await loadFreshData();
+            loaded = await loadFreshData({
+                onProgress: (pct, { fallback } = {}) => {
+                    if (!hintEl || !hintEl.isConnected) return;
+
+                    if (fallback) {
+                        hintEl.textContent = `Резервная копия · Загружено ${pct}%`;
+                    } else {
+                        hintEl.textContent = `Загружено ${pct}%`;
+                    }
+                },
+            });
         } catch (e) {
             console.warn('[init] load failed:', e);
         }
