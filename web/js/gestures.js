@@ -53,7 +53,9 @@ export function setupCalendarGestures() {
     let pinchStartDist = 0;
     let pinchStartCol  = 0;
 
-    const SWIPE_THRESHOLD = 60;
+    // Порог — доля от ширины экрана, но не меньше 100px,
+    // чтобы на узких устройствах не приходилось возить через пол-экрана.
+    const SWIPE_THRESHOLD = Math.max(100, Math.min(160, window.innerWidth * 0.22));
     let startX = 0, startY = 0, tracking = false;
     let startTarget = null;
 
