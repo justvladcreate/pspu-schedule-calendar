@@ -1,6 +1,10 @@
 'use strict';
 
-const CACHE = 'pspu-schedule-v60';
+/* ВАЖНО: реальная версия подставляется в CI на этапе сборки
+   (см. tools/bump-sw.mjs + .github/workflows/deploy-pages.yml).
+   В репозитории всегда должен лежать этот плейсхолдер —
+   так коммиты остаются чистыми и без гонок. */
+const CACHE = 'pspu-schedule-dev00000';
 
 const STATIC_ASSETS = [
   './',
