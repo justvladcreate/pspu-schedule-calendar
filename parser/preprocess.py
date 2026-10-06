@@ -66,22 +66,38 @@ def _normalize_spaces(text: str) -> str:
     text = text.replace('\x00', '.')
     return text
 
-def normalize_rooms(line: str, url: str | None = None) -> List[str]:
-    """
-    Нормализует строку с аудиториями в список уникальных аудиторий.
+_JUNK_ROOMS = {
+    "-", "—", "–",
+    "нет",
+    "n/a", "n a",
+    "н/д", "н д",
+    "n\\a",
+}
 
-    Особенности:
-      • Разбивает по переносам строк и запятым.
-      • Убирает кавычки.
-      • Схлопывает множественные пробелы, убирает слеши.
-      • "дистанционно <что угодно>" → "дистанционно онлайн"
-        или "дистанционно СФЕРУМ".
-      • Убирает дубликаты, сохраняя порядок первого появления.
-      • Мусорные значения ("-", "нет", "n/a", "н/д") — отбрасываются.
-      • Если передан url — markdown-ссылка [дистанционно онлайн](url)
-        привязывается ТОЛЬКО к первой дистанционной записи.
-        Если дистанционной записи нет, url игнорируется.
-    """
+
+def clean_room(room: str) -> str:
+    """Очистка одной записи аудитории. Возвращает "" для мусора."""
+    if not room:
+        return ""
+
+    room = str(room).replace('\\', ' ').replace('/', ' ')
+    room = re.sub(r'\s+', ' ', room).strip()
+    if not room:
+        return ""
+
+    low = room.lower()
+    if low in _JUNK_ROOMS:
+        return ""
+    if low.startswith("дистанционно"):
+        return "дистанционно онлайн"
+
+    room = re.sub(r'\b([IVX]+)\s*к\.\s*', r'\1 к. ', room)
+    room = re.sub(r'(?<=[А-Я])-(?=\d)', '', room, flags=re.IGNORECASE)
+    return room.strip()
+
+
+def normalize_rooms(line: str, url: str | None = None) -> List[str]:
+    """Разбивает строку на части по \\n и , и чистит каждую через clean_room."""
     if line is None:
         return []
 
@@ -89,52 +105,19 @@ def normalize_rooms(line: str, url: str | None = None) -> List[str]:
     if not text.strip():
         return []
 
-    # 1. Убираем кавычки
     for ch in ('"', '«', '»', '“', '”'):
         text = text.replace(ch, ' ')
 
-    # 2. Разбиваем по переносам строк и запятым (СЛЕШИ пока не трогаем)
     raw_parts = re.split(r'[\n\r,]+', text)
 
-    JUNK = {
-        "-", "—", "–",
-        "нет",
-        "n/a", "n a",
-        "н/д", "н д",
-        "n\\a", "n a",
-    }
-
-    # 3. Первый проход: чистим и дедуплицируем БЕЗ url
     rooms_clean: List[str] = []
     seen: set = set()
-
     for part in raw_parts:
-        room = re.sub(r'\s+', ' ', part).strip()
-        if not room:
-            continue
-
-        low = room.lower()
-        if low in JUNK:
-            continue
-
-        room = room.replace('\\', ' ').replace('/', ' ')
-        room = re.sub(r'\s+', ' ', room).strip()
-        if not room:
-            continue
-
-        low = room.lower()
-
-        if low.startswith('дистанционно'):
-            room = "дистанционно онлайн"
-        else:
-            room = re.sub(r'\b([IVX]+)\s*к\.\s*', r'\1 к. ', room)
-            room = re.sub(r'\s+', ' ', room).strip()
-
+        room = clean_room(part)
         if room and room not in seen:
             seen.add(room)
             rooms_clean.append(room)
 
-    # 4. Второй проход: привязываем url ТОЛЬКО к первой дистанционной записи
     if url:
         for i, r in enumerate(rooms_clean):
             if r.startswith("дистанционно"):

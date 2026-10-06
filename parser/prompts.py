@@ -48,7 +48,7 @@ Do not change the order of branches from order of appearance in the text. Preser
 
 2. Extract the time (only if present). There are two cases:
 a) Time at the very start of the input element, before any date. It applies to every branch derived from that element.
-b) Time attached to one specific date inside the element — e.g. 11.09 в 13.30 <discipline> or 11.09 в 13.30 <discipline> ... <other dates> <other discipline>. In this case the time belongs only to that branch. All other branches of the same element must keep - in time_start and time_end unless they have their own explicit time.
+b) Time attached to one specific date inside the element — e.g. 11.09 в 13.30 <discipline> or в 13.30 11.09 <discipline> ... <other dates> <other discipline>. In this case the time belongs only to that branch. All other branches of the same element must keep - in time_start and time_end unless they have their own explicit time.
 
 3. Extract the dates for each branch (only if present)
 Within a branch, collect all date expressions from the start until the discipline name begins. Dates are written as:
@@ -142,12 +142,12 @@ Output:
 
 Example 7 – Time variations
 Input:
-[1] 11.09 в 13.30 Современная образовательная среда (Технопарк) преп. Терехина А.В. 18.09 Культурно-просветительский практикум доц. Порозов В.А. 9.10, 16.10 Основы медицинских знаний (лек.) доц. Отавина М.Л.
+[1] 11.09 Современная образовательная среда (Технопарк) преп. Терехина А.В. 18.09 в 11.00 Культурно-просветительский практикум доц. Порозов В.А. в 13.30 9.10, 16.10 Основы медицинских знаний (лек.) доц. Отавина М.Л.
 
 Output:
-[1];-;13.30;-;11.09;Современная образовательная среда (Технопарк);-;-;преп. Терехина А.В.;-
-[1];-;-;-;18.09;Культурно-просветительский практикум;-;-;доц. Порозов В.А.;-
-[1];-;-;-;9.10, 16.10;Основы медицинских знаний;лек.;-;доц. Отавина М.Л.;-
+[1];-;-;-;11.09;Современная образовательная среда (Технопарк);-;-;преп. Терехина А.В.;-
+[1];-;11.00;-;18.09;Культурно-просветительский практикум;-;-;доц. Порозов В.А.;-
+[1];-;13.30;-;9.10, 16.10;Основы медицинских знаний;лек.;-;доц. Отавина М.Л.;-
 
 Apply these instructions to every input string you receive.
 

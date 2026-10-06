@@ -34,6 +34,8 @@ Type-hint и date-hint можно комбинировать:
 import re
 from typing import Optional
 
+from parser.preprocess import clean_room
+
 
 # ========================================================================
 # TYPE-HINT
@@ -167,25 +169,7 @@ def _date_sort_key(md: str) -> tuple[int, int]:
 # ========================================================================
 # НОРМАЛИЗАЦИЯ КОМНАТЫ
 # ========================================================================
-def _clean_room(room: str) -> str:
-    room = room.replace('\\', ' ').replace('/', ' ')
-    room = re.sub(r'\s+', ' ', room).strip()
-    if not room:
-        return ""
-
-    low = room.lower()
-
-    # JUNK-фильтр
-    if low in {"-", "—", "–", "нет", "n/a", "n a", "н/д", "н д"}:
-        return ""
-
-    # Дистанционные варианты → унифицированный вид
-    if low.startswith("дистанционно"):
-        return "дистанционно онлайн"
-
-    room = re.sub(r'\b([IVX]+)\s*к\.\s*', r'\1 к. ', room)
-    room = re.sub(r'(?<=[А-Я])-(?=\d)', '', room, flags=re.IGNORECASE)
-    return room.strip()
+_clean_room = clean_room
 
 
 # ========================================================================

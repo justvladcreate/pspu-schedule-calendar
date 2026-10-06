@@ -100,22 +100,22 @@ def main() -> None:
             print(f"    type={br['type']!r:<8} dates={br['dates']!r}")
             for i, p in enumerate(parsed):
                 hint_type = p["hint_type"]
-                hint_dates = p["hint_dates"]
-                if not hint_type and not hint_dates:
+                hint_dates_set = set(p["hint_dates"] or [])
+                if not hint_type and not hint_dates_set:
                     continue  # base, не проверяем
 
                 t_ok = not hint_type or hint_type in (br["type"] or "").lower()
                 branch_dates_set = _parse_dates_hint(br["dates"] or "", expand_ranges=True)
-                d_ok = not hint_dates or bool(hint_dates & branch_dates_set)
+                d_ok = not hint_dates_set or bool(hint_dates_set & branch_dates_set)
 
                 mark = "✓" if (t_ok and d_ok) else "✗"
                 reason = []
                 if hint_type:
                     reason.append(f"type={hint_type} vs {br['type']!r} → {t_ok}")
-                if hint_dates:
+                if hint_dates_set:
                     reason.append(
-                        f"dates {sorted(hint_dates)} ∩ {sorted(branch_dates_set)} "
-                        f"= {sorted(hint_dates & branch_dates_set)} → {d_ok}"
+                        f"dates {sorted(hint_dates_set)} ∩ {sorted(branch_dates_set)} "
+                        f"= {sorted(hint_dates_set & branch_dates_set)} → {d_ok}"
                     )
                 print(f"        {mark} [{i}] {p['room']!r:<25} {', '.join(reason)}")
 

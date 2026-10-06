@@ -233,6 +233,25 @@ def _chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+async def _ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
+    delay = 1.0
+    last_exc: Exception | None = None
+    for attempt in range(max_attempts):
+        try:
+            return await ask_ai(prompt=prompt)
+        except Exception as e:
+            last_exc = e
+            if attempt == max_attempts - 1:
+                break
+            logger.warning(
+                f"AI: попытка {attempt + 1}/{max_attempts} не удалась: {e}; "
+                f"пауза {delay:.1f}с"
+            )
+            await asyncio.sleep(delay)
+            delay *= 2
+    raise last_exc
+
+
 
 def _add_90_minutes(time_start: str) -> str:
     """time_start + 1.5ч в формате HH:MM. Пусто, если не распарсилось."""
@@ -507,16 +526,16 @@ async def process_schedule(
         else:
             prompt_text = user_prompt.format(data=ai_input_text)
             try:
-                chunk_result = await ask_ai(prompt=prompt_text)
+                chunk_result = await _ask_ai_with_retry(prompt=prompt_text)
                 if isinstance(chunk_result, list):
                     lines = [e for e in chunk_result if e.strip()]
                 else:
                     lines = [e for e in chunk_result.split("\n") if e.strip()]
+                ai_calls += 1
+                await asyncio.sleep(0.5)
             except Exception as e:
                 logger.error(f"AI ошибка (группа {group}): {e}")
                 continue
-            ai_calls += 1
-            await asyncio.sleep(0.5)
 
         new_cache[key] = lines
         # Deprecated feature

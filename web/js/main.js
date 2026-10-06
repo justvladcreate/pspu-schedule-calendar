@@ -56,8 +56,21 @@ function stripReloadMarker() {
  *  Загрузка данных
  * ============================================================ */
 
+const SUPPORTED_SCHEMA_VERSION = 1;
+
+function _isSupportedSchemaVersion(data) {
+    const version = data.schema_version;
+    if (version === undefined) return true;
+    if (version === SUPPORTED_SCHEMA_VERSION) return true;
+    console.warn(`[load] неподдерживаемая schema_version: ${version}`);
+    return false;
+}
+
 function isValidScheduleData(data) {
-    return data && typeof data === 'object' && Array.isArray(data.events);
+    return !!data
+        && typeof data === 'object'
+        && Array.isArray(data.events)
+        && _isSupportedSchemaVersion(data);
 }
 
 function loadCachedData() {
@@ -398,6 +411,27 @@ function resetToToday() {
  *  UI, независимый от данных
  * ============================================================ */
 
+function setupScrollPersistence() {
+    const cal = document.getElementById('calendar');
+    let lastScrollSave = 0;
+
+    cal.addEventListener('scroll', () => {
+        if (state.restoringScroll) return;
+        const view = state.view;
+        if (view !== 'week' && view !== 'day') return;
+
+        const now = performance.now();
+        if (now - lastScrollSave < 150) return;
+        lastScrollSave = now;
+
+        saveScrollMemory(view, {
+            top: cal.scrollTop,
+            left: cal.scrollLeft,
+        });
+    }, { passive: true });
+}
+
+
 function setupAllUI() {
     const exportModal = setupExportModal();
     document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
@@ -446,20 +480,7 @@ function setupAllUI() {
     setupPullToRefresh();
     setupCalendarGestures();
 
-    const cal = document.getElementById('calendar');
-    let scrollTimer = null;
-    cal.addEventListener('scroll', () => {
-        const viewAtScroll = state.view;
-        if (scrollTimer) clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-            if (viewAtScroll === 'week' || viewAtScroll === 'day') {
-                saveScrollMemory(viewAtScroll, {
-                    top: cal.scrollTop,
-                    left: cal.scrollLeft,
-                });
-            }
-        }, 200);
-    }, { passive: true });
+    setupScrollPersistence();
 
     setupReadmeModal();
     setupOriginalModal();
@@ -519,6 +540,8 @@ function setupAllUI() {
     }
 
     setInterval(updateOnlineStatus, 60 * 1000);
+
+    setupPeriodicUpdates();
 }
 
 /* ============================================================
@@ -793,20 +816,28 @@ function openUrlContextEvent() {
     });
 }
 
+const SW_RELOAD_FLAG = 'schedule-sw-reloading';
+
+function _swReloadGuardActive() {
+    try { return sessionStorage.getItem(SW_RELOAD_FLAG) === '1'; }
+    catch { return false; }
+}
+
+function _swReloadGuardSet() {
+    try { sessionStorage.setItem(SW_RELOAD_FLAG, '1'); } catch {}
+}
+
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
 
     const hadController = !!navigator.serviceWorker.controller;
-    let refreshing = false;
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        if (!hadController) {
-            console.info('[SW] Первичный claim — перезагрузка не требуется.');
-            return;
-        }
-        refreshing = true;
-        console.info('[SW] Получил контроль — перезагружаю страницу.');
+        if (!hadController) return;
+        if (!navigator.serviceWorker.controller) return;
+        if (_swReloadGuardActive()) return;
+
+        _swReloadGuardSet();
         location.reload();
     });
 
@@ -926,7 +957,24 @@ async function fetchAndApply({ showIndicator = false } = {}) {
 
 window.__checkForUpdates = fetchAndApply;
 
-setInterval(() => fetchAndApply({ showIndicator: false }), UPDATE_INTERVAL);
+const MIN_UPDATE_GAP = 5 * 60 * 1000;
+
+function setupPeriodicUpdates() {
+    let lastCheck = 0;
+
+    function maybeCheck() {
+        if (document.hidden) return;
+        const now = Date.now();
+        if (now - lastCheck < MIN_UPDATE_GAP) return;
+        lastCheck = now;
+        fetchAndApply({ showIndicator: false });
+    }
+
+    setInterval(maybeCheck, UPDATE_INTERVAL);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) maybeCheck();
+    });
+}
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

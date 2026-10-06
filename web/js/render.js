@@ -16,6 +16,25 @@ import { layoutDayEvents } from './layout.js';
 import { showEventDetails, showGroupDetails } from './popover.js';
 import { renderLoad } from './load-view.js';
 
+const elementDataMap = new WeakMap();
+
+function ensureDelegation(cal) {
+    if (cal.dataset.delegationAttached === '1') return;
+    cal.dataset.delegationAttached = '1';
+
+    cal.addEventListener('click', (e) => {
+        const el = e.target.closest('.event-block, .month-event');
+        if (!el || !cal.contains(el)) return;
+
+        const data = elementDataMap.get(el);
+        if (!data) return;
+
+        e.stopPropagation();
+        if (data.type === 'single') showEventDetails(data.ev, el);
+        else if (data.type === 'group') showGroupDetails(data.events, el);
+    });
+}
+
 /* ---------- EMPTY STATE ---------- */
 export function hasActiveFilters() {
     return state.selectedGroups.size > 0 || state.selectedTeachers.size > 0;
@@ -96,6 +115,9 @@ function pulseSelectedDay(cal) {
 export function render(animation = null) {
   const cal = document.getElementById('calendar');
 
+  ensureDelegation(cal);
+
+  state.restoringScroll = true;
   cal.innerHTML = '';
   cal.className = 'calendar view-' + state.view;
 
@@ -113,44 +135,54 @@ export function render(animation = null) {
 
   updateDateLabel();
 
-  // 2. Восстановить скролл после отрисовки
-  if (state.view === 'week' || state.view === 'day') {
-    if (state.scrollToNow) {
-      // Первый рендер после смены generated_at — скроллим к текущему времени
-      state.scrollToNow = false;
-      requestAnimationFrame(() => {
+  _restoreScroll(cal);
+  state.initialRenderDone = true;
+
+  if (animation) {
+    _applyRenderAnimation(cal, animation);
+  }
+}
+
+
+function _restoreScroll(cal) {
+  if (state.view !== 'week' && state.view !== 'day') {
+    state.restoringScroll = false;
+    return;
+  }
+
+  const applyScroll = state.scrollToNow
+    ? () => {
+        state.scrollToNow = false;
         const now = new Date();
         const top = (now.getHours() + now.getMinutes() / 60 - HOUR_START) * HOUR_HEIGHT;
         cal.scrollTop = Math.max(0, top - 120);
         cal.scrollLeft = 0;
-      });
-    } else {
-      const mem = loadScrollMemory(state.view);
-      if (mem) {
-        // requestAnimationFrame — ждём, пока браузер посчитает размеры
-        requestAnimationFrame(() => {
-          cal.scrollTop = mem.top || 0;
-          cal.scrollLeft = mem.left || 0;
-        });
       }
-    }
+    : () => {
+        const mem = loadScrollMemory(state.view);
+        if (!mem) return;
+        cal.scrollTop = mem.top || 0;
+        cal.scrollLeft = mem.left || 0;
+      };
+
+  requestAnimationFrame(() => {
+    applyScroll();
+    requestAnimationFrame(() => { state.restoringScroll = false; });
+  });
+}
+
+
+function _applyRenderAnimation(cal, animation) {
+  if (state.view === 'load') {
+    pulseSelectedDay(cal);
+    return;
   }
 
-  state.initialRenderDone = true;
-
-  if (animation) {
-    if (state.view === 'load') {
-      // В «Нагрузке» — собственный отклик на навигацию:
-      // пульс на выбранной ячейке вместо общего слайда.
-      pulseSelectedDay(cal);
-    } else {
-      void cal.offsetWidth;
-      cal.classList.add('anim-' + animation);
-      cal.addEventListener('animationend', () => {
-        cal.classList.remove('anim-' + animation);
-      }, { once: true });
-    }
-  }
+  void cal.offsetWidth;
+  cal.classList.add('anim-' + animation);
+  cal.addEventListener('animationend', () => {
+    cal.classList.remove('anim-' + animation);
+  }, { once: true });
 }
 
 export function updateDateLabel() {
@@ -324,10 +356,7 @@ export function makeEventBlock(ev, column = 0, columnsCount = 1) {
         <div class="event-time">${ev.time_start}–${ev.endTime}</div>
     `;
 
-    el.addEventListener('click', e => {
-        e.stopPropagation();
-        showEventDetails(ev, el);
-    });
+    elementDataMap.set(el, { type: 'single', ev });
 
     return el;
 }
@@ -355,10 +384,7 @@ export function makeGroupBlock(item) {
         <div class="event-group-hint">Нажмите, чтобы увидеть</div>
     `;
 
-    el.addEventListener('click', e => {
-        e.stopPropagation();
-        showGroupDetails(events, el);
-    });
+    elementDataMap.set(el, { type: 'group', events });
 
     return el;
 }
@@ -404,10 +430,7 @@ export function renderMonth(root) {
                 group.className = 'month-event month-event--group';
                 group.textContent = `${dayEvents.length} мероприятий`;
                 group.title = `${dayEvents.length} мероприятий — нажмите, чтобы увидеть`;
-                group.addEventListener('click', e => {
-                    e.stopPropagation();
-                    showGroupDetails(dayEvents, group);
-                });
+                elementDataMap.set(group, { type: 'group', events: dayEvents });
                 cell.appendChild(group);
             } else {
                 dayEvents.forEach(ev => {
@@ -417,10 +440,7 @@ export function renderMonth(root) {
                     chip.title = chip.textContent;
                     chip.dataset.eventId = ev.event_id || '';
                     chip.dataset.dateIso = ev.dateISO || '';
-                    chip.addEventListener('click', e => {
-                        e.stopPropagation();
-                        showEventDetails(ev, chip);
-                    });
+                    elementDataMap.set(chip, { type: 'single', ev });
                     cell.appendChild(chip);
                 });
             }

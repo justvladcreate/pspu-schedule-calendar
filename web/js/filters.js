@@ -6,7 +6,7 @@ import {
     saveFavoritesActive,
     savePrevFilter,
 } from './state.js';
-import { render } from './render.js';
+import { render, updateDateLabel } from './render.js';
 import { refreshBanner } from './update-banner.js';
 import { showToast } from './toast.js';
 
@@ -616,7 +616,5 @@ export function setupUnifiedFilter() {
     updateCounter();
     updateDoneButton();
 
-    window.addEventListener('resize', () => {
-        import('./render.js').then(m => m.updateDateLabel());
-    });
+    window.addEventListener('resize', updateDateLabel);
 }

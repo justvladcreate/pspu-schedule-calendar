@@ -79,51 +79,49 @@ def clean_group_name(group_name: str) -> str:
 
 
 # ---------------------------------------------------------------- extraction
+def _ffill_weekday_column(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.iloc[:, 0] = df.iloc[:, 0].ffill()
+    return df
+
+
 def extraction(df, sheet_id, hyperlinks: dict | None = None):
     if hyperlinks is None:
         hyperlinks = {}
-    # print(df)
-    # Указываем стартовые клетки
+
+    df = _ffill_weekday_column(df)
+
     start_cells = []
     for i, row in df.iterrows():
-        # row = set(row)
         for j, cell in enumerate(row):
             if "Начало" in str(cell).strip():
                 start_cells.append((i, j))
-    # Указываем конечную высоту поиска
+
     end_row = None
     for i, row in df.iterrows():
-        row = set(row)
-        for j, cell in enumerate(row):
-            if "Декан" in str(cell).strip():
-                end_row = i
-                break
-        if end_row:
+        if any("Декан" in str(cell).strip() for cell in row):
+            end_row = i
             break
-    # Указываем конечные клетки
+
     end_cells = []
     for i, row in df.iterrows():
-        # row = set(row)
         for j, cell in enumerate(row):
             if "форма обучения /" in str(cell).strip().lower():
                 end_cells.append((end_row, j))
-    # Ищем заголовки
+
     headers = []
     for i, row in df.iterrows():
         row_set = set()
         for j, cell in enumerate(row):
-            if "семестр" in str(cell).strip().lower() and not (cell in row_set):
+            if "семестр" in str(cell).strip().lower() and cell not in row_set:
                 headers.append((i, j))
                 row_set.add(cell)
 
     group_info = {}
-
     min_count = min(len(start_cells), len(end_cells), len(headers))
-
     if min_count == 0:
         return group_info
 
-    # Проходим по всем блокам по каждой клетке внутри блока
     for i in range(min_count):
 
         start_cell = start_cells[i]
@@ -177,15 +175,10 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
 
         events = []
 
-        # Разбираем строчки на пары
-        for row in range(1, subset.shape[0] - 1):
-            if row >= subset.shape[0]:
-                break
-
+        for row in range(1, subset.shape[0]):
             abs_row = start_cell[0] + row
 
             try:
-                # extra
                 time_val_exception = df.iloc[abs_row, start_cells[0][1]]
                 room_val_exception = df.iloc[abs_row, end_cells[-1][1]]
 
@@ -212,10 +205,15 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
                 if not subject_val:
                     continue
 
-                if (time_val in subject_val) or (room_val in subject_val) and (room_val != "" and subject_val != ""):
-                    if time_val in subject_val:
+                time_str = str(time_val) if time_val is not None else ""
+                room_str = str(room_val) if room_val is not None else ""
+                time_in_subject = bool(time_str) and (time_str in subject_val)
+                room_in_subject = bool(room_str) and (room_str in subject_val)
+
+                if time_in_subject or room_in_subject:
+                    if time_in_subject:
                         time_val = time_val_exception
-                    if room_val in subject_val:
+                    if room_in_subject:
                         room_val = room_val_exception
 
                 # собираем все URL-ы в этой строке — может быть несколько
@@ -249,9 +247,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
                 subject_val = remove_spaces_between_initials(text=subject_val)
                 subject_val = normalize_subgroup(text=subject_val)
 
-                # Добавляем день недели
                 day_of_week = ""
-                df.iloc[:, 0] = df.iloc[:, 0].ffill()
                 left_col_val = df.iloc[abs_row, 0]
                 if pd.notna(left_col_val) and str(left_col_val).strip():
                     day_of_week = str(left_col_val).strip().upper()

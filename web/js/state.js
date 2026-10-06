@@ -2,6 +2,20 @@
 
 import { toISO } from './utils.js';
 
+const STORAGE_VERSION_KEY = 'schedule-storage-version';
+const STORAGE_SCHEMA_VERSION = 1;
+
+function ensureStorageVersion() {
+    try {
+        const raw = localStorage.getItem(STORAGE_VERSION_KEY);
+        const current = raw ? parseInt(raw, 10) : 0;
+        if (current === STORAGE_SCHEMA_VERSION) return;
+        localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_SCHEMA_VERSION));
+    } catch {}
+}
+
+ensureStorageVersion();
+
 export function loadSetFromStorage(key) {
     try {
         const raw = localStorage.getItem(key);
@@ -108,6 +122,7 @@ export const state = {
   displayedIso: null,
   initialRenderDone: false,
   scrollToNow: false,
+  restoringScroll: false,
 
   pendingChanges: loadPendingChanges(),
 
