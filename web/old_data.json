@@ -1978,59 +1978,19 @@
         {
             "group": "1212",
             "weekday": "ПТ",
-            "time_start": "11:09",
-            "time_end": "12:39",
-            "pair_number": 2,
-            "discipline": "Современная образовательная среда (Демоцентр)",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Полякова О.В."
-            ],
-            "dates": [
-                "11.09.2026"
-            ],
-            "rooms": "IV к. А111",
-            "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_2_2"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
-            "time_start": "11:09",
-            "time_end": "12:39",
-            "pair_number": 2,
-            "discipline": "Современная образовательная среда (Демоцентр)",
-            "type": "",
-            "subgroup": "",
-            "teachers": [
-                "Полякова О.В."
-            ],
-            "dates": [
-                "11.09.2026"
-            ],
-            "rooms": "IV к. А111",
-            "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_2_3"
-        },
-        {
-            "group": "1212",
-            "weekday": "ПТ",
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
-            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
+            "discipline": "Современная образовательная среда (Демоцентр)",
             "type": "",
             "subgroup": "",
             "teachers": [
-                "Порозов В.А."
+                "Полякова О.В."
             ],
             "dates": [
-                "18.09.2026"
+                "11.09.2026"
             ],
-            "rooms": "IV к. В105",
+            "rooms": "IV к. А111",
             "comment": "",
             "position": 1,
             "event_id": "1212_ПТ_3_1"
@@ -2041,6 +2001,26 @@
             "time_start": "11:30",
             "time_end": "13:00",
             "pair_number": 3,
+            "discipline": "Культурно-просветительский практикум Традиционные российские духовно-нравственные ценности",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Порозов В.А."
+            ],
+            "dates": [
+                "18.09.2026"
+            ],
+            "rooms": "IV к. В105",
+            "comment": "",
+            "position": 2,
+            "event_id": "1212_ПТ_3_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
             "discipline": "Основы медицинских знаний",
             "type": "лек.",
             "subgroup": "",
@@ -2053,8 +2033,28 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_3_2"
+            "position": 3,
+            "event_id": "1212_ПТ_3_3"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Современная образовательная среда (Демоцентр)",
+            "type": "",
+            "subgroup": "",
+            "teachers": [
+                "Полякова О.В."
+            ],
+            "dates": [
+                "11.09.2026"
+            ],
+            "rooms": "IV к. А111",
+            "comment": "",
+            "position": 1,
+            "event_id": "1212_ПТ_4_1"
         },
         {
             "group": "1212",
@@ -2073,8 +2073,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
-            "position": 1,
-            "event_id": "1212_ПТ_4_1"
+            "position": 2,
+            "event_id": "1212_ПТ_4_2"
         },
         {
             "group": "1212",
@@ -2094,8 +2094,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "position": 2,
-            "event_id": "1212_ПТ_4_2"
+            "position": 3,
+            "event_id": "1212_ПТ_4_3"
         },
         {
             "group": "1212",
@@ -2119,8 +2119,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 3,
-            "event_id": "1212_ПТ_4_3"
+            "position": 4,
+            "event_id": "1212_ПТ_4_4"
         },
         {
             "group": "1212",
@@ -2140,8 +2140,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 4,
-            "event_id": "1212_ПТ_4_4"
+            "position": 5,
+            "event_id": "1212_ПТ_4_5"
         },
         {
             "group": "1212",
@@ -2161,8 +2161,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
-            "position": 5,
-            "event_id": "1212_ПТ_4_5"
+            "position": 6,
+            "event_id": "1212_ПТ_4_6"
         },
         {
             "group": "1212",
@@ -2498,6 +2498,27 @@
         {
             "group": "1212",
             "weekday": "СР",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Технологии профессиональной мотивации",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Галиева С.Ю."
+            ],
+            "dates": [
+                "11.11.2026",
+                "18.11.2026"
+            ],
+            "rooms": "IV к. Б",
+            "comment": "",
+            "position": 3,
+            "event_id": "1212_СР_3_3"
+        },
+        {
+            "group": "1212",
+            "weekday": "СР",
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
@@ -2535,6 +2556,27 @@
             "comment": "",
             "position": 2,
             "event_id": "1212_СР_4_2"
+        },
+        {
+            "group": "1212",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Технологии профессиональной мотивации",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Галиева С.Ю."
+            ],
+            "dates": [
+                "11.11.2026",
+                "18.11.2026"
+            ],
+            "rooms": "IV к. Б",
+            "comment": "",
+            "position": 3,
+            "event_id": "1212_СР_4_3"
         },
         {
             "group": "1212",
@@ -3714,6 +3756,27 @@
         {
             "group": "1214",
             "weekday": "СР",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Технологии профессиональной мотивации",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Галиева С.Ю."
+            ],
+            "dates": [
+                "11.11.2026",
+                "18.11.2026"
+            ],
+            "rooms": "IV к. Б",
+            "comment": "",
+            "position": 3,
+            "event_id": "1214_СР_3_3"
+        },
+        {
+            "group": "1214",
+            "weekday": "СР",
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
@@ -3731,6 +3794,27 @@
             "comment": "",
             "position": 1,
             "event_id": "1214_СР_4_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "СР",
+            "time_start": "13:30",
+            "time_end": "15:00",
+            "pair_number": 4,
+            "discipline": "Технологии профессиональной мотивации",
+            "type": "лек.",
+            "subgroup": "",
+            "teachers": [
+                "Галиева С.Ю."
+            ],
+            "dates": [
+                "11.11.2026",
+                "18.11.2026"
+            ],
+            "rooms": "IV к. Б",
+            "comment": "",
+            "position": 2,
+            "event_id": "1214_СР_4_2"
         },
         {
             "group": "1214",
@@ -16727,5 +16811,5 @@
             "event_id": "М1227_ЧТ_7_4"
         }
     ],
-    "generated_at": "2026-10-06T16:01:15+00:00"
+    "generated_at": "2026-10-07T09:52:36+00:00"
 }
