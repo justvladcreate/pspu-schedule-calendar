@@ -4394,7 +4394,7 @@
                 "14.09.2026",
                 "21.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 1,
             "event_id": "1221_ПН_4_1"
@@ -4415,7 +4415,7 @@
                 "28.09.2026",
                 "05.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 2,
             "event_id": "1221_ПН_4_2"
@@ -4437,7 +4437,7 @@
                 "09.11.2026",
                 "16.11.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 3,
             "event_id": "1221_ПН_4_3"
@@ -4458,7 +4458,7 @@
             "dates": [
                 "12.10.2026"
             ],
-            "rooms": "II к. 103, II к. 102",
+            "rooms": "II к. 103, II к. 302",
             "comment": "",
             "position": 4,
             "event_id": "1221_ПН_4_4"
@@ -4502,7 +4502,7 @@
                 "09.11.2026",
                 "16.11.2026"
             ],
-            "rooms": "II к. 103, II к. 102",
+            "rooms": "II к. 103, II к. 302",
             "comment": "",
             "position": 2,
             "event_id": "1221_ПН_5_2"
@@ -5639,7 +5639,7 @@
             "dates": [
                 "06.10.2026"
             ],
-            "rooms": "Региональный центр финансовой грамотности",
+            "rooms": "IV к. А201",
             "comment": "",
             "position": 1,
             "event_id": "1222_ВТ_6_1"
@@ -5703,7 +5703,7 @@
                 "14.09.2026",
                 "21.09.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 1,
             "event_id": "1222_ПН_4_1"
@@ -5725,7 +5725,7 @@
                 "12.10.2026",
                 "19.10.2026"
             ],
-            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 2,
             "event_id": "1222_ПН_4_2"
@@ -5748,7 +5748,7 @@
                 "09.11.2026",
                 "16.11.2026"
             ],
-            "rooms": "II к. 103, II к. 102",
+            "rooms": "II к. 103, II к. 302",
             "comment": "",
             "position": 3,
             "event_id": "1222_ПН_4_3"
@@ -5769,7 +5769,7 @@
                 "21.09.2026",
                 "28.09.2026"
             ],
-            "rooms": "II к. 302, IV к. А214, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "II к. 302, IV к. А214, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 1,
             "event_id": "1222_ПН_5_1"
@@ -5789,7 +5789,7 @@
             "dates": [
                 "05.10.2026"
             ],
-            "rooms": "II к. 302, IV к. А214, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 102",
+            "rooms": "II к. 302, IV к. А214, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
             "position": 2,
             "event_id": "1222_ПН_5_2"
@@ -5816,7 +5816,7 @@
                 "16.11.2026",
                 "23.11.2026"
             ],
-            "rooms": "II к. 103, II к. 102",
+            "rooms": "II к. 103, II к. 302",
             "comment": "",
             "position": 3,
             "event_id": "1222_ПН_5_3"
@@ -16955,5 +16955,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-08T11:50:14+00:00"
+    "generated_at": "2026-10-08T13:36:42+00:00"
 }
