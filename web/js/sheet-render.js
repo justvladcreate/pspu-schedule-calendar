@@ -370,17 +370,35 @@ function parsePositionLocal(pos) {
 }
 
 /**
+ * Нативные координаты ячейки внутри iframe viewport'а.
+ * Обходим цепочку offsetParent'ов: td → tr → tbody → table → …
+ * Это НЕ зависит от transform: scale на iframe — offsetTop/Left
+ * всегда в нативных пикселях layout'а.
+ */
+function nativeOffsetInFrame(cell, frameDoc) {
+    let x = 0, y = 0;
+    let node = cell;
+    const body = frameDoc.body || frameDoc.documentElement;
+
+    while (node && node !== body && node !== frameDoc.documentElement) {
+        x += node.offsetLeft || 0;
+        y += node.offsetTop  || 0;
+        node = node.offsetParent;
+        if (!node) break;
+    }
+    return { x, y };
+}
+
+/**
  * Подсвечивает ячейку и плавно скроллит к ней РОДИТЕЛЬСКИЙ wrap.
  *
- * КРИТИЧНО: cell.getBoundingClientRect() возвращает координаты
- * в системе viewport'а iframe (нативные, без учёта scale).
- * wrap.getBoundingClientRect() и wrap.scrollLeft — в системе
- * родительского документа. Их нельзя вычитать напрямую.
- *
- * Переводим через iframe.getBoundingClientRect():
- *   cellVisualLeft = iframeRect.left + cellRect.left * zoom
- * где zoom — текущий scale iframe (== getComputedStyle(iframe).transform
- * в матричной форме, либо наш currentZoom).
+ * Координаты ячейки берём через offsetLeft/offsetTop — это нативные
+ * пиксели внутри iframe. Позицию iframe в родителе — через
+ * getBoundingClientRect (уже с учётом transform родителя). Масштаб
+ * применяем один раз: native * zoom. Раньше использовался
+ * cell.getBoundingClientRect(), и он вёл себя по-разному между
+ * браузерами: возвращал то натив, то post-transform. Отсюда «оффсет»
+ * на ПК и «улёт в угол» на телефоне.
  */
 export function focusCellInFrame(wrapEl, iframe, cell, zoom) {
     if (!wrapEl || !iframe || !cell) return;
@@ -388,28 +406,30 @@ export function focusCellInFrame(wrapEl, iframe, cell, zoom) {
     requestAnimationFrame(() => {
         const wrapRect   = wrapEl.getBoundingClientRect();
         const iframeRect = iframe.getBoundingClientRect();
-        const cellRect   = cell.getBoundingClientRect();
+        const frameDoc   = iframe.contentDocument || iframe.ownerDocument;
+        const scale      = zoom || 1;
 
-        const scale = zoom || 1;
+        const nat = nativeOffsetInFrame(cell, frameDoc);
+        const natW = cell.offsetWidth  || 0;
+        const natH = cell.offsetHeight || 0;
 
-        // Позиция ячейки в системе координат родительского документа.
-        // cellRect в нативных пикселях iframe, умноженных на текущий scale.
-        const cellVisualLeft = iframeRect.left + cellRect.left * scale;
-        const cellVisualTop  = iframeRect.top  + cellRect.top  * scale;
-        const cellVisualW    = cellRect.width  * scale;
-        const cellVisualH    = cellRect.height * scale;
+        // Визуальные координаты верхнего левого угла ячейки
+        // в родительском viewport'е. native * scale — единственное
+        // место, где применяется zoom.
+        const cellVisualLeft = iframeRect.left + nat.x * scale;
+        const cellVisualTop  = iframeRect.top  + nat.y * scale;
+        const cellVisualW    = natW * scale;
+        const cellVisualH    = natH * scale;
 
         // Центр ячейки в родительском viewport'е.
         const cellCenterX = cellVisualLeft + cellVisualW / 2;
         const cellCenterY = cellVisualTop  + cellVisualH / 2;
 
-        // Расстояние от левого/верхнего края wrap'а в визуальных пикселях.
-        // Теперь все величины в одной системе координат.
+        // Смещение центра ячейки от левого/верхнего края wrap'а
+        // (в визуальных пикселях — они же пиксели stage).
         const dx = cellCenterX - wrapRect.left;
         const dy = cellCenterY - wrapRect.top;
 
-        // scrollLeft wrap'а — в пикселях stage (stage.width = nativeW * zoom),
-        // это те же визуальные пиксели, потому что сам stage без transform.
         const targetScrollX = wrapEl.scrollLeft + dx - wrapRect.width  / 2;
         const targetScrollY = wrapEl.scrollTop  + dy - wrapRect.height / 2;
 
