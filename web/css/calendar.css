@@ -137,44 +137,116 @@
     transition: filter 0.15s, transform 0.05s;
     color: var(--text);
     z-index: 2;
+    container-type: size;
+    container-name: ev;
 }
 .event-block:hover { filter: brightness(1.1); z-index: 20; }
 .event-block:active { transform: scale(0.99); }
 
+/* ============================================================
+ *  Содержимое карточки события
+ *
+ *  Структура:
+ *    .event-title                      — до 2 строк, обрезка
+ *    .event-meta--primary   [room] · [time]
+ *    .event-meta--secondary [group] · [teachers]
+ *
+ *  Мета-строки — flex с разделителем. Room и teacher сжимаются
+ *  первыми, time и group сохраняют ширину.
+ *
+ *  Container queries скрывают вторичные строки, если блок
+ *  слишком низкий — одинаково работает и на ПК, и на мобилке.
+ * ============================================================ */
+
 .event-block .event-title {
     font-weight: 600;
     font-size: 12px;
-    margin-bottom: 2px;
+    line-height: 1.2;
+    margin-bottom: 3px;
     color: var(--event-title);
     overflow: hidden;
-    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
 }
-.event-block .event-room {
+
+.event-block .event-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 10.5px;
+    line-height: 1.2;
+    min-width: 0;
+}
+
+.event-block .event-meta--primary {
     color: var(--text-muted);
+}
+
+.event-block .event-meta--secondary {
+    color: var(--text-dim);
+    margin-top: 1px;
+}
+
+.event-block .event-sep {
+    color: var(--text-dim);
+    opacity: 0.5;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.event-block .event-room,
+.event-block .event-time,
+.event-block .event-group,
+.event-block .event-teacher {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 11px;
+    min-width: 0;
 }
-.event-block .event-time {
-    color: var(--text-dim);
-    font-size: 10.5px;
-    margin-top: 1px;
+
+/* room и teacher — длинные, жертвуем ими первыми */
+.event-block .event-room,
+.event-block .event-teacher {
+    flex: 0 1 auto;
 }
+
+/* time и group — короткие, не сжимаются */
+.event-block .event-time,
+.event-block .event-group {
+    flex: 0 0 auto;
+}
+
+.event-block .event-group {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.event-block .event-teacher {
+    font-style: italic;
+}
+
+/* --- Адаптация по высоте блока (без привязки к вьюпорту) --- */
+
+@container ev (max-height: 55px) {
+    .event-block .event-meta { display: none; }
+}
+
+/* --- Узкие блоки (несколько событий в дне идут рядом) --- */
 
 .event-block--narrow { padding: 3px 5px; }
 .event-block--narrow .event-title {
     font-size: 11px;
     -webkit-line-clamp: 1;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
 }
-.event-block--narrow .event-room,
-.event-block--narrow .event-time {
+.event-block--narrow .event-meta {
     font-size: 10px;
 }
+
+/* --- Групповые блоки («N мероприятий») --- */
 
 .event-block--group {
     background: var(--accent-soft);

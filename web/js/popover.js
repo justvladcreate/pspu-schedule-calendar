@@ -76,11 +76,32 @@ function renderGroupList(events, anchor, pop) {
         <div class="group-list">
             ${events.map((ev, i) => {
                 const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
+                const roomsHtml = ev.rooms ? renderRoomsLinks(ev.rooms) : '';
+                const timeStr = (ev.time_start && ev.endTime)
+                    ? `${ev.time_start}–${ev.endTime}`
+                    : '';
+                const teachersStr = (ev.teachers && ev.teachers.length)
+                    ? ev.teachers.join(', ')
+                    : '';
+
+                // Как в карточке календаря:
+                //   primary   — время · аудитория
+                //   secondary — группа · преподаватель
+                const primaryParts = [];
+                if (timeStr)   primaryParts.push(`<span class="group-item-time">${timeStr}</span>`);
+                if (roomsHtml) primaryParts.push(`<span class="group-item-room">${roomsHtml}</span>`);
+                const primaryHtml = primaryParts.join('<span class="group-item-sep">·</span>');
+
+                const secondaryParts = [];
+                if (ev.group)     secondaryParts.push(`<span class="group-item-group">${escapeHtml(ev.group)}</span>`);
+                if (teachersStr)  secondaryParts.push(`<span class="group-item-teacher">${escapeHtml(teachersStr)}</span>`);
+                const secondaryHtml = secondaryParts.join('<span class="group-item-sep">·</span>');
+
                 return `
                     <div class="group-item" data-idx="${i}">
-                        <div class="group-item-time">${ev.time_start}–${ev.endTime}</div>
                         <div class="group-item-title">${escapeHtml(titleText)}</div>
-                        ${ev.rooms ? `<div class="group-item-room">${renderRoomsLinks(ev.rooms)}</div>` : ''}
+                        ${primaryHtml ? `<div class="group-item-meta group-item-meta--primary">${primaryHtml}</div>` : ''}
+                        ${secondaryHtml ? `<div class="group-item-meta group-item-meta--secondary">${secondaryHtml}</div>` : ''}
                     </div>
                 `;
             }).join('')}

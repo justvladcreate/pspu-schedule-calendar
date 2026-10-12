@@ -7,7 +7,12 @@
     padding: 14px 16px;
     min-width: 260px;
     max-width: 340px;
-    z-index: 1000;
+    /* Ниже модалок (.modal-backdrop, z-index: 999) — поповер
+       не должен перекрывать открытые диалоги. При этом выше
+       обычного контента календаря, тулбара и десктопного
+       фильтра (100), но ниже мобильного фуллскрин-фильтра (500),
+       чтобы тот гарантированно перекрывал поповер. */
+    z-index: 400;
     display: none;
     font-size: 13px;
 }
@@ -119,11 +124,6 @@
 }
 .group-item:hover { background: var(--surface-2); }
 
-.group-item-time {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 2px;
-}
 .group-item-title {
     font-size: 13px;
     font-weight: 600;
@@ -131,9 +131,45 @@
     margin-bottom: 2px;
     line-height: 1.3;
 }
-.group-item-room {
+
+/* Две мета-строки — один-в-один как в карточке календаря:
+       • primary   — аудитория · время
+       • secondary — группа · преподаватель
+   На узкой ширине части переносятся целиком (flex-wrap).
+   Разделитель «·» при переносе оказался бы висячим символом
+   в начале строки — прячем, а части разводим gap'ом. */
+.group-item-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 2px 6px;
+    flex-wrap: wrap;
     font-size: 11.5px;
+    line-height: 1.3;
+    margin-top: 1px;
+    min-width: 0;
+}
+.group-item-meta--primary   { color: var(--text-muted); }
+.group-item-meta--secondary { color: var(--text-dim); }
+.group-item-sep { display: none; }
+
+.group-item-room {
     color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+.group-item-time {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto;
+}
+.group-item-group {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.group-item-teacher {
+    font-style: italic;
+    color: var(--text-dim);
 }
 
 .popover-back {

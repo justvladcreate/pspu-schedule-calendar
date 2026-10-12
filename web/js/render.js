@@ -350,10 +350,43 @@ export function makeEventBlock(ev, column = 0, columnsCount = 1) {
     }
 
     const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
+    const roomsStr = plainRooms(ev.rooms || '');
+    const teachersStr = (ev.teachers && ev.teachers.length)
+        ? ev.teachers.join(', ')
+        : '';
+
+    // Первая мета-строка: время · аудитория
+    const primaryParts = [];
+    if (ev.time_start && ev.endTime) {
+        primaryParts.push(
+            `<span class="event-time">${ev.time_start}–${ev.endTime}</span>`
+        );
+    }
+    if (roomsStr) {
+        primaryParts.push(
+            `<span class="event-room">${escapeHtml(roomsStr)}</span>`
+        );
+    }
+    const primaryHtml = primaryParts.join('<span class="event-sep">·</span>');
+
+    // Вторая мета-строка: группа · преподаватели
+    const secondaryParts = [];
+    if (ev.group) {
+        secondaryParts.push(
+            `<span class="event-group">${escapeHtml(ev.group)}</span>`
+        );
+    }
+    if (teachersStr) {
+        secondaryParts.push(
+            `<span class="event-teacher">${escapeHtml(teachersStr)}</span>`
+        );
+    }
+    const secondaryHtml = secondaryParts.join('<span class="event-sep">·</span>');
+
     el.innerHTML = `
         <div class="event-title">${escapeHtml(titleText)}</div>
-        <div class="event-room">${escapeHtml(plainRooms(ev.rooms || ''))}</div>
-        <div class="event-time">${ev.time_start}–${ev.endTime}</div>
+        ${primaryHtml ? `<div class="event-meta event-meta--primary">${primaryHtml}</div>` : ''}
+        ${secondaryHtml ? `<div class="event-meta event-meta--secondary">${secondaryHtml}</div>` : ''}
     `;
 
     elementDataMap.set(el, { type: 'single', ev });

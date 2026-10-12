@@ -141,10 +141,32 @@
     }
     .cal-body.week .day-grid { grid-template-columns: repeat(7, var(--m-day-col)); }
 
-    .event-block { padding: 2px 5px; border-left-width: 2px; }
-    .event-block .event-title { font-size: 11px; line-height: 1.2; -webkit-line-clamp: 3; }
+    .event-block { padding: 3px 5px; border-left-width: 2px; }
+    .event-block .event-title {
+        font-size: 11px;
+        line-height: 1.15;
+        -webkit-line-clamp: 2;
+        margin-bottom: 2px;
+    }
+    /* На узкой карточке room + time не помещаются в одну строку.
+       Вместо сжатия до «IV к. …» разрешаем переносить части
+       мета-строки целиком (flex-wrap). Разделитель при переносе
+       смотрится как висячий символ — на мобилке его скрываем,
+       а части разводим gap'ом. */
+    .event-block .event-meta {
+        font-size: 9.5px;
+        line-height: 1.2;
+        gap: 1px 5px;
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+    .event-block .event-meta .event-sep { display: none; }
     .event-block .event-room,
-    .event-block .event-time { font-size: 9.5px; }
+    .event-block .event-time,
+    .event-block .event-group,
+    .event-block .event-teacher {
+        flex: 0 0 auto;
+    }
 
     .month-event { font-size: 10px; padding: 1px 3px; }
     .month-day-num { font-size: 11px; min-width: 18px; height: 18px; }
