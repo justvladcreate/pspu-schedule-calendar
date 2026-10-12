@@ -371,29 +371,30 @@ function parsePositionLocal(pos) {
 
 /**
  * Подсвечивает ячейку и плавно скроллит к ней РОДИТЕЛЬСКИЙ wrap.
- * Внутри iframe мы теперь не скроллим — iframe статичный,
- * прокрутка живёт в .original-sheet-wrap.
+ * Внутри iframe мы не скроллим — прокрутка живёт в .original-sheet-wrap.
  *
- * zoom — текущий scale, нужен чтобы перевести координаты td
- * (внутри stage) в координаты скролла wrap'а.
+ * Математика: wrap.scrollLeft измеряется в пикселях stage
+ * (stage = nativeW × zoom). Позиция ячейки в визуальных пикселях
+ * относительно wrap'а — уже в той же системе, потому что stage
+ * отмасштабирован по определению. Никаких переводов scale не нужно.
  */
-export function focusCellInFrame(wrapEl, iframe, cell, zoom) {
+export function focusCellInFrame(wrapEl, iframe, cell) {
     if (!wrapEl || !iframe || !cell) return;
 
     requestAnimationFrame(() => {
         const wrapRect = wrapEl.getBoundingClientRect();
         const cellRect = cell.getBoundingClientRect();
-        const scale = zoom || 1;
 
-        // Центр ячейки в ВИЗУАЛЬНЫХ пикселях относительно левого/верхнего
-        // края wrap'а (после того как уже применён transform: scale).
+        // Центр ячейки относительно левого/верхнего края wrap'а —
+        // уже в пикселях stage, потому что cellRect учитывает
+        // transform: scale, а scrollLeft тоже в stage-пикселях.
         const cx = cellRect.left + cellRect.width  / 2 - wrapRect.left;
         const cy = cellRect.top  + cellRect.height / 2 - wrapRect.top;
 
-        // scrollLeft wrap'а в пикселях stage. Визуальные пиксели
-        // делим на scale, чтобы получить «сырые» пиксели stage.
-        const targetScrollX = wrapEl.scrollLeft + (cx - wrapRect.width  / 2) / scale;
-        const targetScrollY = wrapEl.scrollTop  + (cy - wrapRect.height / 2) / scale;
+        // Чтобы центр ячейки оказался в центре видимой области wrap'а:
+        //   new_scrollLeft = scrollLeft + cx - wrapWidth / 2
+        const targetScrollX = wrapEl.scrollLeft + cx - wrapRect.width  / 2;
+        const targetScrollY = wrapEl.scrollTop  + cy - wrapRect.height / 2;
 
         wrapEl.scrollTo({
             left: Math.max(0, targetScrollX),
