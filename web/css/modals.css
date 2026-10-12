@@ -632,25 +632,19 @@
     border-bottom-right-radius: 12px;
 }
 
-/* Обёртка рендера — вмещает srcdoc-iframe с контентом Google.
-   Внутри iframe стили от самого Google (waffle_k_ltr.css),
-   поэтому выглядит 1:1. Мы управляем только контейнером. */
+/* Обёртка рендера — здесь живёт скролл и все жесты.
+   Единственная точка, где мы слушаем touch-события. */
 .original-sheet-wrap {
     position: relative;
     width: 100%;
     height: 100%;
-    /* Скролл — здесь, не в iframe. iframe статичный, мы двигаем
-       только его transform. Google не перерисовывает ячейки при
-       скролле, потому что его viewport не меняется. */
     overflow: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    /* pan-x pan-y: разрешаем нативный одно-пальцевый скролл,
+       запрещаем нативный pinch (браузер отдаёт жест нам). */
+    touch-action: pan-x pan-y;
     background: #f1f3f4;
-    /* Изолируем layout и paint — те же оптимизации, что у strict,
-       но БЕЗ contain: size. С size браузер перестаёт связывать размер
-       wrap с содержимым, и на части старых Chromium/WebKit скролл
-       внутри wrap может не появиться. */
-    contain: layout paint;
 }
 
 .original-sheet-render {
@@ -659,28 +653,27 @@
     position: relative;
 }
 
-/* Stage — «холст» размером iframe × scale. Родительский wrap
-   скроллит по stage. Меняем только размер stage, сам iframe
-   не трогаем (transform: scale — GPU-операция). */
+/* Stage — «холст» размером nativeW*zoom × nativeH*zoom.
+   КРИТИЧНО: overflow: hidden. Без него iframe (nativeW × nativeH
+   в layout-координатах, до scale) торчит за пределами stage,
+   и wrap считает scrollWidth по нему, а не по stage. Из-за этого
+   ломается anchor pinch'а и появляется «зум в угол». */
 .original-render-stage {
     position: relative;
+    overflow: hidden;
     transform-origin: 0 0;
 }
 
-/* Сам iframe. Размеры ставит JS (applyZoom),
-   scale — тоже (transform-origin 0 0).
-   touch-action: pan-x pan-y — запрещаем браузеру
-   перехватывать 2-пальцевый pinch как page-zoom;
-   пинч мы обрабатываем сами внутри iframe. */
+/* iframe. Размеры (nativeW × nativeH) фиксированы, не меняются.
+   Zoom — только через transform: scale (GPU, без reflow внутри).
+   pointer-events: none — тачи идут мимо iframe прямо на wrap,
+   поэтому нам не нужны слушатели внутри contentDocument. */
 .original-render-frame {
     border: none;
     display: block;
     background: #fff;
-    /* Zoom применяется целиком через transform — width/height
-       iframe фиксированы по натуральному размеру контента.
-       Никаких reflow внутри iframe при pinch'е. */
     transform-origin: 0 0;
-    touch-action: pan-x pan-y;
+    pointer-events: none;
     will-change: transform;
     backface-visibility: hidden;
 }
