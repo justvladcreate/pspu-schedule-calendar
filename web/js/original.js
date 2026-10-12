@@ -1,7 +1,10 @@
 'use strict';
 
 import { fetchSheetHtml } from './sheets.js';
-import { mountSheetFrame, findCellInFrame, focusCellInFrame } from './sheet-render.js';
+import {
+    mountSheetFrame, findCellInFrame, focusCellInFrame,
+    setupFrameGestures,
+} from './sheet-render.js';
 
 /**
  * Модалка «Оригинал» — просмотр исходной Google Таблицы.
@@ -19,11 +22,16 @@ const SHEETS_CACHE_TTL = 24 * 60 * 60 * 1000;
 const LAST_GID_KEY     = 'pspu-original-last-gid';
 const ZOOM_KEY         = 'pspu-original-zoom';
 
-function defaultZoom() { return window.innerWidth <= 900 ? 0.85 : 1.0; }
+/* Дефолт — «золотая середина»: с одной стороны видно несколько
+   колонок листа сразу, с другой стороны текст остаётся читаемым.
+   Пользователь свободно уходит и дальше (0.15) и ближе (2.5). */
+function defaultZoom() {
+    return window.innerWidth <= 900 ? 0.5 : 0.85;
+}
 function getZoom() {
     try {
         const v = parseFloat(localStorage.getItem(ZOOM_KEY));
-        if (Number.isFinite(v) && v >= 0.3 && v <= 2.0) return v;
+        if (Number.isFinite(v) && v >= 0.15 && v <= 2.5) return v;
     } catch {}
     return defaultZoom();
 }
@@ -33,6 +41,7 @@ let sheetsPromise = null;
 let sheets = [];
 let currentGid = null;
 let currentFrame = null;      // { iframe, doc, win }
+let currentGestureCleanup = null;
 
 function getMeta(name) {
     const el = document.querySelector(`meta[name="${name}"]`);
@@ -110,6 +119,12 @@ export function setupOriginalModal() {
     const tabsBox  = document.getElementById('originalSheetTabs');
     const zoomBox  = document.getElementById('originalZoomControls');
 
+    // Текущий zoom в памяти. touchmove меняет его, но в localStorage
+    // не пишет — иначе 60 записей в секунду на каждом кадре жеста.
+    // Единственный момент сохранения — onCommit в setupFrameGestures
+    // (см. touchend), либо кнопки +/-.
+    let currentZoom = getZoom();
+
     const internalUrl   = getMeta('original-schedule-url');
     const externalUrl   = getMeta('original-schedule-external') || internalUrl;
     const spreadsheetId = extractSpreadsheetId(internalUrl);
@@ -160,12 +175,11 @@ export function setupOriginalModal() {
     }
 
     /* ---------- зум ---------- */
-
     function applyZoom() {
         const iframe = currentFrame && currentFrame.iframe;
         if (!iframe || !wrapEl) return;
 
-        const scale = getZoom();
+        const scale = currentZoom;
         const w = wrapEl.clientWidth / scale;
         const h = wrapEl.clientHeight / scale;
 
@@ -183,11 +197,15 @@ export function setupOriginalModal() {
             b.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const dir = b.dataset.zoom;
-                const cur = getZoom();
-                const z = dir === 'in'
-                    ? Math.min(2.0, +(cur + 0.1).toFixed(2))
-                    : Math.max(0.3, +(cur - 0.1).toFixed(2));
+                const cur = currentZoom;
+                let z;
+                if (dir === 'in') {
+                    z = Math.min(2.5, +(cur + 0.1).toFixed(2));
+                } else {
+                    z = Math.max(0.15, +(cur - 0.1).toFixed(2));
+                }
                 if (z === cur) return;
+                currentZoom = z;
                 saveZoom(z);
                 applyZoom();
             });
@@ -216,8 +234,33 @@ export function setupOriginalModal() {
             const html = await fetchSheetHtml(spreadsheetId, gid);
             if (currentGid !== gid) return;   // гонка: успели переключиться
 
+            // Снимаем слушатели со старого iframe, иначе они копятся
+            // и продолжают жить в его мёртвом contentDocument.
+            if (currentGestureCleanup) {
+                currentGestureCleanup();
+                currentGestureCleanup = null;
+            }
+
+            // При смене листа подхватываем сохранённый в LS зум
+            // (могли уйти с другим значением на прошлом листе).
+            currentZoom = getZoom();
+
             const mounted = await mountSheetFrame(renderEl, html);
             currentFrame = mounted;
+
+            // Pinch-to-zoom внутри iframe.
+            //   setZoom   — визуал на каждом кадре, без записи;
+            //   onCommit  — сохранение один раз по touchend.
+            currentGestureCleanup = setupFrameGestures(mounted.iframe, {
+                getZoom: () => currentZoom,
+                setZoom: (z) => {
+                    currentZoom = z;
+                    applyZoom();
+                },
+                onCommit: (z) => {
+                    saveZoom(z);
+                },
+            });
 
             applyZoom();
             if (dialog) dialog.classList.add('is-loaded');

@@ -102,12 +102,5 @@ function sanitizeSheetHtml(html, gid) {
     return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
 }
 
-/* "D5" → { col: 3, row: 4 } (0-based, обе) */
-export function parsePosition(pos) {
-    if (!pos) return null;
-    const m = String(pos).trim().match(/^([A-Z]+)(\d+)$/i);
-    if (!m) return null;
-    let n = 0;
-    for (const ch of m[1].toUpperCase()) n = n * 26 + (ch.charCodeAt(0) - 64);
-    return { col: n - 1, row: parseInt(m[2], 10) - 1 };
-}
+/* parsePosition живёт в sheet-render.js — здесь он больше
+   не нужен (у sheet-render своя локальная копия). */

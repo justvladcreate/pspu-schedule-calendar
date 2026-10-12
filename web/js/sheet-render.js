@@ -62,7 +62,6 @@ export function findCellInFrame(doc, position, searchText) {
             // Строим карту координат по colspan/rowspan
             const occupied = new Set();
             let rowIdx = 0;
-            let lastTr = null;
 
             const trs = doc.querySelectorAll('table tbody tr');
             for (const tr of trs) {
@@ -137,11 +136,9 @@ export function focusCellInFrame(iframe, cell) {
         cell.scrollIntoView();
     }
 
-    // Подсветка — через inline-стиль, чтобы перебить Google CSS
-    const prevOutline = cell.style.outline;
-    const prevOutlineOffset = cell.style.outlineOffset;
-    const prevBg = cell.style.backgroundColor;
-
+    // Подсветка — через inline-стиль, чтобы перебить Google CSS.
+    // Не восстанавливаем предыдущее значение: iframe пересоздаётся
+    // при каждом focusOn, старый DOM уходит вместе с ним.
     cell.style.outline = '2px solid #4285f4';
     cell.style.outlineOffset = '-2px';
     cell.style.backgroundColor = '#e8f0fe';
@@ -157,4 +154,129 @@ export function focusCellInFrame(iframe, cell) {
             { duration: 1000, iterations: 2, easing: 'ease-out' }
         );
     } catch {}
+}
+
+/* ============================================================
+ *  PINCH-TO-ZOOM внутри iframe.
+ *
+ *  Touch-события не всплывают из iframe в родительский документ,
+ *  поэтому слушатели живут внутри contentDocument. Мат. часть:
+ *  точка под пальцами должна остаться на месте — при смене scale
+ *  корректируем внутренний scroll iframe.
+ *
+ *  getZoom()    — прочитать текущий scale
+ *  setZoom(z)   — визуально применить новый scale (без записи в LS)
+ *  onCommit(z)  — один раз по touchend, финальное сохранение
+ * ============================================================ */
+
+/* Диапазон pinch-to-zoom. Нижняя граница — чтобы «отдалить обзором»
+   можно было увидеть сразу несколько колонок листа; верхняя —
+   чтобы разглядеть мелкий шрифт в примечаниях. */
+const ZOOM_MIN = 0.15;
+const ZOOM_MAX = 2.5;
+
+export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
+    const doc = iframe.contentDocument;
+    const win = iframe.contentWindow;
+    if (!doc || !win) return () => {};
+
+    // Отключаем браузерный pinch внутри iframe.
+    const style = doc.createElement('style');
+    style.textContent = 'html, body { touch-action: pan-x pan-y !important; }';
+    doc.head.appendChild(style);
+
+    let pinching = false;
+    let startDist = 0;
+    let startScale = 1;
+    let midX = 0, midY = 0;
+    let startScrollX = 0, startScrollY = 0;
+    let rafPending = false;
+    let pendingScrollX = 0, pendingScrollY = 0;
+
+    const dist = (t1, t2) => {
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        return Math.hypot(dx, dy);
+    };
+
+    /* iOS Safari: без этой блокировки двухпальцевый жест внутри
+       iframe превращается в page-zoom — зумится вся страница с
+       календарём. touch-action iOS частично игнорирует, а вот
+       gesture* события — слушает. */
+    const onGesture = (e) => { if (e.cancelable) e.preventDefault(); };
+
+    function onTouchStart(e) {
+        if (e.touches.length !== 2) return;
+        pinching = true;
+        startDist   = dist(e.touches[0], e.touches[1]);
+        startScale  = getZoom();
+
+        const r = iframe.getBoundingClientRect();
+        const t1 = e.touches[0], t2 = e.touches[1];
+        midX = (t1.clientX + t2.clientX) / 2 - r.left;
+        midY = (t1.clientY + t2.clientY) / 2 - r.top;
+
+        startScrollX = win.scrollX || 0;
+        startScrollY = win.scrollY || 0;
+    }
+
+    function onTouchMove(e) {
+        if (!pinching || e.touches.length !== 2) return;
+        if (e.cancelable) e.preventDefault();
+
+        const d = dist(e.touches[0], e.touches[1]);
+        if (startDist < 1) return;
+
+        let z = startScale * (d / startDist);
+        z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
+
+        const scrollX = startScrollX + midX * (1 / startScale - 1 / z);
+        const scrollY = startScrollY + midY * (1 / startScale - 1 / z);
+
+        // Только визуальный отклик. В localStorage не пишем —
+        // иначе 60 записей в секунду на слабом Android = фризы.
+        setZoom(z);
+
+        // scrollTo — одним rAF на кадр, а не по каждому move.
+        pendingScrollX = scrollX;
+        pendingScrollY = scrollY;
+        if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(() => {
+                rafPending = false;
+                try { win.scrollTo(pendingScrollX, pendingScrollY); } catch {}
+            });
+        }
+    }
+
+    function onTouchEnd(e) {
+        if (e.touches.length >= 2) return;
+        if (!pinching) return;
+        pinching = false;
+
+        // Финал жеста — вот тут сохраняем zoom один раз.
+        if (typeof onCommit === 'function') {
+            try { onCommit(getZoom()); } catch {}
+        }
+    }
+
+    doc.addEventListener('touchstart', onTouchStart, { passive: true });
+    doc.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    doc.addEventListener('touchend',    onTouchEnd,   { passive: true });
+    doc.addEventListener('touchcancel', onTouchEnd,   { passive: true });
+
+    // iOS-only: блокируем page-zoom.
+    doc.addEventListener('gesturestart',  onGesture, { passive: false });
+    doc.addEventListener('gesturechange', onGesture, { passive: false });
+    doc.addEventListener('gestureend',    onGesture, { passive: false });
+
+    return () => {
+        doc.removeEventListener('touchstart', onTouchStart);
+        doc.removeEventListener('touchmove',  onTouchMove);
+        doc.removeEventListener('touchend',   onTouchEnd);
+        doc.removeEventListener('touchcancel', onTouchEnd);
+        doc.removeEventListener('gesturestart',  onGesture);
+        doc.removeEventListener('gesturechange', onGesture);
+        doc.removeEventListener('gestureend',    onGesture);
+    };
 }

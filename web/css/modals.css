@@ -650,12 +650,16 @@
 }
 
 /* Сам iframe. Размеры ставит JS (applyZoom),
-   scale — тоже (transform-origin 0 0). */
+   scale — тоже (transform-origin 0 0).
+   touch-action: pan-x pan-y — запрещаем браузеру
+   перехватывать 2-пальцевый pinch как page-zoom;
+   пинч мы обрабатываем сами внутри iframe. */
 .original-render-frame {
     border: none;
     display: block;
     background: #fff;
     transform-origin: 0 0;
+    touch-action: pan-x pan-y;
 }
 
 .original-placeholder {
@@ -681,12 +685,7 @@
 
 
 /* Кастомный рендер больше не нужен — контент живёт в iframe,
-   стили от самого Google. Оставляем только правила для
-   плейсхолдера и «офлайн»-заглушки. */
-
-@media (max-width: 900px) {
-    .original-sheet-wrap { padding: 0; }
-}
+   стили от самого Google. */
 
 .original-spinner {
     width: 28px;
