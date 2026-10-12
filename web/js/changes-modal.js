@@ -292,7 +292,8 @@ export function setupChangesModal() {
     function open(changes) {
         allChanges = changes || [];
         shownCount = Math.min(PAGE_SIZE, allChanges.length);
-        renderVersions(state.pendingChangesMeta);
+        // Шапку с версиями показываем только если реально есть что сравнивать.
+        renderVersions(allChanges.length > 0 ? state.pendingChangesMeta : null);
         renderList();
         modal.classList.add('open');
     }
