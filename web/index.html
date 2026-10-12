@@ -347,7 +347,14 @@
         <div class="original-sheet-tabs" id="originalSheetTabs"
              role="tablist" aria-label="Листы расписания" hidden></div>
         <div class="original-body">
-            <!-- Плавающие кнопки зума поверх iframe -->
+            <div class="original-sheet-wrap" id="originalSheetWrap">
+                <div class="original-placeholder" id="originalPlaceholder">
+                    <div class="original-spinner"></div>
+                    <p>Загрузка таблицы…</p>
+                </div>
+                <div class="original-sheet-render" id="originalSheetRender"></div>
+            </div>
+
             <div class="original-zoom-controls" id="originalZoomControls" hidden>
                 <button class="original-zoom-btn" type="button"
                         data-zoom="in" aria-label="Приблизить" title="Приблизить">
@@ -373,17 +380,6 @@
                     </svg>
                 </button>
             </div>
-
-            <!-- iframe подгрузится из JS при первом открытии -->
-            <div class="original-placeholder" id="originalPlaceholder">
-                <div class="original-spinner"></div>
-                <p>Загрузка таблицы…</p>
-            </div>
-            <iframe class="original-frame" id="originalFrame"
-                    src="about:blank"
-                    loading="lazy"
-                    referrerpolicy="no-referrer"
-                    title="Оригинальное расписание"></iframe>
 
             <div class="original-offline" id="originalOffline" hidden>
                 <p>Для просмотра оригинала нужен интернет.</p>

@@ -36,10 +36,14 @@ import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { setupMoreMenu } from './more-menu.js';
 import { setupOriginalModal } from './original.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
-import { hideEventDetails, showEventDetails } from './popover.js';
+import {
+    hideEventDetails, showEventDetails,
+    setupPopoverViewHandler,
+} from './popover.js';
 
 let changesModalApi = null;
 let updateBannerApi = null;
+let originalApi = null;
 
 function stripReloadMarker() {
     const search = location.search;
@@ -483,7 +487,13 @@ function setupAllUI() {
     setupScrollPersistence();
 
     setupReadmeModal();
-    setupOriginalModal();
+    originalApi = setupOriginalModal();
+
+    // Кнопка «глазик» в поповере: открывает модалку «Оригинал»
+    // на листе группы и подсвечивает ячейку события.
+    setupPopoverViewHandler((ev) => {
+        if (originalApi) originalApi.focusOn(ev);
+    });
 
     changesModalApi = setupChangesModal();
     updateBannerApi = setupUpdateBanner({

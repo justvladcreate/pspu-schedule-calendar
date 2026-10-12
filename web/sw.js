@@ -45,7 +45,9 @@ const STATIC_ASSETS = [
   './js/update-banner.js',
   './js/share.js',
   './js/more-menu.js',
-  './js/original.js',        // ← добавлено
+  './js/original.js',
+  './js/sheets.js',
+  './js/sheet-render.js',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

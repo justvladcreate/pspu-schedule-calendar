@@ -76,6 +76,8 @@ const WATCHED = [
     'js/share.js',
     'js/more-menu.js',
     'js/original.js',
+    'js/sheets.js',
+    'js/sheet-render.js',
 ];
 
 async function hashFiles() {

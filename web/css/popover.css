@@ -47,12 +47,20 @@
     margin: 0;
 }
 
+.popover-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    margin: -4px -4px 0 0;
+}
+
+.popover-look,
 .popover-share {
     appearance: none;
     background: transparent;
     border: none;
     padding: 4px;
-    margin: -4px -4px 0 0;
     color: var(--text-dim);
     cursor: pointer;
     border-radius: 6px;
@@ -64,15 +72,18 @@
     flex-shrink: 0;
 }
 
+.popover-look:hover,
 .popover-share:hover {
     color: var(--accent);
     background: var(--surface-2);
 }
 
+.popover-look:active,
 .popover-share:active {
     background: var(--surface-3);
 }
 
+.popover-look svg,
 .popover-share svg {
     display: block;
     pointer-events: none;

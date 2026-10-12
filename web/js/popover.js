@@ -24,17 +24,27 @@ export function eventDetailsHtml(ev) {
     return `
         <div class="popover-title-row">
             <h3>${escapeHtml(titleText)}</h3>
-            <button class="popover-share" type="button" aria-label="Поделиться ссылкой на событие">
-                <svg viewBox="0 0 24 24" width="14" height="14"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="18" cy="5" r="3"/>
-                    <circle cx="6" cy="12" r="3"/>
-                    <circle cx="18" cy="19" r="3"/>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                </svg>
-            </button>
+            <div class="popover-actions">
+                <button class="popover-look" type="button" aria-label="Показать в оригинале">
+                    <svg viewBox="0 0 24 24" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+                <button class="popover-share" type="button" aria-label="Поделиться ссылкой на событие">
+                    <svg viewBox="0 0 24 24" width="14" height="14"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="popover-row"><span class="label">Время</span><span>${ev.time_start} – ${ev.endTime}</span></div>
         <div class="popover-row"><span class="label">Дата</span><span>${ev.dateObj.getDate()} ${MONTHS_GEN[ev.dateObj.getMonth()]} ${ev.dateObj.getFullYear()}</span></div>
@@ -49,6 +59,7 @@ export function showEventDetails(ev, anchor) {
     const pop = document.getElementById('eventPopover');
     pop.classList.remove('popover--group');
     pop.innerHTML = eventDetailsHtml(ev);
+    pop._eventData = ev;   // ← привязываем событие к поповеру
     pop.classList.add('open');
     attachShareHandler(pop, ev);
     positionPopover(pop, anchor);
@@ -123,6 +134,7 @@ function renderGroupDetailItem(ev, events, anchor, pop) {
         <button class="popover-back" type="button">← К списку</button>
         ${eventDetailsHtml(ev)}
     `;
+    pop._eventData = ev;
     pop.querySelector('.popover-back').addEventListener('click', e => {
         e.stopPropagation();
         renderGroupList(events, anchor, pop);
@@ -184,4 +196,36 @@ function attachShareHandler(pop, ev) {
             onText: () => copyEventText(ev),
         });
     });
+}
+
+/* ============================================================
+ *  КНОПКА «ПОКАЗАТЬ В ОРИГИНАЛЕ» (глазик).
+ *
+ *  Один глобальный слушатель на document. Клик по .popover-look
+ *  берёт событие, привязанное к поповеру, и передаёт его
+ *  в зарегистрированный handler (см. main.js → originalApi.focusOn).
+ * ============================================================ */
+
+let viewOriginalHandler = null;
+
+export function setupPopoverViewHandler(fn) {
+    if (typeof fn !== 'function' || viewOriginalHandler) return;
+    viewOriginalHandler = fn;
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.popover-look');
+        if (!btn) return;
+
+        const pop = document.getElementById('eventPopover');
+        if (!pop || !pop.contains(btn)) return;
+
+        const ev = pop._eventData;
+        if (!ev) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        try { viewOriginalHandler(ev); }
+        catch (err) { console.warn('[look] failed:', err); }
+    }, true);
 }
