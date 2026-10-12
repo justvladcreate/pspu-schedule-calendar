@@ -1,13 +1,64 @@
 'use strict';
 
 import { addMinutes } from './utils.js';
-import { PAIR_MINUTES } from './config.js';
+import { PAIR_MINUTES, MONTHS_GEN } from './config.js';
 import { showEventDetails } from './popover.js';
+import { state } from './state.js';
 
 const PAGE_SIZE = 50;
 
 let allChanges = [];
 let shownCount = 0;
+
+/* Форматирование версии снимка для шапки модалки.
+   Год опускаем, если совпадает с текущим — так компактнее. */
+function formatVersionDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+
+    const now = new Date();
+    const sameYear = d.getFullYear() === now.getFullYear();
+    const day = d.getDate();
+    const month = MONTHS_GEN[d.getMonth()];
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+
+    return sameYear
+        ? `${day} ${month}, ${hh}:${mm}`
+        : `${day} ${month} ${d.getFullYear()}, ${hh}:${mm}`;
+}
+
+/* Шапка с версиями, между которыми построен diff.
+   Слева — «Было» (снимок, с которым сравниваем),
+   справа — «Стало» (свежая версия).
+   Если мета отсутствует (старые пользователи до обновления) —
+   аккуратно скрываем весь блок. */
+function renderVersions(meta) {
+    const box = document.getElementById('changesVersions');
+    if (!box) return;
+
+    const oldDate = meta ? formatVersionDate(meta.oldVersion) : null;
+    const newDate = meta ? formatVersionDate(meta.newVersion) : null;
+
+    if (!oldDate && !newDate) {
+        box.hidden = true;
+        box.innerHTML = '';
+        return;
+    }
+
+    box.hidden = false;
+    box.innerHTML = `
+        <div class="changes-version changes-version--old">
+            <div class="changes-version-label">Было</div>
+            <div class="changes-version-date" title="${oldDate || ''}">${oldDate || '—'}</div>
+        </div>
+        <div class="changes-version changes-version--new">
+            <div class="changes-version-label">Стало</div>
+            <div class="changes-version-date" title="${newDate || ''}">${newDate || '—'}</div>
+        </div>
+    `;
+}
 
 function expandEntry(entry) {
     const firstDate = (entry.dates && entry.dates[0]) || '';
@@ -241,6 +292,7 @@ export function setupChangesModal() {
     function open(changes) {
         allChanges = changes || [];
         shownCount = Math.min(PAGE_SIZE, allChanges.length);
+        renderVersions(state.pendingChangesMeta);
         renderList();
         modal.classList.add('open');
     }

@@ -88,6 +88,44 @@ export function clearPendingChanges() {
   try { localStorage.removeItem(PENDING_CHANGES_KEY); } catch {}
 }
 
+/* ============================================================
+ *  Версии снимков, между которыми построен diff.
+ *
+ *   oldVersion — generated_at снимка, с которым сравниваем
+ *   newVersion — generated_at свежих данных
+ *
+ *  Храним отдельно от pendingChanges, чтобы не ломать
+ *  существующий формат (массив объектов-изменений).
+ * ============================================================ */
+
+const PENDING_CHANGES_META_KEY = 'schedule-pending-changes-meta';
+
+export function savePendingChangesMeta(meta) {
+  try {
+    if (!meta || (!meta.oldVersion && !meta.newVersion)) {
+      localStorage.removeItem(PENDING_CHANGES_META_KEY);
+    } else {
+      localStorage.setItem(PENDING_CHANGES_META_KEY, JSON.stringify({
+        oldVersion: meta.oldVersion || null,
+        newVersion: meta.newVersion || null,
+      }));
+    }
+  } catch {}
+}
+
+export function loadPendingChangesMeta() {
+  try {
+    const raw = localStorage.getItem(PENDING_CHANGES_META_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj !== 'object') return null;
+    return {
+      oldVersion: obj.oldVersion || null,
+      newVersion: obj.newVersion || null,
+    };
+  } catch { return null; }
+}
+
 export const state = {
   allEvents: [],
   filteredEvents: [],
@@ -125,6 +163,7 @@ export const state = {
   restoringScroll: false,
 
   pendingChanges: loadPendingChanges(),
+  pendingChangesMeta: loadPendingChangesMeta(),
 
   urlContext: false,
   urlEventId: null,

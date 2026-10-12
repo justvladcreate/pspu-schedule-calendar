@@ -4,7 +4,7 @@ import {
   state, saveSetToStorage,
   loadDayColWidth, loadSnapshot, saveSnapshot,
   saveScrollMemory, saveGeneratedAt, loadGeneratedAt,
-  saveCurrentDate, savePendingChanges,
+  saveCurrentDate, savePendingChanges, savePendingChangesMeta,
   applyUrlContext, resolveUrlContext, disarmUrlContext,
 } from './state.js';
 import { escapeHtml, toISO } from './utils.js';
@@ -554,11 +554,19 @@ function finalizeWithData() {
     // Снимок и сравнение — только когда мы не в fallback
     if (!state.fallbackActive) {
         const oldSnapshot = loadSnapshot();
+        // Версию старого снимка читаем ДО того, как saveGeneratedAt
+        // перезапишет её новым generated_at в конце блока.
+        const oldVersion = loadGeneratedAt();
         if (oldSnapshot && !state.urlContext) {
             const changes = compareEvents(oldSnapshot, currentEvents);
             if (changes.length > 0) {
                 state.pendingChanges = sortChanges(changes);
+                state.pendingChangesMeta = {
+                    oldVersion,
+                    newVersion: state.displayedIso || null,
+                };
                 savePendingChanges(state.pendingChanges);
+                savePendingChangesMeta(state.pendingChangesMeta);
             }
         }
         saveSnapshot(currentEvents);
@@ -909,6 +917,9 @@ async function fetchAndApply({ showIndicator = false } = {}) {
                 result = { ok: true, changed: false };
             } else {
                 const oldSnapshot = loadSnapshot();
+                // Запоминаем старую версию ДО перезаписи — она указывает,
+                // каким был предыдущий снимок (тот, с которым сравниваем).
+                const oldVersion = loadGeneratedAt();
                 const changes = oldSnapshot && !state.urlContext
                     ? compareEvents(oldSnapshot, incoming.events || [])
                     : [];
@@ -929,7 +940,12 @@ async function fetchAndApply({ showIndicator = false } = {}) {
 
                 if (changes.length > 0) {
                     state.pendingChanges = sortChanges(changes);
+                    state.pendingChangesMeta = {
+                        oldVersion,
+                        newVersion: incoming.generated_at || null,
+                    };
                     savePendingChanges(state.pendingChanges);
+                    savePendingChangesMeta(state.pendingChangesMeta);
                     if (updateBannerApi) updateBannerApi.refresh();
                 }
 
