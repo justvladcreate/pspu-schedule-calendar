@@ -35,6 +35,7 @@ import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { setupMoreMenu } from './more-menu.js';
 import { setupOriginalModal } from './original.js';
+import { setupModalHistory } from './modal-history.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import {
     hideEventDetails, showEventDetails,
@@ -488,6 +489,7 @@ function setupAllUI() {
 
     setupReadmeModal();
     originalApi = setupOriginalModal();
+    setupModalHistory();
 
     // Кнопка «глазик» в поповере: открывает модалку «Оригинал»
     // на листе группы и подсвечивает ячейку события.

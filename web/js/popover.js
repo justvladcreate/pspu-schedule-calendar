@@ -59,10 +59,21 @@ export function showEventDetails(ev, anchor) {
     const pop = document.getElementById('eventPopover');
     pop.classList.remove('popover--group');
     pop.innerHTML = eventDetailsHtml(ev);
-    pop._eventData = ev;   // ← привязываем событие к поповеру
+    // Запоминаем событие — глобальный обработчик глазика достанет его отсюда.
+    pop._eventData = ev;
     pop.classList.add('open');
+    raisePopoverIfNeeded(pop);
     attachShareHandler(pop, ev);
     positionPopover(pop, anchor);
+}
+
+/* Попап по умолчанию лежит НИЖЕ модалок (z-index: 400 vs 999),
+   чтобы не висеть поверх readme/export/offline. Но иногда он
+   открывается ИЗ модалки — клик по мероприятию в «Изменениях».
+   Тогда его нужно поднять выше backdrop'а. */
+function raisePopoverIfNeeded(pop) {
+    const inModal = !!document.querySelector('.modal-backdrop.open');
+    pop.style.zIndex = inModal ? '1001' : '';
 }
 
 export function hideEventDetails() {
@@ -74,6 +85,7 @@ export function hideEventDetails() {
 export function showGroupDetails(events, anchor) {
     const pop = document.getElementById('eventPopover');
     pop.classList.add('open', 'popover--group');
+    raisePopoverIfNeeded(pop);
     renderGroupList(events, anchor, pop);
     positionPopover(pop, anchor);
 }
@@ -135,6 +147,7 @@ function renderGroupDetailItem(ev, events, anchor, pop) {
         ${eventDetailsHtml(ev)}
     `;
     pop._eventData = ev;
+    raisePopoverIfNeeded(pop);
     pop.querySelector('.popover-back').addEventListener('click', e => {
         e.stopPropagation();
         renderGroupList(events, anchor, pop);

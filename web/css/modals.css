@@ -641,6 +641,9 @@
     height: 100%;
     overflow: hidden;                /* скролл живёт внутри iframe */
     background: #f1f3f4;
+    /* Изолируем layout/paint: изменения внутри (в т.ч. ресайз iframe
+       на каждом кадре pinch'а) не заставляют пересчитывать родителя. */
+    contain: strict;
 }
 
 .original-sheet-render {
@@ -660,6 +663,11 @@
     background: #fff;
     transform-origin: 0 0;
     touch-action: pan-x pan-y;
+    /* transform — на композиторе (быстро);
+       width/height — layout, но его всё равно приходится менять.
+       will-change подсказывает браузеру заранее поднять слой. */
+    will-change: transform, width, height;
+    backface-visibility: hidden;
 }
 
 .original-placeholder {

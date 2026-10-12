@@ -78,6 +78,7 @@ const WATCHED = [
     'js/original.js',
     'js/sheets.js',
     'js/sheet-render.js',
+    'js/modal-history.js',
 ];
 
 async function hashFiles() {

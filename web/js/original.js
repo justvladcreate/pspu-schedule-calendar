@@ -222,7 +222,7 @@ export function setupOriginalModal() {
 
     /* ---------- рендер листа ---------- */
 
-    async function showSheet(gid, { focusPosition, focusText } = {}) {
+    async function showSheet(gid, { focusEvent } = {}) {
         if (!spreadsheetId || !gid) return;
         currentGid = gid;
         try { localStorage.setItem(LAST_GID_KEY, gid); } catch {}
@@ -265,12 +265,19 @@ export function setupOriginalModal() {
             applyZoom();
             if (dialog) dialog.classList.add('is-loaded');
 
-            if (focusPosition || focusText) {
+            if (focusEvent) {
                 // Даём Google CSS доехать, чтобы координаты устоялись
                 setTimeout(() => {
-                    const td = findCellInFrame(mounted.doc, focusPosition, focusText);
+                    const td = findCellInFrame(mounted.doc, {
+                        position:   focusEvent.position,
+                        discipline: focusEvent.discipline,
+                        dates:      focusEvent.dates,
+                        teachers:   focusEvent.teachers,
+                        weekday:    focusEvent.weekday,
+                        pairNumber: focusEvent.pair_number,
+                    });
                     if (td) focusCellInFrame(mounted.iframe, td);
-                }, 60);
+                }, 80);
             }
         } catch (e) {
             console.warn('[original] render failed:', e);
@@ -350,10 +357,7 @@ export function setupOriginalModal() {
 
         const gid = findGidByGroup(ev.group) || currentGid || '0';
 
-        await showSheet(gid, {
-            focusPosition: ev.position || null,
-            focusText:     ev.discipline || null,
-        });
+        await showSheet(gid, { focusEvent: ev });
     }
 
     /* ---------- handlers ---------- */
