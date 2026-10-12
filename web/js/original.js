@@ -282,7 +282,7 @@ export function setupOriginalModal() {
                         weekday:    focusEvent.weekday,
                         pairNumber: focusEvent.pair_number,
                     });
-                    if (td) focusCellInFrame(wrapEl, mounted.iframe, td);
+                    if (td) focusCellInFrame(wrapEl, mounted.iframe, td, currentZoom);
                 }, 80);
             }
         } catch (e) {

@@ -371,30 +371,47 @@ function parsePositionLocal(pos) {
 
 /**
  * Подсвечивает ячейку и плавно скроллит к ней РОДИТЕЛЬСКИЙ wrap.
- * Внутри iframe мы не скроллим — прокрутка живёт в .original-sheet-wrap.
  *
- * Математика: wrap.scrollLeft измеряется в пикселях stage
- * (stage = nativeW × zoom). Позиция ячейки в визуальных пикселях
- * относительно wrap'а — уже в той же системе, потому что stage
- * отмасштабирован по определению. Никаких переводов scale не нужно.
+ * КРИТИЧНО: cell.getBoundingClientRect() возвращает координаты
+ * в системе viewport'а iframe (нативные, без учёта scale).
+ * wrap.getBoundingClientRect() и wrap.scrollLeft — в системе
+ * родительского документа. Их нельзя вычитать напрямую.
+ *
+ * Переводим через iframe.getBoundingClientRect():
+ *   cellVisualLeft = iframeRect.left + cellRect.left * zoom
+ * где zoom — текущий scale iframe (== getComputedStyle(iframe).transform
+ * в матричной форме, либо наш currentZoom).
  */
-export function focusCellInFrame(wrapEl, iframe, cell) {
+export function focusCellInFrame(wrapEl, iframe, cell, zoom) {
     if (!wrapEl || !iframe || !cell) return;
 
     requestAnimationFrame(() => {
-        const wrapRect = wrapEl.getBoundingClientRect();
-        const cellRect = cell.getBoundingClientRect();
+        const wrapRect   = wrapEl.getBoundingClientRect();
+        const iframeRect = iframe.getBoundingClientRect();
+        const cellRect   = cell.getBoundingClientRect();
 
-        // Центр ячейки относительно левого/верхнего края wrap'а —
-        // уже в пикселях stage, потому что cellRect учитывает
-        // transform: scale, а scrollLeft тоже в stage-пикселях.
-        const cx = cellRect.left + cellRect.width  / 2 - wrapRect.left;
-        const cy = cellRect.top  + cellRect.height / 2 - wrapRect.top;
+        const scale = zoom || 1;
 
-        // Чтобы центр ячейки оказался в центре видимой области wrap'а:
-        //   new_scrollLeft = scrollLeft + cx - wrapWidth / 2
-        const targetScrollX = wrapEl.scrollLeft + cx - wrapRect.width  / 2;
-        const targetScrollY = wrapEl.scrollTop  + cy - wrapRect.height / 2;
+        // Позиция ячейки в системе координат родительского документа.
+        // cellRect в нативных пикселях iframe, умноженных на текущий scale.
+        const cellVisualLeft = iframeRect.left + cellRect.left * scale;
+        const cellVisualTop  = iframeRect.top  + cellRect.top  * scale;
+        const cellVisualW    = cellRect.width  * scale;
+        const cellVisualH    = cellRect.height * scale;
+
+        // Центр ячейки в родительском viewport'е.
+        const cellCenterX = cellVisualLeft + cellVisualW / 2;
+        const cellCenterY = cellVisualTop  + cellVisualH / 2;
+
+        // Расстояние от левого/верхнего края wrap'а в визуальных пикселях.
+        // Теперь все величины в одной системе координат.
+        const dx = cellCenterX - wrapRect.left;
+        const dy = cellCenterY - wrapRect.top;
+
+        // scrollLeft wrap'а — в пикселях stage (stage.width = nativeW * zoom),
+        // это те же визуальные пиксели, потому что сам stage без transform.
+        const targetScrollX = wrapEl.scrollLeft + dx - wrapRect.width  / 2;
+        const targetScrollY = wrapEl.scrollTop  + dy - wrapRect.height / 2;
 
         wrapEl.scrollTo({
             left: Math.max(0, targetScrollX),
