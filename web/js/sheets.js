@@ -41,7 +41,22 @@ export async function fetchSheetHtml(spreadsheetId, gid) {
 function sanitizeSheetHtml(html, gid) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
 
-    // 1. <base href="https://docs.google.com/"> — чтобы пути /static/...
+    // 1. Чистим meta viewport: Google до сих пор подставляет туда
+    //    устаревший target-densitydpi, из-за которого браузер
+    //    сыпет предупреждением в консоль.
+    const viewport = doc.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        const content = viewport.getAttribute('content') || '';
+        const cleaned = content
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s && !/^target-densitydpi=/i.test(s))
+            .join(', ');
+        if (cleaned) viewport.setAttribute('content', cleaned);
+        else viewport.remove();
+    }
+
+    // 2. <base href="https://docs.google.com/"> — чтобы пути /static/...
     //    резолвились на Google, а не на наш домен.
     let base = doc.querySelector('base');
     if (!base) {
@@ -75,7 +90,31 @@ function sanitizeSheetHtml(html, gid) {
         if (el.tagName === 'DIV') el.removeAttribute('tabindex');
     });
 
-    // 4. Наш инжект-стиль: гарантируем, что html/body не съезжают,
+    // 4. Stub для DOCS_timing: Google-скрипты в инлайне вызывают
+    //    DOCS_timing.mark(...) ДО того, как подгрузится сама
+    //    библиотека. Из-за этого в консоль сыпется
+    //    «ReferenceError: DOCS_timing is not defined». Заглушка
+    //    безопасна — DOCS_timing у Google отвечает только за
+    //    телеметрию, на отрисовку листа не влияет.
+    //    Ставим САМЫМ ПЕРВЫМ в head, до Google-скриптов.
+    const stub = doc.createElement('script');
+    stub.textContent = `
+        (function () {
+            if (window.DOCS_timing) return;
+            var noop = function () {};
+            window.DOCS_timing = {
+                mark: noop,
+                measure: noop,
+                start: noop,
+                end: noop,
+                clearMarks: noop,
+                clearMeasures: noop,
+            };
+        })();
+    `;
+    doc.head.insertBefore(stub, doc.head.firstChild);
+
+    // 5. Наш инжект-стиль: гарантируем, что html/body не съезжают,
     //    серый фон подложки, скролл. Плюс страховочное правило —
     //    если Google-скрипт по какой-то причине снова спрячет
     //    таблицу, показываем её.
