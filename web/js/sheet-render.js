@@ -14,13 +14,21 @@
  */
 export function mountSheetFrame(container, html) {
     return new Promise((resolve, reject) => {
-        container.querySelectorAll('.original-render-frame').forEach(f => f.remove());
+        // Сносим предыдущий stage целиком — iframe и обёртка уходят вместе.
+        container.querySelectorAll('.original-render-stage').forEach(s => s.remove());
+
+        const stage = document.createElement('div');
+        stage.className = 'original-render-stage';
 
         const iframe = document.createElement('iframe');
         iframe.className = 'original-render-frame';
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         iframe.setAttribute('loading', 'eager');
         iframe.setAttribute('title', 'Оригинальное расписание');
+        // Временно растягиваем — пока грузится. Настоящий размер
+        // выставим после load, когда измерим контент.
+        iframe.style.width  = '100%';
+        iframe.style.height = '100%';
 
         let settled = false;
         const onLoad = () => {
@@ -30,7 +38,47 @@ export function mountSheetFrame(container, html) {
                 const doc = iframe.contentDocument;
                 const win = iframe.contentWindow;
                 if (!doc) throw new Error('contentDocument unavailable');
-                resolve({ iframe, doc, win });
+
+                // Даём Google CSS доехать, иначе scrollWidth/Height
+                // измеряются до применения стилей.
+                setTimeout(() => {
+                    try {
+                        const htmlEl = doc.documentElement;
+                        const bodyEl = doc.body || htmlEl;
+
+                        // На время замера снимаем overflow: hidden —
+                        // при нём scrollWidth возвращает размер viewport'а,
+                        // а не полную ширину контента, и таблица обрезается.
+                        htmlEl.style.setProperty('overflow', 'visible', 'important');
+                        bodyEl.style.setProperty('overflow', 'visible', 'important');
+
+                        // Берём scrollWidth/Height самой таблицы Google —
+                        // у неё фиксированные ширины колонок, поэтому
+                        // эти значения равны истинному размеру контента.
+                        const table = doc.querySelector('table');
+                        let nativeW, nativeH;
+
+                        if (table) {
+                            nativeW = Math.max(table.scrollWidth, table.offsetWidth, 800);
+                            nativeH = Math.max(table.scrollHeight, table.offsetHeight, 600);
+                        } else {
+                            // Fallback: если по какой-то причине таблицы нет.
+                            nativeW = Math.max(htmlEl.scrollWidth, bodyEl.scrollWidth, 800);
+                            nativeH = Math.max(htmlEl.scrollHeight, bodyEl.scrollHeight, 600);
+                        }
+
+                        // Возвращаем overflow: hidden.
+                        htmlEl.style.removeProperty('overflow');
+                        bodyEl.style.removeProperty('overflow');
+
+                        iframe.style.width  = nativeW + 'px';
+                        iframe.style.height = nativeH + 'px';
+
+                        resolve({ iframe, stage, doc, win, nativeW, nativeH });
+                    } catch (e) {
+                        reject(e);
+                    }
+                }, 30);
             } catch (e) {
                 reject(e);
             }
@@ -44,7 +92,8 @@ export function mountSheetFrame(container, html) {
         }, { once: true });
 
         iframe.srcdoc = html;
-        container.appendChild(iframe);
+        stage.appendChild(iframe);
+        container.appendChild(stage);
     });
 }
 
@@ -327,27 +376,52 @@ function parsePositionLocal(pos) {
 }
 
 /**
- * Подсвечивает ячейку и плавно скроллит к ней внутри iframe.
- * Вызывается после mountSheetFrame.
+ * Подсвечивает ячейку и плавно скроллит к ней РОДИТЕЛЬСКИЙ wrap.
+ * Внутри iframe мы теперь не скроллим — iframe статичный,
+ * прокрутка живёт в .original-sheet-wrap.
+ *
+ * zoom — текущий scale, нужен чтобы перевести координаты td
+ * (внутри stage) в координаты скролла wrap'а.
  */
-export function focusCellInFrame(iframe, cell) {
-    if (!cell) return;
+export function focusCellInFrame(wrapEl, iframe, cell, zoom) {
+    if (!wrapEl || !iframe || !cell) return;
 
-    // Скролл внутри iframe
-    try {
-        cell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-    } catch {
-        cell.scrollIntoView();
-    }
+    // Скролл родителя к позиции td. getBoundingClientRect даёт
+    // координаты в визуальных пикселях, а wrap.scrollLeft — в
+    // натуральных пикселях stage. Делим на zoom, чтобы получить
+    // «сырую» координату внутри stage.
+    requestAnimationFrame(() => {
+        const wrapRect = wrapEl.getBoundingClientRect();
+        const cellRect = cell.getBoundingClientRect();
 
-    // Подсветка — через inline-стиль, чтобы перебить Google CSS.
-    // Не восстанавливаем предыдущее значение: iframe пересоздаётся
-    // при каждом focusOn, старый DOM уходит вместе с ним.
+        const scale = zoom || 1;
+
+        // Позиция центра ячейки относительно левого/верхнего края wrap,
+        // в ВИЗУАЛЬНЫХ пикселях (iframe уже с transform: scale).
+        const cellCenterVisualX = cellRect.left + cellRect.width  / 2 - wrapRect.left;
+        const cellCenterVisualY = cellRect.top  + cellRect.height / 2 - wrapRect.top;
+
+        // scrollLeft/scrollTop wrap'а живут в НАТУРАЛЬНЫХ пикселях stage,
+        // поэтому визуальные делим на scale. Формула:
+        //   targetScrollX = scrollLeft + (cellCenterVisualX - wrapWidth/2) / scale
+        // Даёт центрирование ячейки в видимой области wrap'а.
+        const targetScrollX = wrapEl.scrollLeft
+            + (cellCenterVisualX - wrapRect.width  / 2) / scale;
+        const targetScrollY = wrapEl.scrollTop
+            + (cellCenterVisualY - wrapRect.height / 2) / scale;
+
+        wrapEl.scrollTo({
+            left: Math.max(0, targetScrollX),
+            top:  Math.max(0, targetScrollY),
+            behavior: 'smooth',
+        });
+    });
+
+    // Подсветка — через inline-стиль, перебиваем Google CSS.
     cell.style.outline = '2px solid #4285f4';
     cell.style.outlineOffset = '-2px';
     cell.style.backgroundColor = '#e8f0fe';
 
-    // Пульс
     try {
         cell.animate(
             [
@@ -379,20 +453,17 @@ export function focusCellInFrame(iframe, cell) {
 const ZOOM_MIN = 0.15;
 const ZOOM_MAX = 2.5;
 
-export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
-    const doc = iframe.contentDocument;
-    const win = iframe.contentWindow;
-    if (!doc || !win) return () => {};
+export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit }) {
+    if (!iframe || !wrapEl) return () => {};
 
-    // Отключаем браузерный pinch внутри iframe.
-    const style = doc.createElement('style');
-    style.textContent = 'html, body { touch-action: pan-x pan-y !important; }';
-    doc.head.appendChild(style);
+    /* Слушатели жестов вешаем на РОДИТЕЛЬСКИЙ wrap — потому что
+       теперь скроллит он, а iframe получает события через
+       bubbling, когда пользователь тапает внутри него. */
 
     let pinching = false;
     let startDist = 0;
     let startScale = 1;
-    let midX = 0, midY = 0;
+    let anchorX = 0, anchorY = 0;      // координата пальца внутри wrap'а
     let startScrollX = 0, startScrollY = 0;
     let rafPending = false;
     let pendingZoom = 1;
@@ -404,10 +475,6 @@ export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
         return Math.hypot(dx, dy);
     };
 
-    /* iOS Safari: без этой блокировки двухпальцевый жест внутри
-       iframe превращается в page-zoom — зумится вся страница с
-       календарём. touch-action iOS частично игнорирует, а вот
-       gesture* события — слушает. */
     const onGesture = (e) => { if (e.cancelable) e.preventDefault(); };
 
     function onTouchStart(e) {
@@ -416,13 +483,14 @@ export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
         startDist   = dist(e.touches[0], e.touches[1]);
         startScale  = getZoom();
 
-        const r = iframe.getBoundingClientRect();
+        const r = wrapEl.getBoundingClientRect();
         const t1 = e.touches[0], t2 = e.touches[1];
-        midX = (t1.clientX + t2.clientX) / 2 - r.left;
-        midY = (t1.clientY + t2.clientY) / 2 - r.top;
+        // Точка между пальцами ВНУТРИ wrap'а (визуальные пиксели).
+        anchorX = (t1.clientX + t2.clientX) / 2 - r.left;
+        anchorY = (t1.clientY + t2.clientY) / 2 - r.top;
 
-        startScrollX = win.scrollX || 0;
-        startScrollY = win.scrollY || 0;
+        startScrollX = wrapEl.scrollLeft;
+        startScrollY = wrapEl.scrollTop;
     }
 
     function onTouchMove(e) {
@@ -435,24 +503,32 @@ export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
         let z = startScale * (d / startDist);
         z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
 
-        const scrollX = startScrollX + midX * (1 / startScale - 1 / z);
-        const scrollY = startScrollY + midY * (1 / startScale - 1 / z);
+        // Универсальная формула: точка stage под пальцем остаётся
+        // на месте при смене scale. stageX = (anchor + startScroll)/startScale,
+        // потом newScroll = stageX * z - anchor.
+        const ratio = z / startScale;
+        const newScrollX = (anchorX + startScrollX) * ratio - anchorX;
+        const newScrollY = (anchorY + startScrollY) * ratio - anchorY;
 
-        // Накапливаем изменения и выплёскиваем их ОДНИМ rAF-ом.
-        // Это важно: setZoom меняет iframe.width/height — тяжёлый
-        // layout внутри iframe (Google Sheets пересчитывает таблицу).
-        // Раньше scrollTo летел отдельным rAF — получалось два
-        // layout'а на кадр, отсюда статтер на слабых телефонах.
         pendingZoom = z;
-        pendingScrollX = scrollX;
-        pendingScrollY = scrollY;
+        pendingScrollX = newScrollX;
+        pendingScrollY = newScrollY;
 
         if (!rafPending) {
             rafPending = true;
             requestAnimationFrame(() => {
                 rafPending = false;
-                setZoom(pendingZoom);   // visual only
-                try { win.scrollTo(pendingScrollX, pendingScrollY); } catch {}
+
+                // setZoom меняет только stage.width/height и transform
+                // iframe. Layout внутри iframe не трогается — нет
+                // пересчёта 260 td. Всё дешево.
+                setZoom(pendingZoom);
+
+                // Скролл — сразу после, тоже в этом кадре. Двойного
+                // reflow не будет: setZoom меняет размер stage,
+                // затем мы просто двигаем scrollLeft/Top.
+                wrapEl.scrollLeft = pendingScrollX;
+                wrapEl.scrollTop  = pendingScrollY;
             });
         }
     }
@@ -462,29 +538,48 @@ export function setupFrameGestures(iframe, { getZoom, setZoom, onCommit }) {
         if (!pinching) return;
         pinching = false;
 
-        // Финал жеста — вот тут сохраняем zoom один раз.
         if (typeof onCommit === 'function') {
             try { onCommit(getZoom()); } catch {}
         }
     }
 
-    doc.addEventListener('touchstart', onTouchStart, { passive: true });
-    doc.addEventListener('touchmove',  onTouchMove,  { passive: false });
-    doc.addEventListener('touchend',    onTouchEnd,   { passive: true });
-    doc.addEventListener('touchcancel', onTouchEnd,   { passive: true });
+    // Слушаем на wrap — если пользователь тапает по iframe, событие
+    // всплывёт наверх, но target останется внутри iframe. Это ок,
+    // нам важны координаты касаний в системе wrap'а.
+    wrapEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    wrapEl.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    wrapEl.addEventListener('touchend',    onTouchEnd,   { passive: true });
+    wrapEl.addEventListener('touchcancel', onTouchEnd,   { passive: true });
 
-    // iOS-only: блокируем page-zoom.
-    doc.addEventListener('gesturestart',  onGesture, { passive: false });
-    doc.addEventListener('gesturechange', onGesture, { passive: false });
-    doc.addEventListener('gestureend',    onGesture, { passive: false });
+    // iOS-only: блокируем page-zoom. Вешаем и на wrap, и в сам iframe
+    // (для Safari, где gesture* события приходят в iframe-контекст).
+    wrapEl.addEventListener('gesturestart',  onGesture, { passive: false });
+    wrapEl.addEventListener('gesturechange', onGesture, { passive: false });
+    wrapEl.addEventListener('gestureend',    onGesture, { passive: false });
+
+    let iframeGestureCleanup = null;
+    try {
+        const innerDoc = iframe.contentDocument;
+        if (innerDoc) {
+            innerDoc.addEventListener('gesturestart',  onGesture, { passive: false });
+            innerDoc.addEventListener('gesturechange', onGesture, { passive: false });
+            innerDoc.addEventListener('gestureend',    onGesture, { passive: false });
+            iframeGestureCleanup = () => {
+                innerDoc.removeEventListener('gesturestart',  onGesture);
+                innerDoc.removeEventListener('gesturechange', onGesture);
+                innerDoc.removeEventListener('gestureend',    onGesture);
+            };
+        }
+    } catch {}
 
     return () => {
-        doc.removeEventListener('touchstart', onTouchStart);
-        doc.removeEventListener('touchmove',  onTouchMove);
-        doc.removeEventListener('touchend',   onTouchEnd);
-        doc.removeEventListener('touchcancel', onTouchEnd);
-        doc.removeEventListener('gesturestart',  onGesture);
-        doc.removeEventListener('gesturechange', onGesture);
-        doc.removeEventListener('gestureend',    onGesture);
+        wrapEl.removeEventListener('touchstart', onTouchStart);
+        wrapEl.removeEventListener('touchmove',  onTouchMove);
+        wrapEl.removeEventListener('touchend',   onTouchEnd);
+        wrapEl.removeEventListener('touchcancel', onTouchEnd);
+        wrapEl.removeEventListener('gesturestart',  onGesture);
+        wrapEl.removeEventListener('gesturechange', onGesture);
+        wrapEl.removeEventListener('gestureend',    onGesture);
+        if (iframeGestureCleanup) iframeGestureCleanup();
     };
 }

@@ -124,7 +124,11 @@ function sanitizeSheetHtml(html, gid) {
             margin: 0 !important;
             padding: 0 !important;
             background: #f1f3f4 !important;
-            overflow: auto !important;
+            /* Скролл живёт в родителе (.original-sheet-wrap), не внутри
+               iframe. Так Google не перерисовывает ячейки при скролле
+               и не мерцает, а zoom работает через transform — без
+               reflow внутри iframe. */
+            overflow: hidden !important;
         }
         #sheets-viewport {
             overflow: visible !important;

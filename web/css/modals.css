@@ -639,17 +639,32 @@
     position: relative;
     width: 100%;
     height: 100%;
-    overflow: hidden;                /* скролл живёт внутри iframe */
+    /* Скролл — здесь, не в iframe. iframe статичный, мы двигаем
+       только его transform. Google не перерисовывает ячейки при
+       скролле, потому что его viewport не меняется. */
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     background: #f1f3f4;
-    /* Изолируем layout/paint: изменения внутри (в т.ч. ресайз iframe
-       на каждом кадре pinch'а) не заставляют пересчитывать родителя. */
-    contain: strict;
+    /* Изолируем layout и paint — те же оптимизации, что у strict,
+       но БЕЗ contain: size. С size браузер перестаёт связывать размер
+       wrap с содержимым, и на части старых Chromium/WebKit скролл
+       внутри wrap может не появиться. */
+    contain: layout paint;
 }
 
 .original-sheet-render {
     width: 100%;
     height: 100%;
     position: relative;
+}
+
+/* Stage — «холст» размером iframe × scale. Родительский wrap
+   скроллит по stage. Меняем только размер stage, сам iframe
+   не трогаем (transform: scale — GPU-операция). */
+.original-render-stage {
+    position: relative;
+    transform-origin: 0 0;
 }
 
 /* Сам iframe. Размеры ставит JS (applyZoom),
@@ -661,12 +676,12 @@
     border: none;
     display: block;
     background: #fff;
+    /* Zoom применяется целиком через transform — width/height
+       iframe фиксированы по натуральному размеру контента.
+       Никаких reflow внутри iframe при pinch'е. */
     transform-origin: 0 0;
     touch-action: pan-x pan-y;
-    /* transform — на композиторе (быстро);
-       width/height — layout, но его всё равно приходится менять.
-       will-change подсказывает браузеру заранее поднять слой. */
-    will-change: transform, width, height;
+    will-change: transform;
     backface-visibility: hidden;
 }
 
