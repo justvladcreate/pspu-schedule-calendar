@@ -456,14 +456,19 @@ const ZOOM_MAX = 2.5;
 export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit }) {
     if (!iframe || !wrapEl) return () => {};
 
-    /* Слушатели жестов вешаем на РОДИТЕЛЬСКИЙ wrap — потому что
-       теперь скроллит он, а iframe получает события через
-       bubbling, когда пользователь тапает внутри него. */
+    /* Touch-события НЕ всплывают из iframe в родительский DOM —
+       это особенность браузеров. Слушатели вешаем на
+       iframe.contentDocument, а координаты пальцев переводим
+       в систему координат родительского wrap'а (прибавляем
+       позицию iframe на экране). */
+
+    const innerDoc = iframe.contentDocument;
+    if (!innerDoc) return () => {};
 
     let pinching = false;
     let startDist = 0;
     let startScale = 1;
-    let anchorX = 0, anchorY = 0;      // координата пальца внутри wrap'а
+    let anchorX = 0, anchorY = 0;      // координаты точки жеста в системе wrap'а
     let startScrollX = 0, startScrollY = 0;
     let rafPending = false;
     let pendingZoom = 1;
@@ -475,6 +480,17 @@ export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit 
         return Math.hypot(dx, dy);
     };
 
+    /* Переводит координаты клиента (в системе iframe viewport'а)
+       в систему координат wrap'а родителя. */
+    function toWrapCoords(clientX, clientY) {
+        const iframeRect = iframe.getBoundingClientRect();
+        const wrapRect   = wrapEl.getBoundingClientRect();
+        return {
+            x: iframeRect.left + clientX - wrapRect.left,
+            y: iframeRect.top  + clientY - wrapRect.top,
+        };
+    }
+
     const onGesture = (e) => { if (e.cancelable) e.preventDefault(); };
 
     function onTouchStart(e) {
@@ -483,11 +499,14 @@ export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit 
         startDist   = dist(e.touches[0], e.touches[1]);
         startScale  = getZoom();
 
-        const r = wrapEl.getBoundingClientRect();
         const t1 = e.touches[0], t2 = e.touches[1];
-        // Точка между пальцами ВНУТРИ wrap'а (визуальные пиксели).
-        anchorX = (t1.clientX + t2.clientX) / 2 - r.left;
-        anchorY = (t1.clientY + t2.clientY) / 2 - r.top;
+        // Середина жеста в системе iframe
+        const midX = (t1.clientX + t2.clientX) / 2;
+        const midY = (t1.clientY + t2.clientY) / 2;
+        // ...переводим в систему wrap'а родителя
+        const p = toWrapCoords(midX, midY);
+        anchorX = p.x;
+        anchorY = p.y;
 
         startScrollX = wrapEl.scrollLeft;
         startScrollY = wrapEl.scrollTop;
@@ -503,9 +522,9 @@ export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit 
         let z = startScale * (d / startDist);
         z = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z));
 
-        // Универсальная формула: точка stage под пальцем остаётся
-        // на месте при смене scale. stageX = (anchor + startScroll)/startScale,
-        // потом newScroll = stageX * z - anchor.
+        // Точка stage под пальцами остаётся на месте:
+        //   stageX = (anchor + startScroll) / startScale
+        //   newScroll = stageX * z - anchor
         const ratio = z / startScale;
         const newScrollX = (anchorX + startScrollX) * ratio - anchorX;
         const newScrollY = (anchorY + startScrollY) * ratio - anchorY;
@@ -518,15 +537,7 @@ export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit 
             rafPending = true;
             requestAnimationFrame(() => {
                 rafPending = false;
-
-                // setZoom меняет только stage.width/height и transform
-                // iframe. Layout внутри iframe не трогается — нет
-                // пересчёта 260 td. Всё дешево.
                 setZoom(pendingZoom);
-
-                // Скролл — сразу после, тоже в этом кадре. Двойного
-                // reflow не будет: setZoom меняет размер stage,
-                // затем мы просто двигаем scrollLeft/Top.
                 wrapEl.scrollLeft = pendingScrollX;
                 wrapEl.scrollTop  = pendingScrollY;
             });
@@ -543,43 +554,35 @@ export function setupFrameGestures(iframe, wrapEl, { getZoom, setZoom, onCommit 
         }
     }
 
-    // Слушаем на wrap — если пользователь тапает по iframe, событие
-    // всплывёт наверх, но target останется внутри iframe. Это ок,
-    // нам важны координаты касаний в системе wrap'а.
+    // Основные слушатели — внутри iframe.
+    innerDoc.addEventListener('touchstart', onTouchStart, { passive: true });
+    innerDoc.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    innerDoc.addEventListener('touchend',    onTouchEnd,   { passive: true });
+    innerDoc.addEventListener('touchcancel', onTouchEnd,   { passive: true });
+
+    // iOS-only: блокируем page-zoom внутри iframe.
+    innerDoc.addEventListener('gesturestart',  onGesture, { passive: false });
+    innerDoc.addEventListener('gesturechange', onGesture, { passive: false });
+    innerDoc.addEventListener('gestureend',    onGesture, { passive: false });
+
+    // Дублируем на wrap — на случай тапа по серому фону вне iframe.
     wrapEl.addEventListener('touchstart', onTouchStart, { passive: true });
     wrapEl.addEventListener('touchmove',  onTouchMove,  { passive: false });
     wrapEl.addEventListener('touchend',    onTouchEnd,   { passive: true });
     wrapEl.addEventListener('touchcancel', onTouchEnd,   { passive: true });
 
-    // iOS-only: блокируем page-zoom. Вешаем и на wrap, и в сам iframe
-    // (для Safari, где gesture* события приходят в iframe-контекст).
-    wrapEl.addEventListener('gesturestart',  onGesture, { passive: false });
-    wrapEl.addEventListener('gesturechange', onGesture, { passive: false });
-    wrapEl.addEventListener('gestureend',    onGesture, { passive: false });
-
-    let iframeGestureCleanup = null;
-    try {
-        const innerDoc = iframe.contentDocument;
-        if (innerDoc) {
-            innerDoc.addEventListener('gesturestart',  onGesture, { passive: false });
-            innerDoc.addEventListener('gesturechange', onGesture, { passive: false });
-            innerDoc.addEventListener('gestureend',    onGesture, { passive: false });
-            iframeGestureCleanup = () => {
-                innerDoc.removeEventListener('gesturestart',  onGesture);
-                innerDoc.removeEventListener('gesturechange', onGesture);
-                innerDoc.removeEventListener('gestureend',    onGesture);
-            };
-        }
-    } catch {}
-
     return () => {
+        innerDoc.removeEventListener('touchstart', onTouchStart);
+        innerDoc.removeEventListener('touchmove',  onTouchMove);
+        innerDoc.removeEventListener('touchend',   onTouchEnd);
+        innerDoc.removeEventListener('touchcancel', onTouchEnd);
+        innerDoc.removeEventListener('gesturestart',  onGesture);
+        innerDoc.removeEventListener('gesturechange', onGesture);
+        innerDoc.removeEventListener('gestureend',    onGesture);
+
         wrapEl.removeEventListener('touchstart', onTouchStart);
         wrapEl.removeEventListener('touchmove',  onTouchMove);
         wrapEl.removeEventListener('touchend',   onTouchEnd);
         wrapEl.removeEventListener('touchcancel', onTouchEnd);
-        wrapEl.removeEventListener('gesturestart',  onGesture);
-        wrapEl.removeEventListener('gesturechange', onGesture);
-        wrapEl.removeEventListener('gestureend',    onGesture);
-        if (iframeGestureCleanup) iframeGestureCleanup();
     };
 }
