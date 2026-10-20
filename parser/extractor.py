@@ -268,9 +268,9 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                             merged_times.append(cur)
                             i += 1
 
-                    all_gray = []
+                    all_colors = []
                     for c in range(start_cell[1], end_cell[1] + 1):
-                        all_gray.extend(colors.get((abs_row, c), []))
+                        all_colors.extend(colors.get((abs_row, c), []))
 
                     for time_value in merged_times:
                         time_val = normalize_time(time_value)
@@ -281,8 +281,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                             "rooms": ", ".join(room_val),
                             "rooms_hints": rooms_hints,
                             "subject": subject_val,
-                            "gray_texts": all_gray,
-                        })
+                            "text_colors": all_colors,                        })
 
             except Exception as e:
                 print(f"Ошибка при обработке строки {row} {group_name}: {e}")

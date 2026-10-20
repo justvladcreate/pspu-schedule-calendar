@@ -309,30 +309,25 @@ def merge_ai_line(
     time_start = normalize_time(time_start) if time_start else ""
     time_end   = normalize_time(time_end) if time_end else ""
 
-    gray_texts = src.get("gray_texts") or []
+    text_colors = src.get("text_colors") or []
 
-    def _check_past(b_dates: str) -> bool:
+    def _get_event_color(b_dates: str) -> str | None:
         """
-        Мероприятие серое ⇔ хотя бы одна его дата встречается в сером тексте.
-
-        Ограничение целостности данных (от заказчика): мероприятие серое
-        ЦЕЛИКОМ — даты, преподаватели, дисциплина, подгруппа, тип
-        одновременно серые или чёрные. Поэтому единственного признака
-        (совпадения по датам) достаточно для классификации.
+        Возвращает hex-код цвета, если найдено пересечение по датам.
+        Ограничение целостности: мероприятие окрашено целиком.
         """
-        if not gray_texts or not b_dates:
-            return False
+        if not text_colors or not b_dates:
+            return None
 
         branch_dates = set(re.findall(r'\d{1,2}\.\d{2}', b_dates))
         if not branch_dates:
-            return False
+            return None
 
-        for gt in gray_texts:
-            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', gt))
+        for item in text_colors:
+            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', item["text"]))
             if branch_dates & gt_dates:
-                return True
-
-        return False
+                return item["color"]
+        return None
 
     if not rooms_ai:
         hints = src.get("rooms_hints") or []
@@ -344,7 +339,8 @@ def merge_ai_line(
                 branch_index=branch_index,
                 branch_total=branch_total,
             )
-            is_past = _check_past(dates)
+            color = _get_event_color(dates)
+            is_past = bool(color)
             return [{
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -355,13 +351,15 @@ def merge_ai_line(
                 "subgroup":   subgroup,
                 "teachers":   teachers,
                 "rooms":      rooms,
+                "color":      color or "",
                 "is_past":    is_past,
             }]
 
         groups = split_branch_by_rooms(hints, type_, dates)
         res = []
         for g_dates, g_rooms in groups:
-            is_past_g = _check_past(g_dates)
+            color = _get_event_color(g_dates)
+            is_past_g = bool(color)
             res.append({
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -372,11 +370,13 @@ def merge_ai_line(
                 "subgroup":   subgroup,
                 "teachers":   teachers,
                 "rooms":      g_rooms,
+                "color":      color or "",
                 "is_past":    is_past_g,
             })
         return res
 
-    is_past = _check_past(dates)
+    color = _get_event_color(dates)
+    is_past = bool(color)
     return [{
         "weekday":    weekday,
         "time_start": time_start,
@@ -387,6 +387,7 @@ def merge_ai_line(
         "subgroup":   subgroup,
         "teachers":   teachers,
         "rooms":      rooms_ai,
+        "color":      color or "",
         "is_past":    is_past,
     }]
 

@@ -63,28 +63,18 @@ def _sheet_paths_from_zip(path: str | Path) -> dict[str, str]:
         result[name] = target
     return result
 
-def _is_gray_hex(hex_str: str | None) -> bool:
+def _extract_color_hex(hex_str: str | None) -> str | None:
     if not hex_str:
-        return False
+        return None
     hex_str = hex_str.upper()
-    if hex_str.startswith('FF'):
+    if hex_str.startswith('FF') and len(hex_str) == 8:
         hex_str = hex_str[2:]
     if len(hex_str) != 6:
-        return False
-    try:
-        r = int(hex_str[0:2], 16)
-        g = int(hex_str[2:4], 16)
-        b = int(hex_str[4:6], 16)
-    except ValueError:
-        return False
-
-    # Считаем "серым" (прошедшим) любой цвет, кроме чёрного.
-    # У чёрного все каналы близки к 0. Ставим порог 80 (примерно #505050),
-    # чтобы случайные тёмные оттенки не приравнивались к чёрному.
-    if max(r, g, b) < 80:
-        return False
-
-    return True
+        return None
+    # Игнорируем черный цвет (активные мероприятия)
+    if hex_str == '000000':
+        return None
+    return f"#{hex_str}"
 
 def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, dict[tuple[int, int], list[str]]]:
     df = excel_file.parse(worksheet.title, header=None)
@@ -108,9 +98,13 @@ def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, d
     for row in worksheet.iter_rows():
         for cell in row:
             color = cell.font.color
-            if color and color.type == 'rgb' and _is_gray_hex(color.rgb):
-                if cell.value:
-                    colors[(cell.row - 1, cell.column - 1)] = [str(cell.value)]
+            if color and color.type == 'rgb' and cell.value:
+                hex_color = _extract_color_hex(color.rgb)
+                if hex_color:
+                    colors[(cell.row - 1, cell.column - 1)] = [{
+                        "text": str(cell.value),
+                        "color": hex_color
+                    }]
 
     return df, colors
 

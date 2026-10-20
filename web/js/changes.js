@@ -24,6 +24,7 @@ function toEntry(ev) {
     comment: ev.comment || '',
     position: ev.position,
     is_past: ev.is_past || false,
+    color: ev.color || "",
   };
 }
 

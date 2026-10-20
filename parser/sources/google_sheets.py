@@ -61,23 +61,16 @@ def _cell_links(cell: dict) -> list[str]:
     return urls
 
 
-def _is_gray_color(color: dict | None) -> bool:
-    if not color:
-        return False
-    r = color.get('red', 0)
-    g = color.get('green', 0)
-    b = color.get('blue', 0)
-
-    # Считаем "серым" (прошедшим) любой цвет, кроме чёрного.
-    # В Google Sheets цвета в диапазоне 0.0 - 1.0.
-    # 0.3 * 255 = 76.5 — порог для отсечения чёрного.
-    if max(r, g, b) < 0.3:
-        return False
-
-    return True
+def _rgb_to_hex(color: dict | None) -> str | None:
+    if not color: return None
+    r = int(color.get('red', 0) * 255)
+    g = int(color.get('green', 0) * 255)
+    b = int(color.get('blue', 0) * 255)
+    if r == 0 and g == 0 and b == 0: return None  # Игнорируем черный
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def _extract_gray_texts(cell: dict) -> list[str]:
+def _extract_colored_texts(cell: dict) -> list[dict]:
     if not cell: return []
     val = cell.get("formattedValue") or ""
     if not val: return []
@@ -85,7 +78,8 @@ def _extract_gray_texts(cell: dict) -> list[str]:
     runs = cell.get("textFormatRuns") or []
     if not runs:
         fg = (((cell.get("effectiveFormat") or {}).get("textFormat") or {}).get("foregroundColor"))
-        return [val] if _is_gray_color(fg) else []
+        hex_color = _rgb_to_hex(fg)
+        return [{"text": val, "color": hex_color}] if hex_color else []
 
     parts = []
     for i, run in enumerate(runs):
@@ -96,8 +90,9 @@ def _extract_gray_texts(cell: dict) -> list[str]:
         if not text.strip(): continue
 
         fg = ((run.get("format") or {}).get("foregroundColor"))
-        if _is_gray_color(fg):
-            parts.append(text)
+        hex_color = _rgb_to_hex(fg)
+        if hex_color:
+            parts.append({"text": text, "color": hex_color})
     return parts
 
 
@@ -210,9 +205,9 @@ class GoogleSheetsSource(ScheduleSource):
                     if urls:
                         links[(r_idx, c_idx)] = urls
 
-                    gray_texts = _extract_gray_texts(cell)
-                    if gray_texts:
-                        colors[(r_idx, c_idx)] = gray_texts
+                    colored_texts = _extract_colored_texts(cell)
+                    if colored_texts:
+                        colors[(r_idx, c_idx)] = colored_texts
 
             _propagate_links_by_merges(links, sheet.get("merges") or [])
 

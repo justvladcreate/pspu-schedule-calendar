@@ -364,12 +364,28 @@
     color: var(--accent);
 }
 
-/* --- Прошедшие мероприятия (серый цвет) --- */
+/* --- Прошедшие мероприятия --- */
 .event-block--past {
-    opacity: 0.45;
-    filter: grayscale(0.8);
+    opacity: 0.65;
 }
 .month-event--past {
-    opacity: 0.45;
-    filter: grayscale(0.8);
+    opacity: 0.65;
+}
+
+/* --- Оригинальные цвета из таблицы --- */
+.event-block--custom {
+    background: color-mix(in srgb, var(--event-color) 18%, var(--surface));
+    border-left-color: var(--event-color);
+}
+.event-block--custom .event-title {
+    color: var(--event-color);
+}
+.event-block--custom .event-meta {
+    color: var(--text-muted);
+}
+
+.month-event--custom {
+    background: color-mix(in srgb, var(--event-color) 18%, var(--surface));
+    border-left-color: var(--event-color);
+    color: var(--event-color);
 }

@@ -244,7 +244,8 @@ function makeSnapshotEntry(ev) {
     rooms: ev.rooms || '',
     comment: ev.comment || '',
     position: ev.position,
-    is_past: ev.is_past || false,   // ← ДОБАВЛЕНО
+    is_past: ev.is_past || false,
+    color: ev.color || "",
   };
 }
 

@@ -441,7 +441,7 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 4,
             "event_id": "1211_ПН_5_4"
         },
@@ -1900,7 +1900,7 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 5,
             "event_id": "1212_ПН_3_5"
         },
@@ -2012,7 +2012,7 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 4,
             "event_id": "1212_ПН_4_4"
         },
@@ -2357,6 +2357,25 @@
             "pair_number": 5,
             "discipline": "Возрастная анатомия, физиология и культура здоровья",
             "type": "лаб.",
+            "subgroup": "",
+            "teachers": [
+                "Гаврилова И.Н."
+            ],
+            "dates": [],
+            "rooms": "IV к. А305, IV к. А202, IV к. А331",
+            "comment": "",
+            "is_past": false,
+            "position": 3,
+            "event_id": "1212_ПТ_5_3"
+        },
+        {
+            "group": "1212",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Возрастная анатомия, физиология и культура здоровья",
+            "type": "лаб.",
             "subgroup": "п/г 1",
             "teachers": [
                 "Гаврилова И.Н."
@@ -2368,8 +2387,8 @@
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
             "is_past": false,
-            "position": 3,
-            "event_id": "1212_ПТ_5_3"
+            "position": 4,
+            "event_id": "1212_ПТ_5_4"
         },
         {
             "group": "1212",
@@ -2390,8 +2409,8 @@
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
             "is_past": false,
-            "position": 4,
-            "event_id": "1212_ПТ_5_4"
+            "position": 5,
+            "event_id": "1212_ПТ_5_5"
         },
         {
             "group": "1212",
@@ -4611,7 +4630,7 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1221_ПН_3_3"
         },
@@ -4701,7 +4720,7 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 4,
             "event_id": "1221_ПН_4_4"
         },
@@ -4746,7 +4765,7 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1221_ПН_5_2"
         },
@@ -4790,7 +4809,7 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1221_ПН_6_2"
         },
@@ -6067,7 +6086,7 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1222_ПН_3_3"
         },
@@ -6135,7 +6154,7 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1222_ПН_4_3"
         },
@@ -6201,7 +6220,7 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1222_ПН_5_3"
         },
@@ -6267,7 +6286,7 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1222_ПН_6_3"
         },
@@ -6422,7 +6441,7 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1222_ПТ_5_2"
         },
@@ -8468,7 +8487,7 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1227_СБ_1_1"
         },
@@ -8502,7 +8521,7 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1227_СБ_2_1"
         },
@@ -9645,7 +9664,7 @@
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 4,
             "event_id": "1232_ПН_4_4"
         },
@@ -10762,7 +10781,7 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1233_ВТ_4_3"
         },
@@ -10914,14 +10933,14 @@
             "time_start": "11:00",
             "time_end": "12:30",
             "pair_number": 2,
-            "discipline": "Сдача нормативов ГТО манеж Спартак (г. Пермь, ул. Рабочая, 9) регистрация, старт ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
+            "discipline": "Сдача нормативов ГТО регистрация, старт ЯВКА студентов СТРОГО ОБЯЗАТЕЛЬНА!",
             "type": "",
             "subgroup": "",
             "teachers": [],
             "dates": [
                 "26.10.2026"
             ],
-            "rooms": "манеж Спартак, (ул.Рабочая, 9)",
+            "rooms": "манеж Спартак (г. Пермь, ул. Рабочая, 9)",
             "comment": "",
             "is_past": false,
             "position": 2,
@@ -11195,7 +11214,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1233_СБ_1_2"
         },
@@ -11248,7 +11267,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1233_СБ_2_2"
         },
@@ -11580,7 +11599,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 4,
             "event_id": "1233_СР_7_4"
         },
@@ -12160,7 +12179,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1237_ПТ_5_1"
         },
@@ -12192,7 +12211,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1237_ПТ_6_1"
         },
@@ -12426,7 +12445,7 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1237_СБ_5_2"
         },
@@ -12506,7 +12525,7 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1237_СБ_6_3"
         },
@@ -13483,7 +13502,7 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1242_ВТ_3_1"
         },
@@ -13504,7 +13523,7 @@
             ],
             "rooms": "IV к. А102",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1242_ВТ_3_2"
         },
@@ -13527,7 +13546,7 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 3,
             "event_id": "1242_ВТ_3_3"
         },
@@ -15045,7 +15064,7 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1243_ЧТ_4_1"
         },
@@ -15098,7 +15117,7 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1243_ЧТ_5_1"
         },
@@ -17003,7 +17022,7 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1252_ЧТ_4_1"
         },
@@ -17025,7 +17044,7 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1252_ЧТ_4_2"
         },
@@ -17320,7 +17339,7 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "1255_ЧТ_4_1"
         },
@@ -17342,7 +17361,7 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 2,
             "event_id": "1255_ЧТ_4_2"
         },
@@ -18078,7 +18097,7 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/55867250364188)",
             "comment": "",
-            "is_past": false,
+            "is_past": true,
             "position": 1,
             "event_id": "М1227_ЧТ_6_1"
         },
@@ -18189,5 +18208,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-20T18:18:16+00:00"
+    "generated_at": "2026-10-20T19:13:21+00:00"
 }
