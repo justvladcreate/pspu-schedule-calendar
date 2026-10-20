@@ -399,7 +399,11 @@ function setupAllUI() {
     });
 
     document.addEventListener('click', (e) => {
-        hideEventDetails();
+        // Закрываем поповер только если клик был ВНЕ его
+        if (!e.target.closest('#eventPopover')) {
+            hideEventDetails();
+        }
+
         if (window.innerWidth > 900) {
             const filterRoot = document.getElementById('filterRoot');
             if (filterRoot && filterRoot.classList.contains('open') && !filterRoot.contains(e.target)) {
@@ -427,6 +431,7 @@ function setupAllUI() {
     setupShareModal(); // Инициализация модалки шаринга
 
     setupPopoverViewHandler((ev) => {
+        hideEventDetails();
         if (originalApi) originalApi.focusOn(ev);
     });
 

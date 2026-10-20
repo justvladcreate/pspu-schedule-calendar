@@ -9,6 +9,12 @@
 }
 .modal-backdrop.open { display: flex; }
 
+/* Модалка "Оригинал" должна перекрывать остальные модалки,
+   так как она открывается поверх них (например, из "Изменений") */
+#originalModal {
+    z-index: 1000;
+}
+
 .picker {
     background: var(--surface);
     border: 1px solid var(--border);

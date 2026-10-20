@@ -25,16 +25,8 @@ export function eventDetailsHtml(ev) {
         <div class="popover-title-row">
             <h3>${escapeHtml(titleText)}</h3>
             <div class="popover-actions">
-                <button class="popover-look" type="button" aria-label="Показать в оригинале">
-                    <svg viewBox="0 0 24 24" width="14" height="14"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </button>
                 <button class="popover-share" type="button" aria-label="Поделиться ссылкой на событие">
-                    <svg viewBox="0 0 24 24" width="14" height="14"
+                    <svg viewBox="0 0 24 24" width="16" height="16"
                          fill="none" stroke="currentColor" stroke-width="2"
                          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="18" cy="5" r="3"/>
@@ -52,6 +44,18 @@ export function eventDetailsHtml(ev) {
         ${ev.teachers && ev.teachers.length ? `<div class="popover-row"><span class="label">Преподаватель</span><span>${escapeHtml(ev.teachers.join(', '))}</span></div>` : ''}
         <div class="popover-row"><span class="label">Группа</span><span>${escapeHtml(ev.group)}</span></div>
         ${ev.subgroup ? `<div class="popover-row"><span class="label">Подгруппа</span><span>${escapeHtml(ev.subgroup)}</span></div>` : ''}
+
+        <div class="popover-actions-footer">
+            <button class="popover-look" type="button" aria-label="Показать в таблице">
+                <svg viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>В таблице</span>
+            </button>
+        </div>
     `;
 }
 
@@ -177,7 +181,10 @@ function attachShareHandler(pop, ev) {
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         openShareMenu(btn, {
-            onLink: () => openShareModal(buildEventUrl(ev), ev.discipline),
+            onLink: () => {
+                hideEventDetails();
+                openShareModal(buildEventUrl(ev), ev.discipline);
+            },
             onText: () => copyEventText(ev),
         });
     });
