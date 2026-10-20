@@ -30,7 +30,10 @@ import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
 import { showToast } from './toast.js';
-import { openShareMenu, buildTextForView } from './share.js';
+import {
+    openShareMenu, buildTextForView,
+    setupShareModal, openShareModal
+} from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
 import { setupMoreMenu } from './more-menu.js';
@@ -91,13 +94,10 @@ function loadCachedData() {
 async function loadFreshData({ onProgress = null } = {}) {
     const online = navigator.onLine !== false;
 
-    // Обёртка: если пришёл свежий source — прогресс без изменений,
-    // если fallback — сбрасываем в «Загрузка резервной копии…».
     let currentSource = 'main';
     const safeProgress = typeof onProgress === 'function'
         ? (pct) => {
             if (currentSource === 'fallback' && pct < 50) {
-                // Первый тик после сброса — переименовываем
                 onProgress(pct, { fallback: true });
             } else {
                 onProgress(pct, { fallback: currentSource === 'fallback' });
@@ -160,24 +160,9 @@ function rebuildGroups() {
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 }
 
-/**
- * Баннер синхронизации под тулбаром.
- *
- *   showSyncBanner('loading') — «Обновление…»
- *   showSyncBanner('error')   — «Ошибка обновления» + кнопка «Повторить»
- *   hideSyncBanner()          — скрыть
- *
- * Loading показывается с задержкой 400 мс: если данные пришли раньше,
- * пользователь вообще ничего не увидит. Error — сразу.
- *
- * Если уже показан error и мы стартуем новую попытку —
- * переключаемся на loading мгновенно (без задержки).
- * Приоритет с update-banner: пока update-banner открыт, sync-banner
- * скрывается через CSS-селектор — JS об этом не думает.
- */
 let syncBannerTimer = null;
-let syncBannerMode  = null;   // 'loading' | 'error' | null
-let pendingSyncMode = null;   // что показать, когда закроется update-banner
+let syncBannerMode  = null;
+let pendingSyncMode = null;
 
 function isUpdateBannerOpen() {
     const el = document.getElementById('updateBanner');
@@ -193,15 +178,11 @@ function showSyncBanner(mode) {
         syncBannerTimer = null;
     }
 
-    // Пока открыт update-banner (изменения в расписании) — они
-    // делят одну точку под тулбаром. Откладываем показ: как только
-    // пользователь закроет update-banner, покажем отложенное.
     if (isUpdateBannerOpen()) {
         pendingSyncMode = mode;
         return;
     }
 
-    // Уже показано то же состояние — не мигаем
     if (syncBannerMode === mode && el.classList.contains('is-visible')) return;
 
     const apply = () => {
@@ -220,8 +201,6 @@ function showSyncBanner(mode) {
         el.classList.add('is-visible');
     };
 
-    // Loading — с задержкой, если не идёт смена с error.
-    // Error — мгновенно.
     if (mode === 'loading' && syncBannerMode !== 'error') {
         syncBannerTimer = setTimeout(apply, 400);
     } else {
@@ -242,32 +221,12 @@ function hideSyncBanner() {
     el.classList.remove('is-visible', 'is-loading', 'is-error');
 }
 
-/**
- * Вызывается при закрытии update-banner (крестик или клик).
- * Если во время показа update-banner мы отложили sync — показываем.
- */
 function flushPendingSyncBanner() {
     if (pendingSyncMode === null) return;
     const mode = pendingSyncMode;
     pendingSyncMode = null;
-    // Небольшая задержка, чтобы не мигало в момент анимации
     setTimeout(() => showSyncBanner(mode), 120);
 }
-
-/* ============================================================
- *  TOP PROGRESS — тонкая полоска загрузки сверху
- *
- *  API: topProgressStart() / topProgressDone()
- *
- *  Логика роста:
- *    • 0 → 10% мгновенно (мгновенный отклик на «начало»);
- *    • 10% → 85% — плавно замедляясь, интервал 180 мс
- *      (создаёт ощущение «работает, но не знает когда конец»);
- *    • done() → 100% и fade-out за ~0.5 с.
- *
- *  Одновременные start/done не ломают друг друга: каждый start
- *  отменяет старый таймер, done — тоже.
- * ============================================================ */
 
 let topProgressEl       = null;
 let topProgressInterval = null;
@@ -285,7 +244,6 @@ function topProgressStart() {
     const el = _topProgressEl();
     if (!el) return;
 
-    // 1) Убиваем всё, что могло остаться с прошлого раза
     if (topProgressInterval) {
         clearInterval(topProgressInterval);
         topProgressInterval = null;
@@ -295,29 +253,18 @@ function topProgressStart() {
         topProgressHideTimer = null;
     }
 
-    // 2) Показываем элемент и сбрасываем в 0
-    //    БЕЗ transition — чтобы рестарт был мгновенным и предсказуемым.
     el.hidden = false;
     el.style.transition = 'none';
     el.style.transform  = 'scaleX(0)';
     el.style.opacity    = '1';
     topProgressValue    = 0;
 
-    // 3) Форсируем reflow — заставляем браузер «применить»
-    //    scaleX(0), прежде чем перейти к следующему значению.
-    //    Без этого шага два изменения стиля могут слиться в одно,
-    //    и анимации не будет вовсе (или будет резкий скачок).
     void el.offsetWidth;
 
-    // 4) Мгновенный рывок до 10% — синхронно, без RAF.
-    //    RAF не срабатывает во фоновых вкладках и на некоторых
-    //    мобильных браузерах — именно из-за этого полоска
-    //    «не всегда появлялась».
     el.style.transition = 'transform 0.25s ease-out';
     topProgressValue     = 0.1;
     el.style.transform   = 'scaleX(0.1)';
 
-    // 5) Дальше — медленный рост к 85% с асимптотическим замедлением
     topProgressInterval = setInterval(() => {
         if (topProgressValue >= 0.85) return;
         topProgressValue += (0.85 - topProgressValue) * 0.08;
@@ -329,7 +276,6 @@ function topProgressDone() {
     const el = _topProgressEl();
     if (!el) return;
 
-    // 1) Останавливаем рост
     if (topProgressInterval) {
         clearInterval(topProgressInterval);
         topProgressInterval = null;
@@ -339,11 +285,8 @@ function topProgressDone() {
         topProgressHideTimer = null;
     }
 
-    // 2) Форсируем reflow — чтобы transition точно сработал
-    //    от текущего значения, а не «слипся» с предыдущим.
     void el.offsetWidth;
 
-    // 3) Догоняем до 100% и плавно прячем
     el.style.transition =
         'transform 0.25s ease-out, opacity 0.3s ease-out 0.2s';
     el.style.transform = 'scaleX(1)';
@@ -408,14 +351,6 @@ function resetToToday() {
     state.scrollToNow = true;
 }
 
-/* ============================================================
- *  init
- * ============================================================ */
-
-/* ============================================================
- *  UI, независимый от данных
- * ============================================================ */
-
 function setupScrollPersistence() {
     const cal = document.getElementById('calendar');
     let lastScrollSave = 0;
@@ -435,7 +370,6 @@ function setupScrollPersistence() {
         });
     }, { passive: true });
 }
-
 
 function setupAllUI() {
     const exportModal = setupExportModal();
@@ -490,9 +424,8 @@ function setupAllUI() {
     setupReadmeModal();
     originalApi = setupOriginalModal();
     setupModalHistory();
+    setupShareModal(); // Инициализация модалки шаринга
 
-    // Кнопка «глазик» в поповере: открывает модалку «Оригинал»
-    // на листе группы и подсвечивает ячейку события.
     setupPopoverViewHandler((ev) => {
         if (originalApi) originalApi.focusOn(ev);
     });
@@ -509,8 +442,6 @@ function setupAllUI() {
     setupUnifiedFilter();
     setupFavoritesButton();
 
-    // Когда пользователь закрывает баннер изменений — показываем
-    // отложенный баннер синхронизации (если он был отложен).
     const updateBannerClose = document.getElementById('updateBannerClose');
     if (updateBannerClose) {
         updateBannerClose.addEventListener('click', () => {
@@ -519,7 +450,6 @@ function setupAllUI() {
     }
     const updateBannerEl = document.getElementById('updateBanner');
     if (updateBannerEl) {
-        // Клик по баннеру (не по крестику) тоже закрывает его
         updateBannerEl.addEventListener('click', (e) => {
             if (e.target.closest('#updateBannerClose')) return;
             setTimeout(flushPendingSyncBanner, 60);
@@ -532,13 +462,10 @@ function setupAllUI() {
         disarmUrlContext();
     }, true);
 
-    // Кнопки баннера синхронизации
     const syncAction = document.getElementById('syncBannerAction');
     if (syncAction) {
         syncAction.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Новая попытка. showSyncBanner('loading') сам
-            // переключит текущий error → loading мгновенно.
             fetchAndApply({ showIndicator: true });
         });
     }
@@ -556,18 +483,11 @@ function setupAllUI() {
     setupPeriodicUpdates();
 }
 
-/* ============================================================
- *  Пост-обработка после того, как данные уже в state
- * ============================================================ */
-
 function finalizeWithData() {
     const currentEvents = (state.currentData && state.currentData.events) || [];
 
-    // Снимок и сравнение — только когда мы не в fallback
     if (!state.fallbackActive) {
         const oldSnapshot = loadSnapshot();
-        // Версию старого снимка читаем ДО того, как saveGeneratedAt
-        // перезапишет её новым generated_at в конце блока.
         const oldVersion = loadGeneratedAt();
         if (oldSnapshot && !state.urlContext) {
             const changes = compareEvents(oldSnapshot, currentEvents);
@@ -585,34 +505,24 @@ function finalizeWithData() {
         if (state.displayedIso) saveGeneratedAt(state.displayedIso);
     }
 
-    // Ширина колонки дня
     const savedColWidth = loadDayColWidth();
     if (savedColWidth) {
         document.documentElement.style.setProperty('--m-day-col', savedColWidth + 'px');
     }
 
-    // Применяем фильтры к свежим данным
     applyFilters();
     updateTriggerLabel();
     updateCounter();
 
-    // Баннер изменений
     if (!state.fallbackActive && updateBannerApi) {
         updateBannerApi.refresh();
     }
 
     render();
 
-    // Баннер «вы смотрите по ссылке» (мог обновиться после resolveUrlContext)
     setupUrlContextBanner();
-
-    // Открыть попап события, если пришли по deep-link
     openUrlContextEvent();
 }
-
-/* ============================================================
- *  init
- * ============================================================ */
 
 async function init() {
     stripReloadMarker();
@@ -624,13 +534,11 @@ async function init() {
     setupMoreMenu();
     setupOnlineStatus();
 
-    // Настраиваем UI — независимо от того, есть ли уже данные
     setupAllUI();
 
     const cached = loadCachedData();
 
     if (cached) {
-        // === Мгновенный старт с кэша ===
         const wasFirstVisit = !state.displayedIso;
 
         applyDataToState(cached, false);
@@ -649,7 +557,6 @@ async function init() {
 
         finalizeWithData();
 
-        // Фоновое обновление — только если сеть вроде как есть
         if (navigator.onLine !== false) {
             fetchAndApply({ showIndicator: true }).then(result => {
                 if (!result.ok) {
@@ -659,11 +566,9 @@ async function init() {
             });
         }
     } else {
-        // === Холодный старт: нет кэша — спиннер в календаре, блокирующий fetch ===
         showLoadingState();
         topProgressStart();
 
-        // Кэшируем ссылку на hint один раз — не дёргаем DOM на каждом тике
         const hintEl = document.querySelector(
             '.empty-state--loading .empty-state-hint'
         );
@@ -720,10 +625,6 @@ async function init() {
     registerServiceWorker();
 }
 
-/* ============================================================
- *  DEEP LINKS / SHARE
- * ============================================================ */
-
 function buildShareUrl() {
     const params = new URLSearchParams();
     const g = [...state.selectedGroups];
@@ -735,23 +636,6 @@ function buildShareUrl() {
     params.set('d', toISO(state.currentDate));
 
     return location.origin + location.pathname + '?' + params.toString();
-}
-
-async function shareLink(url, title) {
-    try {
-        if (navigator.share) {
-            await navigator.share({ url, title: title || 'Расписание' });
-        } else if (navigator.clipboard) {
-            await navigator.clipboard.writeText(url);
-            showToast('Ссылка скопирована');
-        } else {
-            showToast('Не удалось скопировать ссылку');
-        }
-    } catch (e) {
-        if (e && e.name !== 'AbortError') {
-            console.warn('[share] failed:', e);
-        }
-    }
 }
 
 async function copyText(text, emptyMessage) {
@@ -779,7 +663,7 @@ function setupShareButton() {
         e.stopPropagation();
 
         openShareMenu(btn, {
-            onLink: () => shareLink(buildShareUrl(), 'Расписание'),
+            onLink: () => openShareModal(buildShareUrl(), 'Расписание'),
             onText: () => {
                 const text = buildTextForView(
                     state.view,
@@ -870,21 +754,10 @@ function registerServiceWorker() {
 
 const UPDATE_INTERVAL = 30 * 60 * 1000;
 
-/**
- * Загружает свежие данные и, если они отличаются от текущих,
- * обновляет state и перерисовывает.
- *
- * @param {Object}  [opts]
- * @param {boolean} [opts.showIndicator=false] — показывать ли «Обновление…»
- * @returns {Promise<{ok: boolean, changed?: boolean, count?: number, reason?: string}>}
- */
 async function fetchAndApply({ showIndicator = false } = {}) {
     const online = navigator.onLine !== false;
     const trackProgress = showIndicator && online;
 
-    // Показываем loading только если онлайн: в оффлайне
-    // кнопка «Обновлено» и так переключится в «Оффлайн»,
-    // а баннер ошибки был бы лишним шумом.
     if (trackProgress) {
         showSyncBanner('loading');
         topProgressStart();
@@ -895,8 +768,6 @@ async function fetchAndApply({ showIndicator = false } = {}) {
         const fresh = await loadFreshData();
 
         if (!fresh) {
-            // Данных не получили. Если онлайн — это ошибка сети/сервера,
-            // выставляем fallbackActive, чтобы кнопка стала «Ошибка · обновить».
             if (online) {
                 state.fallbackActive = true;
                 updateOnlineStatus();
@@ -906,31 +777,19 @@ async function fetchAndApply({ showIndicator = false } = {}) {
             const incoming = fresh.data;
             const usedFallback = !!fresh.usedFallback;
 
-            // state.fallbackActive управляет видом кнопки «Обновлено/Ошибка».
             state.fallbackActive = usedFallback;
             updateOnlineStatus();
 
-            // ВАЖНО: fallback (данные из old_data.json) — это тоже
-            // «неуспех» с точки зрения баннера. Пользователь должен
-            // видеть, что свежая версия не пришла, даже если старые
-            // данные успешно подгружены.
             if (usedFallback) {
                 result = {
                     ok: false,
                     reason: 'fallback',
                     changed: false,
                 };
-                // НЕ трогаем state.currentData и не сохраняем снимок —
-                // оставляем базу такой, какой её видел пользователь.
-                // Fallback-копия не должна перетирать UI.
-                // ⚠️ Без return: управление должно дойти до финального
-                // блока, который переключит баннер loading → error.
             } else if (incoming.generated_at === state.displayedIso) {
                 result = { ok: true, changed: false };
             } else {
                 const oldSnapshot = loadSnapshot();
-                // Запоминаем старую версию ДО перезаписи — она указывает,
-                // каким был предыдущий снимок (тот, с которым сравниваем).
                 const oldVersion = loadGeneratedAt();
                 const changes = oldSnapshot && !state.urlContext
                     ? compareEvents(oldSnapshot, incoming.events || [])
@@ -973,7 +832,6 @@ async function fetchAndApply({ showIndicator = false } = {}) {
         result = { ok: false, reason: e.message || String(e) };
     }
 
-    // Финальное состояние баннера синхронизации
     if (trackProgress) {
         topProgressDone();
         if (result.ok) hideSyncBanner();

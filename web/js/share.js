@@ -113,7 +113,7 @@ export function buildTextForEvent(ev) {
 }
 
 /* ============================================================
- *  МЕНЮ ПОДЕЛИТЬСЯ
+ *  МЕНЮ ПОДЕЛИТЬСЯ (DROPDOWN)
  * ============================================================ */
 
 const ICON_LINK = `
@@ -204,7 +204,6 @@ export function openShareMenu(anchor, { onLink, onText } = {}) {
 
     const onKey = (e) => { if (e.key === 'Escape') closeShareMenu(); };
 
-    // Вешаем после текущего тика: клик, открывший меню, не должен его закрыть.
     setTimeout(() => {
         if (!currentMenu) return;
         document.addEventListener('click', onDocClick, true, { signal });
@@ -222,4 +221,109 @@ export function closeShareMenu() {
     currentMenu = null;
     currentCleanup = null;
     if (cleanup) cleanup();
+}
+
+/* ============================================================
+ *  КАСТОМНАЯ МОДАЛКА "ПОДЕЛИТЬСЯ"
+ * ============================================================ */
+
+let shareModalApi = null;
+
+export function setupShareModal() {
+    const modal = document.getElementById('shareModal');
+    const closeBtn = modal.querySelector('.share-close');
+    const urlInput = document.getElementById('shareUrlInput');
+    const copyBtn = document.getElementById('shareCopyBtn');
+    const nativeBtn = document.getElementById('shareNativeBtn');
+    const note = document.getElementById('shareNote');
+    if (!modal || !urlInput) return;
+
+    let currentUrl = '';
+    let currentTitle = 'Расписание';
+
+    function close() {
+        modal.classList.remove('open');
+    }
+
+    function open(url, title) {
+        currentUrl = url;
+        currentTitle = title || 'Расписание';
+        urlInput.value = currentUrl;
+
+        copyBtn.classList.remove('is-copied');
+        copyBtn.textContent = 'Копировать';
+        note.textContent = 'Если кнопка не работает, выделите ссылку и скопируйте вручную.';
+        note.style.color = 'var(--text-dim)';
+
+        // Проверяем поддержку системного шаринга
+        if (navigator.share) {
+            nativeBtn.hidden = false;
+        } else {
+            nativeBtn.hidden = true;
+        }
+
+        modal.classList.add('open');
+
+        // На некоторых устройствах удобно сразу выделить текст
+        setTimeout(() => urlInput.select(), 50);
+    }
+
+    async function copyToClipboard() {
+        try {
+            await navigator.clipboard.writeText(currentUrl);
+            copyBtn.classList.add('is-copied');
+            copyBtn.textContent = 'Скопировано';
+            note.textContent = 'Ссылка успешно скопирована.';
+            note.style.color = 'var(--accent)';
+
+            urlInput.select();
+
+            setTimeout(() => {
+                copyBtn.classList.remove('is-copied');
+                copyBtn.textContent = 'Копировать';
+                note.textContent = 'Если кнопка не работает, выделите ссылку и скопируйте вручную.';
+                note.style.color = 'var(--text-dim)';
+            }, 2000);
+        } catch (e) {
+            console.warn('[share] clipboard failed:', e);
+            urlInput.select();
+            note.textContent = 'Ошибка копирования. Выделите ссылку и скопируйте вручную.';
+            note.style.color = 'var(--danger-text)';
+        }
+    }
+
+    async function nativeShare() {
+        try {
+            await navigator.share({
+                url: currentUrl,
+                title: currentTitle
+            });
+            close();
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                console.warn('[share] native share failed:', e);
+            }
+        }
+    }
+
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+
+    copyBtn.addEventListener('click', copyToClipboard);
+    nativeBtn.addEventListener('click', nativeShare);
+
+    urlInput.addEventListener('click', () => urlInput.select());
+    urlInput.addEventListener('focus', () => urlInput.select());
+
+    shareModalApi = { open, close };
+    return shareModalApi;
+}
+
+export function openShareModal(url, title) {
+    if (shareModalApi) {
+        shareModalApi.open(url, title);
+    }
 }

@@ -4,7 +4,7 @@ import { MONTHS_GEN } from './config.js';
 import { escapeHtml, renderRoomsLinks } from './utils.js';
 import { state } from './state.js';
 import { showToast } from './toast.js';
-import { openShareMenu, buildTextForEvent } from './share.js';
+import { openShareMenu, buildTextForEvent, openShareModal } from './share.js';
 
 export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
@@ -59,7 +59,6 @@ export function showEventDetails(ev, anchor) {
     const pop = document.getElementById('eventPopover');
     pop.classList.remove('popover--group');
     pop.innerHTML = eventDetailsHtml(ev);
-    // Запоминаем событие — глобальный обработчик глазика достанет его отсюда.
     pop._eventData = ev;
     pop.classList.add('open');
     raisePopoverIfNeeded(pop);
@@ -67,10 +66,6 @@ export function showEventDetails(ev, anchor) {
     positionPopover(pop, anchor);
 }
 
-/* Попап по умолчанию лежит НИЖЕ модалок (z-index: 400 vs 999),
-   чтобы не висеть поверх readme/export/offline. Но иногда он
-   открывается ИЗ модалки — клик по мероприятию в «Изменениях».
-   Тогда его нужно поднять выше backdrop'а. */
 function raisePopoverIfNeeded(pop) {
     const inModal = !!document.querySelector('.modal-backdrop.open');
     pop.style.zIndex = inModal ? '1001' : '';
@@ -107,9 +102,6 @@ function renderGroupList(events, anchor, pop) {
                     ? ev.teachers.join(', ')
                     : '';
 
-                // Как в карточке календаря:
-                //   primary   — время · аудитория
-                //   secondary — группа · преподаватель
                 const primaryParts = [];
                 if (timeStr)   primaryParts.push(`<span class="group-item-time">${timeStr}</span>`);
                 if (roomsHtml) primaryParts.push(`<span class="group-item-room">${roomsHtml}</span>`);
@@ -155,8 +147,6 @@ function renderGroupDetailItem(ev, events, anchor, pop) {
     attachShareHandler(pop, ev);
 }
 
-/* ---------- SHARE EVENT ---------- */
-
 function buildEventUrl(ev) {
     const params = new URLSearchParams();
     if (ev.group)    params.set('g', ev.group);
@@ -164,24 +154,6 @@ function buildEventUrl(ev) {
     if (state.view)  params.set('v', state.view);
     if (ev.event_id) params.set('e', ev.event_id);
     return location.origin + location.pathname + '?' + params.toString();
-}
-
-async function shareEventLink(ev) {
-    const url = buildEventUrl(ev);
-    try {
-        if (navigator.share) {
-            await navigator.share({ url, title: ev.discipline });
-        } else if (navigator.clipboard) {
-            await navigator.clipboard.writeText(url);
-            showToast('Ссылка скопирована');
-        } else {
-            showToast('Не удалось скопировать ссылку');
-        }
-    } catch (e) {
-        if (e && e.name !== 'AbortError') {
-            console.warn('[share] failed:', e);
-        }
-    }
 }
 
 async function copyEventText(ev) {
@@ -205,19 +177,11 @@ function attachShareHandler(pop, ev) {
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         openShareMenu(btn, {
-            onLink: () => shareEventLink(ev),
+            onLink: () => openShareModal(buildEventUrl(ev), ev.discipline),
             onText: () => copyEventText(ev),
         });
     });
 }
-
-/* ============================================================
- *  КНОПКА «ПОКАЗАТЬ В ОРИГИНАЛЕ» (глазик).
- *
- *  Один глобальный слушатель на document. Клик по .popover-look
- *  берёт событие, привязанное к поповеру, и передаёт его
- *  в зарегистрированный handler (см. main.js → originalApi.focusOn).
- * ============================================================ */
 
 let viewOriginalHandler = null;
 

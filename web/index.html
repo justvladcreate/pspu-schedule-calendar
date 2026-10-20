@@ -494,6 +494,30 @@
     </div>
 </div>
 
+<div class="modal-backdrop" id="shareModal">
+    <div class="share-dialog" role="dialog" aria-labelledby="shareTitle">
+        <div class="share-header">
+            <h2 class="share-title" id="shareTitle">Поделиться</h2>
+            <button class="share-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="share-body">
+            <p class="share-lead">Скопируйте ссылку, чтобы поделиться расписанием.</p>
+            <div class="share-url-row">
+                <input type="text" class="share-url-input" id="shareUrlInput" readonly>
+                <button class="btn share-copy-btn" id="shareCopyBtn" type="button">Копировать</button>
+            </div>
+            <p class="share-note" id="shareNote">Если кнопка не работает, выделите ссылку и скопируйте вручную.</p>
+            <button class="btn share-native-btn" id="shareNativeBtn" type="button" hidden>
+                <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Отправить через приложение
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module" src="js/main.js"></script>
