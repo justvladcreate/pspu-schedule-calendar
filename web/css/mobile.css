@@ -77,14 +77,10 @@
     .toolbar-right > .filter        { order: 5; }
     .toolbar-right > #favoritesBtn  { order: 6; }
     .toolbar-right > #viewSwitch    { order: 7; }
-    .toolbar-right > #exportIcsBtn  { order: 8; }
-    .toolbar-right > #viewBtn       { order: 9; }
-    .toolbar-right > #themeBtn      { order: 10; }
-    .toolbar-right > #shareBtn      { order: 11; }
-
-    /* «⋯» и меню — прямые дети .toolbar (не .toolbar-right!) */
-    .toolbar > #moreBtn  { order: 12; }
-    .toolbar > #moreMenu { order: 13; }
+    .toolbar-right > #viewBtn       { order: 8; }
+    .toolbar-right > #shareBtn      { order: 9; }
+    /* Кнопка настроек встает в самый конец (правый нижний угол) */
+    .toolbar-right > #settingsBtn   { order: 10; }
 
     .toolbar-divider { display: none; }
 
@@ -176,13 +172,6 @@
 
 
 /* ============================================================
- *  «⋯» по умолчанию скрыта
- * ============================================================ */
-
-#moreBtn { display: none; }
-
-
-/* ============================================================
  *  ≤500px — COMPACT
  *
  *  Все кнопки остаются, но размеры и текст короче.
@@ -240,17 +229,9 @@
 
 /* ============================================================
  *  ≤400px — COLLAPSED
- *
- *  Экспорт / Тема / Share прячутся в «⋯».
  * ============================================================ */
 
 @media (max-width: 400px) {
-    #exportIcsBtn,
-    #themeBtn,
-    #shareBtn { display: none; }
-
-    #moreBtn { display: inline-flex; }
-
     .toolbar {
         padding: 6px 10px;
         gap: 6px;
@@ -318,48 +299,4 @@
 }
 
 
-/* ============================================================
- *  МЕНЮ «⋯»
- * ============================================================ */
-
-.more-menu {
-    position: fixed;
-    display: none;
-    flex-direction: column;
-    min-width: 0;
-    width: max-content;
-    max-width: 210px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    padding: 4px;
-    z-index: 3000;
-}
-.more-menu.open { display: flex; }
-
-.more-menu-item {
-    appearance: none;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font: inherit;
-    font-size: 13.5px;
-    font-weight: 500;
-    padding: 11px 13px;
-    border-radius: 7px;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    white-space: nowrap;
-    transition: background 0.12s;
-}
-.more-menu-item:hover,
-.more-menu-item:active { background: var(--surface-2); }
-.more-menu-item .icon {
-    color: var(--text-muted);
-    flex-shrink: 0;
-    width: 16px; height: 16px;
-}
+/* (Удален блок .more-menu, так как кнопка "Ещё" больше не нужна) */

@@ -36,7 +36,7 @@ import {
 } from './share.js';
 import { setupExportModal } from './export.js';
 import { setupCalendarGestures, setupPullToRefresh } from './gestures.js';
-import { setupMoreMenu } from './more-menu.js';
+import { setupSettingsModal } from './settings.js';
 import { setupOriginalModal } from './original.js';
 import { setupModalHistory } from './modal-history.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
@@ -373,7 +373,9 @@ function setupScrollPersistence() {
 
 function setupAllUI() {
     const exportModal = setupExportModal();
-    document.getElementById('exportIcsBtn').addEventListener('click', exportModal.open);
+    const settingsModal = setupSettingsModal(exportModal);
+
+    document.getElementById('settingsBtn').addEventListener('click', settingsModal.open);
 
     document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
     document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
@@ -381,7 +383,6 @@ function setupAllUI() {
     document.getElementById('viewBtn').addEventListener('click', cycleView);
     document.getElementById('calendarModeBtn').addEventListener('click', switchToCalendar);
     document.getElementById('loadBtn').addEventListener('click', switchToLoad);
-    document.getElementById('themeBtn').addEventListener('click', toggleTheme);
     document.getElementById('dateLabel').addEventListener('click', openDatePicker);
 
     document.getElementById('pickerPrev').addEventListener('click', () => {
@@ -536,7 +537,6 @@ async function init() {
     state.displayedIso = loadGeneratedAt();
     applyUrlContext();
     updateViewButton();
-    setupMoreMenu();
     setupOnlineStatus();
 
     setupAllUI();

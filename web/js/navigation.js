@@ -171,14 +171,22 @@ export function updateThemeButton() {
     btn.setAttribute('aria-label', label);
 }
 
-export function toggleTheme() {
-    const idx = THEME_CYCLE.indexOf(state.theme);
-    state.theme = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+export function setTheme(newTheme) {
+    if (!THEME_CYCLE.includes(newTheme)) return;
 
+    state.theme = newTheme;
     try { localStorage.setItem('schedule-theme', state.theme); } catch {}
 
     document.documentElement.setAttribute('data-theme', effectiveTheme(state.theme));
     updateThemeButton();
+
+    // Оповещаем модалку настроек, чтобы она обновила активную кнопку
+    document.dispatchEvent(new CustomEvent('themechanged', { detail: state.theme }));
+}
+
+export function toggleTheme() {
+    const idx = THEME_CYCLE.indexOf(state.theme);
+    setTheme(THEME_CYCLE[(idx + 1) % THEME_CYCLE.length]);
 }
 
 let mediaListenerAttached = false;

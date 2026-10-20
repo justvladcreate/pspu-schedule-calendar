@@ -35,13 +35,18 @@ export function setupModalHistory() {
 
             if (isOpen && !inStack) {
                 stack.push(el);
-                history.pushState({ __modal: el.id, __depth: stack.length }, '');
+                // Передаем location.href, чтобы браузер точно не сменил URL
+                history.pushState({ __modal: el.id, __depth: stack.length }, '', location.href);
             } else if (!isOpen && inStack) {
-                // Программное закрытие — откатываем свой state.
                 const idx = stack.indexOf(el);
                 if (idx !== -1) stack.splice(idx, 1);
-                suppressPop = true;
-                history.back();
+
+                // КРИТИЧНО: Откатываем историю, только если текущий state наш.
+                // Иначе history.back() может увести на домашнюю страницу.
+                if (history.state && history.state.__modal === el.id) {
+                    suppressPop = true;
+                    history.back();
+                }
             }
         }
     });

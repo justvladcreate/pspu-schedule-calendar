@@ -72,7 +72,11 @@ export function setupExportModal() {
     }
 
     copyBtn.addEventListener('click', tryCopy);
-    closeBtn.addEventListener('click', close);
+    closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        close();
+    });
     modal.addEventListener('click', e => { if (e.target === modal) close(); });
 
     openBtn.addEventListener('click', () => {
