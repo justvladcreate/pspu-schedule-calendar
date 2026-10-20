@@ -154,6 +154,7 @@ export const state = {
   navStep: loadNavStepFromStorage(),
 
   theme: localStorage.getItem('schedule-theme') || 'auto',
+  showOnlyActive: localStorage.getItem('schedule-show-only-active') === '1',
 
   fallbackActive: false,
   currentData: null,

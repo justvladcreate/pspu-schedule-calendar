@@ -31,6 +31,9 @@ export function setupExportModal() {
     const copyTxt  = copyBtn.querySelector('.export-copy-text');
     const closeBtn = modal.querySelector('.export-close');
     const openBtn  = document.getElementById('openGcalBtn');
+    const footer   = document.getElementById('exportFooter');
+    const tabBtns  = modal.querySelectorAll('.export-tabs .view-switch-btn');
+    const panels   = modal.querySelectorAll('.export-tab-panel');
 
     let currentUrl = '';
     let copyTimer  = null;
@@ -53,11 +56,27 @@ export function setupExportModal() {
         }
     }
 
+    // Переключение вкладок. Кнопка «Открыть Google Calendar» в футере
+    // имеет смысл только для Google — для Apple и «Других» прячем
+    // футер вместе с ней, чтобы не вводить в заблуждение.
+    function setTab(name) {
+        tabBtns.forEach(btn => {
+            const isActive = btn.dataset.tab === name;
+            btn.classList.toggle('is-active', isActive);
+            btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        panels.forEach(panel => {
+            panel.hidden = panel.dataset.tabPanel !== name;
+        });
+        if (footer) footer.hidden = name !== 'google';
+    }
+
     function open() {
         currentUrl = buildIcsUrl();
         urlEl.textContent = currentUrl;
         copyBtn.classList.remove('is-copied');
         copyTxt.textContent = 'Копировать';
+        setTab('google');
         modal.classList.add('open');
 
         tryCopy();
@@ -70,6 +89,13 @@ export function setupExportModal() {
             copyTimer = null;
         }
     }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setTab(btn.dataset.tab);
+        });
+    });
 
     copyBtn.addEventListener('click', tryCopy);
     closeBtn.addEventListener('click', (e) => {

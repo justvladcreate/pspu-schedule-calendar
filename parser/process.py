@@ -270,15 +270,10 @@ def merge_ai_line(
         line: str,
         offset: int,
         sources: list[dict],
-        branch_index: int = 0,   # 0-based позиция среди веток своего enumerator
-        branch_total: int = 1,   # всего веток для этого enumerator
+        branch_index: int = 0,
+        branch_total: int = 1,
 ) -> list[dict]:
-    """
-    Возвращает список событий — 0, 1 или несколько, если одна AI-строка
-    разбилась по разным комнатам (date-hint внутри одной ветки).
-    """
     parts = [p.strip() for p in line.split(";")]
-    # "-" — плейсхолдер пустого поля из промпта
     parts = ["" if p == "-" else p for p in parts]
 
     if len(parts) not in (9, 10):
@@ -314,21 +309,56 @@ def merge_ai_line(
     time_start = normalize_time(time_start) if time_start else ""
     time_end   = normalize_time(time_end) if time_end else ""
 
-    # Если AI сам вернул rooms — доверяем полностью, не распределяем.
-    # Иначе берём из источника и раскладываем по ветками.
-    # ── rooms не пришли от AI ──
+    gray_texts = src.get("gray_texts") or []
+
+    # Нормализованный тип для сопоставления с серым текстом.
+    # "-", "", "." — значит тип не указан, проверку по нему пропускаем.
+    _type_norm = (type_ or "").strip(" .")
+    if _type_norm in ("", "-"):
+        _type_re = None
+    else:
+        _type_re = re.compile(rf'\b{re.escape(_type_norm.lower())}\b')
+
+    def _check_past(b_dates: str) -> bool:
+        """
+        Мероприятие серое ⇔ хотя бы одна его дата встречается в сером тексте
+        И (если у мероприятия известен тип) этот тип присутствует в том же
+        сером фрагменте — чтобы не спутать лек. и прак. с совпадающими датами.
+
+        Ограничение целостности данных (от заказчика): мероприятие серое
+        ЦЕЛИКОМ — даты, преподаватели, дисциплина, подгруппа, тип
+        одновременно серые или чёрные. Поэтому единственного признака
+        (даты) достаточно для классификации.
+        """
+        if not gray_texts or not b_dates:
+            return False
+
+        branch_dates = set(re.findall(r'\d{1,2}\.\d{2}', b_dates))
+        if not branch_dates:
+            return False
+
+        for gt in gray_texts:
+            gt_low = gt.lower()
+            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', gt_low))
+            if not (branch_dates & gt_dates):
+                continue
+            if _type_re and not _type_re.search(gt_low):
+                continue
+            return True
+
+        return False
+
     if not rooms_ai:
         hints = src.get("rooms_hints") or []
         has_overrides = any(r["hint_type"] or r["hint_dates"] for r in hints)
 
-        # Только base (или hints нет) → старая позиционная логика:
-        # первая ветка → первая комната, вторая → вторая.
         if not has_overrides:
             rooms = _assign_rooms(
                 src.get("rooms", ""),
                 branch_index=branch_index,
                 branch_total=branch_total,
             )
+            is_past = _check_past(dates)
             return [{
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -339,12 +369,14 @@ def merge_ai_line(
                 "subgroup":   subgroup,
                 "teachers":   teachers,
                 "rooms":      rooms,
+                "is_past":    is_past,
             }]
 
-        # Есть override'ы → split_branch_by_rooms
         groups = split_branch_by_rooms(hints, type_, dates)
-        return [
-            {
+        res = []
+        for g_dates, g_rooms in groups:
+            is_past_g = _check_past(g_dates)
+            res.append({
                 "weekday":    weekday,
                 "time_start": time_start,
                 "time_end":   time_end,
@@ -354,11 +386,11 @@ def merge_ai_line(
                 "subgroup":   subgroup,
                 "teachers":   teachers,
                 "rooms":      g_rooms,
-            }
-            for g_dates, g_rooms in groups
-        ]
+                "is_past":    is_past_g,
+            })
+        return res
 
-    # ── rooms пришли от AI ──
+    is_past = _check_past(dates)
     return [{
         "weekday":    weekday,
         "time_start": time_start,
@@ -369,6 +401,7 @@ def merge_ai_line(
         "subgroup":   subgroup,
         "teachers":   teachers,
         "rooms":      rooms_ai,
+        "is_past":    is_past,
     }]
 
 

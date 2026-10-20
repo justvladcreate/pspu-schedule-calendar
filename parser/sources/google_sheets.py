@@ -18,7 +18,8 @@ _FIELDS = (
     "data(rowData(values("
     "formattedValue,"
     "hyperlink,"
-    "textFormatRuns(format(link(uri)))"
+    "effectiveFormat.textFormat.foregroundColor,"
+    "textFormatRuns(startIndex,format(link(uri),foregroundColor))"
     ")))"
     ")"
 )
@@ -60,6 +61,42 @@ def _cell_links(cell: dict) -> list[str]:
     return urls
 
 
+def _is_gray_color(color: dict | None) -> bool:
+    if not color:
+        return False
+    r = color.get('red', 0)
+    g = color.get('green', 0)
+    b = color.get('blue', 0)
+    mx, mn = max(r, g, b), min(r, g, b)
+    if mx - mn > 0.1:
+        return False
+    return 0.1 < mx < 0.9
+
+
+def _extract_gray_texts(cell: dict) -> list[str]:
+    if not cell: return []
+    val = cell.get("formattedValue") or ""
+    if not val: return []
+
+    runs = cell.get("textFormatRuns") or []
+    if not runs:
+        fg = (((cell.get("effectiveFormat") or {}).get("textFormat") or {}).get("foregroundColor"))
+        return [val] if _is_gray_color(fg) else []
+
+    parts = []
+    for i, run in enumerate(runs):
+        start = run.get("startIndex", 0)
+        end = runs[i+1].get("startIndex", len(val)) if i + 1 < len(runs) else len(val)
+        if start >= len(val): break
+        text = val[start:end]
+        if not text.strip(): continue
+
+        fg = ((run.get("format") or {}).get("foregroundColor"))
+        if _is_gray_color(fg):
+            parts.append(text)
+    return parts
+
+
 def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:
     rows: list[list[Any]] = []
     for row in row_data or []:
@@ -70,7 +107,6 @@ def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:
             cells = cells[:n_cols]
         rows.append(cells)
 
-    # добиваем до n_rows (как pd.read_excel делает по сетке)
     while len(rows) < n_rows:
         rows.append([None] * n_cols)
 
@@ -79,7 +115,6 @@ def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:
 
     df = pd.DataFrame(rows, dtype=object)
 
-    # обрезаем хвост из полностью пустых строк — как pandas
     last = -1
     for i in range(len(df) - 1, -1, -1):
         if df.iloc[i].notna().any():
@@ -91,7 +126,6 @@ def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:
 
 
 def _apply_merges(df: pd.DataFrame, merges: list[dict]) -> pd.DataFrame:
-    """Заполняет merged-диапазоны значением из левой верхней ячейки."""
     if df.empty or not merges:
         return df
 
@@ -118,11 +152,6 @@ def _propagate_links_by_merges(
         links: dict[tuple[int, int], list[str]],
         merges: list[dict],
 ) -> None:
-    """Распространяет ссылки из top-left merged-ячейки на всю область.
-
-    Зеркалит поведение xlsx-источника (см. load_hyperlinks в xlsx_file.py).
-    endRowIndex / endColumnIndex — эксклюзивные, как в Sheets API.
-    """
     for m in merges or []:
         r0 = m.get("startRowIndex", 0)
         r1 = m.get("endRowIndex", 0)
@@ -142,15 +171,8 @@ def _propagate_links_by_merges(
                     if u not in links[(r, c)]:
                         links[(r, c)].append(u)
 
+
 class GoogleSheetsSource(ScheduleSource):
-    """
-    Источник данных — Google Sheets через API v4.
-
-    Один запрос `spreadsheets.get` забирает сразу значения, merges и ВСЕ
-    ссылки ячейки (включая rich-text через textFormatRuns[].format.link.uri).
-    Это решает проблему, из-за которой xlsx-экспорт теряет вторую ссылку.
-    """
-
     def __init__(self, spreadsheet_id: str, sheets_service):
         self.spreadsheet_id = spreadsheet_id
         self.service = sheets_service
@@ -176,11 +198,17 @@ class GoogleSheetsSource(ScheduleSource):
             df = _apply_merges(df, sheet.get("merges") or [])
 
             links: dict[tuple[int, int], list[str]] = {}
+            colors: dict[tuple[int, int], list[str]] = {}
+
             for r_idx, row in enumerate(row_data):
                 for c_idx, cell in enumerate(row.get("values") or []):
                     urls = _cell_links(cell)
                     if urls:
                         links[(r_idx, c_idx)] = urls
+
+                    gray_texts = _extract_gray_texts(cell)
+                    if gray_texts:
+                        colors[(r_idx, c_idx)] = gray_texts
 
             _propagate_links_by_merges(links, sheet.get("merges") or [])
 
@@ -188,6 +216,7 @@ class GoogleSheetsSource(ScheduleSource):
                 name=name,
                 df=df,
                 links=links,
+                colors=colors,
                 hidden=bool(props.get("hidden", False)),
                 sheet_id=props.get("sheetId"),
             ))

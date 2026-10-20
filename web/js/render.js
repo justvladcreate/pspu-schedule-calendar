@@ -337,6 +337,7 @@ export function makeEventBlock(ev, column = 0, columnsCount = 1) {
 
     const el = document.createElement('div');
     el.className = 'event-block';
+    if (ev.is_past) el.classList.add('event-block--past');
     el.style.top = top + 'px';
     el.style.height = height + 'px';
     el.dataset.eventId = ev.event_id || '';
@@ -469,6 +470,7 @@ export function renderMonth(root) {
                 dayEvents.forEach(ev => {
                     const chip = document.createElement('div');
                     chip.className = 'month-event';
+                    if (ev.is_past) chip.classList.add('month-event--past');
                     chip.textContent = `${ev.time_start} ${ev.discipline}${ev.type ? ` (${ev.type})` : ''}`;
                     chip.title = chip.textContent;
                     chip.dataset.eventId = ev.event_id || '';

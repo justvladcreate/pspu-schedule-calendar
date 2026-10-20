@@ -2,6 +2,8 @@
 
 import { state } from './state.js';
 import { setTheme } from './navigation.js';
+import { applyFilters, updateCounter } from './filters.js';
+import { render } from './render.js';
 
 export function setupSettingsModal(exportModalApi) {
     const modal = document.getElementById('settingsModal');
@@ -10,6 +12,7 @@ export function setupSettingsModal(exportModalApi) {
     const closeBtn = modal.querySelector('.settings-close');
     const exportBtn = document.getElementById('settingsExportBtn');
     const themeBtns = modal.querySelectorAll('#themeSwitch .view-switch-btn');
+    const activeOnlyToggle = document.getElementById('activeOnlyToggle');
 
     function close() {
         modal.classList.remove('open');
@@ -23,8 +26,23 @@ export function setupSettingsModal(exportModalApi) {
         });
     }
 
+    if (activeOnlyToggle) {
+        activeOnlyToggle.checked = state.showOnlyActive;
+        activeOnlyToggle.addEventListener('change', (e) => {
+            state.showOnlyActive = e.target.checked;
+            try {
+                localStorage.setItem('schedule-show-only-active', state.showOnlyActive ? '1' : '0');
+            } catch {}
+
+            applyFilters();
+            updateCounter();
+            render(); // Мгновенная перерисовка календаря
+        });
+    }
+
     function open() {
         updateThemeUI();
+        if (activeOnlyToggle) activeOnlyToggle.checked = state.showOnlyActive;
         modal.classList.add('open');
     }
 

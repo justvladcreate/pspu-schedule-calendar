@@ -56,7 +56,7 @@ class DataExtractor:
             if idx == 0:
                 continue
 
-            group_info = extraction(sheet.df, sheet.sheet_id, sheet.links)
+            group_info = extraction(sheet.df, sheet.sheet_id, sheet.links, sheet.colors)
             if not group_info:
                 continue
 
@@ -85,9 +85,11 @@ def _ffill_weekday_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def extraction(df, sheet_id, hyperlinks: dict | None = None):
+def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None = None):
     if hyperlinks is None:
         hyperlinks = {}
+    if colors is None:
+        colors = {}
 
     df = _ffill_weekday_column(df)
 
@@ -266,6 +268,10 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
                             merged_times.append(cur)
                             i += 1
 
+                    all_gray = []
+                    for c in range(start_cell[1], end_cell[1] + 1):
+                        all_gray.extend(colors.get((abs_row, c), []))
+
                     for time_value in merged_times:
                         time_val = normalize_time(time_value)
                         # НОВЫЙ ФОРМАТ: dict вместо строки-обёртки
@@ -275,6 +281,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None):
                             "rooms": ", ".join(room_val),
                             "rooms_hints": rooms_hints,
                             "subject": subject_val,
+                            "gray_texts": all_gray,
                         })
 
             except Exception as e:

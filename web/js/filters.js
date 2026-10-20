@@ -36,6 +36,7 @@ function countMatchingEvents(groups, teachers) {
     if (groups.size === 0 && teachers.size === 0) return 0;
     let n = 0;
     for (const ev of state.allEvents) {
+        if (state.showOnlyActive && ev.is_past) continue;
         if (groups.size > 0 && !groups.has(ev.group)) continue;
         if (teachers.size > 0) {
             const t = ev.teachers || [];
@@ -60,6 +61,7 @@ export function applyFilters() {
     }
 
     state.filteredEvents = state.allEvents.filter(ev => {
+        if (state.showOnlyActive && ev.is_past) return false;
         if (sg.size > 0 && !sg.has(ev.group)) return false;
         if (st.size > 0) {
             const teachers = ev.teachers || [];

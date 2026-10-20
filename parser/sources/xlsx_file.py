@@ -19,21 +19,17 @@ _XLSX_NS = {
 }
 _R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
-
-# ---------------------------------------------------------------- helpers
 def _col_idx(letters: str) -> int:
     n = 0
     for ch in letters:
         n = n * 26 + (ord(ch) - ord("A") + 1)
     return n - 1
 
-
 def _parse_ref(ref: str):
     m = re.match(r"^([A-Z]+)(\d+)$", ref)
     if not m:
         return None
     return int(m.group(2)) - 1, _col_idx(m.group(1))
-
 
 def _parse_range(ref: str):
     m = re.match(r"^([A-Z]+)(\d+):([A-Z]+)(\d+)$", ref)
@@ -44,9 +40,7 @@ def _parse_range(ref: str):
         int(m.group(4)) - 1, _col_idx(m.group(3)),
     )
 
-
 def _sheet_paths_from_zip(path: str | Path) -> dict[str, str]:
-    """{sheet_name: path_in_zip} — один проход по workbook.xml и rels."""
     with zipfile.ZipFile(path) as zf:
         wb   = ET.fromstring(zf.read("xl/workbook.xml"))
         rels = ET.fromstring(zf.read("xl/_rels/workbook.xml.rels"))
@@ -69,8 +63,26 @@ def _sheet_paths_from_zip(path: str | Path) -> dict[str, str]:
         result[name] = target
     return result
 
+def _is_gray_hex(hex_str: str | None) -> bool:
+    if not hex_str:
+        return False
+    hex_str = hex_str.upper()
+    if hex_str.startswith('FF'):
+        hex_str = hex_str[2:]
+    if len(hex_str) != 6:
+        return False
+    try:
+        r = int(hex_str[0:2], 16)
+        g = int(hex_str[2:4], 16)
+        b = int(hex_str[4:6], 16)
+    except ValueError:
+        return False
+    mx, mn = max(r, g, b), min(r, g, b)
+    if mx - mn > 20:
+        return False
+    return 30 < mx < 230
 
-def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> pd.DataFrame:
+def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, dict[tuple[int, int], list[str]]]:
     df = excel_file.parse(worksheet.title, header=None)
     df = df.astype(object)
 
@@ -88,12 +100,18 @@ def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> pd.DataFrame:
             for j in range(start_col, end_col + 1):
                 df.iat[i, j] = top_left_value
 
-    return df
+    colors = {}
+    for row in worksheet.iter_rows():
+        for cell in row:
+            color = cell.font.color
+            if color and color.type == 'rgb' and _is_gray_hex(color.rgb):
+                if cell.value:
+                    colors[(cell.row - 1, cell.column - 1)] = [str(cell.value)]
 
+    return df, colors
 
 def _load_hyperlinks(zf: zipfile.ZipFile, sheet_path: str) -> dict[tuple[int, int], list[str]]:
     links: dict[tuple[int, int], list[str]] = {}
-
     if not sheet_path:
         return links
 
@@ -160,7 +178,6 @@ def _load_hyperlinks(zf: zipfile.ZipFile, sheet_path: str) -> dict[tuple[int, in
     return links
 
 
-# ---------------------------------------------------------------- source
 class XlsxFileSource(ScheduleSource):
     def __init__(self, path: str | Path):
         self.path = Path(path)
@@ -181,12 +198,13 @@ class XlsxFileSource(ScheduleSource):
             result: list[SheetData] = []
             with zipfile.ZipFile(self.path) as zf:
                 for name in wb.sheetnames:
-                    df    = _read_sheet_df(excel_file, wb[name])
+                    df, colors = _read_sheet_df(excel_file, wb[name])
                     links = _load_hyperlinks(zf, sheet_paths.get(name))
                     result.append(SheetData(
                         name=name,
                         df=df,
                         links=links,
+                        colors=colors,
                         hidden=(name in hidden),
                         sheet_id=None,
                     ))

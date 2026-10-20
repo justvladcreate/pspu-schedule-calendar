@@ -13,6 +13,7 @@ class SheetData:
     name: str
     df: pd.DataFrame                             # значения, merges уже применены
     links: dict[tuple[int, int], list[str]] = field(default_factory=dict)
+    colors: dict[tuple[int, int], list[str]] = field(default_factory=dict)  # (row, col) -> [серые подстроки]
     hidden: bool = False
     sheet_id: int | None = None                  # gid для Google, None для xlsx
 

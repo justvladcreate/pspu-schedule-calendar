@@ -132,14 +132,19 @@ export function findCellInFrame(doc, opts) {
         }
     }
 
-    // 2) Структурный поиск: день недели + номер пары
+    // 2) Текстовый скоринг (надежнее для ячеек с подгруппами, так как ищет по ФИО)
+    if (o.discipline || (o.teachers && o.teachers.length)) {
+        const td = findByTextScore(tds, o);
+        if (td) return td;
+    }
+
+    // 3) Структурный поиск: день недели + номер пары (резерв)
     if (weekday && pairNumber != null) {
         const td = findByDayPair(doc, weekday, pairNumber);
         if (td) return td;
     }
 
-    // 3) Текстовый скоринг
-    return findByTextScore(tds, o);
+    return null;
 }
 
 /* ---------- Стратегия 2: день + пара ---------- */
@@ -298,11 +303,21 @@ function findByTextScore(tds, o) {
             for (const d of dateShort) if (text.includes(d)) hit++;
             if (hit) score += (hit / dateShort.length) * 4;
         }
-
         if (teacherNeedles.length) {
+            let tHit = false;
             for (const t of teacherNeedles) {
-                if (text.includes(t)) { score += 2; break; }
+                // Извлекаем фамилию (первое слово без точек и титулов)
+                const parts = t.split(' ').filter(p => !p.includes('.') && !p.includes('доц') && !p.includes('преп') && !p.includes('проф'));
+                const surname = parts.length ? parts[0].toLowerCase() : t;
+
+                if (text.includes(surname)) {
+                    tHit = true;
+                    score += 10; // Даем огромный приоритет, если совпал преподаватель
+                    break;
+                }
             }
+            // Если искали преподавателя, но не нашли — сильно штрафуем ячейку
+            if (!tHit) score -= 10;
         }
 
         if (score > bestScore) {

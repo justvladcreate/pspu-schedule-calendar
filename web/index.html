@@ -419,7 +419,7 @@
 <div class="modal-backdrop" id="exportModal">
     <div class="export" role="dialog" aria-labelledby="exportTitle">
         <div class="export-header">
-            <h2 class="export-title" id="exportTitle">Экспорт в Google Calendar</h2>
+            <h2 class="export-title" id="exportTitle">Экспорт в календарь</h2>
             <button class="export-close" type="button" aria-label="Закрыть">✕</button>
         </div>
         <div class="export-body">
@@ -428,11 +428,40 @@
                 события подтянутся сами, обычно в течение суток.
             </p>
 
-            <ol class="export-steps">
-                <li>Скопируйте ссылку ниже (она уже должна быть в буфере обмена).</li>
-                <li>В Google Calendar откройте <b>Другие календари → + → Добавить по URL</b>.</li>
-                <li>Вставьте ссылку и нажмите <b>Добавить календарь</b>.</li>
-            </ol>
+            <div class="view-switch export-tabs" id="exportTabs"
+                 role="tablist" aria-label="Выберите календарь">
+                <button class="view-switch-btn is-active" type="button"
+                        data-tab="google" role="tab" aria-selected="true">Google</button>
+                <button class="view-switch-btn" type="button"
+                        data-tab="apple" role="tab" aria-selected="false">Apple</button>
+                <button class="view-switch-btn" type="button"
+                        data-tab="other" role="tab" aria-selected="false">Другие</button>
+            </div>
+
+            <div class="export-tab-panel" data-tab-panel="google">
+                <ol class="export-steps">
+                    <li>Скопируйте ссылку ниже (она уже должна быть в буфере обмена).</li>
+                    <li>В Google Calendar откройте <b>Другие календари → + → Добавить по URL</b>.</li>
+                    <li>Вставьте ссылку и нажмите <b>Добавить календарь</b>.</li>
+                </ol>
+            </div>
+
+            <div class="export-tab-panel" data-tab-panel="apple" hidden>
+                <ol class="export-steps">
+                    <li>Скопируйте ссылку ниже.</li>
+                    <li>На <b>iPhone или iPad</b>: Настройки → Календарь → Учётные записи → Добавить учётную запись → Другое → <b>Добавить подписной календарь</b>.</li>
+                    <li>На <b>Mac</b>: Календарь → Файл → <b>Новая подписка на календарь</b>.</li>
+                    <li>Вставьте ссылку и подтвердите подписку.</li>
+                </ol>
+            </div>
+
+            <div class="export-tab-panel" data-tab-panel="other" hidden>
+                <ol class="export-steps">
+                    <li>Скопируйте ссылку ниже.</li>
+                    <li>В вашем календаре (Outlook, Яндекс, Thunderbird и др.) найдите раздел подписки на календарь по URL — обычно это <b>Добавить календарь → По ссылке / Из интернета</b>.</li>
+                    <li>Вставьте ссылку и сохраните подписку.</li>
+                </ol>
+            </div>
 
             <div class="export-url-row">
                 <code class="export-url" id="exportUrl"></code>
@@ -451,7 +480,7 @@
                 Если копирование не сработало — выделите ссылку выше и скопируйте вручную.
             </p>
         </div>
-        <div class="export-footer">
+        <div class="export-footer" id="exportFooter">
             <button class="btn export-open-btn" id="openGcalBtn" type="button">
                 Открыть Google Calendar
             </button>
@@ -503,6 +532,18 @@
                         <button class="view-switch-btn" type="button" data-theme-val="auto" role="tab">Авто</button>
                         <button class="view-switch-btn" type="button" data-theme-val="dark" role="tab">Тёмная</button>
                     </div>
+                </div>
+
+                <!-- Переключатель прошедших -->
+                <div class="settings-row">
+                    <div class="settings-row-title">
+                        Только активные мероприятия
+                        <span class="info-icon" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="activeOnlyToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
 
                 <!-- Экспорт в календарь -->

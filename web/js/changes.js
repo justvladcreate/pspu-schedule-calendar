@@ -23,6 +23,7 @@ function toEntry(ev) {
     rooms: ev.rooms || '',
     comment: ev.comment || '',
     position: ev.position,
+    is_past: ev.is_past || false,
   };
 }
 

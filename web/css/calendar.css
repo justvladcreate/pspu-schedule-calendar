@@ -363,3 +363,13 @@
 .event-block .event-room a:hover {
     color: var(--accent);
 }
+
+/* --- Прошедшие мероприятия (серый цвет) --- */
+.event-block--past {
+    opacity: 0.45;
+    filter: grayscale(0.8);
+}
+.month-event--past {
+    opacity: 0.45;
+    filter: grayscale(0.8);
+}

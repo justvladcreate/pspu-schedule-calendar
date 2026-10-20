@@ -243,6 +243,7 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
                 "dates":        dates,
                 "rooms":        event.get("rooms", "") or "",
                 "comment":      "",
+                "is_past":      event.get("is_past", False),
             })
 
     # Группируем по group, weekday, pair_number
