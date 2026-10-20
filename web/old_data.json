@@ -16055,6 +16055,24 @@
         {
             "group": "1252",
             "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "КОНСУЛЬТАЦИЯ ПО ВКР УСТАНОВВОЧНАЯ КОНФЕРЕНЦИЯ",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "09.11.2026"
+            ],
+            "rooms": "",
+            "comment": "",
+            "position": 1,
+            "event_id": "1252_ПН_3_1"
+        },
+        {
+            "group": "1252",
+            "weekday": "ПН",
             "time_start": "13:30",
             "time_end": "15:00",
             "pair_number": 4,
@@ -16313,6 +16331,24 @@
             "comment": "",
             "position": 2,
             "event_id": "1255_ВТ_4_2"
+        },
+        {
+            "group": "1255",
+            "weekday": "ПН",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "КОНСУЛЬТАЦИЯ ПО ВКР",
+            "type": "",
+            "subgroup": "",
+            "teachers": [],
+            "dates": [
+                "09.11.2026"
+            ],
+            "rooms": "",
+            "comment": "",
+            "position": 1,
+            "event_id": "1255_ПН_3_1"
         },
         {
             "group": "1255",
@@ -17351,5 +17387,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-20T09:59:25+00:00"
+    "generated_at": "2026-10-20T10:14:42+00:00"
 }
