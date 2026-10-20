@@ -792,6 +792,16 @@ async function fetchAndApply({ showIndicator = false } = {}) {
                     changed: false,
                 };
             } else if (incoming.generated_at === state.displayedIso) {
+                // Если версия совпала, но в памяти нет is_past (старый кэш) —
+                // принудительно обновляем данные и перерисовываем.
+                const missingPast = state.allEvents.some(ev => ev.is_past === undefined);
+                if (missingPast) {
+                    state.currentData = incoming;
+                    state.allEvents = expandEvents(incoming.events || []);
+                    saveSnapshot(incoming.events || []);
+                    applyFilters();
+                    render();
+                }
                 result = { ok: true, changed: false };
             } else {
                 const oldSnapshot = loadSnapshot();

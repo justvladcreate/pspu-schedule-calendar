@@ -67,10 +67,14 @@ def _is_gray_color(color: dict | None) -> bool:
     r = color.get('red', 0)
     g = color.get('green', 0)
     b = color.get('blue', 0)
-    mx, mn = max(r, g, b), min(r, g, b)
-    if mx - mn > 0.1:
+
+    # Считаем "серым" (прошедшим) любой цвет, кроме чёрного.
+    # В Google Sheets цвета в диапазоне 0.0 - 1.0.
+    # 0.3 * 255 = 76.5 — порог для отсечения чёрного.
+    if max(r, g, b) < 0.3:
         return False
-    return 0.1 < mx < 0.9
+
+    return True
 
 
 def _extract_gray_texts(cell: dict) -> list[str]:

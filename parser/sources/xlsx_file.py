@@ -77,10 +77,14 @@ def _is_gray_hex(hex_str: str | None) -> bool:
         b = int(hex_str[4:6], 16)
     except ValueError:
         return False
-    mx, mn = max(r, g, b), min(r, g, b)
-    if mx - mn > 20:
+
+    # Считаем "серым" (прошедшим) любой цвет, кроме чёрного.
+    # У чёрного все каналы близки к 0. Ставим порог 80 (примерно #505050),
+    # чтобы случайные тёмные оттенки не приравнивались к чёрному.
+    if max(r, g, b) < 80:
         return False
-    return 30 < mx < 230
+
+    return True
 
 def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, dict[tuple[int, int], list[str]]]:
     df = excel_file.parse(worksheet.title, header=None)

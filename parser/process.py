@@ -311,24 +311,14 @@ def merge_ai_line(
 
     gray_texts = src.get("gray_texts") or []
 
-    # Нормализованный тип для сопоставления с серым текстом.
-    # "-", "", "." — значит тип не указан, проверку по нему пропускаем.
-    _type_norm = (type_ or "").strip(" .")
-    if _type_norm in ("", "-"):
-        _type_re = None
-    else:
-        _type_re = re.compile(rf'\b{re.escape(_type_norm.lower())}\b')
-
     def _check_past(b_dates: str) -> bool:
         """
-        Мероприятие серое ⇔ хотя бы одна его дата встречается в сером тексте
-        И (если у мероприятия известен тип) этот тип присутствует в том же
-        сером фрагменте — чтобы не спутать лек. и прак. с совпадающими датами.
+        Мероприятие серое ⇔ хотя бы одна его дата встречается в сером тексте.
 
         Ограничение целостности данных (от заказчика): мероприятие серое
         ЦЕЛИКОМ — даты, преподаватели, дисциплина, подгруппа, тип
         одновременно серые или чёрные. Поэтому единственного признака
-        (даты) достаточно для классификации.
+        (совпадения по датам) достаточно для классификации.
         """
         if not gray_texts or not b_dates:
             return False
@@ -338,13 +328,9 @@ def merge_ai_line(
             return False
 
         for gt in gray_texts:
-            gt_low = gt.lower()
-            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', gt_low))
-            if not (branch_dates & gt_dates):
-                continue
-            if _type_re and not _type_re.search(gt_low):
-                continue
-            return True
+            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', gt))
+            if branch_dates & gt_dates:
+                return True
 
         return False
 
