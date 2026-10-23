@@ -3701,8 +3701,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
-            "is_past": false,
-            "color": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 3,
             "event_id": "1214_ПТ_3_3"
         },
@@ -19043,5 +19043,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-23T06:18:44+00:00"
+    "generated_at": "2026-10-23T07:19:32+00:00"
 }
