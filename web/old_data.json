@@ -15960,19 +15960,61 @@
                 "Иванова О.Г."
             ],
             "dates": [
-                "23.10.2026",
-                "30.10.2026",
-                "06.11.2026",
-                "11.12.2026",
-                "18.12.2026",
-                "25.12.2026"
+                "23.10.2026"
             ],
-            "rooms": "IV к. А111",
+            "rooms": "IV к. А111, IV к. А112",
             "comment": "",
             "is_past": false,
             "color": "",
             "position": 1,
             "event_id": "1245_ПТ_3_1"
+        },
+        {
+            "group": "1245",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Экономика России",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "30.10.2026"
+            ],
+            "rooms": "II к. 104",
+            "comment": "",
+            "is_past": false,
+            "color": "",
+            "position": 2,
+            "event_id": "1245_ПТ_3_2"
+        },
+        {
+            "group": "1245",
+            "weekday": "ПТ",
+            "time_start": "11:30",
+            "time_end": "13:00",
+            "pair_number": 3,
+            "discipline": "Экономика России",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Иванова О.Г."
+            ],
+            "dates": [
+                "06.11.2026",
+                "11.12.2026",
+                "18.12.2026",
+                "25.12.2026"
+            ],
+            "rooms": "IV к. А111, IV к. А112",
+            "comment": "",
+            "is_past": false,
+            "color": "",
+            "position": 3,
+            "event_id": "1245_ПТ_3_3"
         },
         {
             "group": "1245",
@@ -15989,12 +16031,12 @@
             "dates": [
                 "06.11.2026"
             ],
-            "rooms": "IV к. А112",
+            "rooms": "IV к. А111, IV к. А112",
             "comment": "",
             "is_past": false,
             "color": "",
-            "position": 2,
-            "event_id": "1245_ПТ_3_2"
+            "position": 4,
+            "event_id": "1245_ПТ_3_4"
         },
         {
             "group": "1245",
@@ -19043,5 +19085,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-23T07:19:32+00:00"
+    "generated_at": "2026-10-23T07:49:57+00:00"
 }
