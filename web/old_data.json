@@ -17,6 +17,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ВТ_2_1"
         },
@@ -38,6 +40,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_ВТ_3_1"
         },
@@ -62,6 +66,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ВТ_3_2"
         },
@@ -86,6 +92,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ВТ_4_1"
         },
@@ -106,6 +114,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ВТ_4_2"
         },
@@ -127,6 +137,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ВТ_5_1"
         },
@@ -149,6 +161,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_ПН_1_1"
         },
@@ -169,6 +183,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_ПН_2_1"
         },
@@ -189,6 +205,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1211_ПН_3_1"
         },
@@ -210,6 +228,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1211_ПН_3_2"
         },
@@ -237,6 +257,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПН_3_3"
         },
@@ -259,6 +281,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1211_ПН_3_4"
         },
@@ -280,6 +304,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_ПН_4_1"
         },
@@ -307,6 +333,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ПН_4_2"
         },
@@ -329,6 +357,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПН_4_3"
         },
@@ -350,6 +380,8 @@
             ],
             "rooms": "IV к. холл 2 эт.",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ПН_5_1"
         },
@@ -374,6 +406,8 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ПН_5_2"
         },
@@ -396,6 +430,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПН_5_3"
         },
@@ -423,6 +459,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 4,
             "event_id": "1211_ПН_5_4"
         },
@@ -454,6 +492,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1211_ПН_5_5"
         },
@@ -478,6 +518,8 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ПН_6_1"
         },
@@ -496,6 +538,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ПТ_2_1"
         },
@@ -516,6 +560,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1211_ПТ_3_1"
         },
@@ -536,6 +582,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 2,
             "event_id": "1211_ПТ_3_2"
         },
@@ -557,6 +605,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПТ_3_3"
         },
@@ -577,6 +627,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ПТ_4_1"
         },
@@ -597,6 +649,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ПТ_4_2"
         },
@@ -618,6 +672,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПТ_4_3"
         },
@@ -642,6 +698,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1211_ПТ_4_4"
         },
@@ -667,6 +725,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1211_ПТ_4_5"
         },
@@ -687,6 +747,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_ПТ_5_1"
         },
@@ -711,6 +773,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ПТ_5_2"
         },
@@ -736,6 +800,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_ПТ_5_3"
         },
@@ -760,6 +826,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ПТ_6_1"
         },
@@ -785,6 +853,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ПТ_6_2"
         },
@@ -824,6 +894,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_СБ_2_1"
         },
@@ -844,6 +916,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СБ_2_2"
         },
@@ -871,6 +945,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_СБ_2_3"
         },
@@ -910,6 +986,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_СБ_3_1"
         },
@@ -930,6 +1008,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СБ_3_2"
         },
@@ -957,6 +1037,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_СБ_3_3"
         },
@@ -981,6 +1063,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_СБ_4_1"
         },
@@ -999,6 +1083,8 @@
             ],
             "rooms": "Дом дружбы (Комсомольский пр-т, 15 В)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СБ_4_2"
         },
@@ -1023,6 +1109,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_СБ_5_1"
         },
@@ -1045,6 +1133,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1211_СР_1_1"
         },
@@ -1063,6 +1153,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_СР_2_1"
         },
@@ -1084,6 +1176,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1211_СР_2_2"
         },
@@ -1105,6 +1199,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_СР_3_1"
         },
@@ -1126,6 +1222,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СР_3_2"
         },
@@ -1148,6 +1246,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1211_СР_4_1"
         },
@@ -1169,6 +1269,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СР_4_2"
         },
@@ -1189,6 +1291,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_СР_5_1"
         },
@@ -1215,6 +1319,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СР_5_2"
         },
@@ -1236,6 +1342,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_СР_5_3"
         },
@@ -1257,6 +1365,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1211_СР_5_4"
         },
@@ -1278,6 +1388,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1211_СР_6_1"
         },
@@ -1296,6 +1408,8 @@
             "dates": [],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_СР_6_2"
         },
@@ -1317,6 +1431,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1211_СР_6_3"
         },
@@ -1338,6 +1454,8 @@
             ],
             "rooms": "IV к. А214, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1211_СР_6_4"
         },
@@ -1365,6 +1483,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ЧТ_4_1"
         },
@@ -1392,6 +1512,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ЧТ_5_1"
         },
@@ -1418,6 +1540,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1211_ЧТ_5_2"
         },
@@ -1444,6 +1568,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1211_ЧТ_6_1"
         },
@@ -1464,6 +1590,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ВТ_2_1"
         },
@@ -1482,6 +1610,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ВТ_2_2"
         },
@@ -1512,6 +1642,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ВТ_3_1"
         },
@@ -1542,6 +1674,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ВТ_4_1"
         },
@@ -1562,6 +1696,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ВТ_5_1"
         },
@@ -1584,6 +1720,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ВТ_5_2"
         },
@@ -1610,6 +1748,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ВТ_6_1"
         },
@@ -1636,6 +1776,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ВТ_6_2"
         },
@@ -1658,6 +1800,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ПН_1_1"
         },
@@ -1678,6 +1822,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), IV к. А331",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ПН_2_1"
         },
@@ -1698,6 +1844,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ПН_2_2"
         },
@@ -1719,6 +1867,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_ПН_2_3"
         },
@@ -1739,6 +1889,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПН_3_1"
         },
@@ -1759,6 +1911,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1212_ПН_3_2"
         },
@@ -1780,6 +1934,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 3,
             "event_id": "1212_ПН_3_3"
         },
@@ -1801,6 +1957,8 @@
             ],
             "rooms": "II к. 104",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1212_ПН_3_4"
         },
@@ -1821,6 +1979,8 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 5,
             "event_id": "1212_ПН_3_5"
         },
@@ -1847,6 +2007,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8), [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 6,
             "event_id": "1212_ПН_3_6"
         },
@@ -1868,6 +2030,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ПН_4_1"
         },
@@ -1888,6 +2052,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ПН_4_2"
         },
@@ -1908,6 +2074,8 @@
             ],
             "rooms": "II к. 104",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_ПН_4_3"
         },
@@ -1928,6 +2096,8 @@
             ],
             "rooms": "IV к. А214+216",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 4,
             "event_id": "1212_ПН_4_4"
         },
@@ -1954,6 +2124,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), 5.10",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1212_ПН_4_5"
         },
@@ -1974,6 +2146,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПН_5_1"
         },
@@ -1995,6 +2169,8 @@
             ],
             "rooms": "IV к. холл 2 эт.",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПН_6_1"
         },
@@ -2013,6 +2189,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПТ_2_1"
         },
@@ -2033,6 +2211,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ПТ_3_1"
         },
@@ -2053,6 +2233,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1212_ПТ_3_2"
         },
@@ -2074,6 +2256,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_ПТ_3_3"
         },
@@ -2094,6 +2278,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПТ_4_1"
         },
@@ -2114,6 +2300,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ПТ_4_2"
         },
@@ -2135,6 +2323,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_ПТ_4_3"
         },
@@ -2160,6 +2350,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1212_ПТ_4_4"
         },
@@ -2181,6 +2373,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1212_ПТ_4_5"
         },
@@ -2202,6 +2396,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 6,
             "event_id": "1212_ПТ_4_6"
         },
@@ -2222,6 +2418,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 1,
             "event_id": "1212_ПТ_5_1"
         },
@@ -2246,6 +2444,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ПТ_5_2"
         },
@@ -2267,6 +2467,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_ПТ_5_3"
         },
@@ -2288,6 +2490,8 @@
             ],
             "rooms": "IV к. А305, IV к. А202, IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1212_ПТ_5_4"
         },
@@ -2312,6 +2516,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ПТ_6_1"
         },
@@ -2351,6 +2557,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_СБ_2_1"
         },
@@ -2371,6 +2579,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_СБ_2_2"
         },
@@ -2410,6 +2620,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_СБ_3_1"
         },
@@ -2430,6 +2642,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_СБ_3_2"
         },
@@ -2448,6 +2662,8 @@
             ],
             "rooms": "Дом дружбы (Комсомольский пр-т, 15 В)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_СБ_4_1"
         },
@@ -2470,6 +2686,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_СР_1_1"
         },
@@ -2491,6 +2709,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_СР_2_1"
         },
@@ -2512,6 +2732,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_СР_3_1"
         },
@@ -2533,6 +2755,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_СР_3_2"
         },
@@ -2554,6 +2778,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_СР_3_3"
         },
@@ -2574,6 +2800,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_СР_4_1"
         },
@@ -2595,6 +2823,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_СР_4_2"
         },
@@ -2616,6 +2846,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1212_СР_4_3"
         },
@@ -2636,6 +2868,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_СР_5_1"
         },
@@ -2657,6 +2891,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ЧТ_1_1"
         },
@@ -2678,6 +2914,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1212_ЧТ_2_1"
         },
@@ -2698,6 +2936,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ЧТ_3_1"
         },
@@ -2722,6 +2962,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ЧТ_3_2"
         },
@@ -2742,6 +2984,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1212_ЧТ_4_1"
         },
@@ -2766,6 +3010,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1212_ЧТ_4_2"
         },
@@ -2786,6 +3032,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1212_ЧТ_5_1"
         },
@@ -2804,6 +3052,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ВТ_2_1"
         },
@@ -2826,6 +3076,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ВТ_3_1"
         },
@@ -2850,6 +3102,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ВТ_3_2"
         },
@@ -2877,6 +3131,8 @@
             ],
             "rooms": "IV к. A301",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ВТ_4_1"
         },
@@ -2901,6 +3157,8 @@
             ],
             "rooms": "I к. 47",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ВТ_4_2"
         },
@@ -2921,6 +3179,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ВТ_5_1"
         },
@@ -2947,6 +3207,8 @@
             ],
             "rooms": "IV к. А216",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ВТ_5_2"
         },
@@ -2973,6 +3235,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ВТ_6_1"
         },
@@ -2995,6 +3259,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ПН_1_1"
         },
@@ -3015,6 +3281,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ПН_2_1"
         },
@@ -3036,6 +3304,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ПН_2_2"
         },
@@ -3056,6 +3326,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/BrFTNJn8e7CezhiX3k8CQl2E9oXxxsyhVlWaf9Slov8)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ПН_3_1"
         },
@@ -3077,6 +3349,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1214_ПН_3_2"
         },
@@ -3103,6 +3377,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_ПН_3_3"
         },
@@ -3123,6 +3399,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 1,
             "event_id": "1214_ПН_4_1"
         },
@@ -3144,6 +3422,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1214_ПН_4_2"
         },
@@ -3165,6 +3445,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_ПН_4_3"
         },
@@ -3191,6 +3473,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1214_ПН_4_4"
         },
@@ -3212,6 +3496,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1214_ПН_4_5"
         },
@@ -3233,6 +3519,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 6,
             "event_id": "1214_ПН_4_6"
         },
@@ -3253,6 +3541,8 @@
             ],
             "rooms": "IV к. А331, [дистанционно онлайн](https://max.ru/joincall/z2QBl4w2OosszajJwns9tnWijHE2RtF6diXCZvfNfC0), IV к. холл 2 эт., IV к. А331, IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 7,
             "event_id": "1214_ПН_4_7"
         },
@@ -3273,6 +3563,8 @@
             ],
             "rooms": "IV к. А331",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ПН_5_1"
         },
@@ -3296,6 +3588,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ПН_5_2"
         },
@@ -3319,6 +3613,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ПН_6_1"
         },
@@ -3337,6 +3633,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ПТ_2_1"
         },
@@ -3357,6 +3655,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ПТ_3_1"
         },
@@ -3378,6 +3678,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1214_ПТ_3_2"
         },
@@ -3399,6 +3701,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_ПТ_3_3"
         },
@@ -3423,6 +3727,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1214_ПТ_3_4"
         },
@@ -3443,6 +3749,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ПТ_4_1"
         },
@@ -3464,6 +3772,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ПТ_4_2"
         },
@@ -3485,6 +3795,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_ПТ_4_3"
         },
@@ -3509,6 +3821,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1214_ПТ_4_4"
         },
@@ -3530,6 +3844,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ПТ_5_1"
         },
@@ -3551,6 +3867,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_СБ_2_1"
         },
@@ -3571,6 +3889,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_СБ_2_2"
         },
@@ -3598,6 +3918,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_СБ_2_3"
         },
@@ -3619,6 +3941,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/hCF1uLUOqxzDD122zY7b4Sb2uG151wUrrIwPeQNLxHA)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_СБ_3_1"
         },
@@ -3639,6 +3963,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_СБ_3_2"
         },
@@ -3666,6 +3992,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_СБ_3_3"
         },
@@ -3684,6 +4012,8 @@
             ],
             "rooms": "Дом дружбы (Комсомольский пр-т, 15 В)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_СБ_4_1"
         },
@@ -3706,6 +4036,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/N_mkGg9w56peRR1B0hX-qZyV855PY298TUGnHmVTkWA)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_СР_1_1"
         },
@@ -3726,6 +4058,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1214_СР_2_1"
         },
@@ -3746,6 +4080,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b2UAcFjqCwMewrR6I4fD3Plbtt9brBqpnTCLTrXzA5Y)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1214_СР_3_1"
         },
@@ -3767,6 +4103,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_СР_3_2"
         },
@@ -3788,6 +4126,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1214_СР_3_3"
         },
@@ -3809,6 +4149,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_СР_4_1"
         },
@@ -3830,6 +4172,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_СР_4_2"
         },
@@ -3850,6 +4194,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ЧТ_3_1"
         },
@@ -3878,6 +4224,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ЧТ_3_2"
         },
@@ -3898,6 +4246,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ЧТ_4_1"
         },
@@ -3925,6 +4275,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ЧТ_4_2"
         },
@@ -3945,6 +4297,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1214_ЧТ_5_1"
         },
@@ -3970,6 +4324,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1214_ЧТ_5_2"
         },
@@ -3995,6 +4351,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ЧТ_6_1"
         },
@@ -4016,6 +4374,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ВТ_1_1"
         },
@@ -4037,6 +4397,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ВТ_1_2"
         },
@@ -4058,6 +4420,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1221_ВТ_2_1"
         },
@@ -4079,6 +4443,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 2,
             "event_id": "1221_ВТ_2_2"
         },
@@ -4101,6 +4467,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А306",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1221_ВТ_3_1"
         },
@@ -4121,6 +4489,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ВТ_3_2"
         },
@@ -4142,6 +4512,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ВТ_3_3"
         },
@@ -4166,6 +4538,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1221_ВТ_3_4"
         },
@@ -4188,6 +4562,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А306",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1221_ВТ_4_1"
         },
@@ -4208,6 +4584,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ВТ_4_2"
         },
@@ -4229,6 +4607,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ВТ_4_3"
         },
@@ -4253,6 +4633,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM), IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1221_ВТ_4_4"
         },
@@ -4273,6 +4655,8 @@
             ],
             "rooms": "ДОМ МЕШКОВА, (Монастырская, 11), бронь билета",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ВТ_5_1"
         },
@@ -4293,6 +4677,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/TD0jEA43ymCK9uD8wrr-QzrQvPdfWpV7TTeazkjWnTM)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1221_ВТ_5_2"
         },
@@ -4320,6 +4706,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ВТ_5_3"
         },
@@ -4349,6 +4737,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПН_2_1"
         },
@@ -4370,6 +4760,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1221_ПН_3_1"
         },
@@ -4392,6 +4784,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ПН_3_2"
         },
@@ -4414,6 +4808,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 3,
             "event_id": "1221_ПН_3_3"
         },
@@ -4435,6 +4831,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1221_ПН_4_1"
         },
@@ -4456,6 +4854,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1221_ПН_4_2"
         },
@@ -4478,6 +4878,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), IV к. А214, II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ПН_4_3"
         },
@@ -4500,6 +4902,8 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 4,
             "event_id": "1221_ПН_4_4"
         },
@@ -4521,6 +4925,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПН_5_1"
         },
@@ -4543,6 +4949,8 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 2,
             "event_id": "1221_ПН_5_2"
         },
@@ -4564,6 +4972,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПН_6_1"
         },
@@ -4585,6 +4995,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 2,
             "event_id": "1221_ПН_6_2"
         },
@@ -4622,6 +5034,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПТ_2_1"
         },
@@ -4659,6 +5073,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПТ_3_1"
         },
@@ -4685,6 +5101,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ПТ_4_1"
         },
@@ -4705,6 +5123,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1221_ПТ_5_1"
         },
@@ -4729,6 +5149,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ПТ_5_2"
         },
@@ -4751,6 +5173,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СБ_2_1"
         },
@@ -4773,6 +5197,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_СБ_2_2"
         },
@@ -4799,6 +5225,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_СБ_2_3"
         },
@@ -4821,6 +5249,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СБ_3_1"
         },
@@ -4843,6 +5273,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_СБ_3_2"
         },
@@ -4869,6 +5301,8 @@
             ],
             "rooms": "IV к. A310, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_СБ_3_3"
         },
@@ -4890,6 +5324,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СБ_4_1"
         },
@@ -4910,6 +5346,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_СБ_4_2"
         },
@@ -4937,6 +5375,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_СБ_4_3"
         },
@@ -4958,6 +5398,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СБ_5_1"
         },
@@ -4978,6 +5420,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_СБ_5_2"
         },
@@ -5005,6 +5449,8 @@
             ],
             "rooms": "IV к. A310, IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_СБ_5_3"
         },
@@ -5042,6 +5488,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СР_2_1"
         },
@@ -5079,6 +5527,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СР_3_1"
         },
@@ -5107,6 +5557,8 @@
             ],
             "rooms": "II к. 408",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СР_4_1"
         },
@@ -5135,6 +5587,8 @@
             ],
             "rooms": "II к. 408",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СР_5_1"
         },
@@ -5158,6 +5612,8 @@
             ],
             "rooms": "IV к. А323",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_СР_6_1"
         },
@@ -5179,6 +5635,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 1,
             "event_id": "1221_ЧТ_1_1"
         },
@@ -5200,6 +5658,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ЧТ_2_1"
         },
@@ -5218,6 +5678,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ЧТ_2_2"
         },
@@ -5236,6 +5698,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ЧТ_3_1"
         },
@@ -5258,6 +5722,8 @@
             ],
             "rooms": "IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ЧТ_3_2"
         },
@@ -5279,6 +5745,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ЧТ_3_3"
         },
@@ -5299,6 +5767,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u2rIdbNq1gf_dJBqIlqKG2seTF3RR1RNyLiekXn8wLY)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1221_ЧТ_3_4"
         },
@@ -5325,6 +5795,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1221_ЧТ_3_5"
         },
@@ -5345,6 +5817,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ЧТ_4_1"
         },
@@ -5365,6 +5839,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u2rIdbNq1gf_dJBqIlqKG2seTF3RR1RNyLiekXn8wLY)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ЧТ_4_2"
         },
@@ -5391,6 +5867,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1221_ЧТ_4_3"
         },
@@ -5411,6 +5889,8 @@
             ],
             "rooms": "ул. Монастырская, 2, корп. 1, бронь билета",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1221_ЧТ_5_1"
         },
@@ -5431,6 +5911,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1221_ЧТ_5_2"
         },
@@ -5452,6 +5934,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1222_ВТ_1_1"
         },
@@ -5473,6 +5957,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1222_ВТ_1_2"
         },
@@ -5497,6 +5983,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b9oBkeySWYjLsvCaBj6AIJzQ9xafdOYde3Dg7PBJcgk)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ВТ_1_3"
         },
@@ -5518,6 +6006,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1222_ВТ_2_1"
         },
@@ -5539,6 +6029,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1222_ВТ_2_2"
         },
@@ -5559,6 +6051,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/b9oBkeySWYjLsvCaBj6AIJzQ9xafdOYde3Dg7PBJcgk)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ВТ_2_3"
         },
@@ -5583,6 +6077,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ВТ_3_1"
         },
@@ -5608,6 +6104,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ВТ_3_2"
         },
@@ -5632,6 +6130,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ВТ_4_1"
         },
@@ -5656,6 +6156,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ВТ_4_2"
         },
@@ -5676,6 +6178,8 @@
             ],
             "rooms": "ДОМ МЕШКОВА, (Монастырская, 11), бронь билета",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ВТ_5_1"
         },
@@ -5705,6 +6209,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ВТ_5_2"
         },
@@ -5725,6 +6231,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ВТ_5_3"
         },
@@ -5745,6 +6253,8 @@
             ],
             "rooms": "Региональный центр финансовой грамотности",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ВТ_6_1"
         },
@@ -5766,6 +6276,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПН_3_1"
         },
@@ -5788,6 +6300,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ПН_3_2"
         },
@@ -5809,6 +6323,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 3,
             "event_id": "1222_ПН_3_3"
         },
@@ -5830,6 +6346,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1222_ПН_4_1"
         },
@@ -5852,6 +6370,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/1h66zsddpGWQ4hz8NQzDKhxKZgNlhW2axjLy4xmpIRk), II к. 301, Шуминская С.И. – II к. 103, Максимова О.А. – II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ПН_4_2"
         },
@@ -5874,6 +6394,8 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 3,
             "event_id": "1222_ПН_4_3"
         },
@@ -5895,6 +6417,8 @@
             ],
             "rooms": "II к. 302, IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПН_5_1"
         },
@@ -5915,6 +6439,8 @@
             ],
             "rooms": "II к. 302, IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ПН_5_2"
         },
@@ -5937,6 +6463,8 @@
             ],
             "rooms": "II к. 103",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 3,
             "event_id": "1222_ПН_5_3"
         },
@@ -5958,6 +6486,8 @@
             ],
             "rooms": "II к. 302, IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПН_6_1"
         },
@@ -5978,6 +6508,8 @@
             ],
             "rooms": "II к. 302, IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ПН_6_2"
         },
@@ -6000,6 +6532,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": true,
+            "color": "#37761c",
             "position": 3,
             "event_id": "1222_ПН_6_3"
         },
@@ -6037,6 +6571,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПТ_2_1"
         },
@@ -6074,6 +6610,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПТ_3_1"
         },
@@ -6102,6 +6640,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ПТ_4_1"
         },
@@ -6122,6 +6662,8 @@
             ],
             "rooms": "IV к. В103",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1222_ПТ_5_1"
         },
@@ -6150,6 +6692,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1222_ПТ_5_2"
         },
@@ -6171,6 +6715,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_СБ_3_1"
         },
@@ -6192,6 +6738,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_СБ_4_1"
         },
@@ -6229,6 +6777,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_СР_2_1"
         },
@@ -6266,6 +6816,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_СР_3_1"
         },
@@ -6287,6 +6839,8 @@
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_СР_4_1"
         },
@@ -6312,6 +6866,8 @@
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_СР_4_2"
         },
@@ -6332,6 +6888,8 @@
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_СР_4_3"
         },
@@ -6355,6 +6913,8 @@
             ],
             "rooms": "IV к. А202, II к. 315, II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1222_СР_4_4"
         },
@@ -6376,6 +6936,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1222_СР_5_1"
         },
@@ -6396,6 +6958,8 @@
             ],
             "rooms": "II к. 309",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_СР_5_2"
         },
@@ -6419,6 +6983,8 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_СР_5_3"
         },
@@ -6439,6 +7005,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1222_СР_5_4"
         },
@@ -6462,6 +7030,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1222_СР_5_5"
         },
@@ -6483,6 +7053,8 @@
             ],
             "rooms": "II к. 309",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1222_СР_6_1"
         },
@@ -6504,6 +7076,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_1_1"
         },
@@ -6525,6 +7099,8 @@
             ],
             "rooms": "II к. 309",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_1_2"
         },
@@ -6543,6 +7119,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ЧТ_1_3"
         },
@@ -6564,6 +7142,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_2_1"
         },
@@ -6585,6 +7165,8 @@
             ],
             "rooms": "II к. 309",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_2_2"
         },
@@ -6603,6 +7185,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ЧТ_2_3"
         },
@@ -6621,6 +7205,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_3_1"
         },
@@ -6642,6 +7228,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/c3XpR1AcA1u7tesLi_KzJlOPjKsEySUu8PoxzhluzIU)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_3_2"
         },
@@ -6668,6 +7256,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ЧТ_3_3"
         },
@@ -6688,6 +7278,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgB19DlkmIOlQ6ZMXIloz4XHAXC7Hko01nENEUK9pk0DV6k?e=VnjxS1)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_4_1"
         },
@@ -6714,6 +7306,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_4_2"
         },
@@ -6734,6 +7328,8 @@
             ],
             "rooms": "ул. Монастырская, 2, корп. 1, бронь билета",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_5_1"
         },
@@ -6754,6 +7350,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_5_2"
         },
@@ -6774,6 +7372,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ЧТ_5_3"
         },
@@ -6796,6 +7396,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1222_ЧТ_5_4"
         },
@@ -6818,6 +7420,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1222_ЧТ_6_1"
         },
@@ -6838,6 +7442,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1222_ЧТ_6_2"
         },
@@ -6858,6 +7464,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/28685989869550), IV к. В105, IV к. А111, IV к. А214, IV к. А203",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1222_ЧТ_6_3"
         },
@@ -6881,6 +7489,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ВТ_5_1"
         },
@@ -6901,6 +7511,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ВТ_5_2"
         },
@@ -6933,6 +7545,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ВТ_6_1"
         },
@@ -6965,6 +7579,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ВТ_7_1"
         },
@@ -6996,6 +7612,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПН_3_1"
         },
@@ -7017,6 +7635,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПН_4_1"
         },
@@ -7047,6 +7667,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ПН_4_2"
         },
@@ -7075,6 +7697,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПН_5_1"
         },
@@ -7098,6 +7722,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ПН_5_2"
         },
@@ -7128,6 +7754,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПН_6_1"
         },
@@ -7165,6 +7793,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПТ_2_1"
         },
@@ -7202,6 +7832,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПТ_3_1"
         },
@@ -7229,6 +7861,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПТ_5_1"
         },
@@ -7249,6 +7883,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ПТ_6_1"
         },
@@ -7269,6 +7905,8 @@
             ],
             "rooms": "А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ПТ_6_2"
         },
@@ -7294,6 +7932,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1223_ПТ_6_3"
         },
@@ -7314,6 +7954,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1223_ПТ_6_4"
         },
@@ -7346,6 +7988,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СБ_1_1"
         },
@@ -7378,6 +8022,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СБ_2_1"
         },
@@ -7410,6 +8056,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СБ_3_1"
         },
@@ -7439,6 +8087,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СБ_4_1"
         },
@@ -7476,6 +8126,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СР_2_1"
         },
@@ -7513,6 +8165,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_СР_3_1"
         },
@@ -7533,6 +8187,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1223_ЧТ_1_1"
         },
@@ -7551,6 +8207,8 @@
             ],
             "rooms": "IV к. акт. зал, ул. Пушкина, 42",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ЧТ_1_2"
         },
@@ -7571,6 +8229,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ЧТ_2_1"
         },
@@ -7591,6 +8251,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ЧТ_2_2"
         },
@@ -7618,6 +8280,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1223_ЧТ_2_3"
         },
@@ -7640,6 +8304,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1223_ЧТ_2_4"
         },
@@ -7660,6 +8326,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ЧТ_3_1"
         },
@@ -7680,6 +8348,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ЧТ_3_2"
         },
@@ -7710,6 +8380,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1223_ЧТ_3_3"
         },
@@ -7738,6 +8410,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ЧТ_4_1"
         },
@@ -7764,6 +8438,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1223_ЧТ_5_1"
         },
@@ -7785,6 +8461,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1223_ЧТ_5_2"
         },
@@ -7808,6 +8486,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1227_ВТ_5_1"
         },
@@ -7836,6 +8516,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://edu.olymponline.ru/invite/Nr7JQJ)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПН_2_1"
         },
@@ -7864,6 +8546,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://edu.olymponline.ru/invite/Nr7JQJ)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПН_3_1"
         },
@@ -7885,6 +8569,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1227_ПН_4_1"
         },
@@ -7913,6 +8599,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПН_5_1"
         },
@@ -7943,6 +8631,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПН_6_1"
         },
@@ -7980,6 +8670,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПТ_2_1"
         },
@@ -8017,6 +8709,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПТ_3_1"
         },
@@ -8037,6 +8731,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПТ_4_1"
         },
@@ -8063,6 +8759,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1227_ПТ_4_2"
         },
@@ -8090,6 +8788,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПТ_5_1"
         },
@@ -8122,6 +8822,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ПТ_7_1"
         },
@@ -8154,6 +8856,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 1,
             "event_id": "1227_СБ_1_1"
         },
@@ -8187,6 +8891,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 1,
             "event_id": "1227_СБ_2_1"
         },
@@ -8220,6 +8926,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/40198236107201)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СБ_3_1"
         },
@@ -8253,6 +8961,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/40198236107201)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СБ_4_1"
         },
@@ -8286,6 +8996,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/40198236107201)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СБ_5_1"
         },
@@ -8319,6 +9031,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/40198236107201)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СБ_6_1"
         },
@@ -8356,6 +9070,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СР_2_1"
         },
@@ -8393,6 +9109,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СР_3_1"
         },
@@ -8420,6 +9138,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СР_4_1"
         },
@@ -8447,6 +9167,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СР_5_1"
         },
@@ -8479,6 +9201,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_СР_7_1"
         },
@@ -8499,6 +9223,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ЧТ_1_1"
         },
@@ -8531,6 +9257,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1227_ЧТ_1_2"
         },
@@ -8560,6 +9288,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ЧТ_2_1"
         },
@@ -8582,6 +9312,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1227_ЧТ_2_2"
         },
@@ -8602,6 +9334,8 @@
             ],
             "rooms": "А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ЧТ_5_1"
         },
@@ -8626,6 +9360,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1227_ЧТ_5_2"
         },
@@ -8646,6 +9382,8 @@
             ],
             "rooms": "А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1227_ЧТ_5_3"
         },
@@ -8666,6 +9404,8 @@
             ],
             "rooms": "12.11;",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1227_ЧТ_5_4"
         },
@@ -8686,6 +9426,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1227_ЧТ_5_5"
         },
@@ -8706,6 +9448,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 6,
             "event_id": "1227_ЧТ_5_6"
         },
@@ -8727,6 +9471,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 7,
             "event_id": "1227_ЧТ_5_7"
         },
@@ -8747,6 +9493,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 8,
             "event_id": "1227_ЧТ_5_8"
         },
@@ -8767,6 +9515,8 @@
             ],
             "rooms": "А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ЧТ_6_1"
         },
@@ -8791,6 +9541,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1227_ЧТ_6_2"
         },
@@ -8811,6 +9563,8 @@
             ],
             "rooms": "А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1227_ЧТ_6_3"
         },
@@ -8831,6 +9585,8 @@
             ],
             "rooms": "12.11;",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1227_ЧТ_6_4"
         },
@@ -8851,6 +9607,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1227_ЧТ_6_5"
         },
@@ -8871,6 +9629,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 6,
             "event_id": "1227_ЧТ_6_6"
         },
@@ -8892,6 +9652,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 7,
             "event_id": "1227_ЧТ_6_7"
         },
@@ -8912,6 +9674,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 8,
             "event_id": "1227_ЧТ_6_8"
         },
@@ -8932,6 +9696,8 @@
             ],
             "rooms": "А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1227_ЧТ_7_1"
         },
@@ -8952,6 +9718,8 @@
             ],
             "rooms": "Тир",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_1_1"
         },
@@ -8972,6 +9740,8 @@
             ],
             "rooms": "Мед. помощь",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_2_1"
         },
@@ -8992,6 +9762,8 @@
             ],
             "rooms": "Строевая",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_3_1"
         },
@@ -9012,6 +9784,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ВТ_3_2"
         },
@@ -9032,6 +9806,8 @@
             ],
             "rooms": "Хим. защита",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_4_1"
         },
@@ -9056,6 +9832,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_5_1"
         },
@@ -9080,6 +9858,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_6_1"
         },
@@ -9104,6 +9884,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ВТ_7_1"
         },
@@ -9141,6 +9923,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПН_2_1"
         },
@@ -9159,6 +9943,8 @@
             ],
             "rooms": "манеж Спартак (г. Пермь, ул. Рабочая, 9)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ПН_2_2"
         },
@@ -9196,6 +9982,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПН_3_1"
         },
@@ -9216,6 +10004,8 @@
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПН_4_1"
         },
@@ -9236,6 +10026,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ПН_4_2"
         },
@@ -9257,6 +10049,8 @@
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1232_ПН_4_3"
         },
@@ -9285,6 +10079,8 @@
             ],
             "rooms": "IV к. В105, IV к. А112",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 4,
             "event_id": "1232_ПН_4_4"
         },
@@ -9305,6 +10101,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПН_5_1"
         },
@@ -9333,6 +10131,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ПН_5_2"
         },
@@ -9361,6 +10161,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПН_6_1"
         },
@@ -9381,6 +10183,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПТ_1_1"
         },
@@ -9402,6 +10206,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/O9LwDuY6zga52TWQgHXmX1omvAhX2NTEH0HvZ5DOr50)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ПТ_1_2"
         },
@@ -9422,6 +10228,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПТ_2_1"
         },
@@ -9443,6 +10251,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/O9LwDuY6zga52TWQgHXmX1omvAhX2NTEH0HvZ5DOr50)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ПТ_2_2"
         },
@@ -9463,6 +10273,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1232_ПТ_3_1"
         },
@@ -9483,6 +10295,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1232_ПТ_3_2"
         },
@@ -9503,6 +10317,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
             "comment": "",
+            "is_past": true,
+            "color": "#d9d9d9",
             "position": 3,
             "event_id": "1232_ПТ_3_3"
         },
@@ -9525,6 +10341,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1232_ПТ_3_4"
         },
@@ -9553,6 +10371,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1232_ПТ_3_5"
         },
@@ -9573,6 +10393,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/0RtePHjo1J_WRSlFvANfbntZt5Wlp13JjzYxv4Hm0yM)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1232_ПТ_4_1"
         },
@@ -9593,6 +10415,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YdkRSqRuJpJ75He4MlLqmiw7QlfgApWInV32oyJJCzE)",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 2,
             "event_id": "1232_ПТ_4_2"
         },
@@ -9613,6 +10437,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/u3PAptfT1YDhUy9nUe0I-zLF-HtxbQbUOLNEnsDS7KY)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1232_ПТ_4_3"
         },
@@ -9635,6 +10461,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1232_ПТ_4_4"
         },
@@ -9663,6 +10491,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1232_ПТ_4_5"
         },
@@ -9690,6 +10520,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПТ_5_1"
         },
@@ -9715,6 +10547,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПТ_6_1"
         },
@@ -9740,6 +10574,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ПТ_7_1"
         },
@@ -9762,6 +10598,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_СР_1_1"
         },
@@ -9783,6 +10621,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_СР_1_2"
         },
@@ -9805,6 +10645,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_СР_2_1"
         },
@@ -9827,6 +10669,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/8e1N0xJMmrGpStjFOUbzGeQv5d-rG81I4FTb0CSiHHM)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_СР_3_1"
         },
@@ -9847,6 +10691,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_СР_3_2"
         },
@@ -9867,6 +10713,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_СР_4_1"
         },
@@ -9887,6 +10735,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_СР_4_2"
         },
@@ -9914,6 +10764,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1232_СР_4_3"
         },
@@ -9934,6 +10786,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://pshpu-my.sharepoint.com/:f:/g/personal/bogatkina_as_pspu_ru/IgDtaJOBWRGnSJz2gJSEsYvXAWWcoox8HUejXQMnZgoaIvY?e=gyqqfc)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_СР_5_1"
         },
@@ -9954,6 +10808,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/YrktHcWUDd11-e9_o2NewtF-Kizt2JTm4S5XMcHfXLs)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_СР_5_2"
         },
@@ -9981,6 +10837,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1232_СР_5_3"
         },
@@ -10018,6 +10876,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ЧТ_2_1"
         },
@@ -10055,6 +10915,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ЧТ_3_1"
         },
@@ -10080,6 +10942,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ЧТ_4_1"
         },
@@ -10104,6 +10968,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ЧТ_4_2"
         },
@@ -10129,6 +10995,8 @@
             ],
             "rooms": "II к. 314",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1232_ЧТ_5_1"
         },
@@ -10153,6 +11021,8 @@
             ],
             "rooms": "II к. 315",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1232_ЧТ_5_2"
         },
@@ -10173,6 +11043,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_1_1"
         },
@@ -10193,6 +11065,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_2_1"
         },
@@ -10213,6 +11087,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_3_1"
         },
@@ -10233,6 +11109,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ВТ_3_2"
         },
@@ -10257,6 +11135,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 3,
             "event_id": "1233_ВТ_3_3"
         },
@@ -10280,6 +11160,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 4,
             "event_id": "1233_ВТ_3_4"
         },
@@ -10300,6 +11182,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_4_1"
         },
@@ -10324,6 +11208,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ВТ_4_2"
         },
@@ -10356,6 +11242,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 3,
             "event_id": "1233_ВТ_4_3"
         },
@@ -10384,6 +11272,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1233_ВТ_5_1"
         },
@@ -10408,6 +11298,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ВТ_5_2"
         },
@@ -10432,6 +11324,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_6_1"
         },
@@ -10456,6 +11350,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ВТ_7_1"
         },
@@ -10493,6 +11389,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПН_2_1"
         },
@@ -10511,6 +11409,8 @@
             ],
             "rooms": "манеж Спартак (г. Пермь, ул. Рабочая, 9)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ПН_2_2"
         },
@@ -10548,6 +11448,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПН_3_1"
         },
@@ -10581,6 +11483,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПН_4_1"
         },
@@ -10604,6 +11508,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПН_5_1"
         },
@@ -10625,6 +11531,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ПН_5_2"
         },
@@ -10648,6 +11556,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПН_6_1"
         },
@@ -10673,6 +11583,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПТ_3_1"
         },
@@ -10695,6 +11607,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ПТ_3_2"
         },
@@ -10722,6 +11636,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ПТ_4_1"
         },
@@ -10750,6 +11666,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_1_1"
         },
@@ -10773,6 +11691,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 2,
             "event_id": "1233_СБ_1_2"
         },
@@ -10801,6 +11721,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_2_1"
         },
@@ -10824,6 +11746,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/77076871981868)",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 2,
             "event_id": "1233_СБ_2_2"
         },
@@ -10851,6 +11775,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/61633174232773)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_4_1"
         },
@@ -10875,6 +11801,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/15984810723797)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_5_1"
         },
@@ -10898,6 +11826,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/15984810723797)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_6_1"
         },
@@ -10916,6 +11846,8 @@
             "dates": [],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СБ_7_1"
         },
@@ -10943,6 +11875,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СР_1_1"
         },
@@ -10970,6 +11904,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СР_2_1"
         },
@@ -10990,6 +11926,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СР_4_1"
         },
@@ -11018,6 +11956,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СР_6_1"
         },
@@ -11041,6 +11981,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_СР_6_2"
         },
@@ -11069,6 +12011,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_СР_7_1"
         },
@@ -11092,6 +12036,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_СР_7_2"
         },
@@ -11120,6 +12066,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1233_СР_7_3"
         },
@@ -11143,6 +12091,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/26669002670727)",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 4,
             "event_id": "1233_СР_7_4"
         },
@@ -11180,6 +12130,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ЧТ_2_1"
         },
@@ -11217,6 +12169,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ЧТ_3_1"
         },
@@ -11242,6 +12196,8 @@
             ],
             "rooms": "IV к. Б406",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ЧТ_4_1"
         },
@@ -11268,6 +12224,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ЧТ_4_2"
         },
@@ -11293,6 +12251,8 @@
             ],
             "rooms": "IV к. Б406",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ЧТ_5_1"
         },
@@ -11319,6 +12279,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1233_ЧТ_5_2"
         },
@@ -11348,6 +12310,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/05771841063750)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1233_ЧТ_6_1"
         },
@@ -11368,6 +12332,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ВТ_3_1"
         },
@@ -11392,6 +12358,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ВТ_4_1"
         },
@@ -11416,6 +12384,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ВТ_5_1"
         },
@@ -11440,6 +12410,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ВТ_6_1"
         },
@@ -11464,6 +12436,8 @@
             ],
             "rooms": "IV к. В105",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ВТ_7_1"
         },
@@ -11501,6 +12475,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПН_2_1"
         },
@@ -11519,6 +12495,8 @@
             ],
             "rooms": "манеж Спартак (г. Пермь, ул. Рабочая, 9)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_ПН_2_2"
         },
@@ -11556,6 +12534,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПН_3_1"
         },
@@ -11576,6 +12556,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПН_4_1"
         },
@@ -11596,6 +12578,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_ПН_4_2"
         },
@@ -11619,6 +12603,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1237_ПН_4_3"
         },
@@ -11642,6 +12628,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПН_5_1"
         },
@@ -11671,6 +12659,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/66812222973580)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПН_7_1"
         },
@@ -11702,6 +12692,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 1,
             "event_id": "1237_ПТ_5_1"
         },
@@ -11733,6 +12725,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 1,
             "event_id": "1237_ПТ_6_1"
         },
@@ -11753,6 +12747,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_1_1"
         },
@@ -11773,6 +12769,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_2_1"
         },
@@ -11793,6 +12791,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_3_1"
         },
@@ -11818,6 +12818,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1237_СБ_3_2"
         },
@@ -11841,6 +12843,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 3,
             "event_id": "1237_СБ_3_3"
         },
@@ -11861,6 +12865,8 @@
             ],
             "rooms": "Мед. помощь - IV к. А327, Хим. защита - IV к. А416, Тир - IV к. А326, Строевая - II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_4_1"
         },
@@ -11885,6 +12891,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СБ_4_2"
         },
@@ -11908,6 +12916,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1237_СБ_4_3"
         },
@@ -11932,6 +12942,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/15984810723797)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_5_1"
         },
@@ -11957,6 +12969,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 2,
             "event_id": "1237_СБ_5_2"
         },
@@ -11980,6 +12994,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/15984810723797)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СБ_6_1"
         },
@@ -12009,6 +13025,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/15984810723797)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СБ_6_2"
         },
@@ -12034,6 +13052,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": true,
+            "color": "#ff0000",
             "position": 3,
             "event_id": "1237_СБ_6_3"
         },
@@ -12062,6 +13082,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СР_3_1"
         },
@@ -12085,6 +13107,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СР_3_2"
         },
@@ -12113,6 +13137,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СР_4_1"
         },
@@ -12136,6 +13162,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СР_4_2"
         },
@@ -12164,6 +13192,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СР_5_1"
         },
@@ -12187,6 +13217,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СР_5_2"
         },
@@ -12215,6 +13247,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_СР_6_1"
         },
@@ -12238,6 +13272,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СР_6_2"
         },
@@ -12275,6 +13311,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ЧТ_2_1"
         },
@@ -12312,6 +13350,8 @@
             ],
             "rooms": "",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ЧТ_3_1"
         },
@@ -12339,6 +13379,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ЧТ_4_1"
         },
@@ -12366,6 +13408,8 @@
             ],
             "rooms": "IV к. А316",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ЧТ_5_1"
         },
@@ -12384,6 +13428,8 @@
             ],
             "rooms": "МЦ Кристалл, (зал Пространство, Просвещения, 2 этаж), пр-т Комсомольский, 53",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ВТ_4_1"
         },
@@ -12412,6 +13458,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПН_3_1"
         },
@@ -12435,6 +13483,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ПН_3_2"
         },
@@ -12463,6 +13513,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПН_4_1"
         },
@@ -12486,6 +13538,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ПН_4_2"
         },
@@ -12510,6 +13564,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1241_ПН_5_1"
         },
@@ -12532,6 +13588,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ПН_5_2"
         },
@@ -12555,6 +13613,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1241_ПН_6_1"
         },
@@ -12579,6 +13639,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПТ_3_1"
         },
@@ -12600,6 +13662,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ПТ_3_2"
         },
@@ -12625,6 +13689,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1241_ПТ_3_3"
         },
@@ -12649,6 +13715,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПТ_4_1"
         },
@@ -12669,6 +13737,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ПТ_4_2"
         },
@@ -12695,6 +13765,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1241_ПТ_4_3"
         },
@@ -12723,6 +13795,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПТ_5_1"
         },
@@ -12751,6 +13825,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ПТ_6_1"
         },
@@ -12777,6 +13853,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_СР_3_1"
         },
@@ -12797,6 +13875,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_СР_3_2"
         },
@@ -12823,6 +13903,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_СР_4_1"
         },
@@ -12843,6 +13925,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_СР_4_2"
         },
@@ -12869,6 +13953,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_СР_5_1"
         },
@@ -12895,6 +13981,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ЧТ_4_1"
         },
@@ -12919,6 +14007,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ЧТ_5_1"
         },
@@ -12945,6 +14035,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ЧТ_5_2"
         },
@@ -12969,6 +14061,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1241_ЧТ_6_1"
         },
@@ -12992,6 +14086,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1241_ЧТ_6_2"
         },
@@ -13012,6 +14108,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1242_ВТ_3_1"
         },
@@ -13032,6 +14130,8 @@
             ],
             "rooms": "IV к. А102",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1242_ВТ_3_2"
         },
@@ -13054,6 +14154,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 3,
             "event_id": "1242_ВТ_3_3"
         },
@@ -13079,6 +14181,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1242_ВТ_3_4"
         },
@@ -13099,6 +14203,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ВТ_4_1"
         },
@@ -13119,6 +14225,8 @@
             ],
             "rooms": "IV к. А102",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ВТ_4_2"
         },
@@ -13141,6 +14249,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1242_ВТ_4_3"
         },
@@ -13166,6 +14276,8 @@
             ],
             "rooms": "IV к. А108, IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1242_ВТ_4_4"
         },
@@ -13184,6 +14296,8 @@
             ],
             "rooms": "МЦ Кристалл, (зал Пространство, Просвещения, 2 этаж), пр-т Комсомольский, 53",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 5,
             "event_id": "1242_ВТ_4_5"
         },
@@ -13205,6 +14319,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ВТ_5_1"
         },
@@ -13226,6 +14342,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ВТ_6_1"
         },
@@ -13250,6 +14368,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПН_3_1"
         },
@@ -13273,6 +14393,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ПН_3_2"
         },
@@ -13297,6 +14419,8 @@
             ],
             "rooms": "II к. 302",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПН_4_1"
         },
@@ -13320,6 +14444,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ПН_4_2"
         },
@@ -13341,6 +14467,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПН_5_1"
         },
@@ -13362,6 +14490,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПН_6_1"
         },
@@ -13387,6 +14517,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПТ_3_1"
         },
@@ -13412,6 +14544,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ПТ_3_2"
         },
@@ -13434,6 +14568,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПТ_4_1"
         },
@@ -13458,6 +14594,8 @@
             ],
             "rooms": "IV к. А108",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ПТ_4_2"
         },
@@ -13480,6 +14618,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ПТ_5_1"
         },
@@ -13504,6 +14644,8 @@
             ],
             "rooms": "IV к. А108",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ПТ_5_2"
         },
@@ -13531,6 +14673,8 @@
             ],
             "rooms": "II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_СР_3_1"
         },
@@ -13558,6 +14702,8 @@
             ],
             "rooms": "II к. 111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_СР_4_1"
         },
@@ -13578,6 +14724,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_СР_5_1"
         },
@@ -13598,6 +14746,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_СР_6_1"
         },
@@ -13620,6 +14770,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1242_ЧТ_3_1"
         },
@@ -13640,6 +14792,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ЧТ_3_2"
         },
@@ -13662,6 +14816,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ЧТ_4_1"
         },
@@ -13682,6 +14838,8 @@
             ],
             "rooms": "I к. 15",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ЧТ_4_2"
         },
@@ -13706,6 +14864,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ЧТ_5_1"
         },
@@ -13726,6 +14886,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ЧТ_5_2"
         },
@@ -13747,6 +14909,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1242_ЧТ_5_3"
         },
@@ -13771,6 +14935,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1242_ЧТ_6_1"
         },
@@ -13791,6 +14957,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1242_ЧТ_6_2"
         },
@@ -13812,6 +14980,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1242_ЧТ_6_3"
         },
@@ -13837,6 +15007,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ВТ_4_1"
         },
@@ -13866,6 +15038,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ВТ_4_2"
         },
@@ -13893,6 +15067,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ВТ_5_1"
         },
@@ -13918,6 +15094,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ВТ_6_1"
         },
@@ -13940,6 +15118,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ВТ_6_2"
         },
@@ -13967,6 +15147,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПН_4_1"
         },
@@ -13994,6 +15176,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПН_5_1"
         },
@@ -14022,6 +15206,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПН_6_1"
         },
@@ -14046,6 +15232,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ПН_6_2"
         },
@@ -14074,6 +15262,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПН_7_1"
         },
@@ -14094,6 +15284,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПТ_3_1"
         },
@@ -14131,6 +15323,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ПТ_3_2"
         },
@@ -14155,6 +15349,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПТ_4_1"
         },
@@ -14179,6 +15375,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ПТ_4_2"
         },
@@ -14201,6 +15399,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1243_ПТ_4_3"
         },
@@ -14229,6 +15429,8 @@
             ],
             "rooms": "IV к. А304, или А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПТ_5_1"
         },
@@ -14257,6 +15459,8 @@
             ],
             "rooms": "IV к. А304, или А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ПТ_6_1"
         },
@@ -14282,6 +15486,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_СБ_3_1"
         },
@@ -14307,6 +15513,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_СБ_4_1"
         },
@@ -14339,6 +15547,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_СР_3_1"
         },
@@ -14371,6 +15581,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_СР_4_1"
         },
@@ -14401,6 +15613,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_СР_4_2"
         },
@@ -14435,6 +15649,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_СР_5_1"
         },
@@ -14462,6 +15678,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1243_ЧТ_3_1"
         },
@@ -14488,6 +15706,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ЧТ_3_2"
         },
@@ -14513,6 +15733,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1243_ЧТ_4_1"
         },
@@ -14539,6 +15761,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ЧТ_4_2"
         },
@@ -14563,6 +15787,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1243_ЧТ_5_1"
         },
@@ -14589,6 +15815,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1243_ЧТ_5_2"
         },
@@ -14615,6 +15843,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ВТ_3_1"
         },
@@ -14640,6 +15870,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ВТ_4_1"
         },
@@ -14658,6 +15890,8 @@
             ],
             "rooms": "МЦ Кристалл, (зал Пространство, Просвещения, 2 этаж), пр-т Комсомольский, 53",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_ВТ_4_2"
         },
@@ -14682,6 +15916,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ПН_3_1"
         },
@@ -14706,6 +15942,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ПН_4_1"
         },
@@ -14731,6 +15969,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ПТ_3_1"
         },
@@ -14751,6 +15991,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_ПТ_3_2"
         },
@@ -14771,6 +16013,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ПТ_4_1"
         },
@@ -14791,6 +16035,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ПТ_5_1"
         },
@@ -14814,6 +16060,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СБ_3_1"
         },
@@ -14837,6 +16085,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СБ_3_2"
         },
@@ -14859,6 +16109,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1245_СБ_3_3"
         },
@@ -14882,6 +16134,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СБ_4_1"
         },
@@ -14905,6 +16159,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СБ_4_2"
         },
@@ -14927,6 +16183,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1245_СБ_4_3"
         },
@@ -14950,6 +16208,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СБ_5_1"
         },
@@ -14973,6 +16233,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СБ_5_2"
         },
@@ -14995,6 +16257,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1245_СБ_5_3"
         },
@@ -15020,6 +16284,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СБ_6_1"
         },
@@ -15046,6 +16312,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СР_3_1"
         },
@@ -15066,6 +16334,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СР_3_2"
         },
@@ -15092,6 +16362,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СР_4_1"
         },
@@ -15112,6 +16384,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СР_4_2"
         },
@@ -15133,6 +16407,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1245_СР_5_1"
         },
@@ -15155,6 +16431,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_СР_5_2"
         },
@@ -15177,6 +16455,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_СР_6_1"
         },
@@ -15204,6 +16484,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ЧТ_3_1"
         },
@@ -15231,6 +16513,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ЧТ_4_1"
         },
@@ -15252,6 +16536,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ЧТ_5_1"
         },
@@ -15276,6 +16562,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_ЧТ_5_2"
         },
@@ -15297,6 +16585,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1245_ЧТ_5_3"
         },
@@ -15319,6 +16609,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 4,
             "event_id": "1245_ЧТ_5_4"
         },
@@ -15339,6 +16631,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1245_ЧТ_6_1"
         },
@@ -15365,6 +16659,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1245_ЧТ_6_2"
         },
@@ -15390,6 +16686,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ВТ_6_1"
         },
@@ -15423,6 +16721,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1247_ВТ_6_2"
         },
@@ -15456,6 +16756,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ВТ_7_1"
         },
@@ -15485,6 +16787,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ПН_5_1"
         },
@@ -15515,6 +16819,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ПН_6_1"
         },
@@ -15535,6 +16841,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1247_ПТ_3_1"
         },
@@ -15559,6 +16867,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ПТ_4_1"
         },
@@ -15583,6 +16893,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1247_ПТ_4_2"
         },
@@ -15620,6 +16932,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ПТ_5_1"
         },
@@ -15650,6 +16964,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_СБ_2_1"
         },
@@ -15680,6 +16996,8 @@
             ],
             "rooms": "IV к. А305",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_СБ_3_1"
         },
@@ -15712,6 +17030,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_СР_3_1"
         },
@@ -15744,6 +17064,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_СР_4_1"
         },
@@ -15773,6 +17095,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1247_СР_4_2"
         },
@@ -15809,6 +17133,8 @@
             ],
             "rooms": "IV к. А111",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_СР_5_1"
         },
@@ -15836,6 +17162,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ЧТ_3_1"
         },
@@ -15861,6 +17189,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ЧТ_4_1"
         },
@@ -15885,6 +17215,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ЧТ_5_1"
         },
@@ -15911,6 +17243,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1247_ЧТ_5_2"
         },
@@ -15939,6 +17273,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ЧТ_6_1"
         },
@@ -15967,6 +17303,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1247_ЧТ_7_1"
         },
@@ -15987,6 +17325,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_ПН_5_1"
         },
@@ -16007,6 +17347,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_ПН_6_1"
         },
@@ -16027,6 +17369,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_ПТ_6_1"
         },
@@ -16047,6 +17391,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_ПТ_7_1"
         },
@@ -16067,6 +17413,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_СБ_1_1"
         },
@@ -16087,6 +17435,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_СБ_2_1"
         },
@@ -16108,6 +17458,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_СР_6_1"
         },
@@ -16129,6 +17481,8 @@
             ],
             "rooms": "IV к. А224",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_СР_7_1"
         },
@@ -16149,6 +17503,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1251_ЧТ_4_1"
         },
@@ -16169,6 +17525,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ВТ_4_1"
         },
@@ -16189,6 +17547,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1252_ВТ_4_2"
         },
@@ -16209,6 +17569,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПН_3_1"
         },
@@ -16229,6 +17591,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПН_4_1"
         },
@@ -16249,6 +17613,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1252_ПН_4_2"
         },
@@ -16269,6 +17635,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПН_5_1"
         },
@@ -16289,6 +17657,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПТ_3_1"
         },
@@ -16309,6 +17679,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПТ_4_1"
         },
@@ -16329,6 +17701,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1252_ПТ_4_2"
         },
@@ -16349,6 +17723,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ПТ_5_1"
         },
@@ -16369,6 +17745,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_СР_4_1"
         },
@@ -16389,6 +17767,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_СР_5_1"
         },
@@ -16409,6 +17789,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1252_ЧТ_3_1"
         },
@@ -16430,6 +17812,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1252_ЧТ_4_1"
         },
@@ -16451,6 +17835,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1252_ЧТ_4_2"
         },
@@ -16471,6 +17857,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ВТ_4_1"
         },
@@ -16491,6 +17879,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1255_ВТ_4_2"
         },
@@ -16511,6 +17901,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПН_3_1"
         },
@@ -16531,6 +17923,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПН_4_1"
         },
@@ -16551,6 +17945,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1255_ПН_4_2"
         },
@@ -16571,6 +17967,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПН_5_1"
         },
@@ -16591,6 +17989,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПТ_3_1"
         },
@@ -16611,6 +18011,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПТ_4_1"
         },
@@ -16631,6 +18033,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1255_ПТ_4_2"
         },
@@ -16651,6 +18055,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ПТ_5_1"
         },
@@ -16671,6 +18077,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_СР_4_1"
         },
@@ -16691,6 +18099,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_СР_5_1"
         },
@@ -16711,6 +18121,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1255_ЧТ_3_1"
         },
@@ -16732,6 +18144,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1255_ЧТ_4_1"
         },
@@ -16753,6 +18167,8 @@
             ],
             "rooms": "IV к. А201",
             "comment": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 2,
             "event_id": "1255_ЧТ_4_2"
         },
@@ -16783,6 +18199,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ВТ_6_1"
         },
@@ -16813,6 +18231,8 @@
             ],
             "rooms": "IV к. А306",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ВТ_7_1"
         },
@@ -16843,6 +18263,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/13863719342241)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ВТ_8_1"
         },
@@ -16874,6 +18296,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ПН_6_1"
         },
@@ -16905,6 +18329,8 @@
             ],
             "rooms": "IV к. А112",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ПН_7_1"
         },
@@ -16936,6 +18362,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/93333999634564)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "М1217_ПН_7_2"
         },
@@ -16956,6 +18384,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://max.ru/joincall/I1copujnM569P9PDDiO1Pn9E3nejnjzzWVz1jez41rc)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ПТ_6_1"
         },
@@ -16987,6 +18417,8 @@
             ],
             "rooms": "II к. 101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "М1217_ПТ_6_2"
         },
@@ -17018,6 +18450,8 @@
             ],
             "rooms": "II к. 101",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ПТ_7_1"
         },
@@ -17045,6 +18479,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_СР_6_1"
         },
@@ -17072,6 +18508,8 @@
             ],
             "rooms": "IV к. А308",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_СР_7_1"
         },
@@ -17099,6 +18537,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/66426995061591)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_СР_8_1"
         },
@@ -17129,6 +18569,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ЧТ_6_1"
         },
@@ -17159,6 +18601,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ЧТ_7_1"
         },
@@ -17189,6 +18633,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/63630624024067)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1217_ЧТ_8_1"
         },
@@ -17221,6 +18667,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ВТ_6_1"
         },
@@ -17253,6 +18701,8 @@
             ],
             "rooms": "IV к. А202",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ВТ_7_1"
         },
@@ -17285,6 +18735,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/35156028489152)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "М1227_ВТ_7_2"
         },
@@ -17313,6 +18765,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ПТ_6_1"
         },
@@ -17341,6 +18795,8 @@
             ],
             "rooms": "IV к. А220",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ПТ_7_1"
         },
@@ -17369,6 +18825,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/58152585730092)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ПТ_8_1"
         },
@@ -17407,6 +18865,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_СР_6_1"
         },
@@ -17445,6 +18905,8 @@
             ],
             "rooms": "IV к. А304",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_СР_7_1"
         },
@@ -17465,6 +18927,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/55867250364188)",
             "comment": "",
+            "is_past": true,
+            "color": "#1155cc",
             "position": 1,
             "event_id": "М1227_ЧТ_6_1"
         },
@@ -17492,6 +18956,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "М1227_ЧТ_6_2"
         },
@@ -17512,6 +18978,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/55867250364188)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "М1227_ЧТ_7_1"
         },
@@ -17539,6 +19007,8 @@
             ],
             "rooms": "IV к. А204",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "М1227_ЧТ_7_2"
         },
@@ -17567,9 +19037,11 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/74796738181016)",
             "comment": "",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-22T13:37:33+00:00"
+    "generated_at": "2026-10-23T06:18:44+00:00"
 }
