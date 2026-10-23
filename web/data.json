@@ -3844,10 +3844,32 @@
             ],
             "rooms": "IV к. А214",
             "comment": "",
-            "is_past": true,
-            "color": "#cccccc",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1214_ПТ_5_1"
+        },
+        {
+            "group": "1214",
+            "weekday": "ПТ",
+            "time_start": "15:15",
+            "time_end": "16:45",
+            "pair_number": 5,
+            "discipline": "Прикладная математика и теория дифференциальных уравнений",
+            "type": "лек.прак.",
+            "subgroup": "",
+            "teachers": [
+                "Швалева О.В."
+            ],
+            "dates": [
+                "20.11.2026"
+            ],
+            "rooms": "IV к. А231",
+            "comment": "",
+            "is_past": false,
+            "color": "",
+            "position": 2,
+            "event_id": "1214_ПТ_5_2"
         },
         {
             "group": "1214",
@@ -19149,5 +19171,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-23T11:38:49+00:00"
+    "generated_at": "2026-10-23T12:40:09+00:00"
 }
