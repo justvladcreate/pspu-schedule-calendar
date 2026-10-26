@@ -12762,8 +12762,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
-            "is_past": true,
-            "color": "#ff0000",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПТ_5_1"
         },
@@ -12795,8 +12795,8 @@
             ],
             "rooms": "[дистанционно онлайн](https://telemost.yandex.ru/j/97330919395171)",
             "comment": "",
-            "is_past": true,
-            "color": "#ff0000",
+            "is_past": false,
+            "color": "",
             "position": 1,
             "event_id": "1237_ПТ_6_1"
         },
@@ -13039,8 +13039,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": true,
-            "color": "#ff0000",
+            "is_past": false,
+            "color": "",
             "position": 2,
             "event_id": "1237_СБ_5_2"
         },
@@ -13122,8 +13122,8 @@
             ],
             "rooms": "дистанционно онлайн",
             "comment": "",
-            "is_past": true,
-            "color": "#ff0000",
+            "is_past": false,
+            "color": "",
             "position": 3,
             "event_id": "1237_СБ_6_3"
         },
@@ -19175,5 +19175,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-26T08:47:44+00:00"
+    "generated_at": "2026-10-26T10:18:48+00:00"
 }
