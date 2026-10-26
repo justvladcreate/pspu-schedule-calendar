@@ -11605,8 +11605,8 @@
             ],
             "rooms": "IV к. А101",
             "comment": "",
-            "is_past": false,
-            "color": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 1,
             "event_id": "1233_ПН_5_1"
         },
@@ -11626,10 +11626,10 @@
                 "12.10.2026",
                 "19.10.2026"
             ],
-            "rooms": "IV к. А101",
+            "rooms": "IV к. А111",
             "comment": "",
-            "is_past": false,
-            "color": "",
+            "is_past": true,
+            "color": "#b7b7b7",
             "position": 2,
             "event_id": "1233_ПН_5_2"
         },
@@ -11652,7 +11652,7 @@
                 "07.12.2026",
                 "14.12.2026"
             ],
-            "rooms": "IV к. А101",
+            "rooms": "кроме 9.11",
             "comment": "",
             "is_past": false,
             "color": "",
@@ -11677,10 +11677,10 @@
                 "05.10.2026",
                 "12.10.2026"
             ],
-            "rooms": "IV к. А101",
+            "rooms": "IV к. А101, IV к. А111, кроме 9.11",
             "comment": "",
-            "is_past": false,
-            "color": "",
+            "is_past": true,
+            "color": "#cccccc",
             "position": 1,
             "event_id": "1233_ПН_6_1"
         },
@@ -11699,7 +11699,7 @@
             "dates": [
                 "14.12.2026"
             ],
-            "rooms": "IV к. А101",
+            "rooms": "IV к. А101, IV к. А111, кроме 9.11",
             "comment": "",
             "is_past": false,
             "color": "",
@@ -19230,5 +19230,5 @@
             "event_id": "М1227_ЧТ_7_3"
         }
     ],
-    "generated_at": "2026-10-26T12:35:37+00:00"
+    "generated_at": "2026-10-26T12:50:51+00:00"
 }
