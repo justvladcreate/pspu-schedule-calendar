@@ -79,6 +79,62 @@ def clean_group_name(group_name: str) -> str:
     return group_name.strip()
 
 
+# Даты в заголовке: «01.09.2026», «23.01.2027».
+_HEADER_DATE_RE = re.compile(r'\b(\d{1,2})\.(\d{2})\.(\d{4})\b')
+# Учебный год в заголовке: «2025/2026».
+_HEADER_ACADEMIC_YEAR_RE = re.compile(r'\b(\d{4})\s*/\s*(\d{4})\b')
+# Содержимое круглых скобок.
+_HEADER_PARENS_RE = re.compile(r'\(([^)]*)\)')
+
+
+def semester_start_year_from_header(semester: str | None) -> int | None:
+    """
+    Определяет год начала учебного года (сентябрь) по строке семестра.
+
+    Приоритет — даты в круглых скобках:
+        «10 семестр 2025/2026 учебного года (01.09.2026 – 23.01.2027)»
+    В этом примере 2025/2026 — устаревшая/неверная шапка, а реальные
+    даты семестра начинаются в 2026 году, поэтому результатом будет 2026.
+
+    Для весеннего семестра, например «(09.02.2026 – 30.06.2026)»,
+    результатом будет 2025 — год начала учебного года, к которому
+    относится весна 2026.
+
+    Если дат в скобках нет, используются даты из всей строки, затем —
+    старый вариант «2025/2026».
+    """
+    text = str(semester or "")
+
+    def start_year_from_dates(value: str) -> int | None:
+        dates = _HEADER_DATE_RE.findall(value)
+        if not dates:
+            return None
+
+        # Берём самую раннюю дату диапазона — это начало семестра.
+        year, month, _day = min(
+            (int(y), int(m), int(d)) for d, m, y in dates
+        )
+        return year if month >= 9 else year - 1
+
+    # 1. Даты внутри круглых скобок.
+    for group in _HEADER_PARENS_RE.findall(text):
+        year = start_year_from_dates(group)
+        if year is not None:
+            return year
+
+    # 2. Даты где-то ещё в строке семестра.
+    year = start_year_from_dates(text)
+    if year is not None:
+        return year
+
+    # 3. Старый fallback — учебный год «2025/2026».
+    m = _HEADER_ACADEMIC_YEAR_RE.search(text)
+    if m:
+        return int(m.group(1))
+
+    return None
+
+
 # ---------------------------------------------------------------- extraction
 def _ffill_weekday_column(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -151,9 +207,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                     group_name = clean_group_name(group_name)
                     semester = lines[1]
 
-                    m = re.search(r'(\d{4})/\d{4}', semester)
-                    if m:
-                        semester_start_year = int(m.group(1))
+                    semester_start_year = semester_start_year_from_header(semester)
 
                     try:
                         session_index = next(i for i, line in enumerate(lines) if "Экзаменационная сессия" in line)
