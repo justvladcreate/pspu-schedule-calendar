@@ -98,8 +98,22 @@ def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, d
     for row in worksheet.iter_rows():
         for cell in row:
             color = cell.font.color
-            if color and color.type == 'rgb' and cell.value:
-                hex_color = _extract_color_hex(color.rgb)
+            if color and cell.value:
+                hex_color = None
+
+                if color.type == 'rgb':
+                    hex_color = _extract_color_hex(color.rgb)
+                elif color.type == 'theme':
+                    # Игнорируем стандартный черный (Theme 1) и белый (Theme 0) без оттенков
+                    if not (color.theme == 1 and color.tint == 0) and not (color.theme == 0 and color.tint == 0):
+                        # Если это цвет темы, но не черный/белый — принудительно ставим серый.
+                        # В большинстве таблиц так помечают прошедшие пары.
+                        hex_color = "#808080"
+                elif color.type == 'indexed':
+                    # Игнорируем 64 (стандартный черный)
+                    if color.indexed not in (64, 9):
+                        hex_color = "#808080"
+
                 if hex_color:
                     colors[(cell.row - 1, cell.column - 1)] = [{
                         "text": str(cell.value),

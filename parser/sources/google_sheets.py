@@ -18,8 +18,9 @@ _FIELDS = (
     "data(rowData(values("
     "formattedValue,"
     "hyperlink,"
+    "effectiveFormat.textFormat.foregroundColorStyle,"
     "effectiveFormat.textFormat.foregroundColor,"
-    "textFormatRuns(startIndex,format(link(uri),foregroundColor))"
+    "textFormatRuns(startIndex,format(link(uri),foregroundColorStyle,foregroundColor))"
     ")))"
     ")"
 )
@@ -61,12 +62,25 @@ def _cell_links(cell: dict) -> list[str]:
     return urls
 
 
-def _rgb_to_hex(color: dict | None) -> str | None:
-    if not color: return None
-    r = int(color.get('red', 0) * 255)
-    g = int(color.get('green', 0) * 255)
-    b = int(color.get('blue', 0) * 255)
-    if r == 0 and g == 0 and b == 0: return None  # Игнорируем черный
+def _rgb_to_hex(color_obj: dict | None) -> str | None:
+    if not color_obj: return None
+
+    # Поддержка нового формата foregroundColorStyle
+    if 'rgbColor' in color_obj:
+        color_obj = color_obj['rgbColor']
+
+    # Если после распаковки объект пустой или в нем нет ключа 'red'
+    if not color_obj or 'red' not in color_obj:
+        return None
+
+    r = int(color_obj.get('red', 0) * 255)
+    g = int(color_obj.get('green', 0) * 255)
+    b = int(color_obj.get('blue', 0) * 255)
+
+    # Игнорируем черный цвет
+    if max(r, g, b) < 40:
+        return None
+
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
@@ -75,25 +89,39 @@ def _extract_colored_texts(cell: dict) -> list[dict]:
     val = cell.get("formattedValue") or ""
     if not val: return []
 
+    # 1. Сначала проверяем итоговый цвет всей ячейки (effectiveFormat)
+    text_format = (cell.get("effectiveFormat") or {}).get("textFormat") or {}
+
+    # Безопасно извлекаем цвет, проверяя, что объект не пустой
+    style = text_format.get("foregroundColorStyle") or {}
+    fg = style.get("rgbColor")
+    if not fg:
+        fg = text_format.get("foregroundColor")
+
+    hex_color = _rgb_to_hex(fg)
+
+    # Если вся ячейка цветная, сразу возвращаем её целиком
+    if hex_color:
+        return [{"text": val, "color": hex_color}]
+
+    # 2. Если итоговый цвет черный (None), проверяем куски текста (textFormatRuns)
     runs = cell.get("textFormatRuns") or []
-    if not runs:
-        fg = (((cell.get("effectiveFormat") or {}).get("textFormat") or {}).get("foregroundColor"))
-        hex_color = _rgb_to_hex(fg)
-        return [{"text": val, "color": hex_color}] if hex_color else []
+    for run in runs:
+        fmt = run.get("format") or {}
+        run_style = fmt.get("foregroundColorStyle") or {}
+        run_fg = run_style.get("rgbColor")
+        if not run_fg:
+            run_fg = fmt.get("foregroundColor")
 
-    parts = []
-    for i, run in enumerate(runs):
-        start = run.get("startIndex", 0)
-        end = runs[i+1].get("startIndex", len(val)) if i + 1 < len(runs) else len(val)
-        if start >= len(val): break
-        text = val[start:end]
-        if not text.strip(): continue
+        run_color = _rgb_to_hex(run_fg)
+        if run_color:
+            # Ограничение целостности: если найден хоть один цветной кусок
+            # (и это не черный), считаем, что всё мероприятие окрашено,
+            # и возвращаем весь текст ячейки с этим цветом.
+            # Это гарантирует, что даты не потеряются при парсинге.
+            return [{"text": val, "color": run_color}]
 
-        fg = ((run.get("format") or {}).get("foregroundColor"))
-        hex_color = _rgb_to_hex(fg)
-        if hex_color:
-            parts.append({"text": text, "color": hex_color})
-    return parts
+    return []
 
 
 def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:
