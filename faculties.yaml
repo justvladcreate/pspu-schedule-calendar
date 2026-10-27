@@ -1,12 +1,16 @@
 # Реестр факультетов и источников расписания.
 #
-# source.type:
-#   google_sheets — текущий ИНЭК, чтение через Google Sheets API;
-#   cloud_mail    — публичная ссылка cloud.mail.ru на XLSX.
+# Добавить факультет:
+#   1) создать parser/faculties/<id>_<имя>/parser.py с наследником FacultyParser;
+#   2) зарегистрировать его в parser/faculties/__init__.py;
+#   3) добавить запись сюда.
 #
-# adapter — формат разбора (см. parser/adapters).
-# prompt  — профиль промпта для LLM (parser/prompts/profiles.py).
-# enabled — выключить, если файл устарел или ещё не проверен.
+# source.type:
+#   google_sheets — чтение через Google Sheets API (нужны креды);
+#   cloud_mail    — публичная ссылка cloud.mail.ru на XLSX;
+#   google_drive  — экспорт Google-таблицы в XLSX по spreadsheet_id.
+#
+# prompt — имя профиля промпта внутри модуля факультета.
 
 academic:
   year: "2026/2027"
@@ -14,154 +18,22 @@ academic:
   semester_end: "23.01.2027"
 
 faculties:
+  # Эталон: старая проверенная схема с LLM.
   - id: "12"
     name: "Институт непрерывного образования"
     short: "ИНЭК"
     source:
       type: google_sheets
       spreadsheet_id: "1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg"
-    adapter: inec_legacy
     prompt: inec
     enabled: true
 
-  # Файлы 01 и 09 содержат 2025/2026 учебный год.
-  # Включить после обновления ссылок на 2026/2027.
+  # Первый XLSX-факультет, разбор пока детерминированный.
   - id: "01"
     name: "Математический факультет"
     short: "Математика"
     source:
       type: cloud_mail
       url: "https://cloud.mail.ru/public/io8E/mjHowrL81/01_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_parallel
     prompt: math
-    enabled: false
-
-  - id: "02"
-    name: "Филологический факультет"
-    short: "Филология"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/15Vx/grtZCYPQn/02_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_parallel
-    prompt: philology
-    enabled: true
-
-  - id: "03"
-    name: "Факультет физической культуры"
-    short: "Физкультура"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/u4un/27cMDwW3U/03_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_parallel
-    prompt: physical
-    enabled: true
-
-  - id: "04"
-    name: "Факультет педагогики и методики начального образования"
-    short: "Начальное образование"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/Ma3K/7xsmJw1RW/04_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical
-    prompt: primary
-    enabled: true
-
-  - id: "05"
-    name: "Факультет педагогики и психологии детства"
-    short: "Педагогика детства"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/GbLB/E1PHaujSN/05_%D0%BD%D0%B5%D0%B4%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5%20%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0).xlsx"
-    adapter: weekly_grid
-    prompt: childhood
-    enabled: true
-
-  - id: "06"
-    name: "Естественнонаучный факультет"
-    short: "Естествознание"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/d5Lo/FVxmTVT3C/06_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical
-    prompt: natural
-    enabled: true
-
-  - id: "07"
-    name: "Факультет иностранных языков"
-    short: "Иняз"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/sTVD/twKTW2gxj/07_%20%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: subgroup_columns
-    prompt: foreign
-    enabled: true
-
-  - id: "08"
-    name: "Физический факультет"
-    short: "Физика"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/FzCm/a91CDQdDz/08_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%B1%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%BC%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D1%81%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_parallel
-    prompt: physics
-    enabled: true
-
-  - id: "09"
-    name: "Исторический факультет"
-    short: "История"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/LL9y/hHN8GXsp5/09_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_parallel
-    prompt: history
-    enabled: false
-
-  - id: "10"
-    name: "Факультет музыки"
-    short: "Музыка"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/pXjE/PXsEDEczU/10_%D0%97%D0%90%D0%9D%D0%AF%D0%A2%D0%98%D0%AF.xlsx"
-    adapter: vertical
-    prompt: music
-    enabled: true
-
-  - id: "11"
-    name: "Факультет психологии"
-    short: "Психология"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/RAZu/VMDuEjQMA/!%20%D0%9E%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5%20%D0%A0%D0%B0%D1%81%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5_1%20%D1%81%D0%B5%D0%BC%D0%B5%D1%81%D1%82%D1%80%202026_%20%D1%81%20%D0%BF%D1%80%D0%B5%D0%BF%D0%BE%D0%B4%D0%B0%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8F%D0%BC%D0%B8!.xlsx"
-    adapter: paired_columns
-    prompt: psychology
-    enabled: true
-
-  - id: "13"
-    name: "Факультет правового и социально-педагогического образования"
-    short: "Право"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/6HuF/RUkDz9KRy/13_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%91%D0%B0%D0%BA%D0%B0%D0%BB%D0%B0%D0%B2%D1%80%D0%B8%D0%B0%D1%82%2C%20%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0%2C%20%D0%A1%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%82%D0%B5%D1%82).xlsx"
-    adapter: vertical_dates
-    prompt: law
-    enabled: true
-
-  - id: "14"
-    name: "Кафедра педагогики и психологии"
-    short: "Магистратура (заочно)"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/QvWk/szYGTo1Zy/14_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95%20%D0%97%D0%90%D0%9E%D0%A7%D0%9D%D0%9E%D0%93%D0%9E%20%D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%AF%20(%D0%9C%D0%B0%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D1%83%D1%80%D0%B0).xlsx"
-    adapter: exam_session
-    prompt: master_parttime
-    enabled: true
-
-  - id: "16"
-    name: "Международное образование"
-    short: "Международное"
-    source:
-      type: cloud_mail
-      url: "https://cloud.mail.ru/public/WUj4/m6mhy2DK8/16_%D0%A0%D0%90%D0%A1%D0%9F%D0%98%D0%A1%D0%90%D0%9D%D0%98%D0%95.xlsx"
-    adapter: vertical
-    prompt: international
     enabled: true

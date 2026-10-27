@@ -1,6 +1,6 @@
-import pandas as pd
+﻿import pandas as pd
 
-from parser.extractor import _ffill_weekday_column, clean_group_name, extraction
+from parser.faculties.f12_inec.extractor import _ffill_weekday_column, clean_group_name, extraction
 
 
 def _schedule_df(header: str) -> pd.DataFrame:

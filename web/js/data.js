@@ -93,8 +93,17 @@ export function loadFacultyIndex(options = {}) {
     return loadData('data/index.json', options);
 }
 
+/**
+ * Данные факультета: web/data/faculties/<id>/data.json.
+ * ``old_data.json`` в той же папке — предыдущая версия.
+ */
+export function facultyDataUrl(id, { previous = false } = {}) {
+    const name = previous ? 'old_data.json' : 'data.json';
+    return `data/faculties/${encodeURIComponent(id)}/${name}`;
+}
+
 export function loadFacultyData(id, options = {}) {
-    return loadData(`data/faculties/${encodeURIComponent(id)}.json`, options);
+    return loadData(facultyDataUrl(id), options);
 }
 
 export function expandEvents(rawEvents) {

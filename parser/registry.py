@@ -50,8 +50,7 @@ def load_registry(path: Path | str = DEFAULT_PATH) -> tuple[AcademicPeriod, list
                 url=source_raw.get("url"),
                 spreadsheet_id=source_raw.get("spreadsheet_id"),
             ),
-            adapter=str(item.get("adapter") or "vertical"),
-            prompt=str(item.get("prompt") or "default"),
+            prompt=str(item.get("prompt") or faculty_id),
             enabled=bool(item.get("enabled", True)),
         ))
 

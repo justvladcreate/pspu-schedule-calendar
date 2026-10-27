@@ -1,4 +1,15 @@
-"""Публикация данных по факультетам: index.json + faculties/<id>.json."""
+"""Публикация расписания по факультетам.
+
+Раскладка на фронте:
+
+    web/data/index.json
+    web/data/faculties/<id>/data.json
+    web/data/faculties/<id>/old_data.json
+    web/data/faculties/<id>/source.xlsx    (кладёт CI)
+
+Версия факультета (``generated_at``) меняется только когда меняются его
+события — по ней фронтенд и push-воркер понимают, что обновилось.
+"""
 from __future__ import annotations
 
 import json
@@ -10,11 +21,11 @@ from parser.model import Faculty
 SCHEMA_VERSION = 2
 
 
-def _json_text(payload: dict) -> str:
+def _text(payload: dict) -> str:
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
-def _read_text(path: Path) -> str:
+def _read(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
     except OSError:
@@ -28,120 +39,118 @@ def _read_json(path: Path) -> dict:
         return {}
 
 
-def _write_with_rotation(path: Path, text: str) -> bool:
-    """Пишет файл, если содержимое изменилось. Прошлую версию — в old/."""
+def _write(path: Path, text: str) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
-    previous = _read_text(path)
-    if previous == text:
+    if _read(path) == text:
         return False
-    if previous:
-        old = path.parent / "old" / path.name
-        old.parent.mkdir(parents=True, exist_ok=True)
-        old.write_text(previous, encoding="utf-8")
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(text, encoding="utf-8")
     tmp.replace(path)
     return True
 
 
-def publish_faculty_data(
-    output_dir: Path,
+def faculty_original(faculty: Faculty) -> dict:
+    original: dict = {"type": faculty.source.type, "url": faculty.source.url}
+    if faculty.source.type == "google_sheets":
+        original["spreadsheet_id"] = faculty.source.spreadsheet_id
+    else:
+        original["file"] = "source.xlsx"
+    return original
+
+
+def publish_faculty(
+    web_data_dir: Path,
+    faculty: Faculty,
+    events: list[dict],
+    generated_at: str,
+) -> bool:
+    """Пишет data.json (+ old_data.json) факультета. True — если изменилось."""
+    web_data_dir = Path(web_data_dir)
+    folder = web_data_dir / "faculties" / faculty.id
+    folder.mkdir(parents=True, exist_ok=True)
+
+    events = [dict(event) for event in events]
+    for event in events:
+        event.setdefault("faculty_id", faculty.id)
+        event.setdefault("faculty_name", faculty.name)
+
+    groups = sorted({
+        str(event.get("group"))
+        for event in events
+        if event.get("group") is not None
+    })
+
+    data_path = folder / "data.json"
+    prepared = {
+        "schema_version": SCHEMA_VERSION,
+        "faculty": {
+            "id": faculty.id,
+            "name": faculty.name,
+            "short": faculty.short,
+        },
+        "generated_at": _read_json(data_path).get("generated_at", ""),
+        "groups": groups,
+        "events": events,
+    }
+
+    if _text(prepared) == _read(data_path):
+        return False
+
+    # Предыдущую версию — в old_data.json
+    previous = _read(data_path)
+    if previous:
+        old_path = folder / "old_data.json"
+        old_path.write_text(previous, encoding="utf-8")
+
+    prepared["generated_at"] = generated_at
+    _write(data_path, _text(prepared))
+    return True
+
+
+def publish(
+    web_data_dir: Path,
     faculties: list[Faculty],
     events_by_faculty: dict[str, list[dict]],
     generated_at: str,
 ) -> Path:
-    """
-    Пишет:
-      output_dir/index.json
-      output_dir/faculties/<id>.json
-      output_dir/faculties/old/<id>.json
-
-    Исходные XLSX в репозиторий не кладём: их скачивает CI
-    (`tools/fetch-faculty-xlsx.mjs`) уже в артефакт GitHub Pages.
-    В index.json остаётся ссылка на облако и путь, по которому файл
-    будет доступен на сайте.
-    """
-    output_dir = Path(output_dir)
-    faculties_dir = output_dir / "faculties"
-    faculties_dir.mkdir(parents=True, exist_ok=True)
-
-    index_path = output_dir / "index.json"
+    """Публикует все факультеты и обновляет index.json."""
+    web_data_dir = Path(web_data_dir)
+    index_path = web_data_dir / "index.json"
     previous_index = _read_json(index_path)
 
-    prepared: list[tuple[Faculty, list[str], dict, bool]] = []
-    changed = False
+    stamp = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    entries = []
+    changed_any = False
 
     for faculty in faculties:
-        events = list(events_by_faculty.get(faculty.id, []))
-        for event in events:
-            event.setdefault("faculty_id", faculty.id)
-            event.setdefault("faculty_name", faculty.name)
+        events = events_by_faculty.get(faculty.id) or []
+        if not events:
+            continue
 
-        groups = sorted({
-            str(event.get("group"))
-            for event in events
-            if event.get("group") is not None
-        })
+        changed = publish_faculty(web_data_dir, faculty, events, stamp)
+        changed_any = changed_any or changed
 
-        original = {"type": faculty.source.type}
-        if faculty.source.type == "google_sheets":
-            original["spreadsheet_id"] = faculty.source.spreadsheet_id
-            original["url"] = faculty.source.url
-        else:
-            original["url"] = faculty.source.url
-            # Файл появится на сайте после шага CI; фронтенд при 404
-            # предложит открыть ссылку на облако.
-            original["file"] = f"faculties/{faculty.id}.xlsx"
-
-        target = faculties_dir / f"{faculty.id}.json"
-        previous = _read_json(target)
-        payload = {
-            "schema_version": SCHEMA_VERSION,
-            "faculty": {
-                "id": faculty.id,
-                "name": faculty.name,
-                "short": faculty.short,
-            },
-            "generated_at": previous.get("generated_at", ""),
-            "groups": groups,
-            "events": events,
-        }
-        if _json_text(payload) != _read_text(target):
-            faculty_changed = True
-            changed = True
-        else:
-            faculty_changed = False
-
-        prepared.append((faculty, groups, {"payload": payload, "original": original}, faculty_changed))
-
-    stamp = generated_at
-    if not stamp or (changed and stamp == previous_index.get("generated_at")):
-        # ИНЭК не менялся, но другой факультет обновился — нужна новая версия.
-        stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-    index_faculties = []
-    for faculty, groups, data, faculty_changed in prepared:
-        payload = data["payload"]
-        if faculty_changed:
-            payload["generated_at"] = stamp
-        target = faculties_dir / f"{faculty.id}.json"
-        _write_with_rotation(target, _json_text(payload))
-
-        index_faculties.append({
+        data_path = web_data_dir / "faculties" / faculty.id / "data.json"
+        payload = _read_json(data_path)
+        entries.append({
             "id": faculty.id,
             "name": faculty.name,
             "short": faculty.short,
-            "file": f"faculties/{faculty.id}.json",
-            "groups": groups,
-            "events": len(payload["events"]),
-            "generated_at": payload["generated_at"],
-            "original": data["original"],
+            "folder": f"faculties/{faculty.id}",
+            "groups": payload.get("groups", []),
+            "events": len(payload.get("events", [])),
+            "generated_at": payload.get("generated_at", ""),
+            "original": faculty_original(faculty),
         })
+
+    if changed_any and previous_index.get("generated_at") == stamp:
+        # ИНЭК не менялся, но другой факультет обновился.
+        stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     index = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": stamp,
-        "faculties": index_faculties,
+        "faculties": entries,
     }
-    _write_with_rotation(index_path, _json_text(index))
+    _write(index_path, _text(index))
     return index_path

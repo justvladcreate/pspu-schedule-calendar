@@ -1,7 +1,7 @@
-"""Общие модели данных для парсеров факультетов."""
+"""Модели, общие для всех факультетов."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 
 
@@ -26,7 +26,11 @@ class AcademicPeriod:
         """
         if not self.semester_start:
             return None
-        year = self.semester_start.year if self.semester_start.month >= 9 else self.semester_start.year - 1
+        year = (
+            self.semester_start.year
+            if self.semester_start.month >= 9
+            else self.semester_start.year - 1
+        )
         return date(year, 9, 1), date(year + 1, 8, 31)
 
 
@@ -43,38 +47,5 @@ class Faculty:
     name: str
     short: str
     source: FacultySource
-    adapter: str
-    prompt: str
+    prompt: str = ""
     enabled: bool = True
-
-
-@dataclass
-class RawBranch:
-    """Одна ветка занятия до финальной сборки events."""
-
-    faculty_id: str
-    group: str
-    weekday: str
-    time_start: str
-    time_end: str = ""
-    dates: list[str] = field(default_factory=list)
-    discipline: str = ""
-    type: str = ""
-    subgroup: str = ""
-    teachers: list[str] = field(default_factory=list)
-    rooms: str = ""
-    comment: str = ""
-    color: str = ""
-    source_ref: dict = field(default_factory=dict)
-    source_text: str = ""
-    confidence: float = 1.0
-    issues: list[str] = field(default_factory=list)
-    faculty_name: str = ""
-
-
-@dataclass
-class ParseResult:
-    faculty: Faculty
-    branches: list[RawBranch]
-    confidence: float = 1.0
-    issues: list[str] = field(default_factory=list)

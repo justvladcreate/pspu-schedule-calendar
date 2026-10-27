@@ -172,7 +172,8 @@ export function setupOriginalModal() {
             source = createGoogleSource(spreadsheetId);
         } else if (original && original.type === 'cloud_mail' && original.file) {
             spreadsheetId = '';
-            source = createXlsxSource(`data/${original.file}`);
+            const folder = (meta && meta.folder) || `faculties/${id}`;
+            source = createXlsxSource(`data/${folder}/${original.file}`);
         } else if (defaultSpreadsheetId) {
             // Старые данные без блока original — ведём себя как раньше.
             spreadsheetId = defaultSpreadsheetId;
@@ -187,8 +188,7 @@ export function setupOriginalModal() {
                 'href',
                 (original && (original.url || original.file)) || externalUrl
             );
-        }
-    }
+        }    }
 
     if (external) external.setAttribute('href', externalUrl);
 

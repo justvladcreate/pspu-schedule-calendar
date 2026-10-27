@@ -101,7 +101,7 @@ function _facultyMetaFromEvents(events) {
                 id,
                 name: ev.faculty_name || (id === '12' ? 'ИНЭК' : `Факультет ${id}`),
                 short: ev.faculty_name || (id === '12' ? 'ИНЭК' : id),
-                file: `data/faculties/${id}.json`,
+                folder: `faculties/${id}`,
                 groups: [],
             });
         }
@@ -243,7 +243,7 @@ function rebuildGroups() {
                 id: facultyId,
                 name: ev.faculty_name || (facultyId === '12' ? 'ИНЭК' : `Факультет ${facultyId}`),
                 short: ev.faculty_name || (facultyId === '12' ? 'ИНЭК' : facultyId),
-                file: `data/faculties/${facultyId}.json`,
+                folder: `faculties/${facultyId}`,
                 groups: [],
             });
         }

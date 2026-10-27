@@ -1,510 +1,177 @@
-# parser/process.py
+"""Оркестрация парсера: обходит факультеты и публикует результат.
+
+Сам разбор живёт в ``parser/faculties/<id>/parser.py`` — у каждого
+факультета свой процессор, экстрактор и промпт. Здесь только общий
+цикл: загрузить → разобрать → финализировать → опубликовать → закоммитить.
+"""
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
-import shutil
 import subprocess
-from collections import Counter
 from pathlib import Path
 
-from google.auth.exceptions import RefreshError
-from googleapiclient.http import MediaIoBaseDownload
-
-import re
-
-from config import CONFIG
-from google_services import (
-    SPREADSHEET_ID,
-    get_drive_and_sheets_services,
-    get_drive_service,
-)
-from parser.ai import ask_ai
-from parser.faculties import get_faculty, load_registry
+from parser.faculties import get_parser_class
+from parser.faculties.base import PARSED_NAME, read_json, rotate, write_json
+from parser.registry import load_registry
 from parser.finalize import transform_schedule
-from parser.overrides import load_overrides, apply_overrides
-from parser.preprocess import normalize_time
-from parser.prompts import USER_PROMPT as user_prompt
-from parser.publish import publish_faculty_data
-from parser.rooms_hints import pick_rooms_for_branch, split_branch_by_rooms
-from parser.sources import GoogleSheetsSource, ScheduleSource, XlsxFileSource
+from parser.model import Faculty
+from parser.overrides import apply_overrides, load_overrides
+from parser.publish import publish
 
 logger = logging.getLogger(__name__)
 
-current_dir = Path(__file__).resolve().parent.parent
-
-latest_files_path = current_dir / "data" / "latest"
-old_files_path    = current_dir / "data" / "old"
-latest_files_path.mkdir(parents=True, exist_ok=True)
-old_files_path.mkdir(parents=True, exist_ok=True)
-
-web_dir = current_dir / "web"
-
-excel_file_name     = "pspu_schedule.xlsx"
-extracted_file_name = "groups_info_extracted_and_cleaned.json"
-after_ai_file_name  = "groups_info_after_ai.json"
-parsed_file_name    = "groups_info_parsed.json"
-
-latest_excel_path = latest_files_path / excel_file_name
-old_excel_path    = old_files_path    / excel_file_name
-
-latest_extracted_path = latest_files_path / extracted_file_name
-old_extracted_path    = old_files_path    / extracted_file_name
-
-latest_after_ai_path = latest_files_path / after_ai_file_name
-old_after_ai_path    = old_files_path    / after_ai_file_name
-
-latest_parsed_path = latest_files_path / parsed_file_name
-old_parsed_path    = old_files_path    / parsed_file_name
-
-chunks_cache_path = latest_files_path / "chunks_cache.json"
-
-OVERRIDES_PATH = current_dir / "overrides.yaml"
-
-WEB_DATA_PATH     = web_dir / "data.json"
-WEB_DATA_DIR      = web_dir / "data"
-WEB_OLD_DATA_PATH = web_dir / "old_data.json"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+WEB_DIR = PROJECT_ROOT / "web"
+WEB_DATA_DIR = WEB_DIR / "data"
+OVERRIDES_PATH = PROJECT_ROOT / "overrides.yaml"
 
 
-async def publish_web_faculties(parsed: dict) -> None:
-    """Публикует per-faculty JSON: ИНЭК из текущего прогона + XLSX-факультеты."""
-    try:
-        from parser.pipeline import parse_all
+# ================================================================
+# один факультет
+# ================================================================
 
-        period, faculties = load_registry()
-        events_by_faculty = await parse_all(period=period, faculties=faculties)
-        events_by_faculty["12"] = list(parsed.get("events") or [])
-
-        published = [
-            faculty
-            for faculty in faculties
-            if faculty.enabled and events_by_faculty.get(faculty.id)
-        ]
-        if not published:
-            return
-
-        await asyncio.to_thread(
-            publish_faculty_data,
-            WEB_DATA_DIR,
-            published,
-            events_by_faculty,
-            parsed.get("generated_at") or "",
+async def process_faculty(
+    faculty: Faculty,
+    period,
+    rules: list[dict],
+) -> dict | None:
+    parser_class = get_parser_class(faculty.id)
+    if parser_class is None:
+        logger.error(
+            "Для факультета %s нет модуля парсера "
+            "(parser/faculties/%s_*/parser.py)", faculty.id, faculty.id,
         )
+        return None
+
+    parser = parser_class(faculty)
+
+    try:
+        sheets = await parser.load()
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Факультет %s: не удалось загрузить таблицу: %s", faculty.id, exc)
+        return None
+
+    try:
+        groups = await parser.parse(sheets, period)
+        if parser.uses_llm:
+            groups = await parser.refine(groups, period)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Факультет %s: ошибка разбора: %s", faculty.id, exc)
+        return None
+
+    parsed = await transform_schedule(groups, faculty_id=faculty.id)
+    parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
+
+    latest_path = parser.paths.latest_file(PARSED_NAME)
+    previous = read_json(latest_path)
+    previous_events = previous.get("events", []) if isinstance(previous, dict) else []
+    changed = not events_equal(previous_events, parsed["events"])
+
+    if changed:
         logger.info(
-            "Опубликовано факультетов: %s",
-            ", ".join(f"{f.id} ({len(events_by_faculty[f.id])})" for f in published),
+            "Факультет %s: событий %d (было %d) — обновляю",
+            faculty.id, len(parsed["events"]), len(previous_events),
         )
-    except Exception as exc:
-        logger.exception("Не удалось опубликовать данные факультетов: %s", exc)
+        rotate(latest_path)
+        write_json(latest_path, parsed)
+    else:
+        if previous.get("generated_at"):
+            parsed["generated_at"] = previous["generated_at"]
+        logger.info(
+            "Факультет %s: без изменений (%d событий)",
+            faculty.id, len(parsed["events"]),
+        )
+
+    return parsed
 
 
-# ================================================================
-# скачивание Excel из Google Drive (только для xlsx-источника)
-# ================================================================
-
-def _sync_download_excel(excel_path: Path) -> None:
-    """Синхронный download Excel из Google Drive. Вызывать через asyncio.to_thread."""
-    service = get_drive_service()
-
-    request = service.files().export_media(
-        fileId=SPREADSHEET_ID,
-        mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-    excel_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(excel_path, "wb") as f:
-        downloader = MediaIoBaseDownload(f, request)
-        done = False
-        while not done:
-            status, done = downloader.next_chunk()
-            logger.info(f"Download progress: {int(status.progress() * 100)}%")
-
-
-async def _download_excel_from_drive(excel_path: Path) -> None:
-    await asyncio.to_thread(_sync_download_excel, excel_path)
-
-
-async def handle_excel_files(latest_excel: Path, old_excel: Path) -> bool:
-    """Ротация xlsx: latest → old и скачивание свежего. Только для xlsx-источника."""
-    try:
-        if old_excel.exists():
-            if latest_excel.exists() and latest_excel.is_file():
-                delete_old_file(latest_excel, old_excel)
-            if not (latest_excel.exists() and latest_excel.is_file()):
-                await _download_excel_from_drive(latest_excel)
-        else:
-            if latest_excel.exists():
-                delete_old_file(latest_excel, old_excel, max_time=0)
-            if not (latest_excel.exists() and latest_excel.is_file()):
-                await _download_excel_from_drive(latest_excel)
-        return True
-    except PermissionError:
-        logger.error("Нет прав на удаление/запись файла расписания.")
-        if not (latest_excel.exists() and latest_excel.is_file()):
-            await _download_excel_from_drive(latest_excel)
-        return True
-    except RefreshError as e:
-        logger.error(f"Credentials OAuth устарели: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"Ошибка при работе с Excel: {e}")
-        return False
-
-
-# ================================================================
-# выбор источника
-# ================================================================
-
-async def build_schedule_source() -> ScheduleSource:
-    """
-    Собирает источник расписания по конфигу.
-
-    Приоритет:
-      1. Переменная окружения SCHEDULE_SOURCE=google|xlsx
-      2. CONFIG['schedule_source']['type']
-      3. default = 'google'
-    """
-    import os
-
-    src_type = (
-            os.environ.get("SCHEDULE_SOURCE")
-            or (CONFIG.get("schedule_source") or {}).get("type")
-            or "google"
-    ).lower()
-
-    logger.info(f"Источник расписания: {src_type}")
-
-    if src_type == "xlsx":
-        if not await handle_excel_files(latest_excel_path, old_excel_path):
-            raise RuntimeError("Не удалось скачать/подготовить xlsx")
-        return XlsxFileSource(latest_excel_path)
-
-    if src_type == "google":
-        _, sheets_service = await asyncio.to_thread(get_drive_and_sheets_services)
-        return GoogleSheetsSource(SPREADSHEET_ID, sheets_service)
-
-    raise ValueError(f"Неизвестный источник расписания: {src_type!r}")
-
-
-# ================================================================
-# io / misc
-# ================================================================
-
-async def handle_json_files(data, latest_path: Path, old_path: Path) -> bool:
-    try:
-        if latest_path.exists():
-            if old_path.exists():
-                old_path.unlink()
-            shutil.move(str(latest_path), str(old_path))
-        await save_data(data, latest_path)
-        return True
-    except PermissionError:
-        logger.error("Нет прав на запись JSON.")
-        if not latest_path.exists():
-            await save_data(data, latest_path)
-        return True
-    except Exception as e:
-        logger.error(f"Ошибка при работе с JSON: {e}")
-        return False
-
-
-async def save_data(data, path: Path) -> None:
-    def _default(o):
-        if isinstance(o, set):
-            return sorted(o)
-        raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
-
-    text = json.dumps(data, ensure_ascii=False, indent=4, default=_default)
-    await asyncio.to_thread(path.write_text, text, encoding="utf-8")
-
-
-def _read_json(path: Path) -> dict:
-    if not path.exists():
-        return {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception as e:
-        logger.warning(f"Не удалось прочитать {path}: {e}")
-        return {}
-
-
-def _events_equal(a: list, b: list) -> bool:
-    """
-    Сравнивает два списка events без учёта порядка и без timestamp.
-
-    Сортирует по event_id и сравнивает как обычные dict-ы.
-    Это позволяет отличить «расписание реально изменилось»
-    от «парсер просто прогнался ещё раз».
-    """
+def events_equal(a: list, b: list) -> bool:
+    """Сравнивает события без учёта порядка и generated_at."""
     if not isinstance(a, list) or not isinstance(b, list):
         return False
     if len(a) != len(b):
         return False
 
-    def key(ev):
+    def key(event):
         return (
-            str(ev.get("event_id", "")),
-            str(ev.get("group", "")),
-            str(ev.get("weekday", "")),
-            int(ev.get("pair_number", 0) or 0),
+            str(event.get("event_id", "")),
+            str(event.get("group", "")),
+            str(event.get("weekday", "")),
+            int(event.get("pair_number", 0) or 0),
         )
 
     return sorted(a, key=key) == sorted(b, key=key)
 
 
 # ================================================================
-# merge helpers
+# все факультеты
 # ================================================================
 
-def format_ai_input(sources: list[dict]) -> str:
-    """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
-    return "\n\n".join(f"[{i}] {s['subject']}" for i, s in enumerate(sources, start=1))
+async def process_all(
+    *,
+    publish_web: bool = True,
+    git_push: bool = True,
+) -> dict[str, dict]:
+    period, faculties = load_registry()
+    rules = load_overrides(OVERRIDES_PATH)
+
+    results: dict[str, dict] = {}
+    for faculty in faculties:
+        if not faculty.enabled:
+            continue
+        parsed = await process_faculty(faculty, period, rules)
+        if parsed is None:
+            # Не удалось разобрать — не выбрасываем факультет с сайта,
+            # оставляем последнюю опубликованную версию.
+            fallback = _published(faculty.id)
+            if fallback:
+                logger.warning(
+                    "Факультет %s: оставляю прошлую версию (%d событий)",
+                    faculty.id, len(fallback.get("events", [])),
+                )
+                results[faculty.id] = fallback
+            continue
+        results[faculty.id] = parsed
+
+    if publish_web and results:
+        events_by_faculty = {
+            faculty_id: parsed.get("events", [])
+            for faculty_id, parsed in results.items()
+        }
+        published = [faculty for faculty in faculties if faculty.id in results]
+        publish(WEB_DATA_DIR, published, events_by_faculty, _stamp(results))
+
+        if git_push:
+            await commit_and_push()
+
+    return results
 
 
-def _chunk_hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+def _published(faculty_id: str) -> dict:
+    path = WEB_DATA_DIR / "faculties" / faculty_id / "data.json"
+    return read_json(path)
 
 
-async def _ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
-    delay = 1.0
-    last_exc: Exception | None = None
-    for attempt in range(max_attempts):
-        try:
-            return await ask_ai(prompt=prompt)
-        except Exception as e:
-            last_exc = e
-            if attempt == max_attempts - 1:
-                break
-            logger.warning(
-                f"AI: попытка {attempt + 1}/{max_attempts} не удалась: {e}; "
-                f"пауза {delay:.1f}с"
-            )
-            await asyncio.sleep(delay)
-            delay *= 2
-    raise last_exc
-
-
-
-def _add_90_minutes(time_start: str) -> str:
-    """time_start + 1.5ч в формате HH:MM. Пусто, если не распарсилось."""
-    if not time_start:
-        return ""
-    t = normalize_time(time_start)
-    try:
-        h, m = map(int, t.split(":"))
-    except (ValueError, AttributeError):
-        return ""
-    total = h * 60 + m + 90
-    return f"{(total // 60) % 24:02d}:{total % 60:02d}"
-
-
-def merge_ai_line(
-        line: str,
-        offset: int,
-        sources: list[dict],
-        branch_index: int = 0,
-        branch_total: int = 1,
-) -> list[dict]:
-    parts = [p.strip() for p in line.split(";")]
-    parts = ["" if p == "-" else p for p in parts]
-
-    if len(parts) not in (9, 10):
-        logger.warning(f"AI: ожидалось 9/10 полей, получено {len(parts)}: {line!r}")
-        return []
-
-    try:
-        local_n = int(parts[0].strip("[]").strip())
-    except ValueError:
-        logger.warning(f"AI: не удалось разобрать enumerator: {parts[0]!r}")
-        return []
-
-    global_idx = offset + local_n - 1
-    if not (0 <= global_idx < len(sources)):
-        logger.warning(
-            f"AI: enumerator {local_n} вне диапазона "
-            f"(offset={offset}, total={len(sources)})"
-        )
-        return []
-
-    src = sources[global_idx]
-
-    weekday    = parts[1] or src.get("day_of_week", "")
-    time_start = parts[2] or src.get("time_start", "")
-    time_end   = parts[3] or _add_90_minutes(time_start)
-    dates      = parts[4]
-    discipline = parts[5]
-    type_      = parts[6]
-    subgroup   = parts[7]
-    teachers   = parts[8]
-    rooms_ai   = parts[9] if len(parts) == 10 else ""
-
-    time_start = normalize_time(time_start) if time_start else ""
-    time_end   = normalize_time(time_end) if time_end else ""
-
-    text_colors = src.get("text_colors") or []
-
-    def _is_grey_color(hex_color: str) -> bool:
-        """Проверяет, является ли цвет оттенком серого."""
-        if not hex_color or len(hex_color) != 7 or not hex_color.startswith('#'):
-            return False
-        try:
-            r = int(hex_color[1:3], 16)
-            g = int(hex_color[3:5], 16)
-            b = int(hex_color[5:7], 16)
-            # Если разница между каналами невелика — это серый (включая темный/светлый)
-            return abs(r - g) <= 25 and abs(g - b) <= 25
-        except ValueError:
-            return False
-
-
-    def _get_event_color(b_dates: str) -> str | None:
-        """
-        Возвращает hex-код цвета, если ВСЕ даты ветки найдены в цветном тексте.
-        """
-        if not text_colors or not b_dates:
-            return None
-
-        def _norm_date(d: str) -> str:
-            parts = d.split('.')
-            if len(parts) >= 2:
-                return f"{int(parts[0]):02d}.{parts[1]}"
-            return d
-
-        branch_dates = {_norm_date(x) for x in re.findall(r'\d{1,2}\.\d{2}', b_dates)}
-        if not branch_dates:
-            return None
-
-        for item in text_colors:
-            found = {_norm_date(x) for x in re.findall(r'\d{1,2}\.\d{2}', item["text"])}
-            # Цветной кусок без дат (например, цвет названия аудитории)
-            # не должен определять цвет события.
-            if not found:
-                continue
-            # Если даты из чанка являются подмножеством дат ветки, ИЛИ наоборот
-            if item["color"] and (found <= branch_dates or branch_dates <= found):
-                return item["color"]
-
-        return None
-
-    if not rooms_ai:
-        hints = src.get("rooms_hints") or []
-        has_overrides = any(r["hint_type"] or r["hint_dates"] for r in hints)
-
-        if not has_overrides:
-            rooms = _assign_rooms(
-                src.get("rooms", ""),
-                branch_index=branch_index,
-                branch_total=branch_total,
-            )
-            color = _get_event_color(dates)
-            is_past = _is_grey_color(color)
-            return [{
-                "weekday":    weekday,
-                "time_start": time_start,
-                "time_end":   time_end,
-                "dates":      dates,
-                "discipline": discipline,
-                "type":       type_,
-                "subgroup":   subgroup,
-                "teachers":   teachers,
-                "rooms":      rooms,
-                "color":      color or "",
-                "is_past":    is_past,
-            }]
-
-        groups = split_branch_by_rooms(hints, type_, dates)
-        res = []
-        for g_dates, g_rooms in groups:
-            color = _get_event_color(g_dates)
-            is_past_g = _is_grey_color(color)
-            res.append({
-                "weekday":    weekday,
-                "time_start": time_start,
-                "time_end":   time_end,
-                "dates":      g_dates,
-                "discipline": discipline,
-                "type":       type_,
-                "subgroup":   subgroup,
-                "teachers":   teachers,
-                "rooms":      g_rooms,
-                "color":      color or "",
-                "is_past":    is_past_g,
-            })
-        return res
-
-    color = _get_event_color(dates)
-    is_past = _is_grey_color(color)
-    return [{
-        "weekday":    weekday,
-        "time_start": time_start,
-        "time_end":   time_end,
-        "dates":      dates,
-        "discipline": discipline,
-        "type":       type_,
-        "subgroup":   subgroup,
-        "teachers":   teachers,
-        "rooms":      rooms_ai,
-        "color":      color or "",
-        "is_past":    is_past,
-    }]
-
-
-def _assign_rooms(rooms_str: str, branch_index: int, branch_total: int) -> str:
-    """
-    Распределяет комнаты по ветками одной ячейки.
-
-      1 комната          → всем ветками эта комната
-      M комнат == N веток → каждой ветке своя по позиции
-      иначе              → всем ветками все комнаты (fallback)
-    """
-    if not rooms_str:
-        return ""
-
-    rooms_list = [r.strip() for r in rooms_str.split(",") if r.strip()]
-    if not rooms_list:
-        return ""
-
-    if len(rooms_list) == 1:
-        return rooms_list[0]
-
-    if 1 < branch_total == len(rooms_list):
-        return rooms_list[branch_index]
-
-    return ", ".join(rooms_list)
+def _stamp(results: dict[str, dict]) -> str:
+    """Версия публикации: самая свежая из версий факультетов."""
+    stamps = [
+        parsed.get("generated_at", "")
+        for parsed in results.values()
+        if parsed.get("generated_at")
+    ]
+    return max(stamps) if stamps else ""
 
 
 # ================================================================
-# web / git
+# git
 # ================================================================
-
-async def sync_web_data(latest: Path, old: Path) -> bool:
-    """Копирует свежие parsed-файлы в web/ для публикации через GitHub Actions."""
-    try:
-        web_dir.mkdir(parents=True, exist_ok=True)
-
-        if latest.exists():
-            await asyncio.to_thread(shutil.copyfile, latest, WEB_DATA_PATH)
-        else:
-            logger.warning(f"Нет файла для web/data.json: {latest}")
-            return False
-
-        if old.exists():
-            await asyncio.to_thread(shutil.copyfile, old, WEB_OLD_DATA_PATH)
-        else:
-            logger.warning(f"Нет файла для web/old_data.json: {old}")
-
-        return True
-    except Exception as e:
-        logger.error(f"Не удалось скопировать данные в web/: {e}")
-        return False
-
 
 def _git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["git", *args],
-        cwd=current_dir,
+        cwd=str(PROJECT_ROOT),
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -512,28 +179,26 @@ def _git(*args: str) -> subprocess.CompletedProcess:
 
 
 def _sync_commit_and_push() -> bool:
-    """Коммитит опубликованные данные (ИНЭК + все факультеты) и пушит."""
-    add = _git("add", "web/data.json", "web/old_data.json", "web/data")
+    add = _git("add", "web/data")
     if add.returncode != 0:
-        logger.error(f"git add: {add.stderr.strip()}")
+        logger.error("git add: %s", add.stderr.strip())
         return False
 
-    diff = _git("diff", "--cached", "--quiet")
-    if diff.returncode == 0:
+    if _git("diff", "--cached", "--quiet").returncode == 0:
         logger.info("Нет изменений для коммита")
         return False
 
     commit = _git("commit", "-m", "chore: update schedule")
     if commit.returncode != 0:
-        logger.error(f"git commit: {commit.stderr.strip()}")
+        logger.error("git commit: %s", commit.stderr.strip())
         return False
 
     push = _git("push")
     if push.returncode != 0:
-        logger.error(f"git push: {push.stderr.strip()}")
+        logger.error("git push: %s", push.stderr.strip())
         return False
 
-    logger.info("Расписание закоммичено и запушено — GitHub Actions запустится сам")
+    logger.info("Расписание закоммичено и запушено")
     return True
 
 
@@ -541,177 +206,24 @@ async def commit_and_push() -> bool:
     return await asyncio.to_thread(_sync_commit_and_push)
 
 
-# ================================================================
-# main pipeline
-# ================================================================
-
 async def process_schedule(
-        use_chunks: bool = False,
-        chunk_size: int = 30,
-        publish_web: bool = True,
-        git_push: bool = True,
+    use_chunks: bool = False,
+    chunk_size: int = 30,
+    publish_web: bool = True,
+    git_push: bool = True,
 ) -> dict | None:
-    """
-    Получить данные (Google Sheets API или xlsx) → извлечь → AI + merge
-    → finalize → overrides.
-
-    publish_web=True  — копирует parsed.json в web/data.json и
-                        parsed_old.json в web/old_data.json.
-    git_push=True     — делает git add/commit/push (только если publish_web=True,
-                        иначе пушить нечего).
-    """
+    """Совместимая точка входа: обходит все включённые факультеты."""
     logger.info(
-        f"Начата обработка расписания "
-        f"(publish_web={publish_web}, git_push={git_push})"
+        "Начата обработка расписания (publish_web=%s, git_push=%s)",
+        publish_web, git_push,
     )
-
-    # 1. Источник данных
-    try:
-        source = await build_schedule_source()
-    except Exception as e:
-        logger.error(f"Не удалось создать источник расписания: {e}")
+    results = await process_all(publish_web=publish_web, git_push=git_push)
+    if not results:
+        logger.error("Не удалось разобрать ни один факультет")
         return None
 
-    # 2. extractor: {group: {"events": [{day_of_week, time_start, rooms, subject}, ...]}}
-    try:
-        groups_info = await DataExtractor(source).extract()
-    except Exception as e:
-        logger.error(f"Не удалось извлечь расписание: {e}", exc_info=True)
-        return None
-
-    # 3. AI + merge
-    groups_info_after_ai: dict = {}
-
-    old_cache_data = _read_json(chunks_cache_path)
-    old_cache: dict[str, list[str]] = old_cache_data.get("entries", {}) or {}
-
-    new_cache: dict[str, list[str]] = {}
-    cache_hits = 0
-    ai_calls = 0
-
-    for group, group_data in groups_info.items():
-        sources: list[dict] = group_data.get("events", [])
-        if not sources:
-            groups_info_after_ai[group] = {"events": []}
-            continue
-
-        ai_input_text = format_ai_input(sources)
-        key = _chunk_hash(ai_input_text)
-
-        if key in old_cache:
-            lines = old_cache[key]
-            cache_hits += 1
-            logger.info(f"[skip AI] {group}: cache hit ({len(sources)} ячеек)")
-        else:
-            prompt_text = user_prompt.format(data=ai_input_text)
-            try:
-                chunk_result = await _ask_ai_with_retry(prompt=prompt_text)
-                if isinstance(chunk_result, list):
-                    lines = [e for e in chunk_result if e.strip()]
-                else:
-                    lines = [e for e in chunk_result.split("\n") if e.strip()]
-                ai_calls += 1
-                await asyncio.sleep(0.5)
-            except Exception as e:
-                logger.error(f"AI ошибка (группа {group}): {e}")
-                continue
-
-        new_cache[key] = lines
-        # Deprecated feature
-        # lines = sorted(lines, key=_line_sort_key)
-
-        merged: list[dict] = []
-        enum_counts = Counter()
-        for line in lines:
-            head = line.split(";", 1)[0].strip()
-            try:
-                n = int(head.strip("[]").strip())
-            except ValueError:
-                continue
-            enum_counts[n] += 1
-
-        seen: dict[int, int] = {}
-        for line in lines:
-            head = line.split(";", 1)[0].strip()
-            try:
-                n = int(head.strip("[]").strip())
-            except ValueError:
-                items = merge_ai_line(line, 0, sources)
-                if items:
-                    merged.extend(items)
-                continue
-
-            branch_index = seen.get(n, 0)
-            seen[n] = branch_index + 1
-            branch_total = enum_counts[n]
-
-            items = merge_ai_line(
-                line, 0, sources,
-                branch_index=branch_index,
-                branch_total=branch_total,
-            )
-            if items:
-                merged.extend(items)
-
-        groups_info_after_ai[group] = {
-            "events": merged,
-            "semester_start_year": group_data.get("semester_start_year"),
-        }
-
+    total = sum(len(parsed.get("events", [])) for parsed in results.values())
     logger.info(
-        f"AI-статистика: {ai_calls} вызовов, {cache_hits} попаданий в кэш"
+        "Готово: факультетов %d, событий %d", len(results), total
     )
-
-    await save_data({"entries": new_cache}, chunks_cache_path)
-
-    # 4. промежуточные JSON
-    await handle_json_files(groups_info, latest_extracted_path, old_extracted_path)
-    await handle_json_files(groups_info_after_ai, latest_after_ai_path, old_after_ai_path)
-
-    # 5. финализация
-    parsed = await transform_schedule(groups_info_after_ai)
-
-    # 6. ручные правки
-    rules = load_overrides(OVERRIDES_PATH)
-    parsed["events"] = await apply_overrides(parsed["events"], rules)
-
-    # 6.5. Сравниваем с предыдущей версией.
-    #      Если события идентичны — не перезаписываем файлы и не коммитим.
-    prev = _read_json(latest_parsed_path)
-    prev_events = prev.get("events", []) if isinstance(prev, dict) else []
-    changed = not _events_equal(prev_events, parsed["events"])
-
-    if not changed:
-        if prev.get("generated_at"):
-            parsed["generated_at"] = prev["generated_at"]
-
-        logger.info(
-            f"Расписание не изменилось "
-            f"({len(parsed['events'])} событий) — пропускаю запись и коммит."
-        )
-    else:
-        logger.info(
-            f"Расписание изменилось: было {len(prev_events)}, стало {len(parsed['events'])}."
-        )
-        await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
-
-    # 7. публикация в web/
-    #    Факультеты с cloud.mail публикуются в любом случае: их файлы
-    #    меняются независимо от ИНЭК.
-    if publish_web:
-        if changed:
-            await sync_web_data(latest_parsed_path, old_parsed_path)
-        await publish_web_faculties(parsed)
-    else:
-        logger.info("publish_web=False — пропускаю копирование в web/")
-
-    # 8. git commit + push
-    if git_push and publish_web:
-        await commit_and_push()
-    elif git_push and not publish_web:
-        logger.warning("git_push=True, но publish_web=False — пушить нечего, пропускаю")
-    else:
-        logger.info("git_push=False — пропускаю git commit/push")
-
-    logger.info(f"Расписание обработано: {len(parsed['events'])} событий.")
-    return parsed
+    return {"faculties": results, "events": total}

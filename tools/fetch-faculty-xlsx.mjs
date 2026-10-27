@@ -112,14 +112,13 @@ async function main() {
     return;
   }
 
-  const targetDir = resolve(ROOT, 'data/faculties');
-  await mkdir(targetDir, { recursive: true });
-
   let ok = 0;
   for (const faculty of faculties) {
-    const target = resolve(targetDir, `${faculty.id}.xlsx`);
+    const folder = faculty.folder || `faculties/${faculty.id}`;
+    const target = resolve(ROOT, folder, faculty.original.file || 'source.xlsx');
     try {
       const data = await downloadOne(faculty.original.url);
+      await mkdir(dirname(target), { recursive: true });
       await writeFile(target, data);
       ok++;
       console.log(`[xlsx] ${faculty.id}: ${(data.length / 1024).toFixed(0)} КБ`);

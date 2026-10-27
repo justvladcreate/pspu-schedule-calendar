@@ -1,7 +1,7 @@
-import asyncio
+﻿import asyncio
 
 import parser.ai as ai_module
-from parser.prompts import USER_PROMPT
+from parser.faculties.f12_inec.prompt import USER_PROMPT
 
 
 def test_prompt_has_input_placeholder():

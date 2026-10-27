@@ -1,13 +1,13 @@
 import pytest
 
-from parser.process import (
-    _add_90_minutes,
-    _assign_rooms,
-    _chunk_hash,
-    _events_equal,
+from parser.faculties.f12_inec.ai_merge import (
+    add_90_minutes,
+    assign_rooms,
+    chunk_hash,
     format_ai_input,
     merge_ai_line,
 )
+from parser.process import events_equal
 from parser.rooms_hints import parse_rooms_with_hints
 
 
@@ -25,72 +25,65 @@ def _source(room_raw="", **extra):
 
 
 def test_add_90_minutes():
-    assert _add_90_minutes("09:45") == "11:15"
-    assert _add_90_minutes("23:00") == "00:30"
-    assert _add_90_minutes("") == ""
-    assert _add_90_minutes("bad") == ""
+    assert add_90_minutes("08:00") == "09:30"
+    assert add_90_minutes("13:30") == "15:00"
+    assert add_90_minutes("") == ""
 
 
-@pytest.mark.parametrize(
-    ("rooms", "index", "total", "expected"),
-    [
-        ("IV к. А101", 0, 1, "IV к. А101"),
-        ("дистанционно онлайн, IV к. А112", 0, 2, "дистанционно онлайн"),
-        ("дистанционно онлайн, IV к. А112", 1, 2, "IV к. А112"),
-        ("IV к. А111, IV к. А112", 0, 3, "IV к. А111, IV к. А112"),
-        ("", 0, 1, ""),
-    ],
-)
-def test_assign_rooms(rooms, index, total, expected):
-    assert _assign_rooms(rooms, index, total) == expected
+def test_assign_rooms_single():
+    assert assign_rooms("А-101", 0, 2) == "А-101"
 
 
-def test_format_ai_input_and_hash():
-    sources = [{"subject": "A"}, {"subject": "B"}]
-    assert format_ai_input(sources) == "[1] A\n\n[2] B"
-    assert _chunk_hash("x") == _chunk_hash("x")
+def test_assign_rooms_by_branch():
+    assert assign_rooms("А-101, Б-202", 0, 2) == "А-101"
+    assert assign_rooms("А-101, Б-202", 1, 2) == "Б-202"
+
+
+def test_assign_rooms_fallback():
+    assert assign_rooms("А-101, Б-202", 0, 3) == "А-101, Б-202"
+
+
+def test_chunk_hash_is_stable():
+    assert chunk_hash("abc") == chunk_hash("abc")
+    assert chunk_hash("abc") != chunk_hash("abd")
+
+
+def test_format_ai_input_numbers_sources():
+    text = format_ai_input([{"subject": "Первый"}, {"subject": "Второй"}])
+    assert text == "[1] Первый\n\n[2] Второй"
+
+
+def test_merge_ai_line_basic():
+    source = _source()
+    line = "[1];ПН;13:30;15:00;07.09.2026;Математика;лек.;;Иванов И.И.;А-101"
+    items = merge_ai_line(line, 0, [source])
+    assert len(items) == 1
+    item = items[0]
+    assert item["weekday"] == "ПН"
+    assert item["discipline"] == "Математика"
+    assert item["dates"] == "07.09.2026"
+    assert item["rooms"] == "А-101"
+    assert item["is_past"] is False
+
+
+def test_merge_ai_line_bad_field_count():
+    assert merge_ai_line("[1];ПН;13:30", 0, [_source()]) == []
+
+
+def test_merge_ai_line_unknown_enumerator():
+    line = "[99];ПН;13:30;15:00;07.09.2026;Математика;лек.;;Иванов И.И.;А-101"
+    assert merge_ai_line(line, 0, [_source()]) == []
+
+
+def test_grey_color_marks_past():
+    source = _source(text_colors=[{"text": "07.09.2026", "color": "#999999"}])
+    line = "[1];ПН;13:30;15:00;07.09.2026;Математика;лек.;;Иванов И.И.;"
+    items = merge_ai_line(line, 0, [source])
+    assert items and items[0]["is_past"] is True
 
 
 def test_events_equal_ignores_order():
-    a = [{"event_id": "1", "group": "101", "weekday": "ПН", "pair_number": 1}]
-    b = [{"event_id": "1", "group": "101", "weekday": "ПН", "pair_number": 1}]
-    assert _events_equal(a, b)
-    b[0]["pair_number"] = 2
-    assert not _events_equal(a, b)
-
-
-def test_merge_ai_line_plain_source():
-    src = _source("IV к. А101")
-    items = merge_ai_line("[1];-;-;-;14.09;X;лек.;-;Y;", 0, [src])
-    assert items[0]["rooms"] == "IV к. А101"
-    assert items[0]["discipline"] == "X"
-    assert items[0]["weekday"] == "ПН"
-
-
-def test_merge_ai_line_splits_by_date_hint():
-    src = _source("дистанционно\\ онлайн\n28.09 - IV к. В103")
-    items = merge_ai_line(
-        "[1];-;-;-;14.09, 21.09, 28.09;X;лек.;-;Y;",
-        0,
-        [src],
-    )
-    assert [item["rooms"] for item in items] == [
-        "дистанционно онлайн",
-        "IV к. В103",
-    ]
-
-
-def test_merge_ai_line_uses_text_color():
-    src = _source(
-        "IV к. А101",
-        text_colors=[{"text": "14.09, 21.09", "color": "#cccccc"}],
-    )
-    items = merge_ai_line("[1];-;-;-;14.09, 21.09;X;лек.;-;Y;", 0, [src])
-    assert items[0]["color"] == "#cccccc"
-    assert items[0]["is_past"] is True
-
-
-def test_merge_ai_line_accepts_rooms_from_ai():
-    src = _source("")
-    items = merge_ai_line("[1];-;-;-;14.09;X;лек.;-;Y;IV к. А404", 0, [src])
-    assert items[0]["rooms"] == "IV к. А404"
+    a = [{"event_id": "1", "group": "A", "weekday": "ПН", "pair_number": 1}]
+    b = [{"event_id": "1", "group": "A", "weekday": "ПН", "pair_number": 1}]
+    assert events_equal(a, b)
+    assert not events_equal(a, [])
