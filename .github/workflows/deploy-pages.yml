@@ -32,6 +32,10 @@ jobs:
       - name: Bump service worker version
         run: node tools/bump-sw.mjs --root web
 
+      - name: Download faculty originals
+        run: node tools/fetch-faculty-xlsx.mjs --root web
+        continue-on-error: true
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

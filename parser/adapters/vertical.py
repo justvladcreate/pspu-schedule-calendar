@@ -1,31 +1,33 @@
 """Универсальный адаптер «вертикальных» таблиц.
 
 Формат: строки — занятия, столбцы — день / № / начало / дисциплина /
-даты / аудитория. Встречается у 04, 06, 10, 13, 16, 17 и близких
-факультетов. Различия (число колонок дисциплин, наличие колонки «Даты»,
-дата в первой колонке) определяются по шапке, а не по имени файла.
+даты / аудитория. Встречается у 02, 03, 04, 05, 06, 08, 10, 13, 16
+и близких факультетов.
+
+В одном листе может быть несколько блоков колонок рядом (по блоку на
+группу) — каждый разбирается отдельно, иначе перепутаются аудитории
+и преподаватели.
 """
 from __future__ import annotations
 
+import re
+from dataclasses import replace
+
 from parser.adapters.base import (
+    block_has_data,
     build_branch,
     cell_text,
-    clean_discipline,
-    dates_for_weekday,
     dedupe_adjacent,
-    detect_columns,
-    extract_subgroup,
-    extract_teachers,
-    extract_type,
+    detect_blocks,
+    extract_group_codes,
     find_header_row,
-    infer_group,
+    infer_block_group,
     normalize_day,
     pair_to_time,
     parse_cell_blocks,
     parse_pair,
     parse_time,
     split_lines,
-    strip_dates,
 )
 from parser.dates import expand_date_text
 from parser.model import AcademicPeriod, Faculty, RawBranch
@@ -33,6 +35,10 @@ from parser.sources.base import SheetData
 
 _SKIP_SHEETS = ("qr", "приложение", "повтор", "график", "подфак", "лист1")
 _SERVICE_WORDS = ("перерыв", "обед", "кураторский час", "дистанционно")
+_HEADER_NOISE_RE = re.compile(
+    r"семестр|учебн\w*\s*год|курс\s*,?\s*групп|направление подготовки",
+    re.I,
+)
 
 
 def _pair_rooms(rooms: list[str], count: int) -> tuple[list[str], bool]:
@@ -81,17 +87,65 @@ class VerticalAdapter:
         if header_row is None:
             return []
 
-        group, group_confidence = infer_group(sheet, df, header_row, faculty)
-        if not group:
-            return []
-
-        columns = detect_columns(df, header_row)
-        if columns["time"] is None and columns["pair"] is None:
+        blocks = detect_blocks(df, header_row)
+        if not blocks:
             return []
 
         result: list[RawBranch] = []
-        current_day = ""
         semester_year = period.semester_start.year if period.semester_start else None
+
+        for block_index, columns in enumerate(blocks):
+            if not block_has_data(df, header_row, columns):
+                continue
+
+            group, group_confidence = infer_block_group(
+                df, header_row, columns, sheet.name, block_index, len(blocks)
+            )
+            if not group:
+                continue
+            if len(blocks) > 1 and group_confidence < 0.9:
+                group = f"{group}-{block_index + 1}" if group == sheet.name.strip() else group
+
+            block_branches = self._parse_block(
+                df=df,
+                sheet=sheet,
+                columns=columns,
+                header_row=header_row,
+                group=group,
+                group_confidence=group_confidence,
+                faculty=faculty,
+                period=period,
+                semester_year=semester_year,
+                multi_block=len(blocks) > 1,
+            )
+            result.extend(block_branches)
+
+            # Лист может покрывать несколько групп («731, 732»):
+            # расписание у них общее, поэтому дублируем события.
+            codes = extract_group_codes(sheet.name)
+            if group == sheet.name.strip() and len(codes) > 1:
+                for extra in codes[1:]:
+                    for branch in block_branches:
+                        result.append(replace(branch, group=extra))
+
+        return self._drop_stale(result, period)
+
+    def _parse_block(
+        self,
+        *,
+        df,
+        sheet: SheetData,
+        columns: dict,
+        header_row: int,
+        group: str,
+        group_confidence: float,
+        faculty: Faculty,
+        period: AcademicPeriod,
+        semester_year: int | None,
+        multi_block: bool,
+    ) -> list[RawBranch]:
+        result: list[RawBranch] = []
+        current_day = ""
 
         for row_index in range(header_row + 1, len(df)):
             row = df.iloc[row_index]
@@ -101,14 +155,21 @@ class VerticalAdapter:
                     return ""
                 return cell_text(row.iloc[index])
 
+            pair_text = value(columns["pair"]).lower()
+            if any(word in pair_text for word in _SERVICE_WORDS):
+                continue
+
+            row_text = " ".join(
+                cell_text(row.iloc[index])
+                for index in range(columns.get("start", 0), min(columns.get("end", len(row)), len(row)))
+            )
+            if _HEADER_NOISE_RE.search(row_text):
+                continue
+
             day = normalize_day(value(columns["day"]))
             if day:
                 current_day = day
             day = day or current_day
-
-            pair_text = value(columns["pair"]).lower()
-            if any(word in pair_text for word in _SERVICE_WORDS):
-                continue
 
             time_start, time_end = parse_time(value(columns["time"]))
             pair = None
@@ -140,29 +201,30 @@ class VerticalAdapter:
             room_values = [value(index) for index in columns["room"] if value(index)]
             remote_rooms = [
                 item for item in room_values
-                if item.lower().startswith(("http", "www.", "max.ru")) or "join" in item.lower()
+                if item.lower().startswith(("http", "www.", "max.ru"))
+                or "join" in item.lower()
             ]
             room_text = ", ".join(
                 item for item in room_values if item not in remote_rooms
             )
             comments = ["дистанционно"] if remote_rooms else []
+
             date_from_day_cell = value(columns["day"])
             if not date_text and expand_date_text(date_from_day_cell, semester_year):
                 date_text = date_from_day_cell
 
             rooms, rooms_ambiguous = _pair_rooms(split_lines(room_text), len(blocks))
 
-            for index, block in enumerate(blocks):
-                dates = (
-                    expand_date_text(date_text, semester_year)
-                    if date_text
-                    else []
-                )
+            block_dates: list[list[str]] = []
+            for block in blocks:
+                dates = expand_date_text(date_text, semester_year) if date_text else []
                 if not dates:
                     dates = expand_date_text(block["raw"], semester_year)
-                if not dates:
-                    dates = expand_date_text(block["discipline"], semester_year)
+                block_dates.append(dates)
 
+            overlapping = _has_overlapping_dates(block_dates)
+
+            for index, block in enumerate(blocks):
                 branch = build_branch(
                     faculty=faculty,
                     group=group,
@@ -173,7 +235,7 @@ class VerticalAdapter:
                     type_=block["type"],
                     subgroup=block["subgroup"],
                     teachers=block["teachers"],
-                    dates=dates,
+                    dates=block_dates[index],
                     rooms=rooms[index] if index < len(rooms) else "",
                     period=period,
                     comments=comments,
@@ -188,16 +250,18 @@ class VerticalAdapter:
 
                 if group_confidence < 1.0:
                     branch.confidence = round(max(branch.confidence - 0.1, 0.0), 2)
-                    branch.issues.append("group_from_header")
+                    branch.issues.append(
+                        "multi_block_shared_group" if multi_block else "group_from_header"
+                    )
                 if rooms_ambiguous:
                     branch.confidence = round(max(branch.confidence - 0.15, 0.0), 2)
                     branch.issues.append("ambiguous_rooms")
-                if len(blocks) > 1 and not block["subgroup"]:
+                if len(blocks) > 1 and not block["subgroup"] and overlapping:
                     branch.confidence = round(max(branch.confidence - 0.15, 0.0), 2)
                     branch.issues.append("parallel_without_subgroup")
                 result.append(branch)
 
-        return self._drop_stale(result, period)
+        return result
 
     # ---------------------------------------------------------- post
     def _drop_stale(
@@ -223,7 +287,7 @@ class VerticalAdapter:
             inside = [
                 value for value in branch.dates
                 if low <= self._to_date(value) <= high
-            ] if branch.dates else []
+            ]
             if inside:
                 branch.dates = inside
                 result.append(branch)
@@ -266,10 +330,19 @@ class VerticalAdapter:
 
         return [branch for branch in branches if branch.dates]
 
-    # ---------------------------------------------------------- helpers
-    def guess_semester_year(self, period: AcademicPeriod) -> int | None:
-        return period.semester_start.year if period.semester_start else None
 
+def _has_overlapping_dates(blocks_dates: list[list[str]]) -> bool:
+    """Пересекаются ли даты занятий внутри одной ячейки.
 
-def _unused(*args):  # pragma: no cover - защита от случайных импортов
-    return None
+    Если нет — это последовательность разных дисциплин, а не
+    параллельные подгруппы, и пугаться нечего.
+    """
+    seen: set[str] = set()
+    for dates in blocks_dates:
+        if not dates:
+            return True  # без дат — неопределённость
+        current = set(dates)
+        if current & seen:
+            return True
+        seen |= current
+    return False

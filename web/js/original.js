@@ -281,6 +281,19 @@ export function setupOriginalModal() {
 
     /* ---------- рендер листа ---------- */
 
+    function showFallback(reason) {
+        const original = (facultyMeta(activeFacultyId) || {}).original || null;
+        const link = original && original.url
+            ? `<a href="${original.url}" target="_blank" rel="noopener">Открыть оригинал на cloud.mail</a>`
+            : '';
+        renderEl.innerHTML =
+            '<div style="padding:20px;color:#444;font:14px/1.5 Arial,sans-serif">'
+          + `<p>${reason || 'Не удалось загрузить таблицу.'}</p>`
+          + (link ? `<p>${link}</p>` : '')
+          + '</div>';
+        if (dialog) dialog.classList.add('is-loaded');
+    }
+
     async function showSheet(gid, { focusEvent } = {}) {
         if (!source || !gid) return;
         currentGid = gid;
@@ -345,10 +358,7 @@ export function setupOriginalModal() {
             }
         } catch (e) {
             console.warn('[original] render failed:', e);
-            renderEl.innerHTML =
-                '<div style="padding:20px;color:#c62828;font:14px Arial,sans-serif">'
-              + 'Не удалось загрузить лист. Проверьте подключение к интернету.</div>';
-            if (dialog) dialog.classList.add('is-loaded');
+            showFallback('Не удалось загрузить лист с сайта.');
         }
     }
 
@@ -401,7 +411,10 @@ export function setupOriginalModal() {
         if (!gid || !list.some(s => String(s.gid) === String(gid))) {
             gid = list.length ? list[0].gid : '';
         }
-        if (!gid) return;
+        if (!gid) {
+            showFallback('Таблица факультета недоступна на сайте.');
+            return;
+        }
 
         setActiveTab(gid);
         showSheet(gid);

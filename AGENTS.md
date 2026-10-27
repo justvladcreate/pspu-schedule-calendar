@@ -51,6 +51,8 @@ Worker (в этом репозитории его исходников нет). 
 | `web/` | статический сайт |
 | `web/data/` | опубликованные данные факультетов (в Git) |
 | `web/vendor/xlsx.mini.min.js` | SheetJS для «Оригинала» XLSX (грузится лениво) |
+| `tools/fetch-faculty-xlsx.mjs` | CI: скачивает исходные XLSX в артефакт Pages |
+| `utils/report_confidence.py` | отчёт о сомнительных местах разбора |
 | `web/sw.js` | service worker; при добавлении файла обновите `STATIC_ASSETS` |
 | `tools/bump-sw.mjs` | хэш-версия SW для CI; при добавлении JS обновите `WATCHED` |
 | `tests/` | детерминированные тесты, без реальных вызовов LLM |
@@ -141,10 +143,12 @@ build_source(faculty)             # google_sheets | cloud_mail (кэш в data/f
 - `web/data.json` / `old_data.json` остаются ради обратной совместимости и
   push-воркера, но содержат только ИНЭК. Остальные факультеты — в
   `web/data/faculties/`.
-- Для 17 (Открытый университет) нет адаптера: в его файле нет номеров
-  групп, только направления (мат/инф/общ/ист/физ/био).
+- Исходные XLSX **не хранятся в Git**: CI (`tools/fetch-faculty-xlsx.mjs`)
+  скачивает их с cloud.mail.ru в артефакт GitHub Pages. Если файла нет,
+  «Оригинал» предлагает открыть ссылку на облако.
 - `parser/repair.py` включает LLM только для веток с `confidence < 0.9`;
   без `OLLAMA_API_KEY` публикуется детерминированный вариант.
+- Сводка сомнительных мест: `python -m utils.report_confidence`.
 
 
 ## Окружение и секреты
@@ -153,7 +157,7 @@ build_source(faculty)             # google_sheets | cloud_mail (кэш в data/f
 - `data/` — рабочие JSON/кэш парсера (не коммитить).
 - `data/faculties/*.xlsx` — локальный кэш скачанных таблиц.
 - `web/data/index.json`, `web/data/faculties/*.json` — публикуемые данные, в Git.
-- `web/data/faculties/*.xlsx` — исходники для «Оригинала» (исключение в `.gitignore`).
+- `web/data/faculties/*.xlsx` — **не коммитить**: их кладёт CI при деплое.
 - Не коммитить `private/`, `.venv/`, `data/`, `__pycache__/`, `.idea/`.
 
 ## Команды
@@ -172,6 +176,10 @@ build_source(faculty)             # google_sheets | cloud_mail (кэш в data/f
 
 # разбор всех XLSX-факультетов без сети (использует кэш data/faculties)
 # см. parser.pipeline.parse_all(repair=False)
+
+# отчёт о сомнительных местах разбора
+.venv\Scripts\python.exe -m utils.report_confidence
+.venv\Scripts\python.exe -m utils.report_confidence --faculty 06 --json report.json
 
 # таймер парсера
 .venv\Scripts\python.exe main.py

@@ -54,11 +54,7 @@ def test_publish_rotates_previous_file(tmp_path):
     assert old["events"][0]["group"] == "A"
 
 
-def test_publish_copies_xlsx_for_original(tmp_path):
-    source_dir = tmp_path / "cache"
-    source_dir.mkdir()
-    (source_dir / "04.xlsx").write_bytes(b"PK\x03\x04fake")
-
+def test_publish_points_to_xlsx_without_copying(tmp_path):
     faculty = Faculty(
         id="04",
         name="Начальное образование",
@@ -72,12 +68,12 @@ def test_publish_copies_xlsx_for_original(tmp_path):
         [faculty],
         {"04": [{"group": "411"}]},
         "v1",
-        source_dir=source_dir,
     )
 
     index = json.loads(index_path.read_text(encoding="utf-8"))
     original = index["faculties"][0]["original"]
     assert original["type"] == "cloud_mail"
-    assert original["file"] == "faculties/04.xlsx"
     assert original["url"].startswith("https://cloud.mail.ru/")
-    assert (tmp_path / "faculties" / "04.xlsx").exists()
+    # файл в артефакт кладёт CI, в git его быть не должно
+    assert original["file"] == "faculties/04.xlsx"
+    assert not (tmp_path / "faculties" / "04.xlsx").exists()

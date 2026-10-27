@@ -278,6 +278,8 @@ def expand_date_text(
     if not text:
         return []
 
+    text = re.sub(r"\b(\d{1,2})\.\s+(\d{2})\b", r"\1.\2", text)
+
     if semester_start_year is None:
         today = date.today()
         semester_start_year = today.year if today.month >= 9 else today.year - 1

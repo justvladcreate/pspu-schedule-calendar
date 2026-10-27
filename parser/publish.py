@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -45,43 +44,22 @@ def _write_with_rotation(path: Path, text: str) -> bool:
     return True
 
 
-def _copy_original(
-    faculty: Faculty,
-    faculties_dir: Path,
-    source_dir: Path | None,
-) -> Path | None:
-    """Кладёт скачанный XLSX рядом с JSON, чтобы работал «Оригинал»."""
-    if not source_dir:
-        return None
-    source = Path(source_dir) / f"{faculty.id}.xlsx"
-    if not source.exists():
-        return None
-    target = faculties_dir / f"{faculty.id}.xlsx"
-    if target.exists() and target.stat().st_size == source.stat().st_size:
-        if target.read_bytes() == source.read_bytes():
-            return target
-    target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source, target)
-    return target
-
-
 def publish_faculty_data(
     output_dir: Path,
     faculties: list[Faculty],
     events_by_faculty: dict[str, list[dict]],
     generated_at: str,
-    *,
-    source_dir: Path | None = None,
 ) -> Path:
     """
     Пишет:
       output_dir/index.json
       output_dir/faculties/<id>.json
       output_dir/faculties/old/<id>.json
-      output_dir/faculties/<id>.xlsx (если есть исходник)
 
-    Если содержимое хотя бы одного факультета изменилось, версия
-    (``generated_at``) обновляется: фронтенд сравнивает данные по ней.
+    Исходные XLSX в репозиторий не кладём: их скачивает CI
+    (`tools/fetch-faculty-xlsx.mjs`) уже в артефакт GitHub Pages.
+    В index.json остаётся ссылка на облако и путь, по которому файл
+    будет доступен на сайте.
     """
     output_dir = Path(output_dir)
     faculties_dir = output_dir / "faculties"
@@ -111,9 +89,9 @@ def publish_faculty_data(
             original["url"] = faculty.source.url
         else:
             original["url"] = faculty.source.url
-            copied = _copy_original(faculty, faculties_dir, source_dir)
-            if copied:
-                original["file"] = f"faculties/{copied.name}"
+            # Файл появится на сайте после шага CI; фронтенд при 404
+            # предложит открыть ссылку на облако.
+            original["file"] = f"faculties/{faculty.id}.xlsx"
 
         target = faculties_dir / f"{faculty.id}.json"
         previous = _read_json(target)
@@ -156,6 +134,7 @@ def publish_faculty_data(
             "file": f"faculties/{faculty.id}.json",
             "groups": groups,
             "events": len(payload["events"]),
+            "generated_at": payload["generated_at"],
             "original": data["original"],
         })
 

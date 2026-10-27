@@ -32,7 +32,10 @@ WEEKDAY_INDEX = {day: index for index, day in enumerate(WEEKDAY_ORDER)}
 
 _TIME_RE = re.compile(r"\b(\d{1,2})\s*[.:\-]\s*(\d{2})\b")
 _GROUP_IN_HEADER_RE = re.compile(
-    r"групп[аы]?\s*[№:]?\s*([A-Za-zА-Яа-яЁё0-9][A-Za-zА-Яа-яЁё0-9/\-]*)",
+    r"(?<![А-Яа-яЁё])групп[аы]?\s*[№:]?\s*"
+    # в номере группы обязана быть хотя бы одна цифра — иначе регулярка
+    # цепляет последнюю букву слова «группа»
+    r"((?=[A-Za-zА-Яа-яЁё0-9/\-]*\d)[A-Za-zА-Яа-яЁё0-9][A-Za-zА-Яа-яЁё0-9/\-]{0,29})",
     re.I,
 )
 
@@ -311,11 +314,14 @@ def extract_type(text: str) -> tuple[str, str]:
 
 
 def strip_dates(text: str) -> str:
+    # «05. 10» — встречается в 02; без нормализации дата не удаляется
+    text = re.sub(r"\b(\d{1,2})\.\s+(\d{2})\b", r"\1.\2", text)
     text = re.sub(r"\bс\s+(?=\d)", " ", text, flags=re.I)
     text = re.sub(r"\bпо\s+(?=\d)", " ", text, flags=re.I)
     text = re.sub(r"\bдо\s+(?=\d)", " ", text, flags=re.I)
     text = re.sub(r"\(\s*кроме[^)]*\)", " ", text, flags=re.I)
     text = re.sub(r"\b\d{1,2}\.\d{2}(?:\.\d{2,4})?\b", " ", text)
+    text = re.sub(r"\(\s*[,;:]?\s*\)", " ", text)
     text = re.sub(r"\s*[-–—/]\s*(?=\s*[-–—/]|$)", " ", text)
     return text
 
@@ -370,6 +376,21 @@ def parse_cell_blocks(text: str) -> list[dict]:
     return blocks
 
 
+_GROUP_CODE_RE = re.compile(
+    r"(?<![А-Яа-яЁёA-Za-z0-9])([A-Za-zА-Яа-яЁё]?\d{3,4})(?:/\d+)?(?![0-9])"
+)
+
+
+def extract_group_codes(name: str) -> list[str]:
+    """Номера групп из имени листа: «731, 732 (5 семестр)» → ['731', '732']."""
+    codes: list[str] = []
+    for match in _GROUP_CODE_RE.finditer(str(name or "")):
+        code = match.group(1)
+        if code not in codes:
+            codes.append(code)
+    return codes
+
+
 def infer_group(
     sheet: SheetData,
     df: pd.DataFrame,
@@ -377,10 +398,9 @@ def infer_group(
     faculty: Faculty,
 ) -> tuple[str, float]:
     """Номер группы: имя листа важнее шапки, шапка — запасной вариант."""
-    name = sheet.name.strip()
-    match = re.fullmatch(r"[A-Za-zА-Яа-яЁё]?\d{3,4}[A-Za-zА-Яа-яЁё0-9/]*", name)
-    if match:
-        return name, 1.0
+    codes = extract_group_codes(sheet.name)
+    if len(codes) == 1:
+        return codes[0], 1.0
 
     for row in range(0, min(header_row, len(df))):
         text = " ".join(cell_text(v) for v in df.iloc[row] if cell_text(v))
@@ -390,6 +410,45 @@ def infer_group(
             return value, 0.8
 
     return "", 0.0
+
+
+_GROUP_TOKEN_RE = re.compile(
+    r"[A-Za-zА-Яа-яЁё]?\d{3,4}[A-Za-zА-Яа-яЁё0-9/]*"
+)
+
+
+def infer_block_group(
+    df: pd.DataFrame,
+    header_row: int,
+    columns: dict,
+    sheet_name: str,
+    block_index: int,
+    block_count: int,
+) -> tuple[str, float]:
+    """Группа конкретного блока колонок.
+
+    Сначала ищем подпись «Группа …» или отдельный номер группы в шапке
+    над блоком. Если её нет, а блоков несколько — доверять имени листа
+    нельзя, помечаем это низкой уверенностью.
+    """
+    start = columns.get("start", 0)
+    end = columns.get("end", 0)
+    for row in range(0, min(header_row, len(df))):
+        for col in range(start, end):
+            text = cell_text(df.iat[row, col])
+            if not text:
+                continue
+            found = _GROUP_IN_HEADER_RE.search(text)
+            if found:
+                return found.group(1).strip(" ,.;"), 1.0
+
+    name = sheet_name.strip()
+    codes = extract_group_codes(name)
+    if len(codes) == 1:
+        return codes[0], 1.0
+    if block_count <= 1:
+        return name, 1.0
+    return name, 0.6
 
 
 def find_header_row(df: pd.DataFrame, max_rows: int = 40) -> int | None:
@@ -405,8 +464,17 @@ def find_header_row(df: pd.DataFrame, max_rows: int = 40) -> int | None:
     return None
 
 
-def detect_columns(df: pd.DataFrame, header_row: int) -> dict:
+def detect_columns(
+    df: pd.DataFrame,
+    header_row: int,
+    start: int = 0,
+    end: int | None = None,
+) -> dict:
+    """Колонки одного блока. Блок — это свой набор «день/время/…»."""
     header = [cell_text(v).lower() for v in df.iloc[header_row]]
+    if end is None:
+        end = len(header)
+
     columns: dict = {
         "day": None,
         "pair": None,
@@ -417,7 +485,8 @@ def detect_columns(df: pd.DataFrame, header_row: int) -> dict:
         "dates": [],
     }
 
-    for index, value in enumerate(header):
+    for index in range(start, end):
+        value = header[index]
         if columns["day"] is None and value.startswith("день"):
             columns["day"] = index
         if columns["pair"] is None and value.strip() == "№":
@@ -446,11 +515,55 @@ def detect_columns(df: pd.DataFrame, header_row: int) -> dict:
         excluded.discard(None)
         columns["subject"] = [
             index
-            for index in range(len(header))
+            for index in range(start, end)
             if index not in excluded and header[index]
         ]
 
+    columns["start"] = start
+    columns["end"] = end
     return columns
+
+
+def detect_blocks(df: pd.DataFrame, header_row: int) -> list[dict]:
+    """Делит строку заголовка на независимые блоки.
+
+    В одном листе бывает несколько наборов колонок рядом — по блоку на
+    группу или на направление. Склеивать их нельзя: перепутаются
+    аудитории и преподаватели.
+    """
+    header = [cell_text(v).lower() for v in df.iloc[header_row]]
+    starts = [index for index, value in enumerate(header) if value.startswith("день")]
+    if not starts:
+        return []
+
+    blocks: list[dict] = []
+    for position, start in enumerate(starts):
+        end = starts[position + 1] if position + 1 < len(starts) else len(header)
+        columns = detect_columns(df, header_row, start, end)
+        if columns["time"] is None and columns["pair"] is None:
+            continue
+        blocks.append(columns)
+    return blocks
+
+
+def block_has_data(df: pd.DataFrame, header_row: int, columns: dict) -> bool:
+    """Есть ли в блоке хотя бы одна строка с днём и временем."""
+    for row_index in range(header_row + 1, min(len(df), header_row + 400)):
+        row = df.iloc[row_index]
+        day_index = columns.get("day")
+        day = cell_text(row.iloc[day_index]) if day_index is not None else ""
+        if not day:
+            continue
+        if not (normalize_day(day) or re.match(r"\d{1,2}\.\d{2}", day)):
+            continue
+
+        time_index = columns.get("time")
+        if time_index is not None and parse_time(row.iloc[time_index])[0]:
+            return True
+        pair_index = columns.get("pair")
+        if pair_index is not None and parse_pair(row.iloc[pair_index]) is not None:
+            return True
+    return False
 
 
 # ------------------------------------------------------------------ dates
