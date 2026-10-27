@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import re
 import urllib.parse
 import urllib.request
@@ -80,7 +81,21 @@ def download_public_xlsx(
     target.parent.mkdir(parents=True, exist_ok=True)
     meta_path = target.with_suffix(target.suffix + ".meta.json")
 
-    weblink, base_url = resolve_public_file(url)
+    if os.environ.get("PSPU_OFFLINE") == "1" and target.exists() and not force:
+        return target
+
+    try:
+        weblink, base_url = resolve_public_file(url)
+    except Exception as exc:
+        if target.exists():
+            logger.warning(
+                "cloud.mail недоступен (%s), используем сохранённый %s",
+                exc,
+                target.name,
+            )
+            return target
+        raise
+
     remote = _remote_meta(weblink)
 
     if target.exists() and not force and remote and meta_path.exists():
@@ -96,6 +111,11 @@ def download_public_xlsx(
 
     data = _request(_download_url(weblink, base_url), binary=True)
     if not data.startswith(b"PK"):
+        if target.exists():
+            logger.warning(
+                "cloud.mail вернул не XLSX, используем сохранённый %s", target.name
+            )
+            return target
         raise ValueError("cloud.mail вернул не XLSX (нет ZIP-подписи)")
 
     tmp = target.with_suffix(target.suffix + ".tmp")

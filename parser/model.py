@@ -18,6 +18,17 @@ class AcademicPeriod:
             return False
         return True
 
+    def academic_bounds(self) -> tuple[date, date] | None:
+        """Границы учебного года: 1 сентября — 31 августа.
+
+        Нужны, чтобы отсекать файлы прошлых лет, не теряя сессию,
+        которая может выходить за ``semester_end``.
+        """
+        if not self.semester_start:
+            return None
+        year = self.semester_start.year if self.semester_start.month >= 9 else self.semester_start.year - 1
+        return date(year, 9, 1), date(year + 1, 8, 31)
+
 
 @dataclass(frozen=True)
 class FacultySource:
@@ -55,6 +66,7 @@ class RawBranch:
     comment: str = ""
     color: str = ""
     source_ref: dict = field(default_factory=dict)
+    source_text: str = ""
     confidence: float = 1.0
     issues: list[str] = field(default_factory=list)
     faculty_name: str = ""

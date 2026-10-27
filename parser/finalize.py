@@ -39,11 +39,17 @@ async def normalize_teachers(teacher_str: str) -> List[str]:
     return [t.strip() for t in cleaned.split(",") if t.strip()]
 
 
-async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
+async def transform_schedule(
+    raw_data: Dict[str, Any],
+    faculty_id: str | None = None,
+) -> Dict[str, List[Dict]]:
     """
     raw_data: {group: {"events": [
         {weekday, time_start, time_end, dates, discipline, type,
          subgroup, teachers, rooms}, ...]}}
+
+    faculty_id добавляет префикс к event_id, чтобы одинаковые группы
+    разных факультетов не перетирали друг друга.
 
     Возвращает финальную структуру с event_id / position.
     """
@@ -91,7 +97,8 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
         slot_events = list(slot_events_it)
         for idx, ev in enumerate(slot_events, start=1):
             ev["position"] = idx
-            ev["event_id"] = f"{group}_{weekday}_{pair_number}_{idx}"
+            prefix = f"{faculty_id}_" if faculty_id else ""
+            ev["event_id"] = f"{prefix}{group}_{weekday}_{pair_number}_{idx}"
             final_events.append(ev)
 
     return {

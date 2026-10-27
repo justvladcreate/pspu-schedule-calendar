@@ -242,6 +242,80 @@ def add_year(
     return re.sub(rf'\b{DATE_RE}\b', single_repl, text)
 
 
+_DATE_TOKEN = r"\b\d{1,2}\.\d{2}(?:\.\d{4})?\b"
+_DATE_TOKEN_RE = re.compile(_DATE_TOKEN)
+_DATE_RANGE_RE = re.compile(rf"({_DATE_TOKEN})\s*[-–—]\s*({_DATE_TOKEN})")
+_EXCLUDE_RE = re.compile(r"кроме\s*([^)\n;]*)", re.I)
+
+
+def _normalize_date_separators(text: str) -> str:
+    text = text.replace("–", "-").replace("—", "-").replace("−", "-")
+    text = re.sub(r"\bпо\b", "-", text, flags=re.I)
+    text = re.sub(r"\bдо\b", "-", text, flags=re.I)
+    return text
+
+
+def _expand_two_digit_years(text: str) -> str:
+    """'18.03.24' -> '18.03.2024'. Годы до 60 считаем двухтысячными."""
+    def repl(match: re.Match) -> str:
+        tail = int(match.group(2))
+        year = 2000 + tail if tail < 60 else 1900 + tail
+        return f"{match.group(1)}.{year}"
+
+    return re.sub(r"\b(\d{1,2}\.\d{2})\.(\d{2})\b", repl, text)
+
+
+def expand_date_text(
+    value: str,
+    semester_start_year: int | None = None,
+) -> list[str]:
+    """Все даты из свободного текста ячейки — с диапазонами и исключениями.
+
+    Понимает «с 14.09 по 28.09» (еженедельно), «15.12, 29.12, 12.01»,
+    «18.03.24 - 15.04.24» и «с 15.09 (кроме 22.09) - 03.11».
+    """
+    text = str(value or "")
+    if not text:
+        return []
+
+    if semester_start_year is None:
+        today = date.today()
+        semester_start_year = today.year if today.month >= 9 else today.year - 1
+
+    text = _normalize_date_separators(_expand_two_digit_years(text))
+
+    excluded: set[str] = set()
+    for match in _EXCLUDE_RE.finditer(text):
+        for token in _DATE_TOKEN_RE.findall(match.group(1)):
+            excluded.update(
+                expand_dates(token, semester_start_year=semester_start_year)
+            )
+    text = _EXCLUDE_RE.sub(" ", text)
+
+    result: list[str] = []
+    for match in _DATE_RANGE_RE.finditer(text):
+        result.extend(
+            expand_dates(
+                f"{match.group(1)}-{match.group(2)}",
+                semester_start_year=semester_start_year,
+            )
+        )
+    rest = _DATE_RANGE_RE.sub(" ", text)
+    for token in _DATE_TOKEN_RE.findall(rest):
+        result.extend(
+            expand_dates(token, semester_start_year=semester_start_year)
+        )
+
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for value in result:
+        if value in excluded or value in seen:
+            continue
+        seen.add(value)
+        ordered.append(value)
+    return ordered
+
+
 def extract_first_date(text: str) -> str:
     """Первая дата ДД.ММ (или ДД.ММ.ГГГГ) из строки, без года."""
     match = re.search(rf'\b({DATE_PLAIN_RE})(?:\.\d{{4}})?\b', str(text or ""))

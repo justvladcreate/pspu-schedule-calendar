@@ -69,21 +69,35 @@ WEB_OLD_DATA_PATH = web_dir / "old_data.json"
 
 
 async def publish_web_faculties(parsed: dict) -> None:
-    """Публикует per-faculty JSON. Пока ИНЭК — эталонный факультет."""
+    """Публикует per-faculty JSON: ИНЭК из текущего прогона + XLSX-факультеты."""
     try:
-        _, faculties = load_registry()
-        inec = get_faculty(faculties, "12")
-        if not inec:
+        from parser.pipeline import parse_all
+
+        period, faculties = load_registry()
+        events_by_faculty = await parse_all(period=period, faculties=faculties)
+        events_by_faculty["12"] = list(parsed.get("events") or [])
+
+        published = [
+            faculty
+            for faculty in faculties
+            if faculty.enabled and events_by_faculty.get(faculty.id)
+        ]
+        if not published:
             return
+
         await asyncio.to_thread(
             publish_faculty_data,
             WEB_DATA_DIR,
-            [inec],
-            {inec.id: list(parsed.get("events") or [])},
+            published,
+            events_by_faculty,
             parsed.get("generated_at") or "",
         )
+        logger.info(
+            "Опубликовано факультетов: %s",
+            ", ".join(f"{f.id} ({len(events_by_faculty[f.id])})" for f in published),
+        )
     except Exception as exc:
-        logger.error("Не удалось опубликовать данные факультетов: %s", exc)
+        logger.exception("Не удалось опубликовать данные факультетов: %s", exc)
 
 
 # ================================================================
