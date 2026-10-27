@@ -1,4 +1,4 @@
-﻿# parser/extractor.py
+﻿"""Разбор листов ИНЭК в события-источники."""
 from __future__ import annotations
 
 import logging

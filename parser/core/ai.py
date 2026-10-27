@@ -1,4 +1,4 @@
-# parser/ai.py
+﻿"""Клиент LLM (Ollama). Общий для всех факультетов."""
 import os
 
 from ollama import AsyncClient
