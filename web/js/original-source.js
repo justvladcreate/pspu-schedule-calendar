@@ -32,21 +32,35 @@ function loadXlsxLib() {
 const SHEET_CSS = `
   html, body { margin: 0; padding: 0; background: #fff; }
   body {
-    font: 13px/1.35 -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    color: #111;
+    font: 13px/1.45 Arial, "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+    color: #202124;
   }
   table {
     border-collapse: collapse;
     background: #fff;
+    table-layout: fixed;
   }
   td, th {
-    border: 1px solid #d7d7d7;
-    padding: 4px 7px;
+    border: 1px solid #d7dbe0;
+    padding: 3px 6px;
     vertical-align: top;
     white-space: pre-wrap;
-    max-width: 420px;
+    overflow-wrap: break-word;
+    font-weight: 400;
   }
-  tr:first-child td { background: #f4f6f9; font-weight: 600; }
+  /* Шапка расписания: «Дата / № / Время / Дисциплина…» */
+  tr.schedule-head td {
+    background: #f1f3f4;
+    font-weight: 600;
+    color: #3c4043;
+  }
+  /* Богатый текст из Excel не должен ломать вид таблицы */
+  td span, td b, td strong, td i, td em, td u, td font {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    font-style: inherit !important;
+    color: inherit !important;
+  }
 `;
 
 function escapeHtml(value) {
@@ -147,6 +161,18 @@ function workbookHtml(XLSX, workbook, sheetName) {
 
     const table = wrapper.querySelector('table');
     if (table) {
+        // В файлах 01 часть ячеек — «богатый текст» Excel с 14pt и жирным.
+        // Убираем обёртки, чтобы таблица выглядела единообразно.
+        table.querySelectorAll('span, b, strong, i, em, u, font').forEach((el) => {
+            el.replaceWith(...el.childNodes);
+        });
+
+        // Шапка расписания — строка с «Дисциплина/ФИО преподавателя»
+        const headerRow = [...table.querySelectorAll('tr')].find(
+            (row) => /Дисциплин|Предмет/i.test(row.textContent || ''),
+        );
+        if (headerRow) headerRow.classList.add('schedule-head');
+
         const widths = columnWidths(lengths);
         const colgroup = document.createElement('colgroup');
         let total = 0;
@@ -157,7 +183,6 @@ function workbookHtml(XLSX, workbook, sheetName) {
             total += width;
         }
         table.insertBefore(colgroup, table.firstChild);
-        table.style.tableLayout = 'fixed';
         table.style.width = `${total}px`;
     }
 
