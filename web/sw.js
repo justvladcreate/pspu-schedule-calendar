@@ -45,6 +45,7 @@ const STATIC_ASSETS = [
   './js/update-banner.js',
   './js/share.js',
   './js/settings.js',
+  './js/notifications.js',
   './js/original.js',
   './js/sheets.js',
   './js/sheet-render.js',
@@ -199,3 +200,64 @@ async function cacheFirst(request) {
     throw e;
   }
 }
+
+/* ============================================================
+ *  PUSH-УВЕДОМЛЕНИЯ
+ * ============================================================ */
+
+self.addEventListener('push', (event) => {
+  let payload = {};
+
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch {
+    payload = { body: event.data ? event.data.text() : '' };
+  }
+
+  const title = payload.title || 'Изменения в расписании';
+  const options = {
+    body: payload.body || 'Откройте расписание, чтобы посмотреть подробности.',
+    icon: payload.icon || new URL('./icons/icon-192.png', SW_LOCATION).href,
+    badge: payload.badge || new URL('./icons/icon-192.png', SW_LOCATION).href,
+    tag: payload.tag || 'schedule-changes',
+    renotify: !!payload.renotify,
+    data: payload.data || {},
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const data = event.notification.data || {};
+  const targetUrl = new URL(data.url || './?open=changes', SW_LOCATION).href;
+
+  event.waitUntil((async () => {
+    const clients = await self.clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    });
+
+    // Если сайт уже открыт — фокусируем окно и просим страницу
+    // показать модалку «Изменения» без перезагрузки.
+    const client = clients.find((c) => {
+      try {
+        return new URL(c.url).origin === self.location.origin;
+      } catch {
+        return false;
+      }
+    });
+
+    if (client) {
+      await client.focus();
+      client.postMessage({
+        type: 'OPEN_CHANGES',
+        version: data.version || null,
+      });
+      return;
+    }
+
+    await self.clients.openWindow(targetUrl);
+  })());
+});

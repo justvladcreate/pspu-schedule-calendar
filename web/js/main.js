@@ -25,7 +25,7 @@ import {
     setupOnlineStatus,
     updateOnlineStatus,
 } from './online.js';
-import { compareEvents, sortChanges } from './changes.js';
+import { compareEvents, compareRawEvents, sortChanges } from './changes.js';
 import { setupChangesModal } from './changes-modal.js';
 import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
@@ -441,6 +441,15 @@ function setupAllUI() {
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
 
+    // Клик по push-уведомлению в уже открытом окне.
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'OPEN_CHANGES') {
+                openChangesFromNotification(event.data.version || null);
+            }
+        });
+    }
+
     setupUpdatedButton({
         onOpen: () => changesModalApi.open(getVisibleChanges()),
     });
@@ -528,6 +537,75 @@ function finalizeWithData() {
 
     setupUrlContextBanner();
     openUrlContextEvent();
+    maybeOpenChangesFromPush();
+}
+
+/* ============================================================
+ *  ПЕРЕХОД ИЗ PUSH-УВЕДОМЛЕНИЯ В «ИЗМЕНЕНИЯ»
+ * ============================================================ */
+
+async function openChangesFromNotification(version = null) {
+    if (!changesModalApi) return;
+
+    // Обычно pendingChanges уже посчитаны при загрузке данных.
+    // Если пользователь уже видел эту версию (снимок обновлён), но
+    // пришёл по уведомлению — строим diff по old_data.json.
+    if ((state.pendingChanges || []).length === 0) {
+        try {
+            const oldData = await loadData('old_data.json');
+            const current = state.currentData;
+
+            if (
+                oldData &&
+                Array.isArray(oldData.events) &&
+                current &&
+                Array.isArray(current.events)
+            ) {
+                const changes = compareRawEvents(oldData.events, current.events);
+                if (changes.length > 0) {
+                    state.pendingChanges = sortChanges(changes);
+                    state.pendingChangesMeta = {
+                        oldVersion: oldData.generated_at || null,
+                        newVersion: current.generated_at || null,
+                    };
+                }
+            }
+        } catch (e) {
+            console.warn('[push] не удалось загрузить old_data.json:', e);
+        }
+    }
+
+    // Не применяем текущие фильтры: уведомление могло прийти по группе,
+    // которую пользователь сейчас не смотрит, но показать изменение нужно.
+    changesModalApi.open(state.pendingChanges || []);
+}
+
+function maybeOpenChangesFromPush() {
+    let params;
+    try {
+        params = new URLSearchParams(location.search);
+    } catch {
+        return;
+    }
+
+    if (params.get('open') !== 'changes') return;
+
+    const version = params.get('cv');
+
+    // Убираем служебные параметры, чтобы обновление страницы
+    // не открывало модалку повторно.
+    try {
+        params.delete('open');
+        params.delete('cv');
+        const query = params.toString();
+        history.replaceState(
+            null,
+            '',
+            location.pathname + (query ? '?' + query : '') + location.hash,
+        );
+    } catch {}
+
+    openChangesFromNotification(version);
 }
 
 async function init() {

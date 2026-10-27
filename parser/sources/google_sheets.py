@@ -77,8 +77,8 @@ def _rgb_to_hex(color_obj: dict | None) -> str | None:
     g = int(color_obj.get('green', 0) * 255)
     b = int(color_obj.get('blue', 0) * 255)
 
-    # Игнорируем черный цвет
-    if max(r, g, b) < 40:
+    # Игнорируем только абсолютно черный цвет
+    if r == 0 and g == 0 and b == 0:
         return None
 
     return f"#{r:02x}{g:02x}{b:02x}"
@@ -89,39 +89,50 @@ def _extract_colored_texts(cell: dict) -> list[dict]:
     val = cell.get("formattedValue") or ""
     if not val: return []
 
-    # 1. Сначала проверяем итоговый цвет всей ячейки (effectiveFormat)
     text_format = (cell.get("effectiveFormat") or {}).get("textFormat") or {}
 
-    # Безопасно извлекаем цвет, проверяя, что объект не пустой
+    # Базовый цвет ячейки. Отдельные куски текста (textFormatRuns) могут
+    # его переопределять — тогда effectiveFormat врёт про весь текст.
     style = text_format.get("foregroundColorStyle") or {}
-    fg = style.get("rgbColor")
-    if not fg:
-        fg = text_format.get("foregroundColor")
+    base_fg = style.get("rgbColor") or text_format.get("foregroundColor")
+    base_color = _rgb_to_hex(base_fg)
 
-    hex_color = _rgb_to_hex(fg)
-
-    # Если вся ячейка цветная, сразу возвращаем её целиком
-    if hex_color:
-        return [{"text": val, "color": hex_color}]
-
-    # 2. Если итоговый цвет черный (None), проверяем куски текста (textFormatRuns)
     runs = cell.get("textFormatRuns") or []
-    for run in runs:
+    if not runs:
+        return [{"text": val, "color": base_color}] if base_color else []
+
+    chunks: list[dict] = []
+
+    def add_chunk(text: str, color: str | None) -> None:
+        if not text or not color:
+            return
+        if chunks and chunks[-1]["color"] == color:
+            chunks[-1]["text"] += text
+        else:
+            chunks.append({"text": text, "color": color})
+
+    # Текст до первого run наследует цвет ячейки.
+    first_start = runs[0].get("startIndex", 0)
+    if first_start > 0:
+        add_chunk(val[:first_start], base_color)
+
+    for i, run in enumerate(runs):
+        start = run.get("startIndex", 0)
+        end = runs[i + 1].get("startIndex", len(val)) if i + 1 < len(runs) else len(val)
+        chunk = val[start:end]
+        if not chunk:
+            continue
+
         fmt = run.get("format") or {}
         run_style = fmt.get("foregroundColorStyle") or {}
-        run_fg = run_style.get("rgbColor")
-        if not run_fg:
-            run_fg = fmt.get("foregroundColor")
+        run_fg = run_style.get("rgbColor") or fmt.get("foregroundColor")
 
-        run_color = _rgb_to_hex(run_fg)
-        if run_color:
-            # Ограничение целостности: если найден хоть один цветной кусок
-            # (и это не черный), считаем, что всё мероприятие окрашено,
-            # и возвращаем весь текст ячейки с этим цветом.
-            # Это гарантирует, что даты не потеряются при парсинге.
-            return [{"text": val, "color": run_color}]
+        # Нет явного цвета у run — наследуем цвет ячейки. Если цвет
+        # задан явно (в том числе чёрный) — используем именно его.
+        color = _rgb_to_hex(run_fg) if run_fg else base_color
+        add_chunk(chunk, color)
 
-    return []
+    return chunks
 
 
 def _build_df(row_data: list[dict], n_cols: int, n_rows: int) -> pd.DataFrame:

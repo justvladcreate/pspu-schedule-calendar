@@ -314,7 +314,7 @@ def _infer_semester_start_year(text: str, current_calendar_year: int) -> int:
     return current_calendar_year if today.month >= 9 else current_calendar_year - 1
 
 
-def add_year(text: str, current_year: int | None = None) -> str:
+def add_year(text: str, current_year: int | None = None, semester_start_year: int | None = None) -> str:
     """
     Проставляет год к каждой дате.
 
@@ -336,7 +336,8 @@ def add_year(text: str, current_year: int | None = None) -> str:
     if current_year is None:
         current_year = date.today().year
 
-    semester_start_year = _infer_semester_start_year(text, current_year)
+    if semester_start_year is None:
+        semester_start_year = _infer_semester_start_year(text, current_year)
 
     def resolve_year(month: int) -> int:
         # Сентябрь-декабрь → год начала семестра.

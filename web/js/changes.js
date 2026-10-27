@@ -96,6 +96,15 @@ function diffEntry(oldE, newE) {
 }
 
 /**
+ * Сравнивает два массива сырых событий (например, old_data.json и data.json).
+ * Нужно для случая, когда пользователь пришёл по push-уведомлению,
+ * а локального снимка для diff нет.
+ */
+export function compareRawEvents(oldEvents, newEvents) {
+  return compareEvents((oldEvents || []).map(toEntry), newEvents);
+}
+
+/**
  * Сравнивает old snapshot (массив entries) с new events (raw из data.json).
  * Возвращает массив изменений: { type, key, old, new, fields? }.
  */

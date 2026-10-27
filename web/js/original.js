@@ -281,6 +281,7 @@ export function setupOriginalModal() {
                         teachers:   focusEvent.teachers,
                         weekday:    focusEvent.weekday,
                         pairNumber: focusEvent.pair_number,
+                        timeStart:  focusEvent.time_start,
                     });
                     if (td) focusCellInFrame(wrapEl, mounted.iframe, td, currentZoom);
                 }, 80);

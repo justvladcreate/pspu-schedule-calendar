@@ -79,7 +79,7 @@ def _infer_semester_start_year(text: str, fallback_year: int) -> int:
     today = date.today()
     return fallback_year if today.month >= 9 else fallback_year - 1
 
-def expand_dates(s: str, current_year: int | None = None) -> list[str]:
+def expand_dates(s: str, current_year: int | None = None, semester_start_year: int | None = None) -> list[str]:
     """Разворачивает строку дат в список 'DD.MM.YYYY'.
 
     Учитывает, что учебный семестр начинается в сентябре и пересекает
@@ -99,7 +99,8 @@ def expand_dates(s: str, current_year: int | None = None) -> list[str]:
     if current_year is None:
         current_year = date.today().year
 
-    semester_start_year = _infer_semester_start_year(s, current_year)
+    if semester_start_year is None:
+        semester_start_year = _infer_semester_start_year(s, current_year)
 
     def resolve_year(month: int) -> int:
         # Сентябрь-декабрь → год начала семестра.
@@ -216,6 +217,7 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
     temp_events: list[dict] = []
 
     for group, group_data in raw_data.items():
+        sem_start_year = group_data.get("semester_start_year")
         event_dicts = group_data.get("events", [])
         for event in event_dicts:
             weekday  = (event.get("weekday")    or "").strip()
@@ -228,7 +230,7 @@ async def transform_schedule(raw_data: Dict[str, Any]) -> Dict[str, List[Dict]]:
                 continue
 
             teachers = await normalize_teachers(event.get("teachers", "") or "")
-            dates    = expand_dates(event.get("dates", "") or "", date.today().year)
+            dates    = expand_dates(event.get("dates", "") or "", date.today().year, semester_start_year=sem_start_year)
 
             temp_events.append({
                 "group":        group,

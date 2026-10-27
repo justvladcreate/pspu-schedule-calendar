@@ -14,3 +14,15 @@ export const MONTHS_NOM   = ['Январь', 'Февраль', 'Март', 'Ап
 export const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
 export const ICS_BASE = "https://pspu-ics-worker.vladjust059.workers.dev";
+
+/* ============================================================
+ *  PUSH-УВЕДОМЛЕНИЯ
+ *
+ *  Заполните после деплоя cloudflare/push-worker.js:
+ *    PUSH_API_BASE            — URL воркера без слэша в конце;
+ *    PUSH_VAPID_PUBLIC_KEY    — публичный VAPID-ключ (base64url).
+ *
+ *  Пока значения пустые, уведомления в настройках отключены.
+ * ============================================================ */
+export const PUSH_API_BASE = "https://push-worker.vladjust059.workers.dev";
+export const PUSH_VAPID_PUBLIC_KEY = "BGWze2kmriZ4U2L_wj4CBMrwsjDaEnk9JQC2_3-PF8mDKJDRQBDO7laqeJpOUc2IwqZk2kj41gdO96NToJkRhjI";

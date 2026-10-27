@@ -311,22 +311,47 @@ def merge_ai_line(
 
     text_colors = src.get("text_colors") or []
 
+    def _is_grey_color(hex_color: str) -> bool:
+        """Проверяет, является ли цвет оттенком серого."""
+        if not hex_color or len(hex_color) != 7 or not hex_color.startswith('#'):
+            return False
+        try:
+            r = int(hex_color[1:3], 16)
+            g = int(hex_color[3:5], 16)
+            b = int(hex_color[5:7], 16)
+            # Если разница между каналами невелика — это серый (включая темный/светлый)
+            return abs(r - g) <= 25 and abs(g - b) <= 25
+        except ValueError:
+            return False
+
+
     def _get_event_color(b_dates: str) -> str | None:
         """
-        Возвращает hex-код цвета, если найдено пересечение по датам.
-        Ограничение целостности: мероприятие окрашено целиком.
+        Возвращает hex-код цвета, если ВСЕ даты ветки найдены в цветном тексте.
         """
         if not text_colors or not b_dates:
             return None
 
-        branch_dates = set(re.findall(r'\d{1,2}\.\d{2}', b_dates))
+        def _norm_date(d: str) -> str:
+            parts = d.split('.')
+            if len(parts) >= 2:
+                return f"{int(parts[0]):02d}.{parts[1]}"
+            return d
+
+        branch_dates = {_norm_date(x) for x in re.findall(r'\d{1,2}\.\d{2}', b_dates)}
         if not branch_dates:
             return None
 
         for item in text_colors:
-            gt_dates = set(re.findall(r'\d{1,2}\.\d{2}', item["text"]))
-            if branch_dates & gt_dates:
+            found = {_norm_date(x) for x in re.findall(r'\d{1,2}\.\d{2}', item["text"])}
+            # Цветной кусок без дат (например, цвет названия аудитории)
+            # не должен определять цвет события.
+            if not found:
+                continue
+            # Если даты из чанка являются подмножеством дат ветки, ИЛИ наоборот
+            if item["color"] and (found <= branch_dates or branch_dates <= found):
                 return item["color"]
+
         return None
 
     if not rooms_ai:
@@ -340,7 +365,7 @@ def merge_ai_line(
                 branch_total=branch_total,
             )
             color = _get_event_color(dates)
-            is_past = bool(color)
+            is_past = _is_grey_color(color)
             return [{
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -359,7 +384,7 @@ def merge_ai_line(
         res = []
         for g_dates, g_rooms in groups:
             color = _get_event_color(g_dates)
-            is_past_g = bool(color)
+            is_past_g = _is_grey_color(color)
             res.append({
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -376,7 +401,7 @@ def merge_ai_line(
         return res
 
     color = _get_event_color(dates)
-    is_past = bool(color)
+    is_past = _is_grey_color(color)
     return [{
         "weekday":    weekday,
         "time_start": time_start,
@@ -594,7 +619,10 @@ async def process_schedule(
             if items:
                 merged.extend(items)
 
-        groups_info_after_ai[group] = {"events": merged}
+        groups_info_after_ai[group] = {
+            "events": merged,
+            "semester_start_year": group_data.get("semester_start_year"),
+        }
 
     logger.info(
         f"AI-статистика: {ai_calls} вызовов, {cache_hits} попаданий в кэш"

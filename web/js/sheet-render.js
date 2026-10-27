@@ -92,18 +92,18 @@ export function mountSheetFrame(container, html) {
 }
 
 /**
- * Ищет <td> в iframe по A1-позиции или по тексту.
- * Возвращает td или null.
- */
-/**
- * Ищет <td> в iframe. Три стратегии по убыванию точности:
+ * Ищет <td> в iframe. Стратегии по убыванию точности:
  *
  *   1. position как A1 ("D5") — быстро и точно, если формат такой.
- *   2. weekday + pair_number — структурный поиск: находим строку
- *      таблицы, где в столбце «День» = нужный день, а в столбце
- *      «№» = нужный номер пары. Так мы попадаем в правильную
- *      ячейку даже если дисциплина повторяется в листе.
- *   3. Ско́ринг по дисциплине + датам + преподавателю — резерв.
+ *   2. weekday + time_start — структурный поиск по строке листа,
+ *      где «День» совпадает, а «Начало занятий» равно времени
+ *      события. Самый надёжный вариант для расписания ПГГПУ:
+ *      в одном слоте «№ пары» может быть несколько подстрок
+ *      (например, практика с 12.00 внутри пары 3).
+ *   3. weekday + pair_number — резерв для листов без колонки
+ *      времени; результат проверяем по тексту, чтобы не уехать
+ *      на соседнюю пару.
+ *   4. Ско́ринг по дисциплине + датам + преподавателю.
  *
  * opts = {
  *   position   : "D5" | 2 | null,
@@ -112,6 +112,7 @@ export function mountSheetFrame(container, html) {
  *   teachers   : ["Рожнёва И.В.", ...],
  *   weekday    : "ПН",
  *   pairNumber : 5,
+ *   timeStart  : "12:00",
  * }
  */
 export function findCellInFrame(doc, opts) {
@@ -122,6 +123,7 @@ export function findCellInFrame(doc, opts) {
     const position   = o.position;
     const weekday    = o.weekday;
     const pairNumber = o.pairNumber;
+    const timeStart  = o.timeStart;
 
     // 1) position как A1
     if (typeof position === 'string') {
@@ -132,83 +134,171 @@ export function findCellInFrame(doc, opts) {
         }
     }
 
-    // 2) Текстовый скоринг (надежнее для ячеек с подгруппами, так как ищет по ФИО)
-    if (o.discipline || (o.teachers && o.teachers.length)) {
-        const td = findByTextScore(tds, o);
-        if (td) return td;
+    // 2) Структурный поиск: день недели + время начала
+    if (weekday && timeStart && normalizeTime(timeStart)) {
+        const candidates = findByDayTime(doc, weekday, timeStart);
+        if (candidates.length > 0) {
+            const best = findByTextScore(candidates, o, { requireText: true });
+            if (best) return best;
+            if (candidates.length === 1) return candidates[0];
+        }
     }
 
-    // 3) Структурный поиск: день недели + номер пары (резерв)
+    // 3) Структурный поиск: день недели + номер пары
     if (weekday && pairNumber != null) {
-        const td = findByDayPair(doc, weekday, pairNumber);
+        const candidates = findByDayPair(doc, weekday, pairNumber);
+        if (candidates.length > 0) {
+            const best = findByTextScore(candidates, o, { requireText: true });
+            if (best) return best;
+            // Если текст не совпал — не отдаём первую попавшуюся ячейку:
+            // это может быть соседняя пара (как в слоте с несколькими
+            // дисциплинами). Пусть решает общий текстовый скоринг.
+        }
+    }
+
+    // 4) Текстовый скоринг по всей таблице (запасной вариант)
+    if (o.discipline || (o.teachers && o.teachers.length) || (o.dates && o.dates.length)) {
+        const td = findByTextScore(tds, o);
         if (td) return td;
     }
 
     return null;
 }
 
-/* ---------- Стратегия 2: день + пара ---------- */
+/* ---------- Заголовок таблицы ---------- */
 
-function findByDayPair(doc, weekday, pairNumber) {
-    const tables = doc.querySelectorAll('table');
+/**
+ * Ищет строку-заголовок и номера колонок «День», «№»,
+ * «Начало занятий» и «Дисциплина».
+ */
+function findHeaderColumns(grid) {
+    const maxHeaderScan = Math.min(grid.rowCount, 30);
+    for (let r = 0; r < maxHeaderScan; r++) {
+        let dayCol = -1, pairCol = -1, timeCol = -1, discCol = -1;
 
-    for (const table of tables) {
+        for (let c = 0; c < 40; c++) {
+            const cell = grid.map.get(r + ',' + c);
+            if (!cell) continue;
+            const text = (cell.td.textContent || '').trim().toLowerCase();
+            if (!text) continue;
+
+            if (dayCol === -1 && /^день/.test(text))                dayCol  = c;
+            else if (timeCol === -1 && /^(начало|время)/.test(text)) timeCol = c;
+            else if (pairCol === -1 && /^№?\s*$/.test(text))        pairCol = c;
+            else if (discCol === -1 && /^дисциплин/.test(text))     discCol = c;
+        }
+
+        if (dayCol !== -1 && discCol !== -1 && (timeCol !== -1 || pairCol !== -1)) {
+            const discCell = grid.map.get(r + ',' + discCol);
+            const discSpan = Math.max(1, parseInt(discCell.td.getAttribute('colspan') || '1', 10) || 1);
+            return { row: r, dayCol, pairCol, timeCol, discCol, discSpan };
+        }
+    }
+    return null;
+}
+
+/** Непустые ячейки строки начиная с колонки «Дисциплина». */
+function collectRowCells(grid, rowIdx, startCol, span) {
+    const out = [];
+    const end = startCol + Math.max(1, span || 1);
+    for (let c = startCol; c < end; c++) {
+        const cell = grid.map.get(rowIdx + ',' + c);
+        if (!cell) continue;
+        if (!(cell.td.textContent || '').trim()) continue;
+        if (!out.includes(cell.td)) out.push(cell.td);
+    }
+    return out;
+}
+
+/* ---------- Стратегия 2: день + время начала ---------- */
+
+function findByDayTime(doc, weekday, timeStart) {
+    const candidates = [];
+    const dayNorm  = normalizeDay(weekday);
+    const timeNorm = normalizeTime(timeStart);
+    if (!timeNorm) return candidates;
+
+    for (const table of doc.querySelectorAll('table')) {
         const grid = buildGridMap(table);
         if (grid.rowCount === 0) continue;
 
-        // Ищем строку-заголовок с колонками «День», «№», «Дисциплина»
-        let headerRow = -1;
-        let dayCol = -1, pairCol = -1, discCol = -1;
+        const hdr = findHeaderColumns(grid);
+        if (!hdr || hdr.timeCol === -1) continue;
 
-        const maxHeaderScan = Math.min(grid.rowCount, 30);
-        for (let r = 0; r < maxHeaderScan; r++) {
-            let tryDay = -1, tryPair = -1, tryDisc = -1;
-            for (let c = 0; c < 40; c++) {
-                const cell = grid.map.get(r + ',' + c);
-                if (!cell) continue;
-                const text = (cell.td.textContent || '').trim().toLowerCase();
-                if (!text) continue;
+        let currentDayText = '';
+        for (let r = hdr.row + 1; r < grid.rowCount; r++) {
+            const dayCell  = grid.map.get(r + ',' + hdr.dayCol);
+            const timeCell = grid.map.get(r + ',' + hdr.timeCol);
+            if (!timeCell) continue;
 
-                if (tryDay === -1 && /^день/.test(text))         tryDay  = c;
-                else if (tryPair === -1 && /^№?\s*$/.test(text)) tryPair = c;
-                else if (tryDisc === -1 && /^дисциплин/.test(text)) tryDisc = c;
+            const dayText = dayCell ? (dayCell.td.textContent || '').trim() : '';
+            if (dayText) currentDayText = dayText;
+
+            if (normalizeDay(currentDayText) !== dayNorm) continue;
+
+            const timeText = (timeCell.td.textContent || '').trim();
+            if (normalizeTime(timeText) !== timeNorm) continue;
+
+            // В строке может быть несколько колонок дисциплин
+            // (подгруппы), а основная может быть пустой. Поэтому
+            // берём все непустые ячейки начиная с колонки «Дисциплина».
+            if (window.PSPU_DEBUG_FIND_CELL) {
+                console.debug('[findByDayTime] hit at row', r, {
+                    dayText: currentDayText, timeText,
+                });
             }
-            if (tryDay !== -1 && tryPair !== -1 && tryDisc !== -1) {
-                headerRow = r;
-                dayCol    = tryDay;
-                pairCol   = tryPair;
-                discCol   = tryDisc;
-                break;
+            for (const td of collectRowCells(grid, r, hdr.discCol, hdr.discSpan)) {
+                if (!candidates.includes(td)) candidates.push(td);
             }
         }
+    }
+    return candidates;
+}
 
-        if (headerRow === -1) continue;
+/* ---------- Стратегия 3: день + пара ---------- */
+
+function findByDayPair(doc, weekday, pairNumber) {
+    const candidates = [];
+
+    for (const table of doc.querySelectorAll('table')) {
+        const grid = buildGridMap(table);
+        if (grid.rowCount === 0) continue;
+
+        const hdr = findHeaderColumns(grid);
+        if (!hdr || hdr.pairCol === -1) continue;
 
         const dayNorm  = normalizeDay(weekday);
         const pairNorm = normalizePair(pairNumber);
 
-        for (let r = headerRow + 1; r < grid.rowCount; r++) {
-            const dayCell  = grid.map.get(r + ',' + dayCol);
-            const pairCell = grid.map.get(r + ',' + pairCol);
-            const discCell = grid.map.get(r + ',' + discCol);
-            if (!discCell) continue;
+        let currentDayText = '';
+        for (let r = hdr.row + 1; r < grid.rowCount; r++) {
+            const dayCell  = grid.map.get(r + ',' + hdr.dayCol);
+            const pairCell = grid.map.get(r + ',' + hdr.pairCol);
+            if (!pairCell) continue;
 
-            const dayText  = dayCell  ? (dayCell.td.textContent  || '').trim() : '';
-            const pairText = pairCell ? (pairCell.td.textContent || '').trim() : '';
+            // Если в ячейке есть текст (ПН, ВТ), запоминаем его для следующих строк
+            const dayText = dayCell ? (dayCell.td.textContent || '').trim() : '';
+            if (dayText) {
+                currentDayText = dayText;
+            }
 
-            if (normalizeDay(dayText) === dayNorm &&
+            const pairText = (pairCell.td.textContent || '').trim();
+
+            // Сравниваем с запомненным днём
+            if (normalizeDay(currentDayText) === dayNorm &&
                 normalizePair(pairText) === pairNorm) {
                 if (window.PSPU_DEBUG_FIND_CELL) {
                     console.debug('[findByDayPair] hit at row', r, {
-                        dayText, pairText,
-                        disc: (discCell.td.textContent || '').slice(0, 80),
+                        dayText: currentDayText, pairText,
                     });
                 }
-                return discCell.td;
+                for (const td of collectRowCells(grid, r, hdr.discCol, hdr.discSpan)) {
+                    if (!candidates.includes(td)) candidates.push(td);
+                }
             }
         }
     }
-    return null;
+    return candidates;
 }
 
 /** Строит карту (row, col) → ячейка, раскрывая colspan/rowspan. */
@@ -261,68 +351,175 @@ function normalizePair(s) {
     return m ? m[0] : '';
 }
 
-/* ---------- Стратегия 3: текстовый скоринг ---------- */
+/* Часы раньше 6 — это не время пары, а что-то вроде даты «3.09». */
+const MIN_HOUR = 6;
 
-function findByTextScore(tds, o) {
+/** «12:00», «12.00», «12-00» → «12:00». Пустая строка, если это не время. */
+function normalizeTime(s) {
+    if (s == null) return '';
+    const m = String(s).match(/(\d{1,2})\s*[.:\-–]\s*(\d{2})/);
+    if (!m) return '';
+    const h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    if (h < MIN_HOUR || h > 23 || min > 59) return '';
+    return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+}
+
+/** Текст для сравнения: без пунктуации и кавычек, ё → е, схлопнутые пробелы. */
+function normalizeText(s) {
+    return String(s || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .replace(/[^0-9a-zа-я]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+}
+
+/** Время из строки таблицы (колонка «Начало занятий»). */
+function getRowTime(td) {
+    const tr = td.closest('tr');
+    if (!tr) return '';
+    const cells = [...tr.querySelectorAll('td')].slice(0, 4);
+    for (const cell of cells) {
+        const txt = (cell.textContent || '').trim();
+        if (!txt || txt.length > 7) continue;
+        const t = normalizeTime(txt);
+        if (t) return t;
+    }
+    return '';
+}
+
+/** Номер пары из строки таблицы. */
+function getRowPair(td) {
+    const tr = td.closest('tr');
+    if (!tr) return '';
+    const cells = [...tr.querySelectorAll('td')].slice(0, 4);
+    for (const cell of cells) {
+        const txt = (cell.textContent || '').trim();
+        if (/^\d{1,2}$/.test(txt)) return txt;
+    }
+    return '';
+}
+
+/* ---------- Стратегия 4: текстовый скоринг ---------- */
+
+function findByTextScore(tds, o, { requireText = false } = {}) {
     const discipline = o.discipline;
     const dates      = o.dates    || [];
     const teachers   = o.teachers || [];
+    const pairNumber = o.pairNumber;
+    const timeStart  = normalizeTime(o.timeStart);
 
-    if (!discipline && dates.length === 0 && teachers.length === 0) return null;
+    if (!discipline && dates.length === 0 && teachers.length === 0 && !timeStart) return null;
 
-    const needle = discipline
-        ? String(discipline).toLowerCase().replace(/\s+/g, ' ').trim()
-        : '';
+    const needle = discipline ? normalizeText(discipline) : '';
     const needleWords = needle
-        ? needle.split(/\s+/).filter(w => w.length >= 5)
+        ? needle.split(' ').filter(w => w.length >= 5)
         : [];
-    const needleStrong = needleWords.sort((a, b) => b.length - a.length)[0] || '';
+    const needleStrong = needleWords.slice().sort((a, b) => b.length - a.length)[0] || '';
 
-    const dateShort = dates.map(d => {
+    // Для сравнения с листом берём и «06.10», и «6.10»: в таблице
+    // даты часто записаны без ведущего нуля.
+    const dateShort = [];
+    for (const d of dates) {
         const p = String(d).split('.');
-        return p.length >= 2 ? p[0] + '.' + p[1] : null;
-    }).filter(Boolean);
+        if (p.length < 2) continue;
+        dateShort.push(p[0] + '.' + p[1]);
+        const noZero = String(parseInt(p[0], 10)) + '.' + p[1];
+        if (!dateShort.includes(noZero)) dateShort.push(noZero);
+    }
 
     const teacherNeedles = teachers.map(t => String(t).toLowerCase()).filter(Boolean);
+    const hasTextCriteria = !!(needle || dateShort.length || teacherNeedles.length);
 
     let best = null;
     let bestScore = 0;
+    let bestTextScore = 0;
+    // Лучшая ячейка, у которой есть именно текстовые совпадения.
+    // Нужна, чтобы структурные бонусы (пара/время) не могли
+    // «выиграть» у пустой ячейки без нужной дисциплины.
+    let bestText = null;
+    let bestTextTotal = -Infinity;
 
     for (const td of tds) {
         const raw = td.textContent || '';
         if (!raw) continue;
-        const text = raw.toLowerCase().replace(/\s+/g, ' ').trim();
+        const rawLower = raw.toLowerCase();
+        const text = normalizeText(raw);
 
-        let score = 0;
+        /* Текстовая часть оценки. Отдельно от структурных бонусов:
+           для кандидатов из «день + время/пара» важно понять, что
+           в ячейке действительно нужная дисциплина, а не просто
+           совпал номер пары. textHits — только положительные
+           совпадения, без штрафа за ненайденного преподавателя. */
+        let textScore = 0;
+        let textHits = 0;
 
-        if (needle && text.includes(needle)) score += 3;
-        else if (needleStrong && text.includes(needleStrong)) score += 1;
+        if (needle && text.includes(needle)) { textScore += 8; textHits += 8; }
+        else if (needleStrong && text.includes(needleStrong)) { textScore += 2; textHits += 2; }
+        else if (needleWords.length) {
+            // Частичное совпадение: кавычки/сокращения в ячейке могут
+            // ломать точную фразу, но слова обычно остаются на месте.
+            let hits = 0;
+            for (const w of needleWords) if (text.includes(w)) hits++;
+            if (hits >= Math.ceil(needleWords.length * 0.6)) { textScore += 3; textHits += 3; }
+        }
 
         if (dateShort.length) {
             let hit = 0;
-            for (const d of dateShort) if (text.includes(d)) hit++;
-            if (hit) score += (hit / dateShort.length) * 4;
+            for (const d of dateShort) if (rawLower.includes(d)) hit++;
+            if (hit) {
+                const dScore = (hit / dateShort.length) * 4;
+                textScore += dScore;
+                textHits += dScore;
+            }
         }
         if (teacherNeedles.length) {
             let tHit = false;
             for (const t of teacherNeedles) {
                 // Извлекаем фамилию (первое слово без точек и титулов)
                 const parts = t.split(' ').filter(p => !p.includes('.') && !p.includes('доц') && !p.includes('преп') && !p.includes('проф'));
-                const surname = parts.length ? parts[0].toLowerCase() : t;
+                const surname = normalizeText(parts.length ? parts[0] : t);
 
-                if (text.includes(surname)) {
+                if (surname && text.includes(surname)) {
                     tHit = true;
-                    score += 10; // Даем огромный приоритет, если совпал преподаватель
+                    textScore += 10; // Даем огромный приоритет, если совпал преподаватель
+                    textHits += 10;
                     break;
                 }
             }
-            // Если искали преподавателя, но не нашли — сильно штрафуем ячейку
-            if (!tHit) score -= 10;
+            // Если искали преподавателя, но не нашли — штрафуем ячейку,
+            // но в textHits не учитываем: дисциплина всё равно может
+            // быть правильной (в объединённой ячейке преподаватель
+            // может быть указан отдельно).
+            if (!tHit) textScore -= 10;
+        }
+
+        let score = textScore;
+
+        // Совпадение номера пары (решает проблему соседних ячеек)
+        if (pairNumber != null) {
+            const rowPair = getRowPair(td);
+            if (rowPair) {
+                score += rowPair === normalizePair(pairNumber) ? 6 : -6;
+            }
+        }
+
+        // Совпадение времени начала — самый точный структурный признак.
+        if (timeStart) {
+            const rowTime = getRowTime(td);
+            if (rowTime && rowTime === timeStart) score += 30;
         }
 
         if (score > bestScore) {
             bestScore = score;
+            bestTextScore = textScore;
             best = td;
+        }
+
+        if (textHits > 0 && score > bestTextTotal) {
+            bestTextTotal = score;
+            bestText = td;
         }
     }
 
@@ -333,10 +530,25 @@ function findByTextScore(tds, o) {
             teachers: teacherNeedles,
             candidates: tds.length,
             bestScore,
+            bestTextScore,
             bestText: best ? (best.textContent || '').slice(0, 80) : null,
+            pairNumber: o.pairNumber,
+            timeStart,
         });
+
+        // Детальный дамп по всем td
+        const dump = tds.map(td => {
+            return {
+                text: (td.textContent || '').slice(0, 60),
+                rowTime: getRowTime(td),
+                rowPair: getRowPair(td),
+            };
+        });
+        console.table(dump);
     }
 
+    if (requireText) return bestText;
+    if (hasTextCriteria) return bestText;
     return bestScore > 0 ? best : null;
 }
 

@@ -525,7 +525,7 @@
                 <div class="settings-row">
                     <div class="settings-row-title">
                         Тема оформления
-                        <span class="info-icon" data-tooltip="Выберите светлую, тёмную или системную тему интерфейса.">ⓘ</span>
+                        <span class="info-icon" tabindex="0" data-tooltip="Выберите светлую, тёмную или системную тему интерфейса.">ⓘ</span>
                     </div>
                     <div class="view-switch" id="themeSwitch" role="tablist">
                         <button class="view-switch-btn" type="button" data-theme-val="light" role="tab">Светлая</button>
@@ -538,7 +538,7 @@
                 <div class="settings-row">
                     <div class="settings-row-title">
                         Только активные мероприятия
-                        <span class="info-icon" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
+                        <span class="info-icon" tabindex="0" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
                     </div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="activeOnlyToggle">
@@ -550,15 +550,80 @@
                 <div class="settings-row">
                     <div class="settings-row-title">
                         Экспорт в календарь
-                        <span class="info-icon" data-tooltip="Подпишитесь на расписание в Google Calendar, Apple Calendar или других приложениях.">ⓘ</span>
+                        <span class="info-icon" tabindex="0" data-tooltip="Подпишитесь на расписание в Google Calendar, Apple Calendar или других приложениях.">ⓘ</span>
                     </div>
                     <button class="btn" id="settingsExportBtn" type="button">Настроить</button>
                 </div>
 
+                <!-- Уведомления об изменениях -->
+                <div class="settings-row">
+                    <div class="settings-row-title">
+                        Уведомления об изменениях
+                        <span class="info-icon" tabindex="0" data-tooltip="Push-уведомления о переносах, отмене и добавлении занятий. Приходят, даже когда сайт закрыт.">ⓘ</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="pushToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row" id="pushPrefsRow" hidden>
+                    <div class="settings-row-title">
+                        <span class="push-summary" id="pushSummary">Все изменения</span>
+                    </div>
+                    <button class="btn" id="pushPrefsBtn" type="button">Настроить</button>
+                </div>
+
+            </div>
+            <p class="push-hint" id="pushHint" hidden></p>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="pushModal">
+    <div class="settings-dialog push-dialog" role="dialog" aria-labelledby="pushTitle">
+        <div class="settings-header">
+            <h2 class="settings-title" id="pushTitle">Уведомления об изменениях</h2>
+            <button class="settings-close push-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="settings-body push-body">
+            <p class="push-lead">
+                Выберите группы и преподавателей, по которым присылать уведомления.
+                Достаточно совпадения по группе <b>или</b> преподавателю.
+                Изменения приходят, даже когда сайт закрыт.
+            </p>
+
+            <label class="push-all">
+                <input type="checkbox" id="pushAll">
+                <span>Все изменения расписания</span>
+            </label>
+
+            <input type="text" class="filter-search" id="pushSearch"
+                   placeholder="Поиск по группам и преподавателям...">
+
+            <div class="filter-columns push-columns" id="pushColumns">
+                <div class="filter-column">
+                    <div class="filter-column-title">Группы</div>
+                    <div class="filter-options" id="pushGroupsList"></div>
+                </div>
+                <div class="filter-column">
+                    <div class="filter-column-title">Преподаватели</div>
+                    <div class="filter-options" id="pushTeachersList"></div>
+                </div>
+            </div>
+
+            <div class="push-footer">
+                <span class="filter-counter" id="pushCounter"></span>
+                <div class="push-actions">
+                    <button class="btn" id="pushTestBtn" type="button">Проверить</button>
+                    <button class="filter-done" id="pushDone" type="button">Готово</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="settings-tooltip" id="settingsTooltip" role="tooltip"></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

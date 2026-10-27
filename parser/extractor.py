@@ -15,6 +15,7 @@ from parser.preprocess import (
 )
 from parser.rooms_hints import parse_rooms_with_hints
 from parser.sources.base import ScheduleSource
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -141,6 +142,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
             vacation = ""
             session_end_date = None
 
+            semester_start_year = None
             if "семестр" in str(header).lower():
                 lines = [line.strip() for line in str(header).split("\n") if line.strip()]
 
@@ -148,6 +150,10 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                     group_name = lines[0]
                     group_name = clean_group_name(group_name)
                     semester = lines[1]
+
+                    m = re.search(r'(\d{4})/\d{4}', semester)
+                    if m:
+                        semester_start_year = int(m.group(1))
 
                     try:
                         session_index = next(i for i, line in enumerate(lines) if "Экзаменационная сессия" in line)
@@ -244,7 +250,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                 subject_val = english_to_russian_lookalike(text=subject_val)
                 subject_val = normalize_date_ranges(text=subject_val, default_end_date=session_end_date)
                 subject_val = remove_invalid_dates(text=subject_val)
-                subject_val = add_year(text=subject_val)
+                subject_val = add_year(text=subject_val, semester_start_year=semester_start_year)
 
                 subject_val = remove_spaces_between_initials(text=subject_val)
                 subject_val = normalize_subgroup(text=subject_val)
@@ -289,6 +295,7 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
         if events:
             group_info[group_name] = {
                 "events": events,
+                "semester_start_year": semester_start_year,
             }
 
     return group_info
