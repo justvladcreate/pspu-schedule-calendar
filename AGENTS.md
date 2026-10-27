@@ -16,8 +16,8 @@
    экспорт в календарь. Service worker кэширует статику и отдаёт JSON
    по network-first.
 
-Push-уведомления: фронтенд `web/js/notifications.js` + внешний Cloudflare
-Worker (в этом репозитории его исходников нет). URL задаётся в
+Push-уведомления: фронтенд `web/js/notifications.js` + Cloudflare
+Worker (`cloudflare/push-worker.js`, деплой вручную). URL задаётся в
 `web/js/config.js` через `PUSH_API_BASE`.
 
 ## Сейчас в проекте два факультета
@@ -167,8 +167,12 @@ LLM вызывается только для строк с низкой увер
 
 - Публичный VAPID-ключ и URL воркера — `web/js/config.js`.
 - Приватный ключ хранится **только** в Cloudflare Secret, не в Git.
-- Воркер читает `data/index.json`, сравнивает `faculties/<id>/data.json`
-  с `faculties/<id>/old_data.json` и рассылает push по группам/преподавателям.
+- Исходник воркера — `cloudflare/push-worker.js`; после изменений его
+  нужно задеплоить в Cloudflare вручную.
+- Воркер читает `data/index.json`, сравнивает
+  `data/faculties/<id>/data.json` с `data/faculties/<id>/old_data.json`
+  и рассылает push по группам/преподавателям. Факультет в подписке не
+  хранится: совпадения по названию группы достаточно.
 - На iPhone push работают только в PWA, добавленном на экран «Домой».
 
 ## Окружение и секреты
