@@ -214,6 +214,38 @@ def _parse_rooms(value: str) -> list[tuple[str, str]]:
     return entries
 
 
+def _filter_period(events: list[dict], period: AcademicPeriod) -> list[dict]:
+    """Оставляет только занятия текущего учебного года.
+
+    Если у занятия остались даты внутри года — публикуем его с этими
+    датами, иначе выбрасываем (прошлый год не показываем).
+    """
+    from datetime import datetime
+
+    bounds = period.academic_bounds()
+    if bounds is None:
+        return [event for event in events if event.get("dates")]
+
+    low, high = bounds
+    result: list[dict] = []
+    for event in events:
+        kept: list[str] = []
+        for value in str(event.get("dates") or "").split(","):
+            value = value.strip()
+            if not value:
+                continue
+            try:
+                parsed = datetime.strptime(value, "%d.%m.%Y").date()
+            except ValueError:
+                continue
+            if low <= parsed <= high:
+                kept.append(value)
+        if kept:
+            event = dict(event, dates=", ".join(kept))
+            result.append(event)
+    return result
+
+
 class MathParser(FacultyParser):
     id = "01"
     uses_llm = False
@@ -231,6 +263,16 @@ class MathParser(FacultyParser):
         sheets: list[SheetData],
         period: AcademicPeriod,
     ) -> dict:
+        current_year = period.semester_start.year if period.semester_start else None
+        file_year = self._file_year(sheets)
+
+        if file_year and current_year and file_year != current_year:
+            logger.info(
+                "Файл 01 относится к %s учебному году, текущий %s — пропуск",
+                file_year, current_year,
+            )
+            return {}
+
         groups: dict = {}
 
         for sheet in sheets:
@@ -248,9 +290,7 @@ class MathParser(FacultyParser):
             if not group:
                 continue
 
-            year = self._semester_year(df, header_row) or (
-                period.semester_start.year if period.semester_start else None
-            )
+            year = file_year or self._semester_year(df, header_row) or current_year
 
             events: list[dict] = []
             current_day = ""
@@ -313,6 +353,8 @@ class MathParser(FacultyParser):
                     })
 
             if events:
+                events = _filter_period(events, period)
+            if events:
                 groups[group] = {
                     "events": events,
                     "semester_start_year": year,
@@ -338,4 +380,18 @@ class MathParser(FacultyParser):
                 year = semester_start_year_from_header(text)
                 if year is not None:
                     return year
+        return None
+
+    @classmethod
+    def _file_year(cls, sheets: list[SheetData]) -> int | None:
+        """Учебный год файла — по шапке любого листа."""
+        for sheet in sheets:
+            if sheet.hidden or sheet.df.empty:
+                continue
+            header_row = cls._header_row(sheet.df)
+            if header_row is None:
+                continue
+            year = cls._semester_year(sheet.df, header_row)
+            if year is not None:
+                return year
         return None

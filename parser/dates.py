@@ -13,7 +13,7 @@ DATE_PLAIN_RE = r'\d{1,2}\.\d{2}'
 DATE_TRIM = " \t.,;:()[]{}–—-"
 
 _HEADER_DATE_RE = re.compile(r'\b(\d{1,2})\.(\d{2})\.(\d{4})\b')
-_HEADER_ACADEMIC_YEAR_RE = re.compile(r'\b(\d{4})\s*/\s*(\d{4})\b')
+_HEADER_ACADEMIC_YEAR_RE = re.compile(r'\b(\d{4})\s*[/–—-]\s*(\d{4})\b')
 _HEADER_PARENS_RE = re.compile(r'\(([^)]*)\)')
 
 
