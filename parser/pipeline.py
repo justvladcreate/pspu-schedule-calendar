@@ -58,7 +58,11 @@ async def parse_faculty(
         from parser.repair import repair_branches
 
         result.branches = await repair_branches(
-            branches, faculty, period, threshold=REPAIR_THRESHOLD
+            branches,
+            faculty,
+            period,
+            threshold=REPAIR_THRESHOLD,
+            cache_path=CACHE_DIR / f"{faculty.id}.llm-cache.json",
         )
     _recompute_confidence(result)
     return result

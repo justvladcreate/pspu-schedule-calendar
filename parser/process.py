@@ -514,8 +514,8 @@ def _git(*args: str) -> subprocess.CompletedProcess:
 
 
 def _sync_commit_and_push() -> bool:
-    """Коммитит web/data.json и web/old_data.json и пушит в текущую ветку."""
-    add = _git("add", "web/data.json", "web/old_data.json")
+    """Коммитит опубликованные данные (ИНЭК + все факультеты) и пушит."""
+    add = _git("add", "web/data.json", "web/old_data.json", "web/data")
     if add.returncode != 0:
         logger.error(f"git add: {add.stderr.strip()}")
         return False
@@ -691,17 +691,18 @@ async def process_schedule(
             f"Расписание не изменилось "
             f"({len(parsed['events'])} событий) — пропускаю запись и коммит."
         )
-        return parsed
-
-    logger.info(
-        f"Расписание изменилось: было {len(prev_events)}, стало {len(parsed['events'])}."
-    )
-
-    await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
+    else:
+        logger.info(
+            f"Расписание изменилось: было {len(prev_events)}, стало {len(parsed['events'])}."
+        )
+        await handle_json_files(parsed, latest_parsed_path, old_parsed_path)
 
     # 7. публикация в web/
+    #    Факультеты с cloud.mail публикуются в любом случае: их файлы
+    #    меняются независимо от ИНЭК.
     if publish_web:
-        await sync_web_data(latest_parsed_path, old_parsed_path)
+        if changed:
+            await sync_web_data(latest_parsed_path, old_parsed_path)
         await publish_web_faculties(parsed)
     else:
         logger.info("publish_web=False — пропускаю копирование в web/")

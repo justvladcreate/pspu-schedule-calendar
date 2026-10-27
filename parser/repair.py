@@ -9,9 +9,11 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import re
 from datetime import datetime
+from pathlib import Path
 
 from parser.ai import ask_ai
 from parser.dates import expand_date_text
@@ -59,6 +61,37 @@ def needs_repair(branch: RawBranch, threshold: float) -> bool:
 
 def _batch(items: list[RawBranch], size: int) -> list[list[RawBranch]]:
     return [items[index:index + size] for index in range(0, len(items), size)]
+
+
+def _cache_key(branch: RawBranch) -> str:
+    raw = "|".join([
+        branch.faculty_id,
+        branch.group,
+        branch.weekday,
+        branch.time_start,
+        branch.source_text or branch.discipline,
+    ])
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+
+def _load_cache(path: Path | None) -> dict:
+    if not path or not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _save_cache(path: Path | None, cache: dict) -> None:
+    if not path:
+        return
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    except OSError as exc:
+        logger.debug("Не удалось сохранить кэш LLM-проверок: %s", exc)
 
 
 def build_prompt(
@@ -201,15 +234,31 @@ async def repair_branches(
     *,
     threshold: float = 0.9,
     ask=None,
+    cache_path: Path | None = None,
 ) -> list[RawBranch]:
     targets = [branch for branch in branches if needs_repair(branch, threshold)]
     if not targets:
         return branches
 
-    ask = ask or ask_ai
+    cache = _load_cache(cache_path)
     index_of = {id(branch): position for position, branch in enumerate(branches)}
 
-    for group in _batch(targets, BATCH_SIZE):
+    pending: list[tuple[str, RawBranch]] = []
+    for branch in targets:
+        key = _cache_key(branch)
+        if key in cache:
+            branches[index_of[id(branch)]] = apply_payload(
+                branch, cache[key], period
+            )
+        else:
+            pending.append((key, branch))
+
+    if not pending:
+        return branches
+
+    ask = ask or ask_ai
+
+    for group in _batch([item[1] for item in pending], BATCH_SIZE):
         prompt = build_prompt(group, faculty, period)
         try:
             lines = await ask(prompt)
@@ -224,8 +273,9 @@ async def repair_branches(
             payload = payloads.get(local_index)
             if not payload:
                 continue
-            original = branch
             updated = apply_payload(branch, payload, period)
-            branches[index_of[id(original)]] = updated
+            branches[index_of[id(branch)]] = updated
+            cache[_cache_key(branch)] = payload
 
+    _save_cache(cache_path, cache)
     return branches

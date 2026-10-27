@@ -392,6 +392,10 @@ export function setupOriginalModal() {
 
         let gid = currentGid;
         if (!gid) {
+            const selectedGroups = [...(state.selectedGroups || [])];
+            if (selectedGroups.length === 1) gid = findGidByGroup(selectedGroups[0]);
+        }
+        if (!gid) {
             try { gid = localStorage.getItem(LAST_GID_KEY); } catch {}
         }
         if (!gid || !list.some(s => String(s.gid) === String(gid))) {
