@@ -319,9 +319,11 @@ def strip_dates(text: str) -> str:
     text = re.sub(r"\bс\s+(?=\d)", " ", text, flags=re.I)
     text = re.sub(r"\bпо\s+(?=\d)", " ", text, flags=re.I)
     text = re.sub(r"\bдо\s+(?=\d)", " ", text, flags=re.I)
-    text = re.sub(r"\(\s*кроме[^)]*\)", " ", text, flags=re.I)
+    text = re.sub(r"[,;]?\s*кроме\s+[^)]*(?=\))", " ", text, flags=re.I)
+    text = re.sub(r"\(\s*[,;:]?\s*кроме[^)]*\)", " ", text, flags=re.I)
     text = re.sub(r"\b\d{1,2}\.\d{2}(?:\.\d{2,4})?\b", " ", text)
     text = re.sub(r"\(\s*[,;:]?\s*\)", " ", text)
+    text = re.sub(r",\s*,", ",", text)
     text = re.sub(r"\s*[-–—/]\s*(?=\s*[-–—/]|$)", " ", text)
     return text
 

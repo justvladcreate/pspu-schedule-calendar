@@ -203,6 +203,7 @@ class VerticalAdapter:
                 item for item in room_values
                 if item.lower().startswith(("http", "www.", "max.ru"))
                 or "join" in item.lower()
+                or "дистанц" in item.lower()
             ]
             room_text = ", ".join(
                 item for item in room_values if item not in remote_rooms
