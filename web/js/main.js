@@ -9,7 +9,7 @@ import {
 } from './state.js';
 import { escapeHtml, toISO } from './utils.js';
 import {
-    loadData, loadFacultyIndex, loadFacultyData, expandEvents,
+    loadData, loadFacultyIndex, loadFacultyData,
 } from './data.js';
 
 import { render, updateDateLabel } from './render.js';
@@ -218,7 +218,7 @@ async function loadFreshData({ onProgress = null } = {}) {
 function applyDataToState(data, usedFallback) {
     state.currentData = data;
     state.displayedIso = data.generated_at || state.displayedIso;
-    state.allEvents = expandEvents(data.events || []);
+    state.allEvents = data.events || [];
     state.faculties = Array.isArray(data.faculties) && data.faculties.length
         ? data.faculties
         : _facultyMetaFromEvents(data.events || []);
@@ -994,7 +994,7 @@ async function fetchAndApply({ showIndicator = false } = {}) {
                 const missingPast = state.allEvents.some(ev => ev.is_past === undefined);
                 if (missingPast) {
                     state.currentData = incoming;
-                    state.allEvents = expandEvents(incoming.events || []);
+                    state.allEvents = incoming.events || [];
                     saveSnapshot(incoming.events || []);
                     applyFilters();
                     render();
@@ -1008,7 +1008,7 @@ async function fetchAndApply({ showIndicator = false } = {}) {
                     : [];
 
                 state.currentData = incoming;
-                state.allEvents = expandEvents(incoming.events || []);
+                state.allEvents = incoming.events || [];
                 state.displayedIso = incoming.generated_at;
 
                 updateUpdatedLabel(state.displayedIso);

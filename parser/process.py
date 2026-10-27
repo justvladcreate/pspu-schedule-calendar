@@ -65,6 +65,7 @@ OVERRIDES_PATH = current_dir / "overrides.yaml"
 
 WEB_DATA_PATH     = web_dir / "data.json"
 WEB_DATA_DIR      = web_dir / "data"
+CACHE_XLSX_DIR    = current_dir / "data" / "faculties"
 WEB_OLD_DATA_PATH = web_dir / "old_data.json"
 
 
@@ -91,6 +92,7 @@ async def publish_web_faculties(parsed: dict) -> None:
             published,
             events_by_faculty,
             parsed.get("generated_at") or "",
+            source_dir=CACHE_XLSX_DIR,
         )
         logger.info(
             "Опубликовано факультетов: %s",

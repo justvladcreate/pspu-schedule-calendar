@@ -47,6 +47,7 @@ const STATIC_ASSETS = [
   './js/settings.js',
   './js/notifications.js',
   './js/original.js',
+  './js/original-source.js',
   './js/sheets.js',
   './js/sheet-render.js',
   './js/modal-history.js',

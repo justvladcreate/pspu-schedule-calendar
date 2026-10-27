@@ -7,6 +7,7 @@ import {
     savePrevFilter,
 } from './state.js';
 import { render, updateDateLabel } from './render.js';
+import { expandEvents } from './data.js';
 import { refreshBanner } from './update-banner.js';
 import { showToast } from './toast.js';
 
@@ -44,7 +45,7 @@ function countMatchingEvents(groups, teachers, faculties = state.selectedFaculti
             const t = ev.teachers || [];
             if (!t.some(x => teachers.has(x))) continue;
         }
-        n++;
+        n += Array.isArray(ev.dates) ? ev.dates.length : 1;
     }
     return n;
 }
@@ -63,14 +64,14 @@ export function applyFilters() {
             state.filteredEvents = [];
             return;
         }
-        state.filteredEvents = state.allEvents.filter(ev => {
+        state.filteredEvents = expandEvents(state.allEvents.filter(ev => {
             if (state.showOnlyActive && ev.is_past) return false;
             return sf.has(String(ev.faculty_id || '12'));
-        });
+        }));
         return;
     }
 
-    state.filteredEvents = state.allEvents.filter(ev => {
+    state.filteredEvents = expandEvents(state.allEvents.filter(ev => {
         if (state.showOnlyActive && ev.is_past) return false;
         if (sf.size > 0 && !sf.has(String(ev.faculty_id || '12'))) return false;
         if (sg.size > 0 && !sg.has(ev.group)) return false;
@@ -79,7 +80,7 @@ export function applyFilters() {
             if (!teachers.some(t => st.has(t))) return false;
         }
         return true;
-    });
+    }));
 }
 
 /* ============================================================

@@ -1,6 +1,8 @@
 'use strict';
 
 import { fetchSheetHtml } from './sheets.js';
+import { createGoogleSource, createXlsxSource } from './original-source.js';
+import { state } from './state.js';
 import {
     mountSheetFrame, findCellInFrame, focusCellInFrame,
     setupFrameGestures,
@@ -127,10 +129,65 @@ export function setupOriginalModal() {
 
     const internalUrl   = getMeta('original-schedule-url');
     const externalUrl   = getMeta('original-schedule-external') || internalUrl;
-    const spreadsheetId = extractSpreadsheetId(internalUrl);
+    const defaultSpreadsheetId = extractSpreadsheetId(internalUrl);
 
     if (!btn || !modal || !renderEl || !wrapEl) {
         return { open: () => {}, focusOn: () => {}, close: () => {} };
+    }
+
+    /* ---------- выбор факультета ---------- */
+
+    let source = null;          // текущий источник («google» или «xlsx»)
+    let spreadsheetId = defaultSpreadsheetId;
+    let activeFacultyId = null;
+
+    function facultyMeta(id) {
+        return (state.faculties || []).find(
+            item => String(item.id) === String(id)
+        ) || null;
+    }
+
+    function pickFacultyId(ev) {
+        if (ev && ev.faculty_id) return String(ev.faculty_id);
+        const selected = [...(state.selectedFaculties || [])];
+        if (selected.length === 1) return String(selected[0]);
+        return activeFacultyId || '12';
+    }
+
+    function activateFaculty(facultyId) {
+        const id = String(facultyId || '12');
+        const meta = facultyMeta(id);
+        const original = (meta && meta.original) || null;
+
+        if (id === activeFacultyId && source) return;
+
+        activeFacultyId = id;
+        sheetsPromise = null;
+        sheets = [];
+        currentGid = null;
+        buildTabs();
+
+        if (original && original.type === 'google_sheets' && original.spreadsheet_id) {
+            spreadsheetId = original.spreadsheet_id;
+            source = createGoogleSource(spreadsheetId);
+        } else if (original && original.type === 'cloud_mail' && original.file) {
+            spreadsheetId = '';
+            source = createXlsxSource(`data/${original.file}`);
+        } else if (defaultSpreadsheetId) {
+            // Старые данные без блока original — ведём себя как раньше.
+            spreadsheetId = defaultSpreadsheetId;
+            source = createGoogleSource(spreadsheetId);
+        } else {
+            spreadsheetId = '';
+            source = null;
+        }
+
+        if (external) {
+            external.setAttribute(
+                'href',
+                (original && (original.url || original.file)) || externalUrl
+            );
+        }
     }
 
     if (external) external.setAttribute('href', externalUrl);
@@ -225,7 +282,7 @@ export function setupOriginalModal() {
     /* ---------- рендер листа ---------- */
 
     async function showSheet(gid, { focusEvent } = {}) {
-        if (!spreadsheetId || !gid) return;
+        if (!source || !gid) return;
         currentGid = gid;
         try { localStorage.setItem(LAST_GID_KEY, gid); } catch {}
         setActiveTab(gid);
@@ -233,7 +290,7 @@ export function setupOriginalModal() {
         if (dialog) dialog.classList.remove('is-loaded');
 
         try {
-            const html = await fetchSheetHtml(spreadsheetId, gid);
+            const html = await source.htmlFor(fetchSheetHtml, gid);
             if (currentGid !== gid) return;   // гонка: успели переключиться
 
             if (currentGestureCleanup) {
@@ -299,9 +356,9 @@ export function setupOriginalModal() {
 
     function ensureSheets() {
         if (sheetsPromise) return sheetsPromise;
-        if (!spreadsheetId) return Promise.resolve([]);
+        if (!source) return Promise.resolve([]);
 
-        sheetsPromise = fetchSheetList(spreadsheetId)
+        sheetsPromise = source.list(fetchSheetList)
             .then((list) => {
                 sheets = list || [];
                 buildTabs();
@@ -318,6 +375,7 @@ export function setupOriginalModal() {
     /* ---------- open / close ---------- */
 
     async function open() {
+        activateFaculty(pickFacultyId());
         modal.classList.add('open');
         document.body.classList.add('modal-open');
 
@@ -330,13 +388,18 @@ export function setupOriginalModal() {
         if (offline) offline.hidden = true;
         if (wrapEl) wrapEl.style.display = '';
 
+        const list = await ensureSheets();
+
         let gid = currentGid;
         if (!gid) {
             try { gid = localStorage.getItem(LAST_GID_KEY); } catch {}
         }
-        if (!gid) gid = '0';
+        if (!gid || !list.some(s => String(s.gid) === String(gid))) {
+            gid = list.length ? list[0].gid : '';
+        }
+        if (!gid) return;
 
-        ensureSheets().then(() => setActiveTab(currentGid || gid));
+        setActiveTab(gid);
         showSheet(gid);
     }
 
@@ -349,6 +412,7 @@ export function setupOriginalModal() {
 
     async function focusOn(ev) {
         if (!ev) return;
+        activateFaculty(pickFacultyId(ev));
         modal.classList.add('open');
         document.body.classList.add('modal-open');
 
@@ -362,8 +426,11 @@ export function setupOriginalModal() {
 
         try { await ensureSheets(); } catch {}
 
-        const gid = findGidByGroup(ev.group) || currentGid || '0';
+        const gid = findGidByGroup(ev.group)
+            || currentGid
+            || (sheets.length ? sheets[0].gid : '');
 
+        if (!gid) return;
         await showSheet(gid, { focusEvent: ev });
     }
 

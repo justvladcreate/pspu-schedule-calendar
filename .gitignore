@@ -219,6 +219,7 @@ __marimo__/
 # Custom
 private
 *.xlsx
+!web/data/faculties/*.xlsx
 /test_*.py
 /test_*.json
 /test*.log

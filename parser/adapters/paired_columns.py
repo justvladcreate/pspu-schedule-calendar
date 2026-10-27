@@ -7,6 +7,7 @@ from datetime import datetime
 from parser.adapters.base import (
     build_branch,
     cell_text,
+    extract_teachers,
     normalize_day,
     parse_cell_blocks,
     parse_time,
@@ -54,11 +55,16 @@ class PairedColumnsAdapter:
         period: AcademicPeriod,
     ) -> list[RawBranch]:
         result: list[RawBranch] = []
+        seen: set[tuple] = set()
         for sheet in sheets:
             if sheet.hidden:
                 continue
             df = sheet.df
             if df.empty:
+                continue
+            # Сводные листы («Расписание очники») содержат блоки всех
+            # групп сразу — их разбирают отдельные листы.
+            if len(df.columns) > 12:
                 continue
 
             starts = _block_starts(df)
@@ -102,11 +108,9 @@ class PairedColumnsAdapter:
                         discipline=block["discipline"],
                         type_=block["type"],
                         subgroup=block["subgroup"],
-                        teachers=block["teachers"] or [
-                            item.strip()
-                            for item in cell_text(row.iloc[start + 3]).split(",")
-                            if item.strip()
-                        ],
+                        teachers=block["teachers"] or extract_teachers(
+                            cell_text(row.iloc[start + 3])
+                        )[0],
                         dates=expand_date_text(current_date, period.semester_start.year if period.semester_start else None),
                         rooms=cell_text(row.iloc[start + 4]),
                         period=period,
@@ -118,6 +122,12 @@ class PairedColumnsAdapter:
                         },
                     )
                     if branch is not None:
-                        result.append(branch)
+                        key = (
+                            branch.group, branch.weekday, branch.time_start,
+                            branch.discipline, branch.subgroup, branch.rooms,
+                        )
+                        if key not in seen:
+                            seen.add(key)
+                            result.append(branch)
 
         return result

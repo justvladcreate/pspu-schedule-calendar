@@ -28,17 +28,39 @@ def _rotate(path: Path) -> None:
     shutil.copyfile(path, old)
 
 
+def _copy_original(
+    faculty: Faculty,
+    faculties_dir: Path,
+    source_dir: Path | None,
+) -> Path | None:
+    """Кладёт скачанный XLSX рядом с JSON, чтобы работал «Оригинал»."""
+    if not source_dir:
+        return None
+    source = Path(source_dir) / f"{faculty.id}.xlsx"
+    if not source.exists():
+        return None
+    target = faculties_dir / f"{faculty.id}.xlsx"
+    shutil.copyfile(source, target)
+    return target
+
+
 def publish_faculty_data(
     output_dir: Path,
     faculties: list[Faculty],
     events_by_faculty: dict[str, list[dict]],
     generated_at: str,
+    *,
+    source_dir: Path | None = None,
 ) -> Path:
     """
     Пишет:
       output_dir/index.json
       output_dir/faculties/<id>.json
       output_dir/faculties/old/<id>.json
+      output_dir/faculties/<id>.xlsx (если есть исходник)
+
+    ``source_dir`` — папка с скачанными XLSX, чтобы «Оригинал» работал
+    для факультетов с cloud.mail так же, как для Google Sheets.
     """
     output_dir = Path(output_dir)
     faculties_dir = output_dir / "faculties"
@@ -73,6 +95,16 @@ def publish_faculty_data(
         _rotate(target)
         _write_json(target, payload)
 
+        original = {"type": faculty.source.type}
+        if faculty.source.type == "google_sheets":
+            original["spreadsheet_id"] = faculty.source.spreadsheet_id
+            original["url"] = faculty.source.url
+        else:
+            original["url"] = faculty.source.url
+            copied = _copy_original(faculty, faculties_dir, source_dir)
+            if copied:
+                original["file"] = f"faculties/{copied.name}"
+
         index_faculties.append({
             "id": faculty.id,
             "name": faculty.name,
@@ -80,6 +112,7 @@ def publish_faculty_data(
             "file": relative,
             "groups": groups,
             "events": len(events),
+            "original": original,
         })
 
     index = {

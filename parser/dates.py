@@ -291,6 +291,7 @@ def expand_date_text(
                 expand_dates(token, semester_start_year=semester_start_year)
             )
     text = _EXCLUDE_RE.sub(" ", text)
+    text = re.sub(r"\(\s*\)", " ", text)
 
     result: list[str] = []
     for match in _DATE_RANGE_RE.finditer(text):

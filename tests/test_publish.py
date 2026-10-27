@@ -4,12 +4,14 @@ from parser.model import Faculty, FacultySource
 from parser.publish import publish_faculty_data
 
 
-def _faculty():
+def _faculty(faculty_source=None):
     return Faculty(
         id="12",
         name="ИНЭК",
         short="ИНЭК",
-        source=FacultySource(type="google_sheets", spreadsheet_id="x"),
+        source=faculty_source or FacultySource(
+            type="google_sheets", spreadsheet_id="x"
+        ),
         adapter="inec_legacy",
         prompt="inec",
     )
@@ -31,6 +33,7 @@ def test_publish_creates_index_and_faculty_file(tmp_path):
     assert index["schema_version"] == 2
     assert index["faculties"][0]["id"] == "12"
     assert index["faculties"][0]["groups"] == ["1221"]
+    assert index["faculties"][0]["original"]["type"] == "google_sheets"
 
     faculty_payload = json.loads(
         (tmp_path / "faculties" / "12.json").read_text(encoding="utf-8")
@@ -49,3 +52,32 @@ def test_publish_rotates_previous_file(tmp_path):
     )
     assert old["generated_at"] == "v1"
     assert old["events"][0]["group"] == "A"
+
+
+def test_publish_copies_xlsx_for_original(tmp_path):
+    source_dir = tmp_path / "cache"
+    source_dir.mkdir()
+    (source_dir / "04.xlsx").write_bytes(b"PK\x03\x04fake")
+
+    faculty = Faculty(
+        id="04",
+        name="Начальное образование",
+        short="НО",
+        source=FacultySource(type="cloud_mail", url="https://cloud.mail.ru/public/x"),
+        adapter="vertical",
+        prompt="primary",
+    )
+    index_path = publish_faculty_data(
+        tmp_path,
+        [faculty],
+        {"04": [{"group": "411"}]},
+        "v1",
+        source_dir=source_dir,
+    )
+
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    original = index["faculties"][0]["original"]
+    assert original["type"] == "cloud_mail"
+    assert original["file"] == "faculties/04.xlsx"
+    assert original["url"].startswith("https://cloud.mail.ru/")
+    assert (tmp_path / "faculties" / "04.xlsx").exists()

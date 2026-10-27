@@ -7,6 +7,7 @@ _ADAPTERS = {
     "vertical_dates": VerticalAdapter,
     "subgroup_columns": VerticalAdapter,
     "exam_session": VerticalAdapter,
+    "weekly_grid": VerticalAdapter,
     "paired_columns": PairedColumnsAdapter,
 }
 
