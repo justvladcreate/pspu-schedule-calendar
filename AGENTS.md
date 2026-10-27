@@ -8,11 +8,17 @@
 
 1. **Парсер (`parser/`, `utils/`, `main.py`)** — забирает Google Sheets или
    XLSX, извлекает занятия, прогоняет их через LLM, финализирует даты и
-   публикует `web/data.json` + `web/old_data.json`.
+   публикует `web/data/index.json` + `web/data/faculties/<id>.json`
+   (плюс исходные `faculties/<id>.xlsx` для «Оригинала»).
 2. **Веб-приложение (`web/`)** — plain ES-модули без сборщика. Читает
-   `data.json`, показывает неделю/месяц/день/нагрузку, фильтры, модалки
-   изменений и экспорт в календарь. Service worker кэширует статику и
-   отдаёт `data.json` по network-first.
+   `data/index.json` и файлы факультетов, показывает
+   неделю/месяц/день/нагрузку, фильтры (включая фильтр по факультетам),
+   модалки изменений и экспорт в календарь. Service worker кэширует
+   статику и отдаёт JSON по network-first.
+
+Расписание теперь **мультифакультетное**: у каждого факультета своя
+таблица, свой адаптер разбора и свой профиль промпта. Реестр —
+`faculties.yaml`.
 
 Push-уведомления: фронтенд `web/js/notifications.js` + внешний Cloudflare
 Worker (в этом репозитории его исходников нет). URL задаётся в
@@ -23,10 +29,18 @@ Worker (в этом репозитории его исходников нет). 
 | Путь | Назначение |
 |---|---|
 | `main.py` | бесконечный таймер парсера (каждые 15 минут в рабочем окне) |
-| `config.py`, `config.yaml` | загрузка `.env`, логирование, тип источника |
+| `config.py`, `config.yaml` | загрузка `.env`, логирование, тип источника ИНЭК |
 | `google_services.py` | OAuth и клиенты Drive/Sheets |
-| `parser/process.py` | оркестрация: источник → extractor → AI → finalize → web + git |
-| `parser/extractor.py` | разбор листов расписания в события-источники |
+| `faculties.yaml` | реестр факультетов: источник, адаптер, промпт, вкл/выкл |
+| `parser/faculties.py` | загрузка реестра в `AcademicPeriod` / `Faculty` |
+| `parser/model.py` | `Faculty`, `RawBranch`, `ParseResult`, `AcademicPeriod` |
+| `parser/adapters/` | адаптеры форматов таблиц (`base`, `vertical`, `paired_columns`) |
+| `parser/pipeline.py` | разбор одного факультета и всех сразу (`parse_all`) |
+| `parser/repair.py` | LLM-проверка спорных ячеек по `confidence` |
+| `parser/publish.py` | публикация `index.json` + `faculties/<id>.json` + `.xlsx` |
+| `parser/sources/cloud_mail.py` | скачивание XLSX с публичных ссылок cloud.mail.ru |
+| `parser/process.py` | оркестрация ИНЭК: источник → extractor → AI → finalize → web + git |
+| `parser/extractor.py` | разбор листов ИНЭК в события-источники |
 | `parser/preprocess.py` | очистка комнат/времени/текста, подготовка дат |
 | `parser/dates.py` | **единая** логика дат и учебного года |
 | `parser/rooms_hints.py` | распределение аудиторий по ветвям (type/date hints) |
@@ -35,11 +49,13 @@ Worker (в этом репозитории его исходников нет). 
 | `utils/run_local.py` | локальный полный прогон без git push |
 | `utils/rebuild_parsed.py` | пересборка финального JSON из after_ai без AI |
 | `web/` | статический сайт |
+| `web/data/` | опубликованные данные факультетов (в Git) |
+| `web/vendor/xlsx.mini.min.js` | SheetJS для «Оригинала» XLSX (грузится лениво) |
 | `web/sw.js` | service worker; при добавлении файла обновите `STATIC_ASSETS` |
 | `tools/bump-sw.mjs` | хэш-версия SW для CI; при добавлении JS обновите `WATCHED` |
 | `tests/` | детерминированные тесты, без реальных вызовов LLM |
 
-## Пайплайн парсера
+## Пайплайн ИНЭК (эталон, не менять без нужды)
 
 ```text
 ScheduleSource.load()
@@ -51,7 +67,27 @@ ScheduleSource.load()
   → finalize.transform_schedule() # даты, пары, event_id, position
   → overrides.apply_overrides()   # ручные правки
   → web/data.json + web/old_data.json
+  → publish_web_faculties()       # index.json + faculties/*.json
 ```
+
+## Пайплайн XLSX-факультетов
+
+```text
+build_source(faculty)             # google_sheets | cloud_mail (кэш в data/faculties/)
+  → adapter.parse(sheets)         # детерминированный разбор → RawBranch[]
+  → repair_branches()             # только ветки с низким confidence → LLM
+  → branches_to_groups_info()
+  → finalize.transform_schedule(faculty_id=...)
+  → publish_faculty_data()        # JSON + XLSX для «Оригинала»
+```
+
+`RawBranch` хранит `confidence` и `issues`. Правила:
+
+- `confidence >= 0.9` — ветка считается разобранной и в LLM не идёт.
+- LLM не может придумать данные: её ответ сверяется с `source_text`
+  (ФИО должно быть в исходной ячейке) и с границами учебного года.
+- Если LLM недоступна, публикуется детерминированный вариант.
+
 
 ### Важные правила
 
@@ -65,18 +101,29 @@ ScheduleSource.load()
 - Если события не изменились, `process_schedule()` не перезаписывает файлы
   и не коммитит.
 - LLM никогда не должна придумывать данные. Промпт — `parser/prompts.py`.
+- Файлы прошлых учебных годов отсекаются по датам: ветка, у которой все
+  даты вне текущего учебного года, не публикуется
+  (`VerticalAdapter._drop_stale`).
+- Занятие без дат повторяется каждую неделю до конца семестра, но не
+  пересекается с уже занятыми датами (`_fill_weekly_gaps`).
 
 ## Веб-приложение
 
 - ES-модули, без npm/сборки. Точка входа — `web/js/main.js`.
 - `state.js` — состояние, localStorage, snapshot/URL-контекст.
 - `changes.js` — diff снимков; `changes-modal.js` — отображение изменений.
-- `filters.js` — фильтры и избранное.
+- `filters.js` — фильтры (факультеты/группы/преподаватели) и избранное.
 - `settings.js` — «Персонализация»; `notifications.js` — Web Push.
+- `original.js` + `original-source.js` — «Оригинал»: Google htmlview или
+  XLSX через SheetJS (`web/vendor/xlsx.mini.min.js`, грузится лениво).
 - `sheet-render.js` — поиск/навигация по iframe оригинальной таблицы.
 - `load-view.js` — экран «Нагрузка».
-- `sw.js` кэширует статику cache-first, `data.json`/`old_data.json` —
-  network-first. После изменения списка файлов обновите `STATIC_ASSETS`.
+- `data.js` API: `loadFacultyIndex()`, `loadFacultyData(id)`.
+- `state.allEvents` хранит **сырые** события; `expandEvents()` вызывается
+  после фильтрации (иначе на телефоне слишком много объектов).
+- `sw.js` кэширует статику cache-first, JSON (`data.json`,
+  `data/index.json`, `data/faculties/*`) — network-first. После изменения
+  списка файлов обновите `STATIC_ASSETS`.
 - GitHub Actions запускает `tools/bump-sw.mjs`, который меняет версию кэша.
   В репозитории `sw.js` должен оставаться с плейсхолдером `v00000000`.
 
@@ -85,14 +132,28 @@ ScheduleSource.load()
 - Публичный VAPID-ключ и URL воркера — `web/js/config.js`.
 - Приватный ключ хранится **только** в Cloudflare Secret, не в Git.
 - Подписки и настройки групп/преподавателей хранятся в Worker KV.
-- Worker по cron сравнивает `data.json` и `old_data.json` и рассылает push.
+- Worker по cron сравнивает `data.json` и `old_data.json` и рассылает push
+  (пока только по ИНЭК — см. «Известные ограничения»).
 - На iPhone push работают только в PWA, добавленном на экран «Домой».
+
+## Известные ограничения
+
+- `web/data.json` / `old_data.json` остаются ради обратной совместимости и
+  push-воркера, но содержат только ИНЭК. Остальные факультеты — в
+  `web/data/faculties/`.
+- Для 17 (Открытый университет) нет адаптера: в его файле нет номеров
+  групп, только направления (мат/инф/общ/ист/физ/био).
+- `parser/repair.py` включает LLM только для веток с `confidence < 0.9`;
+  без `OLLAMA_API_KEY` публикуется детерминированный вариант.
+
 
 ## Окружение и секреты
 
 - `.env` и Google-креды — в `private/` (игнорируется Git).
 - `data/` — рабочие JSON/кэш парсера (не коммитить).
-- `web/data.json` и `web/old_data.json` — публикуемые данные, они в Git.
+- `data/faculties/*.xlsx` — локальный кэш скачанных таблиц.
+- `web/data/index.json`, `web/data/faculties/*.json` — публикуемые данные, в Git.
+- `web/data/faculties/*.xlsx` — исходники для «Оригинала» (исключение в `.gitignore`).
 - Не коммитить `private/`, `.venv/`, `data/`, `__pycache__/`, `.idea/`.
 
 ## Команды
@@ -108,6 +169,9 @@ ScheduleSource.load()
 
 # пересборка final JSON без AI и Google
 .venv\Scripts\python.exe -m utils.rebuild_parsed
+
+# разбор всех XLSX-факультетов без сети (использует кэш data/faculties)
+# см. parser.pipeline.parse_all(repair=False)
 
 # таймер парсера
 .venv\Scripts\python.exe main.py

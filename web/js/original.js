@@ -150,7 +150,7 @@ export function setupOriginalModal() {
     function pickFacultyId(ev) {
         if (ev && ev.faculty_id) return String(ev.faculty_id);
         const selected = [...(state.selectedFaculties || [])];
-        if (selected.length === 1) return String(selected[0]);
+        if (selected.length) return String(selected[0]);
         return activeFacultyId || '12';
     }
 
