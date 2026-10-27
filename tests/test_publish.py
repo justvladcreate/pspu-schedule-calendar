@@ -1,7 +1,7 @@
 import json
 
-from parser.model import Faculty, FacultySource
-from parser.publish import publish, publish_faculty
+from parser.core.model import Faculty, FacultySource
+from parser.core.publish import publish, publish_faculty
 
 STAMP = "2026-10-27T00:00:00+00:00"
 
@@ -88,3 +88,41 @@ def test_publish_several_faculties(tmp_path):
     assert [entry["id"] for entry in index["faculties"]] == ["12", "01"]
     assert (tmp_path / "faculties" / "01" / "data.json").exists()
     assert (tmp_path / "faculties" / "12" / "data.json").exists()
+
+
+def test_partial_publish_keeps_other_faculties(tmp_path):
+    publish(
+        tmp_path,
+        [_faculty("12"), _faculty("01", FacultySource(type="cloud_mail", url="u"))],
+        {"12": [{"group": "1221"}], "01": [{"group": "111"}]},
+        STAMP,
+    )
+    # Прогон только по 01 не должен выкинуть 12 из индекса.
+    publish(
+        tmp_path,
+        [_faculty("01", FacultySource(type="cloud_mail", url="u"))],
+        {"01": [{"group": "111"}]},
+        STAMP,
+    )
+
+    index = json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))
+    assert [entry["id"] for entry in index["faculties"]] == ["12", "01"]
+
+
+def test_drop_ids_remove_faculty(tmp_path):
+    publish(
+        tmp_path,
+        [_faculty("12"), _faculty("01", FacultySource(type="cloud_mail", url="u"))],
+        {"12": [{"group": "1221"}], "01": [{"group": "111"}]},
+        STAMP,
+    )
+    publish(
+        tmp_path,
+        [_faculty("12")],
+        {"12": [{"group": "1221"}]},
+        STAMP,
+        drop_ids={"01"},
+    )
+
+    index = json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))
+    assert [entry["id"] for entry in index["faculties"]] == ["12"]

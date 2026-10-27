@@ -1,4 +1,4 @@
-# PSPU Schedule Calendar — заметки для агента
+﻿# PSPU Schedule Calendar — заметки для агента
 
 ## Что это за проект
 
@@ -65,19 +65,17 @@ web/data/faculties/<id>/source.xlsx     # оригинал (кладёт CI, н�
 | `config.py`, `config.yaml` | загрузка `.env`, логирование, тип источника ИНЭК |
 | `google_services.py` | OAuth и клиенты Drive/Sheets |
 | `faculties.yaml` | реестр факультетов: источник, промпт, вкл/выкл |
-| `parser/registry.py` | загрузка реестра в `AcademicPeriod` / `Faculty` |
-| `parser/model.py` | `Faculty`, `FacultySource`, `AcademicPeriod` |
+| `parser/runner.py` | общий цикл: разбор → финализация → публикация → git |
+| `parser/core/` | общая часть: `dates`, `finalize`, `model`, `overrides`, |
+|  | `postprocess`, `text`, `publish`, `registry`, `ai` |
 | `parser/faculties/base.py` | `FacultyParser`, `FacultyPaths`, JSON-хелперы |
 | `parser/faculties/__init__.py` | реестр модулей парсеров |
-| `parser/faculties/f12_inec/` | эталон: extractor, ai_merge, prompt |
-| `parser/faculties/f01_math/` | математический факультет |
-| `parser/process.py` | общий цикл: разбор → финализация → публикация → git |
-| `parser/publish.py` | `index.json` + папки факультетов |
-| `parser/finalize.py` | финальные события, `event_id`, `position`, даты |
-| `parser/dates.py` | **единая** логика дат и учебного года |
+| `parser/faculties/f12_inec/` | эталон: `parser`, `extractor`, `ai_merge`, |
+|  | `prompt`, `rooms_hints`, `text` |
+| `parser/faculties/f01_math/` | `parser`, `prompt` |
 | `parser/sources/` | Google Sheets, XLSX, cloud.mail |
-| `parser/overrides.py` | ручные правки из `overrides.yaml` |
-| `utils/run_local.py` | локальный полный прогон без git push |
+| `utils/run_local.py` | локальный прогон по факультетам (флаги `--faculty`, |
+|  | `--no-publish`, `--git-push`, `--source`, `--list`) |
 | `utils/rebuild_parsed.py` | пересборка `parsed.json` из `after_ai.json` |
 | `web/` | статический сайт |
 | `web/vendor/xlsx.mini.min.js` | SheetJS для «Оригинала» XLSX (лениво) |
@@ -138,7 +136,7 @@ LLM здесь пока не используется (`uses_llm = False`).
   `2025/2026`: см. `parser/dates.semester_start_year_from_header()`.
 - Сентябрь–декабрь относится к году начала учебного года, январь–август —
   к следующему: `parser/dates.resolve_year()`.
-- Не дублируйте разбор дат в других модулях — используйте `parser.dates`.
+- Не дублируйте разбор дат в других модулях — используйте `parser/core/dates.py`.
 - Прошлые учебные годы не публикуются: даты фильтруются по границам
   учебного года (`AcademicPeriod.academic_bounds`).
 - Если события факультета не изменились, его `data.json` не перезаписывается,
@@ -172,8 +170,12 @@ LLM здесь пока не используется (`uses_llm = False`).
 # или (Linux/macOS)
 .venv/bin/python -m pytest
 
-# локальный полный прогон без git push
+# локальный прогон по всем факультетам (их модулями), без git push
 .venv\Scripts\python.exe -m utils.run_local
+.venv\Scripts\python.exe -m utils.run_local --list
+.venv\Scripts\python.exe -m utils.run_local --faculty 01
+.venv\Scripts\python.exe -m utils.run_local --no-publish
+.venv\Scripts\python.exe -m utils.run_local --git-push
 
 # пересборка parsed.json из after_ai.json без AI и сети
 .venv\Scripts\python.exe -m utils.rebuild_parsed

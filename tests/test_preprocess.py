@@ -1,11 +1,10 @@
-import pytest
+﻿import pytest
 
-from parser.preprocess import (
-    clean,
+from parser.core.text import clean, normalize_time
+from parser.faculties.f12_inec.text import (
     english_to_russian_lookalike,
     normalize_rooms,
     normalize_subgroup,
-    normalize_time,
     remove_invalid_dates,
     remove_spaces_between_initials,
 )

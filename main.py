@@ -4,7 +4,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import config
-from parser.process import process_schedule
+from parser.runner import process_schedule
 
 logger = logging.getLogger(__name__)
 

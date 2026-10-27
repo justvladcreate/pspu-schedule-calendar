@@ -1,6 +1,6 @@
 import pytest
 
-from parser.finalize import (
+from parser.core.finalize import (
     get_pair_number,
     normalize_teachers,
     transform_schedule,

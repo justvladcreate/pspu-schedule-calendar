@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from parser.faculties.f01_math.parser import MathParser, _split_subject
-from parser.model import AcademicPeriod, Faculty, FacultySource
+from parser.core.model import AcademicPeriod, Faculty, FacultySource
 from parser.sources.base import SheetData
 
 PERIOD = AcademicPeriod(

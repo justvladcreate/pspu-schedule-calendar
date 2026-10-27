@@ -17,7 +17,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from parser.model import AcademicPeriod, Faculty
+from parser.core.model import AcademicPeriod, Faculty
 from parser.sources.base import ScheduleSource, SheetData
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

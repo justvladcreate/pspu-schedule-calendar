@@ -7,8 +7,8 @@ from parser.faculties.f12_inec.ai_merge import (
     format_ai_input,
     merge_ai_line,
 )
-from parser.process import events_equal
-from parser.rooms_hints import parse_rooms_with_hints
+from parser.runner import events_equal
+from parser.faculties.f12_inec.rooms_hints import parse_rooms_with_hints
 
 
 def _source(room_raw="", **extra):

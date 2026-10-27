@@ -1,6 +1,6 @@
 ﻿import asyncio
 
-import parser.ai as ai_module
+import parser.core.ai as ai_module
 from parser.faculties.f12_inec.prompt import USER_PROMPT
 
 

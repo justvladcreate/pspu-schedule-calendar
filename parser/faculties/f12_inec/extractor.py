@@ -1,4 +1,4 @@
-# parser/extractor.py
+﻿# parser/extractor.py
 from __future__ import annotations
 
 import logging
@@ -7,13 +7,17 @@ from pathlib import Path
 
 import pandas as pd
 
-from parser.dates import add_year, extract_first_date, semester_start_year_from_header
-from parser.preprocess import (
-    clean, normalize_rooms, normalize_time,
-    english_to_russian_lookalike, normalize_date_ranges,
-    remove_invalid_dates, remove_spaces_between_initials, normalize_subgroup,
+from parser.core.dates import add_year, extract_first_date, semester_start_year_from_header
+from parser.core.text import clean, normalize_time
+from parser.faculties.f12_inec.rooms_hints import parse_rooms_with_hints
+from parser.faculties.f12_inec.text import (
+    english_to_russian_lookalike,
+    normalize_date_ranges,
+    normalize_rooms,
+    normalize_subgroup,
+    remove_invalid_dates,
+    remove_spaces_between_initials,
 )
-from parser.rooms_hints import parse_rooms_with_hints
 from parser.sources.base import ScheduleSource
 
 logger = logging.getLogger(__name__)

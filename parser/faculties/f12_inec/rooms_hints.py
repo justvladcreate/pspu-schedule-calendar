@@ -1,4 +1,4 @@
-# parser/rooms_hints.py
+﻿# parser/rooms_hints.py
 """
 Разбор строки аудиторий из Excel на элементы с «подсказками».
 
@@ -34,7 +34,7 @@ Type-hint и date-hint можно комбинировать:
 import re
 from typing import Optional
 
-from parser.preprocess import clean_room
+from parser.faculties.f12_inec.text import clean_room
 
 
 # ========================================================================

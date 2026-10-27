@@ -21,10 +21,10 @@ import config  # noqa: F401  — загружает .env и настраивае
 
 from parser.faculties import paths_for
 from parser.faculties.base import AFTER_AI_NAME, PARSED_NAME, read_json, rotate, write_json
-from parser.finalize import transform_schedule
-from parser.overrides import apply_overrides, load_overrides
-from parser.publish import publish
-from parser.registry import load_registry
+from parser.core.finalize import transform_schedule
+from parser.core.overrides import apply_overrides, load_overrides
+from parser.core.publish import publish
+from parser.core.registry import load_registry
 
 logger = logging.getLogger(__name__)
 

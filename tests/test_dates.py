@@ -1,13 +1,13 @@
-import pytest
+﻿import pytest
 
-from parser.dates import (
+from parser.core.dates import (
     add_year,
     expand_dates,
     extract_first_date,
     is_valid_date,
     semester_start_year_from_header,
 )
-from parser.preprocess import normalize_date_ranges
+from parser.faculties.f12_inec.text import normalize_date_ranges
 
 
 @pytest.mark.parametrize(

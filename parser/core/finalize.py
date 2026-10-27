@@ -2,8 +2,8 @@ import itertools
 from datetime import date, datetime, time, timezone
 from typing import Any, Dict, List, Optional
 
-from parser.dates import expand_dates
-from parser.postprocess import remove_academic_titles
+from parser.core.dates import expand_dates
+from parser.core.postprocess import remove_academic_titles
 
 
 # Карта соответствия времени начала пары номеру пары

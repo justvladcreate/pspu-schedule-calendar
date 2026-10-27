@@ -15,14 +15,14 @@ from __future__ import annotations
 import logging
 import re
 
-from parser.dates import expand_date_text, semester_start_year_from_header
+from parser.core.dates import expand_date_text, semester_start_year_from_header
 from parser.faculties.base import (
     SOURCE_NAME,
     FacultyParser,
     paths_for,
 )
-from parser.model import AcademicPeriod, Faculty
-from parser.preprocess import clean, normalize_time
+from parser.core.model import AcademicPeriod, Faculty
+from parser.core.text import clean, normalize_time
 from parser.sources.base import ScheduleSource, SheetData
 from parser.sources.cloud_mail import CloudMailFileSource
 

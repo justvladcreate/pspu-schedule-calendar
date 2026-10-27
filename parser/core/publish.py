@@ -16,7 +16,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from parser.model import Faculty
+from parser.core.model import Faculty
 
 SCHEMA_VERSION = 2
 
@@ -112,14 +112,34 @@ def publish(
     faculties: list[Faculty],
     events_by_faculty: dict[str, list[dict]],
     generated_at: str,
+    *,
+    drop_ids: set[str] | None = None,
 ) -> Path:
-    """Публикует все факультеты и обновляет index.json."""
+    """Публикует факультеты и обновляет index.json.
+
+    Факультеты, которых нет в этом прогоне, остаются в индексе как были —
+    так частичный прогон (`--faculty 01`) не стирает остальных.
+    ``drop_ids`` — факультеты, которые прогон отработал и оставил пустыми.
+    """
     web_data_dir = Path(web_data_dir)
     index_path = web_data_dir / "index.json"
     previous_index = _read_json(index_path)
+    drop_ids = set(drop_ids or ())
 
     stamp = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
-    entries = []
+
+    # Сохраняем порядок прошлого индекса, убираем выбывшие.
+    ordered_ids: list[str] = [
+        entry["id"]
+        for entry in previous_index.get("faculties", [])
+        if entry.get("id") and entry["id"] not in drop_ids
+    ]
+    entries: dict[str, dict] = {
+        entry["id"]: entry
+        for entry in previous_index.get("faculties", [])
+        if entry.get("id") and entry["id"] not in drop_ids
+    }
+
     changed_any = False
 
     for faculty in faculties:
@@ -132,7 +152,7 @@ def publish(
 
         data_path = web_data_dir / "faculties" / faculty.id / "data.json"
         payload = _read_json(data_path)
-        entries.append({
+        entries[faculty.id] = {
             "id": faculty.id,
             "name": faculty.name,
             "short": faculty.short,
@@ -141,7 +161,13 @@ def publish(
             "events": len(payload.get("events", [])),
             "generated_at": payload.get("generated_at", ""),
             "original": faculty_original(faculty),
-        })
+        }
+        if faculty.id not in ordered_ids:
+            ordered_ids.append(faculty.id)
+
+    for faculty_id in drop_ids:
+        if faculty_id in entries:
+            entries.pop(faculty_id, None)
 
     if changed_any and previous_index.get("generated_at") == stamp:
         # ИНЭК не менялся, но другой факультет обновился.
@@ -150,7 +176,7 @@ def publish(
     index = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": stamp,
-        "faculties": entries,
+        "faculties": [entries[fid] for fid in ordered_ids if fid in entries],
     }
     _write(index_path, _text(index))
     return index_path

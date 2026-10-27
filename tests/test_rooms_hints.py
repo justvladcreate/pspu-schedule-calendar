@@ -1,6 +1,6 @@
 import pytest
 
-from parser.rooms_hints import (
+from parser.faculties.f12_inec.rooms_hints import (
     parse_rooms_with_hints,
     pick_rooms_for_branch,
     split_branch_by_rooms,

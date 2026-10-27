@@ -1,4 +1,4 @@
-"""Склейка ответа LLM с исходными ячейками (ИНЭК).
+﻿"""Склейка ответа LLM с исходными ячейками (ИНЭК).
 
 Перенесено из старого parser/process.py без изменения поведения:
 промпт возвращает строки «[n];день;время;...», а здесь они
@@ -11,9 +11,9 @@ import hashlib
 import logging
 import re
 
-from parser.ai import ask_ai
-from parser.preprocess import normalize_time
-from parser.rooms_hints import split_branch_by_rooms
+from parser.core.ai import ask_ai
+from parser.core.text import normalize_time
+from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 
 logger = logging.getLogger(__name__)
 

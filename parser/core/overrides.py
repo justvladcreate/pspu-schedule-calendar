@@ -40,7 +40,7 @@ from pathlib import Path
 
 import yaml
 
-from parser.dates import expand_dates
+from parser.core.dates import expand_dates
 
 logger = logging.getLogger(__name__)
 

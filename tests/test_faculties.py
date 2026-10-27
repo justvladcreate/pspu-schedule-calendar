@@ -1,5 +1,5 @@
 from parser.faculties import available_faculties, get_parser_class
-from parser.registry import get_faculty, load_registry
+from parser.core.registry import get_faculty, load_registry
 
 
 def test_registry_has_only_inec_and_math():

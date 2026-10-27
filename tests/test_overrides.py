@@ -1,6 +1,6 @@
 import pytest
 
-from parser.overrides import apply_overrides
+from parser.core.overrides import apply_overrides
 
 
 def _event(**overrides):

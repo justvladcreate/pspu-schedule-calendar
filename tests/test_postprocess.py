@@ -1,6 +1,6 @@
 import pytest
 
-from parser.postprocess import remove_academic_titles
+from parser.core.postprocess import remove_academic_titles
 
 
 @pytest.mark.parametrize(

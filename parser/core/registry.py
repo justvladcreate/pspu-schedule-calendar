@@ -6,9 +6,9 @@ from pathlib import Path
 
 import yaml
 
-from parser.model import AcademicPeriod, Faculty, FacultySource
+from parser.core.model import AcademicPeriod, Faculty, FacultySource
 
-DEFAULT_PATH = Path(__file__).resolve().parent.parent / "faculties.yaml"
+DEFAULT_PATH = Path(__file__).resolve().parents[2] / "faculties.yaml"
 
 
 def _parse_date(value: str | None):

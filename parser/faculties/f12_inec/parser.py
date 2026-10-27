@@ -38,7 +38,7 @@ from parser.faculties.f12_inec.ai_merge import (
 )
 from parser.faculties.f12_inec.extractor import DataExtractor
 from parser.faculties.f12_inec.prompt import USER_PROMPT
-from parser.model import AcademicPeriod
+from parser.core.model import AcademicPeriod
 from parser.sources import GoogleSheetsSource, ScheduleSource, XlsxFileSource
 from parser.sources.base import SheetData
 

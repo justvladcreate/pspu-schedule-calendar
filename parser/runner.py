@@ -14,11 +14,11 @@ from pathlib import Path
 
 from parser.faculties import get_parser_class
 from parser.faculties.base import PARSED_NAME, read_json, rotate, write_json
-from parser.registry import load_registry
-from parser.finalize import transform_schedule
-from parser.model import Faculty
-from parser.overrides import apply_overrides, load_overrides
-from parser.publish import publish
+from parser.core.registry import load_registry
+from parser.core.finalize import transform_schedule
+from parser.core.model import Faculty
+from parser.core.overrides import apply_overrides, load_overrides
+from parser.core.publish import publish
 
 logger = logging.getLogger(__name__)
 
@@ -111,15 +111,25 @@ def events_equal(a: list, b: list) -> bool:
 
 async def process_all(
     *,
+    faculty_ids: set[str] | None = None,
     publish_web: bool = True,
     git_push: bool = True,
 ) -> dict[str, dict]:
+    """Прогоняет факультеты через их собственные модули.
+
+    faculty_ids — ограничить набор (например, {"01"}); None = все из
+    faculties.yaml.
+    """
     period, faculties = load_registry()
     rules = load_overrides(OVERRIDES_PATH)
+
+    if faculty_ids:
+        faculties = [f for f in faculties if f.id in faculty_ids]
 
     results: dict[str, dict] = {}
     for faculty in faculties:
         if not faculty.enabled:
+            logger.info("Факультет %s выключен в faculties.yaml — пропуск", faculty.id)
             continue
         parsed = await process_faculty(faculty, period, rules)
         if parsed is None:
@@ -141,7 +151,20 @@ async def process_all(
             for faculty_id, parsed in results.items()
         }
         published = [faculty for faculty in faculties if faculty.id in results]
-        publish(WEB_DATA_DIR, published, events_by_faculty, _stamp(results))
+        # Факультет отработал, но событий нет (например, файл прошлого
+        # года) — убираем его из индекса.
+        drop_ids = {
+            faculty_id
+            for faculty_id, parsed in results.items()
+            if not parsed.get("events")
+        }
+        publish(
+            WEB_DATA_DIR,
+            published,
+            events_by_faculty,
+            _stamp(results),
+            drop_ids=drop_ids,
+        )
 
         if git_push:
             await commit_and_push()
@@ -207,23 +230,26 @@ async def commit_and_push() -> bool:
 
 
 async def process_schedule(
-    use_chunks: bool = False,
-    chunk_size: int = 30,
+    faculty_ids: set[str] | None = None,
     publish_web: bool = True,
     git_push: bool = True,
 ) -> dict | None:
-    """Совместимая точка входа: обходит все включённые факультеты."""
+    """Точка входа: обходит факультеты и возвращает сводку."""
     logger.info(
-        "Начата обработка расписания (publish_web=%s, git_push=%s)",
-        publish_web, git_push,
+        "Обработка расписания (факультеты=%s, publish_web=%s, git_push=%s)",
+        ", ".join(sorted(faculty_ids)) if faculty_ids else "все",
+        publish_web,
+        git_push,
     )
-    results = await process_all(publish_web=publish_web, git_push=git_push)
+    results = await process_all(
+        faculty_ids=faculty_ids,
+        publish_web=publish_web,
+        git_push=git_push,
+    )
     if not results:
         logger.error("Не удалось разобрать ни один факультет")
         return None
 
     total = sum(len(parsed.get("events", [])) for parsed in results.values())
-    logger.info(
-        "Готово: факультетов %d, событий %d", len(results), total
-    )
+    logger.info("Готово: факультетов %d, событий %d", len(results), total)
     return {"faculties": results, "events": total}
