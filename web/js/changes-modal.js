@@ -81,6 +81,7 @@ function buildHeaderText(change) {
     const label = { added: '➕ Добавлено', removed: '➖ Удалено', changed: '✏ Изменено' }[change.type];
 
     const parts = [];
+    if (ev.faculty_name) parts.push(ev.faculty_name);
     if (ev.group) parts.push(ev.group);
     if (ev.weekday) parts.push(ev.weekday);
     if (ev.pair_number) parts.push(`${ev.pair_number}-я пара`);

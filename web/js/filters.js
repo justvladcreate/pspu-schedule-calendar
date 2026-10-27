@@ -32,11 +32,13 @@ function isFilterOpen() {
  * Сколько событий попадёт под наборы групп/преподавателей.
  * Не трогает state — чистый расчёт для превью в счётчике.
  */
-function countMatchingEvents(groups, teachers) {
-    if (groups.size === 0 && teachers.size === 0) return 0;
+function countMatchingEvents(groups, teachers, faculties = state.selectedFaculties) {
+    if (groups.size === 0 && teachers.size === 0 && faculties.size === 0) return 0;
     let n = 0;
     for (const ev of state.allEvents) {
         if (state.showOnlyActive && ev.is_past) continue;
+        if (faculties.size > 0
+            && !faculties.has(String(ev.faculty_id || '12'))) continue;
         if (groups.size > 0 && !groups.has(ev.group)) continue;
         if (teachers.size > 0) {
             const t = ev.teachers || [];
@@ -54,14 +56,23 @@ function countMatchingEvents(groups, teachers) {
 export function applyFilters() {
     const sg = state.selectedGroups;
     const st = state.selectedTeachers;
+    const sf = state.selectedFaculties;
 
     if (sg.size === 0 && st.size === 0) {
-        state.filteredEvents = [];
+        if (sf.size === 0) {
+            state.filteredEvents = [];
+            return;
+        }
+        state.filteredEvents = state.allEvents.filter(ev => {
+            if (state.showOnlyActive && ev.is_past) return false;
+            return sf.has(String(ev.faculty_id || '12'));
+        });
         return;
     }
 
     state.filteredEvents = state.allEvents.filter(ev => {
         if (state.showOnlyActive && ev.is_past) return false;
+        if (sf.size > 0 && !sf.has(String(ev.faculty_id || '12'))) return false;
         if (sg.size > 0 && !sg.has(ev.group)) return false;
         if (st.size > 0) {
             const teachers = ev.teachers || [];
@@ -88,7 +99,8 @@ export function updateTriggerLabel() {
     const open = isFilterOpen();
     const g = open ? state.draftGroups.size   : state.selectedGroups.size;
     const t = open ? state.draftTeachers.size : state.selectedTeachers.size;
-    const total = g + t;
+    const f = open ? state.draftFaculties.size : state.selectedFaculties.size;
+    const total = g + t + f;
 
     const newText = total === 0 ? '' : (total > 99 ? '99+' : String(total));
     const changed = badge.textContent !== newText;
@@ -121,21 +133,23 @@ export function updateCounter() {
     const open = isFilterOpen();
     const g = open ? state.draftGroups.size   : state.selectedGroups.size;
     const t = open ? state.draftTeachers.size : state.selectedTeachers.size;
+    const f = open ? state.draftFaculties.size : state.selectedFaculties.size;
 
     const totalG = state.groups.length;
     const totalT = state.teachers.length;
 
     const found = open
-        ? countMatchingEvents(state.draftGroups, state.draftTeachers)
+        ? countMatchingEvents(state.draftGroups, state.draftTeachers, state.draftFaculties)
         : state.filteredEvents.length;
 
     let selectionText;
-    if (g === 0 && t === 0) {
+    if (g === 0 && t === 0 && f === 0) {
         selectionText = 'Ничего не выбрано';
     } else if (g === totalG && t === totalT && (totalG + totalT) > 0) {
         selectionText = 'Выбрано всё';
     } else {
         const parts = [];
+        if (f > 0) parts.push(`факультетов: ${f}`);
         if (g > 0) parts.push(`групп: ${g}`);
         if (t > 0) parts.push(`преподавателей: ${t}`);
         selectionText = `Выбрано — ${parts.join(', ')}`;
@@ -154,7 +168,7 @@ function updateDoneButton() {
     const doneBtn = root.querySelector('.filter-done');
     if (!doneBtn) return;
 
-    const n = state.draftGroups.size + state.draftTeachers.size;
+    const n = state.draftFaculties.size + state.draftGroups.size + state.draftTeachers.size;
     doneBtn.textContent = n > 0 ? `Готово (${n})` : 'Готово';
 }
 
@@ -191,6 +205,7 @@ function commitDrafts() {
     // Снимок «как было» для кнопки «Вернуть» — включая режим избранного
     // и prevFilter, чтобы «Отменить» откатывал и их тоже.
     state.undoFilter = {
+        faculties:       [...state.selectedFaculties],
         groups:          [...state.selectedGroups],
         teachers:        [...state.selectedTeachers],
         favoritesActive: state.favoritesActive,
@@ -201,6 +216,7 @@ function commitDrafts() {
     };
 
     // Применяем черновик.
+    state.selectedFaculties    = new Set(state.draftFaculties);
     state.selectedGroups       = new Set(state.draftGroups);
     state.selectedTeachers     = new Set(state.draftTeachers);
     state.favoritesGroups      = new Set(state.draftFavoritesGroups);
@@ -227,6 +243,7 @@ function commitDrafts() {
         state.prevFilter = null;
     }
 
+    saveSetToStorage('schedule-selected-faculties', state.selectedFaculties);
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
     saveSetToStorage(FAV_GROUPS_KEY,               state.favoritesGroups);
@@ -253,6 +270,7 @@ function commitDrafts() {
 function undoFilterChange() {
     if (!state.undoFilter) return;
 
+    state.selectedFaculties = new Set(state.undoFilter.faculties || []);
     state.selectedGroups   = new Set(state.undoFilter.groups);
     state.selectedTeachers = new Set(state.undoFilter.teachers);
     state.favoritesActive  = !!state.undoFilter.favoritesActive;
@@ -264,6 +282,7 @@ function undoFilterChange() {
         : null;
     state.undoFilter = null;
 
+    saveSetToStorage('schedule-selected-faculties', state.selectedFaculties);
     saveSetToStorage('schedule-selected-groups',   state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
     saveFavoritesActive(state.favoritesActive);
@@ -436,6 +455,42 @@ export function setupUnifiedFilter() {
     const doneBtn = root.querySelector('.filter-done');
     const groupsListEl = document.getElementById('filterGroupsList');
     const teachersListEl = document.getElementById('filterTeachersList');
+    const facultiesEl = document.getElementById('filterFaculties');
+
+    /* ---------- факультеты ---------- */
+
+    function renderFaculties() {
+        if (!facultiesEl) return;
+        facultiesEl.innerHTML = '';
+        if (!state.faculties.length) {
+            const empty = document.createElement('div');
+            empty.className = 'filter-option-empty';
+            empty.textContent = 'Нет факультетов';
+            facultiesEl.appendChild(empty);
+            return;
+        }
+        for (const faculty of state.faculties) {
+            const id = String(faculty.id);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'filter-faculty-chip';
+            btn.classList.toggle('is-active', state.draftFaculties.has(id));
+            btn.textContent = faculty.short || faculty.name || id;
+            btn.title = faculty.name || id;
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (state.draftFaculties.has(id)) state.draftFaculties.delete(id);
+                else state.draftFaculties.add(id);
+                renderFaculties();
+                renderLists(search.value);
+                updateTriggerLabel();
+                updateCounter();
+                updateDoneButton();
+            });
+            facultiesEl.appendChild(btn);
+        }
+    }
 
     /* ---------- одна строка списка ---------- */
 
@@ -476,8 +531,18 @@ export function setupUnifiedFilter() {
     function renderLists(query = '') {
         const q = query.trim().toLowerCase();
 
+        const facultyScope = state.draftFaculties;
+        const inFaculty = (g) => {
+            if (!facultyScope || facultyScope.size === 0) return true;
+            const ids = state.groupFaculties.get(g);
+            if (!ids) return true;
+            return [...ids].some(id => facultyScope.has(String(id)));
+        };
+
         groupsListEl.innerHTML = '';
-        const matchedGroups = state.groups.filter(g => !q || g.toLowerCase().includes(q));
+        const matchedGroups = state.groups.filter(g =>
+            (!q || g.toLowerCase().includes(q)) && inFaculty(g)
+        );
         if (matchedGroups.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'filter-option-empty';
@@ -503,6 +568,7 @@ export function setupUnifiedFilter() {
 
     function openFilter() {
         // Копируем всё «живое» состояние в черновик.
+        state.draftFaculties        = new Set(state.selectedFaculties);
         state.draftGroups           = new Set(state.selectedGroups);
         state.draftTeachers         = new Set(state.selectedTeachers);
         state.draftFavoritesGroups  = new Set(state.favoritesGroups);
@@ -513,6 +579,7 @@ export function setupUnifiedFilter() {
         root.classList.add('open');
 
         search.value = '';
+        renderFaculties();
         renderLists('');
         updateTriggerLabel();   // теперь бейдж показывает draft
         updateCounter();
@@ -603,9 +670,11 @@ export function setupUnifiedFilter() {
     clearBtn.addEventListener('click', e => {
         e.stopPropagation();
 
+        state.draftFaculties.clear();
         state.draftGroups.clear();
         state.draftTeachers.clear();
 
+        renderFaculties();
         renderLists(search.value);
         updateTriggerLabel();
         updateCounter();

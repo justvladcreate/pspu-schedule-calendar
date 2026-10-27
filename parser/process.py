@@ -22,11 +22,12 @@ from google_services import (
     get_drive_service,
 )
 from parser.ai import ask_ai
-from parser.prompts import USER_PROMPT as user_prompt
-from parser.extractor import DataExtractor, delete_old_file
+from parser.faculties import get_faculty, load_registry
 from parser.finalize import transform_schedule
 from parser.overrides import load_overrides, apply_overrides
 from parser.preprocess import normalize_time
+from parser.prompts import USER_PROMPT as user_prompt
+from parser.publish import publish_faculty_data
 from parser.rooms_hints import pick_rooms_for_branch, split_branch_by_rooms
 from parser.sources import GoogleSheetsSource, ScheduleSource, XlsxFileSource
 
@@ -63,7 +64,26 @@ chunks_cache_path = latest_files_path / "chunks_cache.json"
 OVERRIDES_PATH = current_dir / "overrides.yaml"
 
 WEB_DATA_PATH     = web_dir / "data.json"
+WEB_DATA_DIR      = web_dir / "data"
 WEB_OLD_DATA_PATH = web_dir / "old_data.json"
+
+
+async def publish_web_faculties(parsed: dict) -> None:
+    """Публикует per-faculty JSON. Пока ИНЭК — эталонный факультет."""
+    try:
+        _, faculties = load_registry()
+        inec = get_faculty(faculties, "12")
+        if not inec:
+            return
+        await asyncio.to_thread(
+            publish_faculty_data,
+            WEB_DATA_DIR,
+            [inec],
+            {inec.id: list(parsed.get("events") or [])},
+            parsed.get("generated_at") or "",
+        )
+    except Exception as exc:
+        logger.error("Не удалось опубликовать данные факультетов: %s", exc)
 
 
 # ================================================================
@@ -666,6 +686,7 @@ async def process_schedule(
     # 7. публикация в web/
     if publish_web:
         await sync_web_data(latest_parsed_path, old_parsed_path)
+        await publish_web_faculties(parsed)
     else:
         logger.info("publish_web=False — пропускаю копирование в web/")
 

@@ -26,12 +26,19 @@ export function hashChanges(changes) {
 export function filterChangesByFilters(changes) {
     const sg = state.selectedGroups;
     const st = state.selectedTeachers;
-    if (sg.size === 0 && st.size === 0) return changes;
+    const sf = state.selectedFaculties;
+    if (sg.size === 0 && st.size === 0 && sf.size === 0) return changes;
 
     return changes.filter(ch => {
         const groupOld = ch.old ? ch.old.group : '';
         const groupNew = ch.new ? ch.new.group : '';
         const group = groupNew || groupOld;
+        const ev = ch.new || ch.old;
+
+        if (sf.size > 0) {
+            if (!ev || !sf.has(String(ev.faculty_id || '12'))) return false;
+        }
+        if (sg.size === 0 && st.size === 0) return true;
 
         if (sg.size > 0 && !sg.has(group)) return false;
 

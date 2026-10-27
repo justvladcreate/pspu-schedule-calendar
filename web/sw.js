@@ -149,7 +149,9 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.endsWith('/data.json') ||
-      url.pathname.endsWith('/old_data.json')) {
+      url.pathname.endsWith('/old_data.json') ||
+      url.pathname.endsWith('/data/index.json') ||
+      url.pathname.includes('/data/faculties/')) {
     event.respondWith(networkFirstJson(req, url.pathname));
     return;
   }

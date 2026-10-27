@@ -89,6 +89,14 @@ export async function loadData(url = 'data.json', {
     }
 }
 
+export function loadFacultyIndex(options = {}) {
+    return loadData('data/index.json', options);
+}
+
+export function loadFacultyData(id, options = {}) {
+    return loadData(`data/faculties/${encodeURIComponent(id)}.json`, options);
+}
+
 export function expandEvents(rawEvents) {
     const out = [];
     for (const ev of rawEvents) {

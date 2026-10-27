@@ -8,7 +8,9 @@ import {
   applyUrlContext, resolveUrlContext, disarmUrlContext,
 } from './state.js';
 import { escapeHtml, toISO } from './utils.js';
-import { loadData, expandEvents } from './data.js';
+import {
+    loadData, loadFacultyIndex, loadFacultyData, expandEvents,
+} from './data.js';
 
 import { render, updateDateLabel } from './render.js';
 import {
@@ -64,14 +66,47 @@ function stripReloadMarker() {
  *  Загрузка данных
  * ============================================================ */
 
-const SUPPORTED_SCHEMA_VERSION = 1;
+const SUPPORTED_SCHEMA_VERSION = 2;
+const INDEX_CACHE_KEY = 'schedule-faculty-index';
 
 function _isSupportedSchemaVersion(data) {
     const version = data.schema_version;
     if (version === undefined) return true;
-    if (version === SUPPORTED_SCHEMA_VERSION) return true;
+    if (version === 1 || version === SUPPORTED_SCHEMA_VERSION) return true;
     console.warn(`[load] неподдерживаемая schema_version: ${version}`);
     return false;
+}
+
+function _loadCachedIndex() {
+    try {
+        const raw = localStorage.getItem(INDEX_CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
+
+function _saveCachedIndex(index) {
+    try {
+        if (index) localStorage.setItem(INDEX_CACHE_KEY, JSON.stringify(index));
+    } catch {}
+}
+
+function _facultyMetaFromEvents(events) {
+    const map = new Map();
+    for (const ev of events || []) {
+        const id = String(ev.faculty_id || '12');
+        if (!map.has(id)) {
+            map.set(id, {
+                id,
+                name: ev.faculty_name || (id === '12' ? 'ИНЭК' : `Факультет ${id}`),
+                short: ev.faculty_name || (id === '12' ? 'ИНЭК' : id),
+                file: `data/faculties/${id}.json`,
+                groups: [],
+            });
+        }
+    }
+    return [...map.values()];
 }
 
 function isValidScheduleData(data) {
@@ -85,9 +120,11 @@ function loadCachedData() {
     const events = loadSnapshot();
     if (!Array.isArray(events) || events.length === 0) return null;
 
+    const index = _loadCachedIndex();
     return {
         events,
         generated_at: loadGeneratedAt() || null,
+        faculties: index?.faculties || _facultyMetaFromEvents(events),
     };
 }
 
@@ -105,9 +142,54 @@ async function loadFreshData({ onProgress = null } = {}) {
         }
         : null;
 
+    // Новый формат: index.json + data/faculties/<id>.json
+    try {
+        const index = await loadFacultyIndex();
+        if (index && Array.isArray(index.faculties) && index.faculties.length) {
+            _saveCachedIndex(index);
+            safeProgress?.(15);
+
+            const payloads = await Promise.all(
+                index.faculties.map(async (faculty) => {
+                    try {
+                        const payload = await loadFacultyData(faculty.id);
+                        return { faculty, payload };
+                    } catch (e) {
+                        console.warn(`[load] факультет ${faculty.id} недоступен:`, e.message || e);
+                        return null;
+                    }
+                }),
+            );
+
+            const events = [];
+            for (const item of payloads) {
+                if (!item || !Array.isArray(item.payload?.events)) continue;
+                events.push(...item.payload.events);
+            }
+            if (events.length > 0) {
+                safeProgress?.(95);
+                return {
+                    data: {
+                        schema_version: 2,
+                        generated_at: index.generated_at,
+                        faculties: index.faculties,
+                        events,
+                    },
+                    usedFallback: false,
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('[load] index.json недоступен:', e.message || e);
+    }
+
+    // Совместимость со старым монолитным data.json.
     try {
         const data = await loadData('data.json', { onProgress: safeProgress });
         if (isValidScheduleData(data)) {
+            if (!Array.isArray(data.faculties)) {
+                data.faculties = _facultyMetaFromEvents(data.events);
+            }
             return { data, usedFallback: false };
         }
         console.warn('[load] data.json невалиден');
@@ -120,6 +202,9 @@ async function loadFreshData({ onProgress = null } = {}) {
     try {
         const data = await loadData('old_data.json', { onProgress: safeProgress });
         if (isValidScheduleData(data)) {
+            if (!Array.isArray(data.faculties)) {
+                data.faculties = _facultyMetaFromEvents(data.events);
+            }
             return { data, usedFallback: online };
         }
         console.warn('[load] old_data.json невалиден');
@@ -134,6 +219,9 @@ function applyDataToState(data, usedFallback) {
     state.currentData = data;
     state.displayedIso = data.generated_at || state.displayedIso;
     state.allEvents = expandEvents(data.events || []);
+    state.faculties = Array.isArray(data.faculties) && data.faculties.length
+        ? data.faculties
+        : _facultyMetaFromEvents(data.events || []);
     state.fallbackActive = !!usedFallback;
 
     updateUpdatedLabel(state.displayedIso);
@@ -143,19 +231,48 @@ function applyDataToState(data, usedFallback) {
 function rebuildGroups() {
     const groups = new Set();
     const teachers = new Set();
+    const groupFaculties = new Map();
+    const facultyMap = new Map(
+        (state.faculties || []).map(item => [String(item.id), item]),
+    );
+
     for (const ev of state.allEvents) {
-        if (ev.group) groups.add(ev.group);
+        const facultyId = String(ev.faculty_id || '12');
+        if (!facultyMap.has(facultyId)) {
+            facultyMap.set(facultyId, {
+                id: facultyId,
+                name: ev.faculty_name || (facultyId === '12' ? 'ИНЭК' : `Факультет ${facultyId}`),
+                short: ev.faculty_name || (facultyId === '12' ? 'ИНЭК' : facultyId),
+                file: `data/faculties/${facultyId}.json`,
+                groups: [],
+            });
+        }
+        if (ev.group) {
+            groups.add(ev.group);
+            if (!groupFaculties.has(ev.group)) groupFaculties.set(ev.group, new Set());
+            groupFaculties.get(ev.group).add(facultyId);
+        }
         (ev.teachers || []).forEach(t => teachers.add(t));
     }
+
+    state.faculties = [...facultyMap.values()].sort((a, b) =>
+        String(a.name).localeCompare(String(b.name), 'ru')
+    );
     state.groups = [...groups].sort();
     state.teachers = [...teachers].sort();
+    state.groupFaculties = groupFaculties;
 
+    const knownFaculties = new Set(state.faculties.map(item => String(item.id)));
+    for (const id of [...state.selectedFaculties]) {
+        if (!knownFaculties.has(String(id))) state.selectedFaculties.delete(id);
+    }
     for (const g of [...state.selectedGroups]) {
         if (!state.groups.includes(g)) state.selectedGroups.delete(g);
     }
     for (const t of [...state.selectedTeachers]) {
         if (!state.teachers.includes(t)) state.selectedTeachers.delete(t);
     }
+    saveSetToStorage('schedule-selected-faculties', state.selectedFaculties);
     saveSetToStorage('schedule-selected-groups', state.selectedGroups);
     saveSetToStorage('schedule-selected-teachers', state.selectedTeachers);
 }
@@ -710,9 +827,11 @@ async function init() {
 
 function buildShareUrl() {
     const params = new URLSearchParams();
+    const f = [...state.selectedFaculties];
     const g = [...state.selectedGroups];
     const t = [...state.selectedTeachers];
 
+    if (f.length) params.set('f', f.join(','));
     if (g.length) params.set('g', g.join(','));
     if (t.length) params.set('t', t.join(','));
     params.set('v', state.view);

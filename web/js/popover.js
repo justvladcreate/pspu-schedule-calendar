@@ -20,6 +20,10 @@ export function positionPopover(pop, anchor) {
 }
 
 export function eventDetailsHtml(ev) {
+    // В карточке события факультет важен при мультифакультетном расписании.
+    const faculty = ev.faculty_name
+        ? `<div class="popover-row"><span class="label">Факультет</span><span>${escapeHtml(ev.faculty_name)}</span></div>`
+        : "";
     const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
     return `
         <div class="popover-title-row">
@@ -40,6 +44,7 @@ export function eventDetailsHtml(ev) {
         </div>
         <div class="popover-row"><span class="label">Время</span><span>${ev.time_start} – ${ev.endTime}</span></div>
         <div class="popover-row"><span class="label">Дата</span><span>${ev.dateObj.getDate()} ${MONTHS_GEN[ev.dateObj.getMonth()]} ${ev.dateObj.getFullYear()}</span></div>
+        ${faculty}
         ${ev.rooms ? `<div class="popover-row"><span class="label">Место</span><span>${renderRoomsLinks(ev.rooms)}</span></div>` : ''}
         ${ev.teachers && ev.teachers.length ? `<div class="popover-row"><span class="label">Преподаватель</span><span>${escapeHtml(ev.teachers.join(', '))}</span></div>` : ''}
         <div class="popover-row"><span class="label">Группа</span><span>${escapeHtml(ev.group)}</span></div>

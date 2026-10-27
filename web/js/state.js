@@ -125,8 +125,11 @@ export function loadPendingChangesMeta() {
 export const state = {
   allEvents: [],
   filteredEvents: [],
+  faculties: [],
   groups: [],
   teachers: [],
+  groupFaculties: new Map(),
+  selectedFaculties: loadSetFromStorage('schedule-selected-faculties'),
   selectedGroups: loadSetFromStorage('schedule-selected-groups'),
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
 
@@ -135,6 +138,7 @@ export const state = {
   prevFilter: loadPrevFilter(),
   favoritesActive: loadFavoritesActive(),
 
+  draftFaculties: new Set(),
   draftGroups: new Set(),
   draftTeachers: new Set(),
   draftFavoritesGroups: new Set(),
@@ -215,6 +219,7 @@ export function saveNavStep(step) {
 
 export function normalizeKey(ev) {
   return [
+    ev.faculty_id || '',
     ev.group || '',
     ev.weekday || '',
     ev.pair_number || '',
@@ -227,6 +232,8 @@ export function toSnapshotEntry(ev) {
   return {
     key: normalizeKey(ev),
     event_id: ev.event_id,
+    faculty_id: ev.faculty_id || '12',
+    faculty_name: ev.faculty_name || '',
     group: ev.group,
     weekday: ev.weekday,
     pair_number: ev.pair_number,
@@ -257,7 +264,15 @@ export function loadSnapshot() {
     const raw = localStorage.getItem('schedule-snapshot');
     if (!raw) return null;
     const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : null;
+    if (!Array.isArray(arr)) return null;
+
+    // Совместимость: старые снимки не знали о факультетах.
+    return arr.map((entry) => {
+      if (!entry || typeof entry !== 'object' || entry.faculty_id) return entry;
+      const migrated = { ...entry, faculty_id: '12', faculty_name: entry.faculty_name || 'ИНЭК' };
+      migrated.key = normalizeKey(migrated);
+      return migrated;
+    });
   } catch { return null; }
 }
 
@@ -315,6 +330,7 @@ export function loadPrevFilter() {
 export function applyUrlContext() {
   const params = new URLSearchParams(location.search);
   const raw = {
+    f: params.get('f'),
     g: params.get('g'),
     t: params.get('t'),
     v: params.get('v'),
@@ -344,12 +360,21 @@ export function applyUrlContext() {
 export function resolveUrlContext() {
   if (!state.urlRaw) return 'empty';
 
-  const { g, t, v, d, e } = state.urlRaw;
+  const { f, g, t, v, d, e } = state.urlRaw;
+  const knownFaculties = new Set(state.faculties.map(item => String(item.id)));
   const knownGroups   = new Set(state.groups);
   const knownTeachers = new Set(state.teachers);
 
   let total   = 0;
   let matched = 0;
+
+  if (f !== null) {
+    total++;
+    const list = f ? f.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const kept = list.filter(x => knownFaculties.has(x));
+    state.selectedFaculties = new Set(kept);
+    if (f === '' || kept.length > 0) matched++;
+  }
 
   if (g !== null) {
     total++;
@@ -401,6 +426,7 @@ export function resolveUrlContext() {
 }
 
 function restoreFromStorage() {
+  state.selectedFaculties = loadSetFromStorage('schedule-selected-faculties');
   state.selectedGroups   = loadSetFromStorage('schedule-selected-groups');
   state.selectedTeachers = loadSetFromStorage('schedule-selected-teachers');
   state.view        = loadViewFromStorage();
