@@ -218,7 +218,7 @@ __marimo__/
 
 # Custom
 private
-data/
+/data/
 *.xlsx
 /test_*.py
 /test_*.json
