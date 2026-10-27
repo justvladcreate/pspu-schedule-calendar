@@ -1,4 +1,4 @@
-"""Оркестрация парсера: обходит факультеты и публикует результат.
+﻿"""Оркестрация парсера: обходит факультеты и публикует результат.
 
 Сам разбор живёт в ``parser/faculties/<id>/parser.py`` — у каждого
 факультета свой процессор, экстрактор и промпт. Здесь только общий
@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import subprocess
 from pathlib import Path
 
@@ -55,7 +56,7 @@ async def process_faculty(
 
     try:
         groups = await parser.parse(sheets, period)
-        if parser.uses_llm:
+        if parser.uses_llm and not os.environ.get("PSPU_DISABLE_LLM"):
             groups = await parser.refine(groups, period)
     except Exception as exc:  # noqa: BLE001
         logger.exception("Факультет %s: ошибка разбора: %s", faculty.id, exc)

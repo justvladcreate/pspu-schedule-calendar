@@ -36,10 +36,12 @@ class FacultyPaths:
     """Пути одного факультета — и на бэке, и на фронте."""
 
     faculty_id: str
+    data_root: Path = DATA_ROOT
+    web_root: Path = WEB_ROOT
 
     @property
     def root(self) -> Path:
-        return DATA_ROOT / self.faculty_id
+        return self.data_root / self.faculty_id
 
     @property
     def latest(self) -> Path:
@@ -51,7 +53,7 @@ class FacultyPaths:
 
     @property
     def web(self) -> Path:
-        return WEB_ROOT / self.faculty_id
+        return self.web_root / self.faculty_id
 
     def latest_file(self, name: str) -> Path:
         return self.latest / name
@@ -65,8 +67,16 @@ class FacultyPaths:
         return self
 
 
-def paths_for(faculty_id: str) -> FacultyPaths:
-    return FacultyPaths(str(faculty_id))
+def paths_for(
+    faculty_id: str,
+    data_root: Path | None = None,
+    web_root: Path | None = None,
+) -> FacultyPaths:
+    return FacultyPaths(
+        str(faculty_id),
+        Path(data_root) if data_root else DATA_ROOT,
+        Path(web_root) if web_root else WEB_ROOT,
+    )
 
 
 def read_json(path: Path) -> dict:
@@ -110,9 +120,15 @@ class FacultyParser:
     id: str = ""
     uses_llm: bool = False
 
-    def __init__(self, faculty: Faculty, paths: FacultyPaths | None = None):
+    def __init__(
+        self,
+        faculty: Faculty,
+        paths: FacultyPaths | None = None,
+        ask=None,
+    ):
         self.faculty = faculty
         self.paths = (paths or paths_for(faculty.id)).ensure()
+        self.ask = ask
 
     # ---------------------------------------------------------- source
     def source(self) -> ScheduleSource:

@@ -34,9 +34,12 @@ def test_available_faculties_matches_registry():
     assert sorted(faculty.id for faculty in faculties) == available_faculties()
 
 
-def test_inec_uses_llm_math_does_not():
+def test_both_parsers_use_llm_only_for_uncertain_rows():
     _, faculties = load_registry()
     inec = get_parser_class(get_faculty(faculties, "12").id)
     math = get_parser_class(get_faculty(faculties, "01").id)
+    # ИНЭК прогоняет через LLM все ячейки (эталонная схема),
+    # математика — только строки с низкой уверенностью.
     assert inec.uses_llm is True
-    assert math.uses_llm is False
+    assert math.uses_llm is True
+    assert math.id == "01"
