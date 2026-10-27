@@ -115,7 +115,13 @@ async function main() {
   let ok = 0;
   for (const faculty of faculties) {
     const folder = faculty.folder || `faculties/${faculty.id}`;
-    const target = resolve(ROOT, folder, faculty.original.file || 'source.xlsx');
+    // index.json лежит в web/data/, поэтому папка факультета — от data/
+    const target = resolve(
+      ROOT,
+      'data',
+      folder,
+      faculty.original.file || 'source.xlsx',
+    );
     try {
       const data = await downloadOne(faculty.original.url);
       await mkdir(dirname(target), { recursive: true });

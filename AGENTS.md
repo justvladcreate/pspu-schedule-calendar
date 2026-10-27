@@ -192,6 +192,9 @@ LLM вызывается только для строк с низкой увер
 .venv\Scripts\python.exe -m utils.rebuild_parsed
 .venv\Scripts\python.exe -m utils.rebuild_parsed --faculty 01
 
+# скачать исходные XLSX в web/data/faculties/<id>/source.xlsx (для «Оригинала»)
+node tools/fetch-faculty-xlsx.mjs --root web
+
 # таймер парсера
 .venv\Scripts\python.exe main.py
 
