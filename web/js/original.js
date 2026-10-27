@@ -1,7 +1,7 @@
 'use strict';
 
 import { fetchSheetHtml } from './sheets.js';
-import { createGoogleSource, createXlsxSource } from './original-source.js';
+import { createGoogleSource, createStaticSource } from './original-source.js';
 import { state } from './state.js';
 import {
     mountSheetFrame, findCellInFrame, focusCellInFrame,
@@ -170,10 +170,14 @@ export function setupOriginalModal() {
         if (original && original.type === 'google_sheets' && original.spreadsheet_id) {
             spreadsheetId = original.spreadsheet_id;
             source = createGoogleSource(spreadsheetId);
-        } else if (original && original.type === 'cloud_mail' && original.file) {
+        } else if (original && original.type === 'cloud_mail' && original.sheets) {
             spreadsheetId = '';
             const folder = (meta && meta.folder) || `faculties/${id}`;
-            source = createXlsxSource(`data/${folder}/${original.file}`);
+            source = createStaticSource(`data/${folder}`);
+        } else if (original && original.type === 'cloud_mail') {
+            // Старые опубликованные данные без предрендеренных листов.
+            spreadsheetId = '';
+            source = null;
         } else if (defaultSpreadsheetId) {
             // Старые данные без блока original — ведём себя как раньше.
             spreadsheetId = defaultSpreadsheetId;

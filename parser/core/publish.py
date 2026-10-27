@@ -49,12 +49,13 @@ def _write(path: Path, text: str) -> bool:
     return True
 
 
-def faculty_original(faculty: Faculty) -> dict:
+def faculty_original(faculty: Faculty, folder: Path | None = None) -> dict:
     original: dict = {"type": faculty.source.type, "url": faculty.source.url}
     if faculty.source.type == "google_sheets":
         original["spreadsheet_id"] = faculty.source.spreadsheet_id
-    else:
-        original["file"] = "source.xlsx"
+    elif folder and (folder / "sheets.json").exists():
+        # Предрендеренные листы (шрифты, цвета, рамки) для «Оригинала»
+        original["sheets"] = "sheets.json"
     return original
 
 
@@ -160,7 +161,9 @@ def publish(
             "groups": payload.get("groups", []),
             "events": len(payload.get("events", [])),
             "generated_at": payload.get("generated_at", ""),
-            "original": faculty_original(faculty),
+            "original": faculty_original(
+                faculty, web_data_dir / "faculties" / faculty.id
+            ),
         }
         if faculty.id not in ordered_ids:
             ordered_ids.append(faculty.id)

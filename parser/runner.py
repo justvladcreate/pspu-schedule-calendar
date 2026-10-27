@@ -62,6 +62,23 @@ async def process_faculty(
         logger.exception("Факультет %s: ошибка разбора: %s", faculty.id, exc)
         return None
 
+    # Исходную таблицу рендерим в HTML для кнопки «Оригинал» —
+    # со шрифтами, цветами, рамками и объединёнными ячейками.
+    source_path = getattr(parser, "paths", None)
+    if source_path is not None:
+        try:
+            from parser.core.original import publish_original
+            from parser.faculties.base import SOURCE_NAME
+
+            await asyncio.to_thread(
+                publish_original,
+                WEB_DATA_DIR,
+                faculty.id,
+                source_path.latest_file(SOURCE_NAME),
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Факультет %s: «Оригинал» не отрендерен: %s", faculty.id, exc)
+
     parsed = await transform_schedule(groups, faculty_id=faculty.id)
     parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
 

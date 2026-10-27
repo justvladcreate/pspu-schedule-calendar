@@ -51,7 +51,8 @@ data/faculties/<id>/
 web/data/index.json                     # список факультетов, версии, группы
 web/data/faculties/<id>/data.json       # текущая версия
 web/data/faculties/<id>/old_data.json   # предыдущая версия
-web/data/faculties/<id>/source.xlsx     # оригинал (кладёт CI, не коммитится)
+web/data/faculties/<id>/sheets.json     # список листов «Оригинала»
+web/data/faculties/<id>/sheets/*.html   # предрендер листов (шрифты, цвета, рамки)
 ```
 
 `index.json` содержит для каждого факультета `folder`, `groups`,
@@ -78,8 +79,7 @@ web/data/faculties/<id>/source.xlsx     # оригинал (кладёт CI, н�
 |  | `--no-publish`, `--git-push`, `--source`, `--list`) |
 | `utils/rebuild_parsed.py` | пересборка `parsed.json` из `after_ai.json` |
 | `web/` | статический сайт |
-| `web/vendor/xlsx.mini.min.js` | SheetJS для «Оригинала» XLSX (лениво) |
-| `tools/fetch-faculty-xlsx.mjs` | CI: скачивает исходные XLSX в артефакт Pages |
+| `parser/core/original.py` | рендер листов XLSX в HTML для «Оригинала» |
 | `web/sw.js` | service worker; при добавлении файла обновите `STATIC_ASSETS` |
 | `tools/bump-sw.mjs` | хэш-версия SW для CI; при добавлении JS обновите `WATCHED` |
 | `tests/` | детерминированные тесты, без реальных вызовов LLM |
@@ -136,7 +136,8 @@ LLM вызывается только для строк с низкой увер
 - `state.allEvents` хранит **сырые** события; `expandEvents()` вызывается
   после фильтрации.
 - `original.js` + `original-source.js` — «Оригинал»: Google htmlview или
-  SheetJS по `data/faculties/<id>/source.xlsx`; при отсутствии файла —
+  предрендеренные листы (`sheets.json` + `sheets/*.html`) с сохранением
+  шрифтов, цветов, рамок и объединённых ячеек; при их отсутствии —
   ссылка на cloud.mail.
 - `sw.js` кэширует статику cache-first, `/data/` — network-first.
 - После добавления JS обновите `STATIC_ASSETS` и `WATCHED`.
@@ -170,7 +171,8 @@ LLM вызывается только для строк с низкой увер
 - `data/` — рабочие файлы парсера (не коммитить).
 - `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
   данные, они в Git.
-- `web/data/faculties/<id>/source.xlsx` — **не коммитить**: кладёт CI.
+- `web/data/faculties/<id>/sheets/*.html` — предрендер «Оригинала», тоже
+  в Git (обновляется при прогоне парсера).
 - Не коммитить `private/`, `.venv/`, `data/`, `__pycache__/`, `.idea/`.
 
 ## Команды
@@ -191,9 +193,6 @@ LLM вызывается только для строк с низкой увер
 # пересборка parsed.json из after_ai.json без AI и сети
 .venv\Scripts\python.exe -m utils.rebuild_parsed
 .venv\Scripts\python.exe -m utils.rebuild_parsed --faculty 01
-
-# скачать исходные XLSX в web/data/faculties/<id>/source.xlsx (для «Оригинала»)
-node tools/fetch-faculty-xlsx.mjs --root web
 
 # таймер парсера
 .venv\Scripts\python.exe main.py

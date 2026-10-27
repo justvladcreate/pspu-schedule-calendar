@@ -62,18 +62,23 @@ def test_publish_keeps_version_when_nothing_changed(tmp_path):
     assert not (tmp_path / "faculties" / "12" / "old_data.json").exists()
 
 
-def test_publish_points_to_source_xlsx(tmp_path):
+def test_publish_points_to_prerendered_sheets(tmp_path):
     faculty = _faculty(
         "01",
         FacultySource(type="cloud_mail", url="https://cloud.mail.ru/public/x"),
     )
+    folder = tmp_path / "faculties" / "01"
+    folder.mkdir(parents=True)
+    (folder / "sheets.json").write_text('{"sheets":[]}', encoding="utf-8")
+
     index_path = publish(tmp_path, [faculty], {"01": [{"group": "111"}]}, "v1")
 
     index = json.loads(index_path.read_text(encoding="utf-8"))
     original = index["faculties"][0]["original"]
     assert original["type"] == "cloud_mail"
     assert original["url"].startswith("https://cloud.mail.ru/")
-    assert original["file"] == "source.xlsx"
+    assert original["sheets"] == "sheets.json"
+    assert "file" not in original
 
 
 def test_publish_several_faculties(tmp_path):

@@ -1,194 +1,14 @@
 'use strict';
 
 /* ============================================================
- *  Источники «Оригинала»: Google Sheets и XLSX с cloud.mail.
+ *  Источники «Оригинала».
  *
- *  Google отдаёт htmlview-страницу (см. sheets.js).
- *  XLSX скачивается с нашего же сайта (файл публикует парсер) и
- *  разбирается SheetJS прямо в браузере — без сторонних доменов.
+ *  Google Sheets — htmlview-страница (см. sheets.js).
+ *  XLSX-факультеты — предрендеренные на бэкенде листы
+ *  (web/data/faculties/<id>/sheets.json + sheets/*.html):
+ *  openpyxl сохраняет шрифты, цвета, рамки и объединённые ячейки,
+ *  поэтому таблица выглядит как в Excel.
  * ============================================================ */
-
-let libPromise = null;
-
-function loadXlsxLib() {
-    if (window.XLSX) return Promise.resolve(window.XLSX);
-    if (libPromise) return libPromise;
-
-    libPromise = new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'vendor/xlsx.mini.min.js';
-        script.async = true;
-        script.onload = () => {
-            if (window.XLSX) resolve(window.XLSX);
-            else reject(new Error('XLSX не инициализировался'));
-        };
-        script.onerror = () => reject(new Error('Не удалось загрузить XLSX-библиотеку'));
-        document.head.appendChild(script);
-    });
-
-    return libPromise;
-}
-
-const SHEET_CSS = `
-  html, body { margin: 0; padding: 0; background: #fff; }
-  body {
-    font: 13px/1.45 Arial, "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
-    color: #202124;
-  }
-  table {
-    border-collapse: collapse;
-    background: #fff;
-    table-layout: fixed;
-  }
-  td, th {
-    border: 1px solid #d7dbe0;
-    padding: 3px 6px;
-    vertical-align: top;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-    font-weight: 400;
-  }
-  /* Шапка расписания: «Дата / № / Время / Дисциплина…» */
-  tr.schedule-head td {
-    background: #f1f3f4;
-    font-weight: 600;
-    color: #3c4043;
-  }
-  /* Богатый текст из Excel не должен ломать вид таблицы */
-  td span, td b, td strong, td i, td em, td u, td font {
-    font-size: inherit !important;
-    font-weight: inherit !important;
-    font-style: inherit !important;
-    color: inherit !important;
-  }
-`;
-
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
-
-/**
- * Один проход по ячейкам листа: реальные границы (форматирование
- * растягивает «!ref» на сотни пустых строк) и длины текста по колонкам.
- */
-function scanSheet(XLSX, sheet) {
-    const ref = sheet['!ref'];
-    if (!ref) {
-        return { lastRow: 0, lastCol: 0, lengths: [] };
-    }
-
-    const range = XLSX.utils.decode_range(ref);
-    let lastRow = range.s.r;
-    let lastCol = range.s.c;
-    const lengths = [];
-
-    // Объединённые заголовки («Расписание…», «Направление…») лежат в одной
-    // ячейке и раздувают ширину первой колонки — их в расчёт не берём.
-    const mergedTitles = new Set(
-        (sheet['!merges'] || [])
-            .filter((merge) => merge.e.c > merge.s.c)
-            .map((merge) => `${merge.s.r}:${merge.s.c}`),
-    );
-
-    for (let column = range.s.c; column <= range.e.c; column += 1) {
-        const columnLengths = [];
-        for (let row = range.s.r; row <= range.e.r; row += 1) {
-            if (mergedTitles.has(`${row}:${column}`)) continue;
-            const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
-            if (!cell || cell.v === undefined || cell.v === null) continue;
-            const text = String(cell.v);
-            if (!text.trim()) continue;
-            if (row > lastRow) lastRow = row;
-            if (column > lastCol) lastCol = column;
-            columnLengths.push(
-                Math.max(...text.split('\n').map((line) => line.length)),
-            );
-        }
-        lengths.push(columnLengths);
-    }
-
-    return { lastRow, lastCol, lengths };
-}
-
-function percentile(values, share) {
-    if (!values.length) return 0;
-    const sorted = [...values].sort((a, b) => a - b);
-    const index = Math.min(
-        sorted.length - 1,
-        Math.floor(sorted.length * share),
-    );
-    return sorted[index];
-}
-
-function columnWidths(lengths) {
-    return lengths.map((columnLengths) => {
-        const typical = percentile(columnLengths, 0.9);
-        return Math.min(Math.max(typical * 7 + 16, 56), 380);
-    });
-}
-
-function clippedRef(XLSX, base, lastRow, lastCol) {
-    const range = XLSX.utils.decode_range(base);
-    range.e.r = Math.max(lastRow, range.s.r);
-    range.e.c = Math.max(lastCol, range.s.c);
-    return XLSX.utils.encode_range(range);
-}
-
-function workbookHtml(XLSX, workbook, sheetName) {
-    const sheet = workbook.Sheets[sheetName];
-    if (!sheet) {
-        return `<html><body><p style="padding:16px">Лист «${escapeHtml(sheetName)}» не найден</p></body></html>`;
-    }
-
-    const { lastRow, lastCol, lengths } = scanSheet(XLSX, sheet);
-    const clipped = {
-        ...sheet,
-        '!ref': clippedRef(XLSX, sheet['!ref'] || 'A1', lastRow, lastCol),
-    };
-
-    const html = XLSX.utils.sheet_to_html(clipped, {
-        id: 'xlsx-sheet',
-        header: '',
-        footer: '',
-    });
-
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
-
-    const table = wrapper.querySelector('table');
-    if (table) {
-        // В файлах 01 часть ячеек — «богатый текст» Excel с 14pt и жирным.
-        // Убираем обёртки, чтобы таблица выглядела единообразно.
-        table.querySelectorAll('span, b, strong, i, em, u, font').forEach((el) => {
-            el.replaceWith(...el.childNodes);
-        });
-
-        // Шапка расписания — строка с «Дисциплина/ФИО преподавателя»
-        const headerRow = [...table.querySelectorAll('tr')].find(
-            (row) => /Дисциплин|Предмет/i.test(row.textContent || ''),
-        );
-        if (headerRow) headerRow.classList.add('schedule-head');
-
-        const widths = columnWidths(lengths);
-        const colgroup = document.createElement('colgroup');
-        let total = 0;
-        for (const width of widths) {
-            const col = document.createElement('col');
-            col.style.width = `${width}px`;
-            colgroup.appendChild(col);
-            total += width;
-        }
-        table.insertBefore(colgroup, table.firstChild);
-        table.style.width = `${total}px`;
-    }
-
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${SHEET_CSS}</style></head>`
-         + `<body>${wrapper.innerHTML}</body></html>`;
-}
 
 export function createGoogleSource(spreadsheetId) {
     return {
@@ -202,34 +22,48 @@ export function createGoogleSource(spreadsheetId) {
     };
 }
 
-export function createXlsxSource(file) {
-    let workbookPromise = null;
+/**
+ * Предрендеренные листы факультета.
+ * folder — путь относительно web/, например «data/faculties/01».
+ */
+export function createStaticSource(folder) {
+    const base = String(folder || '').replace(/\/+$/, '');
+    let indexPromise = null;
 
-    function workbook() {
-        if (!workbookPromise) {
-            workbookPromise = (async () => {
-                const XLSX = await loadXlsxLib();
-                const resp = await fetch(file, { cache: 'force-cache' });
+    function loadIndex() {
+        if (!indexPromise) {
+            indexPromise = (async () => {
+                const resp = await fetch(`${base}/sheets.json`, { cache: 'no-store' });
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const buffer = await resp.arrayBuffer();
-                return { XLSX, book: XLSX.read(buffer, { type: 'array' }) };
+                const data = await resp.json();
+                return Array.isArray(data?.sheets) ? data.sheets : [];
             })().catch((error) => {
-                workbookPromise = null;
+                indexPromise = null;
                 throw error;
             });
         }
-        return workbookPromise;
+        return indexPromise;
     }
 
     return {
-        type: 'xlsx',
+        type: 'static',
         async list() {
-            const { book } = await workbook();
-            return (book.SheetNames || []).map((name) => ({ name, gid: name }));
+            const sheets = await loadIndex();
+            return sheets.map((sheet) => ({
+                name: sheet.name,
+                gid: sheet.name,
+                file: sheet.file,
+            }));
         },
         async htmlFor(_fetchSheetHtml, gid) {
-            const { XLSX, book } = await workbook();
-            return workbookHtml(XLSX, book, gid);
+            const sheets = await loadIndex();
+            const sheet = sheets.find((item) => item.name === gid);
+            if (!sheet) {
+                throw new Error(`Лист «${gid}» не найден`);
+            }
+            const resp = await fetch(`${base}/${sheet.file}`, { cache: 'force-cache' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return resp.text();
         },
     };
 }
