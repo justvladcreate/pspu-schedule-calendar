@@ -123,12 +123,6 @@ export function switchToLoad() {
     render('fade');
 }
 
-/** @deprecated — используй switchToCalendar / switchToLoad. */
-export function toggleLoadView() {
-    if (state.view === 'load') switchToCalendar();
-    else switchToLoad();
-}
-
 /* ============================================================
  *  ТЕМА
  *

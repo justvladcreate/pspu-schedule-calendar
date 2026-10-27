@@ -1,11 +1,7 @@
 # parser/ai.py
-from ollama import chat, AsyncClient
 import os
 
-from parser.prompts import USER_PROMPT as user_prompt
-
-# Если файл credentials.json лежит не в той же папке, укажите путь
-models: list = ['gemma4:e4b', 'gemma4:31b-cloud']
+from ollama import AsyncClient
 
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
 

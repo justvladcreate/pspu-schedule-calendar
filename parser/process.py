@@ -15,14 +15,14 @@ from googleapiclient.http import MediaIoBaseDownload
 
 import re
 
-import config
 from config import CONFIG
 from google_services import (
     SPREADSHEET_ID,
     get_drive_and_sheets_services,
     get_drive_service,
 )
-from parser.ai import ask_ai, user_prompt
+from parser.ai import ask_ai
+from parser.prompts import USER_PROMPT as user_prompt
 from parser.extractor import DataExtractor, delete_old_file
 from parser.finalize import transform_schedule
 from parser.overrides import load_overrides, apply_overrides

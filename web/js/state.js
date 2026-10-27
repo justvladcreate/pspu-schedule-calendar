@@ -84,10 +84,6 @@ export function loadPendingChanges() {
   } catch { return []; }
 }
 
-export function clearPendingChanges() {
-  try { localStorage.removeItem(PENDING_CHANGES_KEY); } catch {}
-}
-
 /* ============================================================
  *  Версии снимков, между которыми построен diff.
  *
@@ -227,7 +223,7 @@ export function normalizeKey(ev) {
   ].join('|');
 }
 
-function makeSnapshotEntry(ev) {
+export function toSnapshotEntry(ev) {
   return {
     key: normalizeKey(ev),
     event_id: ev.event_id,
@@ -252,7 +248,7 @@ function makeSnapshotEntry(ev) {
 export function saveSnapshot(events) {
   if (state.urlContext) return;
   try {
-    localStorage.setItem('schedule-snapshot', JSON.stringify(events.map(makeSnapshotEntry)));
+    localStorage.setItem('schedule-snapshot', JSON.stringify(events.map(toSnapshotEntry)));
   } catch {}
 }
 

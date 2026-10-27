@@ -17,10 +17,6 @@
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 const memoryCache = new Map();
 
-export function clearSheetCache() {
-    memoryCache.clear();
-}
-
 export async function fetchSheetHtml(spreadsheetId, gid) {
     if (memoryCache.has(gid)) {
         const c = memoryCache.get(gid);

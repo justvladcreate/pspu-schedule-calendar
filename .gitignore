@@ -219,10 +219,11 @@ __marimo__/
 # Custom
 private
 *.xlsx
-test**
+/test_*.py
+/test_*.json
+/test*.log
 groups_info**
 chunks**
 dev
-#utils
-
+.idea/
 .worktree-gh-pages/

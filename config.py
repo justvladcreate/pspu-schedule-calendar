@@ -29,8 +29,6 @@ def load_config_from_yaml(path: Path | str = BASE_DIR / "config.yaml"):
     return config
 
 
-# ... setup_logging тоже поправь ...
-
 def setup_logging(logs_file: str = "info.log"):
     log_path = BASE_DIR / "data" / logs_file
     log_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,32 +1,6 @@
 'use strict';
 
-import { normalizeKey } from './state.js';
-
-/**
- * Превращает raw event из data.json в "entry" для сравнения.
- * Одна запись = одно событие (не expanded).
- */
-function toEntry(ev) {
-  return {
-    key: normalizeKey(ev),
-    event_id: ev.event_id,
-    group: ev.group,
-    weekday: ev.weekday,
-    pair_number: ev.pair_number,
-    time_start: ev.time_start,
-    time_end: ev.time_end,
-    discipline: ev.discipline,
-    type: ev.type,
-    subgroup: ev.subgroup,
-    teachers: [...(ev.teachers || [])],
-    dates: [...(ev.dates || [])],
-    rooms: ev.rooms || '',
-    comment: ev.comment || '',
-    position: ev.position,
-    is_past: ev.is_past || false,
-    color: ev.color || "",
-  };
-}
+import { toSnapshotEntry } from './state.js';
 
 function setsEqual(a, b) {
   if (a.size !== b.size) return false;
@@ -101,7 +75,7 @@ function diffEntry(oldE, newE) {
  * а локального снимка для diff нет.
  */
 export function compareRawEvents(oldEvents, newEvents) {
-  return compareEvents((oldEvents || []).map(toEntry), newEvents);
+  return compareEvents((oldEvents || []).map(toSnapshotEntry), newEvents);
 }
 
 /**
@@ -112,7 +86,7 @@ export function compareEvents(oldSnapshot, newEvents) {
   const oldMap = new Map((oldSnapshot || []).map(e => [e.key, e]));
   const newMap = new Map();
   for (const ev of newEvents || []) {
-    const entry = toEntry(ev);
+    const entry = toSnapshotEntry(ev);
     newMap.set(entry.key, entry);
   }
 

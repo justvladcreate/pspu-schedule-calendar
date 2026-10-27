@@ -76,7 +76,6 @@ const WATCHED = [
     'js/share.js',
     'js/settings.js',
     'js/notifications.js',
-    'js/more-menu.js',
     'js/original.js',
     'js/sheets.js',
     'js/sheet-render.js',

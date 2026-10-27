@@ -7,15 +7,14 @@ from pathlib import Path
 
 import pandas as pd
 
+from parser.dates import add_year, extract_first_date, semester_start_year_from_header
 from parser.preprocess import (
-    add_year, clean, normalize_rooms, normalize_time,
+    clean, normalize_rooms, normalize_time,
     english_to_russian_lookalike, normalize_date_ranges,
-    remove_invalid_dates, extract_first_date,
-    remove_spaces_between_initials, normalize_subgroup,
+    remove_invalid_dates, remove_spaces_between_initials, normalize_subgroup,
 )
 from parser.rooms_hints import parse_rooms_with_hints
 from parser.sources.base import ScheduleSource
-import re
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ class DataExtractor:
             if idx == 0:
                 continue
 
-            group_info = extraction(sheet.df, sheet.sheet_id, sheet.links, sheet.colors)
+            group_info = extraction(sheet.df, sheet.links, sheet.colors)
             if not group_info:
                 continue
 
@@ -79,62 +78,6 @@ def clean_group_name(group_name: str) -> str:
     return group_name.strip()
 
 
-# Даты в заголовке: «01.09.2026», «23.01.2027».
-_HEADER_DATE_RE = re.compile(r'\b(\d{1,2})\.(\d{2})\.(\d{4})\b')
-# Учебный год в заголовке: «2025/2026».
-_HEADER_ACADEMIC_YEAR_RE = re.compile(r'\b(\d{4})\s*/\s*(\d{4})\b')
-# Содержимое круглых скобок.
-_HEADER_PARENS_RE = re.compile(r'\(([^)]*)\)')
-
-
-def semester_start_year_from_header(semester: str | None) -> int | None:
-    """
-    Определяет год начала учебного года (сентябрь) по строке семестра.
-
-    Приоритет — даты в круглых скобках:
-        «10 семестр 2025/2026 учебного года (01.09.2026 – 23.01.2027)»
-    В этом примере 2025/2026 — устаревшая/неверная шапка, а реальные
-    даты семестра начинаются в 2026 году, поэтому результатом будет 2026.
-
-    Для весеннего семестра, например «(09.02.2026 – 30.06.2026)»,
-    результатом будет 2025 — год начала учебного года, к которому
-    относится весна 2026.
-
-    Если дат в скобках нет, используются даты из всей строки, затем —
-    старый вариант «2025/2026».
-    """
-    text = str(semester or "")
-
-    def start_year_from_dates(value: str) -> int | None:
-        dates = _HEADER_DATE_RE.findall(value)
-        if not dates:
-            return None
-
-        # Берём самую раннюю дату диапазона — это начало семестра.
-        year, month, _day = min(
-            (int(y), int(m), int(d)) for d, m, y in dates
-        )
-        return year if month >= 9 else year - 1
-
-    # 1. Даты внутри круглых скобок.
-    for group in _HEADER_PARENS_RE.findall(text):
-        year = start_year_from_dates(group)
-        if year is not None:
-            return year
-
-    # 2. Даты где-то ещё в строке семестра.
-    year = start_year_from_dates(text)
-    if year is not None:
-        return year
-
-    # 3. Старый fallback — учебный год «2025/2026».
-    m = _HEADER_ACADEMIC_YEAR_RE.search(text)
-    if m:
-        return int(m.group(1))
-
-    return None
-
-
 # ---------------------------------------------------------------- extraction
 def _ffill_weekday_column(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -142,7 +85,7 @@ def _ffill_weekday_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None = None):
+def extraction(df, hyperlinks: dict | None = None, colors: dict | None = None):
     if hyperlinks is None:
         hyperlinks = {}
     if colors is None:
@@ -193,9 +136,6 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
 
             group_name = ""
             semester = None
-            additional_info = ""
-            session = ""
-            vacation = ""
             session_end_date = None
 
             semester_start_year = None
@@ -210,13 +150,18 @@ def extraction(df, sheet_id, hyperlinks: dict | None = None, colors: dict | None
                     semester_start_year = semester_start_year_from_header(semester)
 
                     try:
-                        session_index = next(i for i, line in enumerate(lines) if "Экзаменационная сессия" in line)
-                        vacation_index = next(i for i, line in enumerate(lines) if "Каникулы" in line)
-
-                        additional_info = "\n".join(lines[2:session_index])
-                        session = lines[session_index]
-                        session_end_date = extract_first_date(session)
-                        vacation = lines[vacation_index]
+                        session_index = next(
+                            i for i, line in enumerate(lines)
+                            if "Экзаменационная сессия" in line
+                        )
+                        # Старый код требовал наличия и сессии, и каникул.
+                        # Сохраняем это условие, чтобы не менять поведение
+                        # на неполных шапках.
+                        next(
+                            i for i, line in enumerate(lines)
+                            if "Каникулы" in line
+                        )
+                        session_end_date = extract_first_date(lines[session_index])
                     except StopIteration:
                         print("Не найдены сессия или каникулы в заголовке")
                 else:
