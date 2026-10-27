@@ -101,14 +101,6 @@ function inFacultyScope(type, value, scope) {
     return false;
 }
 
-function facultyNamesFor(type, value) {
-    const ids = facultyIdsOf(type, value);
-    if (!ids || ids.size === 0) return [];
-    return [...ids]
-        .map(facultyShort)
-        .sort((a, b) => a.localeCompare(b, 'ru'));
-}
-
 function setsEqual(a, b) {
     if (a.size !== b.size) return false;
     for (const v of a) if (!b.has(v)) return false;
@@ -427,13 +419,10 @@ function makeFavoriteStar(type, value) {
 function buildOption(type, value) {
     const selected = selectedSetFor(type);
     const checked = selected.has(value);
-    const outside = checked
-        && !inFacultyScope(type, value, state.selectedFaculties);
 
     const row = document.createElement('label');
     row.className = 'filter-option';
     row.classList.toggle('is-selected', checked);
-    row.classList.toggle('is-outside', outside);
 
     const input = document.createElement('input');
     input.type = 'checkbox';
@@ -456,22 +445,6 @@ function buildOption(type, value) {
     row.appendChild(input);
     row.appendChild(makeCheckbox());
     row.appendChild(text);
-
-    const names = facultyNamesFor(type, value);
-    const showTag = type === 'group'
-        ? (state.faculties.length > 1 || outside)
-        : outside;
-    if (names.length && showTag) {
-        const tag = document.createElement('span');
-        tag.className = 'filter-option-tag';
-        tag.textContent = names.join(' · ');
-        if (outside) {
-            tag.classList.add('is-outside');
-            tag.title = 'Не входит в выбранные факультеты';
-        }
-        row.appendChild(tag);
-    }
-
     row.appendChild(makeFavoriteStar(type, value));
     return row;
 }

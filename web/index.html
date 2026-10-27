@@ -341,13 +341,21 @@
         <div class="original-toolbar" id="originalToolbar" hidden>
             <div class="original-faculties" id="originalFaculties"
                  role="tablist" aria-label="Факультеты"></div>
-            <label class="original-group-picker" id="originalGroupPicker" hidden>
-                <span class="original-group-label">Группа</span>
-                <select class="original-group-select" id="originalGroupSelect"></select>
-            </label>
         </div>
-        <div class="original-sheet-tabs" id="originalSheetTabs"
-             role="tablist" aria-label="Листы расписания" hidden></div>
+        <div class="original-sheet-bar" id="originalSheetBar" hidden>
+            <div class="original-sheet-tabs" id="originalSheetTabs"
+                 role="tablist" aria-label="Листы расписания" hidden></div>
+            <span class="original-group-jump" id="originalGroupPicker"
+                  hidden title="Выбрать группу">
+                <select class="original-group-select" id="originalGroupSelect"
+                        aria-label="Выбрать группу"></select>
+                <svg class="original-group-chevron" viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </span>
+        </div>
         <div class="original-body">
             <div class="original-sheet-wrap" id="originalSheetWrap">
                 <div class="original-placeholder" id="originalPlaceholder">
@@ -561,7 +569,7 @@
                 <div class="settings-group">
 
                     <!-- Настройка темы -->
-                    <div class="settings-row">
+                    <div class="settings-row settings-row--theme">
                         <div class="settings-row-main">
                             <span class="settings-row-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
@@ -576,7 +584,6 @@
                                     Тема оформления
                                     <span class="info-icon" tabindex="0" data-tooltip="Выберите светлую, тёмную или системную тему интерфейса.">ⓘ</span>
                                 </div>
-                                <div class="settings-row-sub">Светлая, тёмная или как в системе</div>
                             </div>
                         </div>
                         <div class="view-switch" id="themeSwitch" role="tablist">
@@ -602,7 +609,6 @@
                                     Только активные мероприятия
                                     <span class="info-icon" tabindex="0" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
                                 </div>
-                                <div class="settings-row-sub">Скрывать прошедшие занятия</div>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -634,7 +640,6 @@
                                     Экспорт в календарь
                                     <span class="info-icon" tabindex="0" data-tooltip="Подпишитесь на расписание в Google Calendar, Apple Calendar или других приложениях.">ⓘ</span>
                                 </div>
-                                <div class="settings-row-sub">Подписка в Google, Apple и других календарях</div>
                             </div>
                         </div>
                         <button class="btn" id="settingsExportBtn" type="button">Настроить</button>
@@ -663,7 +668,6 @@
                                     Уведомления об изменениях
                                     <span class="info-icon" tabindex="0" data-tooltip="Push-уведомления о переносах, отмене и добавлении занятий. Приходят, даже когда сайт закрыт.">ⓘ</span>
                                 </div>
-                                <div class="settings-row-sub">Присылать изменения, даже когда сайт закрыт</div>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -683,7 +687,7 @@
                             </span>
                             <div class="settings-row-text">
                                 <div class="settings-row-title">Что отслеживать</div>
-                                <div class="settings-row-sub push-summary" id="pushSummary">Все изменения</div>
+                                <div class="push-summary" id="pushSummary">Все изменения</div>
                             </div>
                         </div>
                         <button class="btn" id="pushPrefsBtn" type="button">Настроить</button>

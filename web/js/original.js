@@ -178,6 +178,7 @@ export function setupOriginalModal() {
 
     const toolbarEl    = document.getElementById('originalToolbar');
     const facultiesBox = document.getElementById('originalFaculties');
+    const sheetBar     = document.getElementById('originalSheetBar');
     const groupPicker  = document.getElementById('originalGroupPicker');
     const groupSelect  = document.getElementById('originalGroupSelect');
 
@@ -212,10 +213,14 @@ export function setupOriginalModal() {
     }
 
     function updateToolbarVisibility() {
-        if (!toolbarEl) return;
-        const noFaculties = !facultiesBox || facultiesBox.hidden;
+        if (toolbarEl) toolbarEl.hidden = !facultiesBox || facultiesBox.hidden;
+    }
+
+    function updateSheetBarVisibility() {
+        if (!sheetBar) return;
+        const noTabs = !tabsBox || tabsBox.hidden;
         const noGroups = !groupPicker || groupPicker.hidden;
-        toolbarEl.hidden = noFaculties && noGroups;
+        sheetBar.hidden = noTabs && noGroups;
     }
 
     /**
@@ -296,12 +301,12 @@ export function setupOriginalModal() {
     }
 
     function renderGroupPicker() {
-        if (!groupPicker || !groupSelect) { updateToolbarVisibility(); return; }
+        if (!groupPicker || !groupSelect) { updateSheetBarVisibility(); return; }
 
         if (sheets.length < 2) {
             groupPicker.hidden = true;
             groupSelect.innerHTML = '';
-            updateToolbarVisibility();
+            updateSheetBarVisibility();
             return;
         }
 
@@ -327,7 +332,7 @@ export function setupOriginalModal() {
         }
         if (currentGid) groupSelect.value = currentGid;
 
-        updateToolbarVisibility();
+        updateSheetBarVisibility();
     }
 
     function activateFaculty(facultyId, { force = false } = {}) {
@@ -445,8 +450,13 @@ export function setupOriginalModal() {
     function buildTabs() {
         if (!tabsBox) return;
         tabsBox.innerHTML = '';
-        if (sheets.length === 0) { tabsBox.hidden = true; return; }
+        if (sheets.length === 0) {
+            tabsBox.hidden = true;
+            updateSheetBarVisibility();
+            return;
+        }
         tabsBox.hidden = false;
+        updateSheetBarVisibility();
 
         for (const sheet of sheets) {
             const b = document.createElement('button');

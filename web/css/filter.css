@@ -318,25 +318,6 @@
 }
 .filter-option.is-selected .filter-option-value { font-weight: 600; }
 
-.filter-option-tag {
-    flex-shrink: 0;
-    max-width: 45%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: var(--surface-3);
-    color: var(--text-muted);
-}
-.filter-option-tag.is-outside {
-    background: var(--danger-bg);
-    color: var(--danger-text);
-}
-
 .filter-option-empty {
     font-size: 12px;
     color: var(--text-muted);
