@@ -10,6 +10,7 @@ import {
     enablePush,
     disablePush,
     getPushState,
+    describePushError,
 } from './notifications.js';
 
 export function setupSettingsModal(exportModalApi) {
@@ -109,17 +110,6 @@ export function setupSettingsModal(exportModalApi) {
         }
     }
 
-    function pushErrorMessage(error) {
-        const messages = {
-            not_configured: 'Уведомления ещё не настроены на сервере',
-            unsupported: 'Этот браузер не поддерживает push-уведомления',
-            ios_install: 'На iPhone сначала добавьте сайт на экран «Домой»',
-            denied: 'Уведомления заблокированы в настройках браузера',
-            dismissed: 'Вы не разрешили уведомления',
-        };
-        return messages[error] || 'Не удалось включить уведомления';
-    }
-
     if (pushToggle) {
         pushToggle.addEventListener('change', async () => {
             if (pushToggle.checked) {
@@ -129,7 +119,8 @@ export function setupSettingsModal(exportModalApi) {
 
                 if (!result.ok) {
                     pushToggle.checked = false;
-                    showToast(pushErrorMessage(result.error));
+                    console.warn('[push] enable failed:', result.error);
+                    showToast(`Не удалось включить: ${describePushError(result.error)}`, 5000);
                 } else {
                     showToast('Уведомления включены');
                 }

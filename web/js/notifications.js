@@ -136,7 +136,7 @@ function urlBase64ToUint8Array(value) {
     return out;
 }
 
-function withTimeout(promise, ms = 12000) {
+function withTimeout(promise, ms = 30000) {
     return Promise.race([
         promise,
         new Promise((_, reject) => {
@@ -170,7 +170,13 @@ async function workerRequest(path, payload) {
 async function getRegistration() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-        return await withTimeout(navigator.serviceWorker.ready, 12000);
+        // На мобильных после очистки данных service worker может ещё
+        // устанавливаться. Регистрируем его явно, если регистрации нет.
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+            registration = await navigator.serviceWorker.register('sw.js');
+        }
+        return await withTimeout(navigator.serviceWorker.ready, 30000);
     } catch {
         return null;
     }
@@ -183,6 +189,20 @@ async function getSubscription() {
         return await registration.pushManager.getSubscription();
     } catch {
         return null;
+    }
+}
+
+async function subscribeWithTimeout(registration, options) {
+    try {
+        return await withTimeout(
+            registration.pushManager.subscribe(options),
+            25000,
+        );
+    } catch (error) {
+        if (error && error.message === 'timeout') {
+            throw new Error('subscribe_timeout');
+        }
+        throw error;
     }
 }
 
@@ -202,7 +222,7 @@ async function ensureSubscription() {
     };
 
     try {
-        const subscription = await registration.pushManager.subscribe(options);
+        const subscription = await subscribeWithTimeout(registration, options);
         currentSubscription = subscription;
         return subscription;
     } catch (error) {
@@ -214,7 +234,7 @@ async function ensureSubscription() {
             await stale.unsubscribe();
         } catch {}
 
-        const subscription = await registration.pushManager.subscribe(options);
+        const subscription = await subscribeWithTimeout(registration, options);
         currentSubscription = subscription;
         return subscription;
     }
@@ -241,6 +261,52 @@ async function syncSubscription(subscription = null) {
 /* ============================================================
  *  ПУБЛИЧНОЕ СОСТОЯНИЕ
  * ============================================================ */
+
+export function describePushError(error) {
+    const key = String(error || '');
+
+    if (key.startsWith('push_')) {
+        const status = key.slice(5);
+        if (status === '401' || status === '403') {
+            return 'push-сервис отклонил ключ VAPID';
+        }
+        if (status === '404' || status === '410') {
+            return 'подписка устарела — включите уведомления заново';
+        }
+        if (status === '413') return 'слишком большой размер уведомления';
+        if (status === '429') return 'слишком много запросов, попробуйте позже';
+        return `ошибка push-сервиса (${status})`;
+    }
+
+    if (key.includes('push service')) {
+        return 'Chrome не смог подключиться к push-сервису Google — проверьте VPN, частную DNS и сервисы Google Play';
+    }
+    if (key.includes('Registration failed')) {
+        return 'браузер не смог создать push-подписку';
+    }
+
+    const messages = {
+        not_configured: 'сервер уведомлений не настроен',
+        unsupported: 'этот браузер не поддерживает push-уведомления',
+        ios_install: 'на iPhone добавьте сайт на экран «Домой» и откройте его оттуда',
+        denied: 'уведомления заблокированы в настройках браузера',
+        dismissed: 'разрешение на уведомления не выдано',
+        no_service_worker: 'service worker ещё не готов — обновите страницу',
+        no_subscription: 'браузер не создал push-подписку',
+        subscribe_timeout: 'push-сервис не ответил за 25 секунд — проверьте VPN, частную DNS и Google Play',
+        timeout: 'сервер не ответил, проверьте интернет',
+        'Failed to fetch': 'нет связи с сервером уведомлений (VPN или блокировщик?)',
+        'Load failed': 'нет связи с сервером уведомлений',
+        internal_error: 'ошибка на сервере уведомлений',
+        disabled: 'уведомления выключены',
+        not_subscribed: 'подписка не найдена на сервере',
+        subscription_expired: 'подписка устарела — включите уведомления заново',
+        push_failed: 'push-сервис недоступен',
+        invalid_subscription: 'браузер передал некорректную подписку',
+    };
+
+    return messages[key] || `неизвестная ошибка (${key || 'без кода'})`;
+}
 
 export function getPushState() {
     const supported = isPushSupported();
@@ -271,7 +337,7 @@ export function getPushState() {
     return {
         supported,
         configured,
-        enabled: enabled && supported && configured && permission === 'granted',
+        enabled: enabled && supported && configured && permission === 'granted' && !iosNeedsInstall,
         permission,
         prefs: ensurePrefs(),
         hint,
@@ -287,6 +353,10 @@ export async function enablePush() {
     if (!isPushConfigured()) return { ok: false, error: 'not_configured' };
     if (!isPushSupported()) {
         return { ok: false, error: isIos() && !isStandalone() ? 'ios_install' : 'unsupported' };
+    }
+    if (isIos() && !isStandalone()) {
+        // В обычной вкладке Safari на iPhone push не работают.
+        return { ok: false, error: 'ios_install' };
     }
     if (Notification.permission === 'denied') {
         return { ok: false, error: 'denied' };
@@ -587,7 +657,11 @@ export function setupNotifications() {
                 if (result.ok) {
                     showToast('Тестовое уведомление отправлено');
                 } else {
-                    showToast('Не удалось отправить тестовое уведомление');
+                    console.warn('[push] test failed:', result.error);
+                    showToast(
+                        `Не удалось отправить тестовое: ${describePushError(result.error)}`,
+                        5000,
+                    );
                 }
             });
         }
