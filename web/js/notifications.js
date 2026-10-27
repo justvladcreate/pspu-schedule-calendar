@@ -464,21 +464,35 @@ function renderOptions(container, values, selected) {
     for (const value of values) {
         const row = document.createElement('label');
         row.className = 'filter-option';
+        row.classList.toggle('is-selected', selected.has(value));
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
+        checkbox.className = 'filter-option-input';
         checkbox.checked = selected.has(value);
         checkbox.addEventListener('change', () => {
             if (checkbox.checked) selected.add(value);
             else selected.delete(value);
+            row.classList.toggle('is-selected', checkbox.checked);
             updatePrefsCounter();
         });
+
+        const check = document.createElement('span');
+        check.className = 'filter-option-check';
+        check.setAttribute('aria-hidden', 'true');
+        check.innerHTML = `
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none"
+                 stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 8.5 6.5 12 13 4.5"/>
+            </svg>`;
 
         const text = document.createElement('span');
         text.className = 'filter-option-value';
         text.textContent = value;
 
         row.appendChild(checkbox);
+        row.appendChild(check);
         row.appendChild(text);
         container.appendChild(row);
     }

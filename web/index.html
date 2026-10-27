@@ -92,29 +92,54 @@
                         <span class="filter-mobile-title">Фильтр</span>
                         <button class="filter-close" type="button" aria-label="Закрыть">✕</button>
                     </div>
-                    <input type="text" class="filter-search" placeholder="Поиск по группам и преподавателям...">
-                    <div class="filter-quick-actions">
-                        <button class="filter-link-btn" type="button" data-action="select-all">Выбрать все</button>
-                        <span class="filter-link-sep" aria-hidden="true">·</span>
-                        <button class="filter-link-btn" type="button" data-action="clear">Снять все</button>
-                    </div>
+
+                    <label class="filter-search-wrap">
+                        <svg class="filter-search-icon" viewBox="0 0 24 24" width="16" height="16"
+                             fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="filter-search"
+                               placeholder="Поиск по группам и преподавателям…">
+                    </label>
+
                     <div class="filter-faculty-block">
-                        <div class="filter-column-title">Факультеты</div>
+                        <div class="filter-section-head">
+                            <span class="filter-column-title">Факультеты</span>
+                        </div>
                         <div class="filter-faculties" id="filterFaculties"></div>
                     </div>
+
                     <div class="filter-columns">
                         <div class="filter-column">
-                            <div class="filter-column-title">Группы</div>
+                            <div class="filter-column-head">
+                                <span class="filter-column-title">Группы</span>
+                                <span class="filter-column-tools">
+                                    <span class="filter-column-count" id="filterGroupsCount"></span>
+                                    <button class="filter-column-all" type="button" data-all="groups"
+                                            aria-label="Выбрать все группы">Все</button>
+                                </span>
+                            </div>
                             <div class="filter-options" id="filterGroupsList"></div>
                         </div>
                         <div class="filter-column">
-                            <div class="filter-column-title">Преподаватели</div>
+                            <div class="filter-column-head">
+                                <span class="filter-column-title">Преподаватели</span>
+                                <span class="filter-column-tools">
+                                    <span class="filter-column-count" id="filterTeachersCount"></span>
+                                    <button class="filter-column-all" type="button" data-all="teachers"
+                                            aria-label="Выбрать всех преподавателей">Все</button>
+                                </span>
+                            </div>
                             <div class="filter-options" id="filterTeachersList"></div>
                         </div>
                     </div>
+
                     <div class="filter-footer">
                         <span class="filter-counter" id="filterCounter"></span>
                         <div class="filter-actions">
+                            <button class="filter-reset" type="button" data-action="reset">Сбросить</button>
                             <button class="filter-done" type="button">Готово</button>
                         </div>
                     </div>
@@ -312,6 +337,14 @@
         <div class="original-header">
             <h2 class="original-title" id="originalTitle">Оригинальное расписание</h2>
             <button class="original-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="original-toolbar" id="originalToolbar" hidden>
+            <div class="original-faculties" id="originalFaculties"
+                 role="tablist" aria-label="Факультеты"></div>
+            <label class="original-group-picker" id="originalGroupPicker" hidden>
+                <span class="original-group-label">Группа</span>
+                <select class="original-group-select" id="originalGroupSelect"></select>
+            </label>
         </div>
         <div class="original-sheet-tabs" id="originalSheetTabs"
              role="tablist" aria-label="Листы расписания" hidden></div>
@@ -523,63 +556,142 @@
             <button class="settings-close" type="button" aria-label="Закрыть">✕</button>
         </div>
         <div class="settings-body">
-            <div class="settings-group">
+            <section class="settings-section">
+                <h3 class="settings-section-title">Внешний вид</h3>
+                <div class="settings-group">
 
-                <!-- Настройка темы -->
-                <div class="settings-row">
-                    <div class="settings-row-title">
-                        Тема оформления
-                        <span class="info-icon" tabindex="0" data-tooltip="Выберите светлую, тёмную или системную тему интерфейса.">ⓘ</span>
+                    <!-- Настройка темы -->
+                    <div class="settings-row">
+                        <div class="settings-row-main">
+                            <span class="settings-row-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                                </svg>
+                            </span>
+                            <div class="settings-row-text">
+                                <div class="settings-row-title">
+                                    Тема оформления
+                                    <span class="info-icon" tabindex="0" data-tooltip="Выберите светлую, тёмную или системную тему интерфейса.">ⓘ</span>
+                                </div>
+                                <div class="settings-row-sub">Светлая, тёмная или как в системе</div>
+                            </div>
+                        </div>
+                        <div class="view-switch" id="themeSwitch" role="tablist">
+                            <button class="view-switch-btn" type="button" data-theme-val="light" role="tab">Светлая</button>
+                            <button class="view-switch-btn" type="button" data-theme-val="auto" role="tab">Авто</button>
+                            <button class="view-switch-btn" type="button" data-theme-val="dark" role="tab">Тёмная</button>
+                        </div>
                     </div>
-                    <div class="view-switch" id="themeSwitch" role="tablist">
-                        <button class="view-switch-btn" type="button" data-theme-val="light" role="tab">Светлая</button>
-                        <button class="view-switch-btn" type="button" data-theme-val="auto" role="tab">Авто</button>
-                        <button class="view-switch-btn" type="button" data-theme-val="dark" role="tab">Тёмная</button>
+
+                    <!-- Переключатель прошедших -->
+                    <div class="settings-row">
+                        <div class="settings-row-main">
+                            <span class="settings-row-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <polyline points="12 7 12 12 15.5 14"/>
+                                </svg>
+                            </span>
+                            <div class="settings-row-text">
+                                <div class="settings-row-title">
+                                    Только активные мероприятия
+                                    <span class="info-icon" tabindex="0" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
+                                </div>
+                                <div class="settings-row-sub">Скрывать прошедшие занятия</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="activeOnlyToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
+
                 </div>
+            </section>
 
-                <!-- Переключатель прошедших -->
-                <div class="settings-row">
-                    <div class="settings-row-title">
-                        Только активные мероприятия
-                        <span class="info-icon" tabindex="0" data-tooltip="Скрыть мероприятия, которые уже прошли (в оригинале выделены серым цветом).">ⓘ</span>
+            <section class="settings-section">
+                <h3 class="settings-section-title">Календарь</h3>
+                <div class="settings-group">
+
+                    <!-- Экспорт в календарь -->
+                    <div class="settings-row">
+                        <div class="settings-row-main">
+                            <span class="settings-row-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                                </svg>
+                            </span>
+                            <div class="settings-row-text">
+                                <div class="settings-row-title">
+                                    Экспорт в календарь
+                                    <span class="info-icon" tabindex="0" data-tooltip="Подпишитесь на расписание в Google Calendar, Apple Calendar или других приложениях.">ⓘ</span>
+                                </div>
+                                <div class="settings-row-sub">Подписка в Google, Apple и других календарях</div>
+                            </div>
+                        </div>
+                        <button class="btn" id="settingsExportBtn" type="button">Настроить</button>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="activeOnlyToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
 
-                <!-- Экспорт в календарь -->
-                <div class="settings-row">
-                    <div class="settings-row-title">
-                        Экспорт в календарь
-                        <span class="info-icon" tabindex="0" data-tooltip="Подпишитесь на расписание в Google Calendar, Apple Calendar или других приложениях.">ⓘ</span>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h3 class="settings-section-title">Уведомления</h3>
+                <div class="settings-group">
+
+                    <!-- Уведомления об изменениях -->
+                    <div class="settings-row">
+                        <div class="settings-row-main">
+                            <span class="settings-row-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                            </span>
+                            <div class="settings-row-text">
+                                <div class="settings-row-title">
+                                    Уведомления об изменениях
+                                    <span class="info-icon" tabindex="0" data-tooltip="Push-уведомления о переносах, отмене и добавлении занятий. Приходят, даже когда сайт закрыт.">ⓘ</span>
+                                </div>
+                                <div class="settings-row-sub">Присылать изменения, даже когда сайт закрыт</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pushToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
-                    <button class="btn" id="settingsExportBtn" type="button">Настроить</button>
-                </div>
 
-                <!-- Уведомления об изменениях -->
-                <div class="settings-row">
-                    <div class="settings-row-title">
-                        Уведомления об изменениях
-                        <span class="info-icon" tabindex="0" data-tooltip="Push-уведомления о переносах, отмене и добавлении занятий. Приходят, даже когда сайт закрыт.">ⓘ</span>
+                    <div class="settings-row" id="pushPrefsRow" hidden>
+                        <div class="settings-row-main">
+                            <span class="settings-row-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+                                     stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                </svg>
+                            </span>
+                            <div class="settings-row-text">
+                                <div class="settings-row-title">Что отслеживать</div>
+                                <div class="settings-row-sub push-summary" id="pushSummary">Все изменения</div>
+                            </div>
+                        </div>
+                        <button class="btn" id="pushPrefsBtn" type="button">Настроить</button>
                     </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="pushToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
 
-                <div class="settings-row" id="pushPrefsRow" hidden>
-                    <div class="settings-row-title">
-                        <span class="push-summary" id="pushSummary">Все изменения</span>
-                    </div>
-                    <button class="btn" id="pushPrefsBtn" type="button">Настроить</button>
                 </div>
-
-            </div>
-            <p class="push-hint" id="pushHint" hidden></p>
+                <p class="push-hint" id="pushHint" hidden></p>
+            </section>
         </div>
     </div>
 </div>

@@ -192,6 +192,7 @@ function rebuildGroups() {
     const groups = new Set();
     const teachers = new Set();
     const groupFaculties = new Map();
+    const teacherFaculties = new Map();
     const facultyMap = new Map(
         (state.faculties || []).map(item => [String(item.id), item]),
     );
@@ -212,7 +213,11 @@ function rebuildGroups() {
             if (!groupFaculties.has(ev.group)) groupFaculties.set(ev.group, new Set());
             groupFaculties.get(ev.group).add(facultyId);
         }
-        (ev.teachers || []).forEach(t => teachers.add(t));
+        (ev.teachers || []).forEach(t => {
+            teachers.add(t);
+            if (!teacherFaculties.has(t)) teacherFaculties.set(t, new Set());
+            teacherFaculties.get(t).add(facultyId);
+        });
     }
 
     state.faculties = [...facultyMap.values()].sort((a, b) =>
@@ -221,6 +226,7 @@ function rebuildGroups() {
     state.groups = [...groups].sort();
     state.teachers = [...teachers].sort();
     state.groupFaculties = groupFaculties;
+    state.teacherFaculties = teacherFaculties;
 
     const knownFaculties = new Set(state.faculties.map(item => String(item.id)));
     for (const id of [...state.selectedFaculties]) {

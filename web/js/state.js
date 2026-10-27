@@ -129,6 +129,7 @@ export const state = {
   groups: [],
   teachers: [],
   groupFaculties: new Map(),
+  teacherFaculties: new Map(),
   selectedFaculties: loadSetFromStorage('schedule-selected-faculties'),
   selectedGroups: loadSetFromStorage('schedule-selected-groups'),
   selectedTeachers: loadSetFromStorage('schedule-selected-teachers'),
@@ -137,15 +138,6 @@ export const state = {
   favoritesTeachers: loadSetFromStorage('schedule-favorites-teachers'),
   prevFilter: loadPrevFilter(),
   favoritesActive: loadFavoritesActive(),
-
-  draftFaculties: new Set(),
-  draftGroups: new Set(),
-  draftTeachers: new Set(),
-  draftFavoritesGroups: new Set(),
-  draftFavoritesTeachers: new Set(),
-  draftFavoritesDirty: false,
-
-  undoFilter: null,
 
   currentDate: loadCurrentDate() || new Date(),
   view: loadViewFromStorage(),

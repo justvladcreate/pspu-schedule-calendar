@@ -113,17 +113,36 @@
     .filter-close:hover, .filter-close:active {
         background: var(--surface-2); color: var(--text);
     }
-    .filter-columns { grid-template-columns: 1fr; gap: 10px; }
-    .filter-options { height: auto; max-height: 200px; }
-    .filter-quick-actions { padding: 0 0 12px; font-size: 13px; }
-    .filter-footer {
-        flex-direction: column; align-items: stretch;
-        gap: 10px; padding-top: 12px;
+    .filter-columns { grid-template-columns: 1fr; gap: 12px; }
+    .filter-options { height: auto; max-height: 220px; }
+    .filter-faculties {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: none;
+        padding: 1px 1px 5px;
     }
-    .filter-counter { order: 1; text-align: center; padding: 0; font-size: 12px; }
+    .filter-faculty-chip { flex-shrink: 0; }
+    .filter-faculty-name { max-width: 46vw; }
+    .filter-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin: 0 -16px -16px;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+    .filter-counter { order: 1; text-align: center; padding: 0; font-size: 12px; flex: none; }
     .filter-actions { order: 2; width: 100%; justify-content: stretch; }
-    .filter-done { width: 100%; min-height: 46px; font-size: 15px; padding: 12px; }
-    .filter-search { font-size: 15px; padding: 10px 12px; }
+    .filter-reset, .filter-done { flex: 1; }
+    .filter-done { min-height: 46px; font-size: 15px; padding: 12px; }
+    .filter-reset { min-height: 46px; font-size: 15px; }
+    .filter-search-wrap { min-height: 46px; }
+    .filter-search-wrap .filter-search { font-size: 15px; padding: 11px 0; }
 
     /* Календарь */
     .calendar.view-week { overflow-x: auto; -webkit-overflow-scrolling: touch; }

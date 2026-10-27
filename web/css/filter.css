@@ -1,23 +1,56 @@
+/* ============================================================
+ *  ФИЛЬТР РАСПИСАНИЯ
+ *
+ *  Панель живёт в поповере над тулбаром. Изменения применяются
+ *  сразу (live), поэтому закрытие панели ничего не отменяет.
+ * ============================================================ */
+
 .filter { position: relative; }
 
 .filter-dropdown {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     right: 0;
-    width: 520px;
+    width: 680px;
     max-width: calc(100vw - 24px);
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 14px;
     box-shadow: var(--shadow);
-    padding: 10px;
+    padding: 14px;
     z-index: 100;
     display: none;
     flex-direction: column;
+    gap: 12px;
 }
 .filter.open .filter-dropdown { display: flex; }
 
 .filter-mobile-header { display: none; }
+
+/* ---------- поиск ---------- */
+
+.filter-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    min-height: 40px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.filter-search-wrap:focus-within {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.filter-search-icon {
+    color: var(--text-dim);
+    flex-shrink: 0;
+    display: block;
+}
 
 .filter-search {
     width: 100%;
@@ -25,18 +58,155 @@
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 13px;
     font-family: inherit;
     outline: none;
-    margin-bottom: 10px;
+    margin-bottom: 0;
 }
 .filter-search:focus { border-color: var(--accent); }
+
+.filter-search-wrap .filter-search {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.filter-search::placeholder { color: var(--text-dim); }
+
+/* ---------- заголовки секций ---------- */
+
+.filter-section-head,
+.filter-column-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.filter-section-head {
+    padding: 0 2px 8px;
+}
+
+.filter-column-title {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+}
+
+.filter-column-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.filter-column-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+.filter-column-all {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 5px;
+    transition: color 0.12s, background 0.12s;
+}
+.filter-column-all:hover {
+    color: var(--text);
+    background: var(--surface-3);
+}
+.filter-column-all[disabled] { opacity: 0.4; cursor: default; }
+.filter-column-all.is-on { color: var(--accent); }
+
+/* ---------- факультеты ---------- */
+
+.filter-faculty-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.filter-faculties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 96px;
+    overflow-y: auto;
+    padding: 1px;
+    scrollbar-width: thin;
+}
+
+.filter-faculty-chip {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 6px 8px 6px 11px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.05s;
+}
+.filter-faculty-chip:hover {
+    border-color: var(--accent);
+    color: var(--text);
+}
+.filter-faculty-chip:active { transform: scale(0.98); }
+
+.filter-faculty-chip.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.filter-faculty-name {
+    max-width: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.filter-faculty-count {
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 6px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.filter-faculty-chip.is-active .filter-faculty-count {
+    background: var(--surface);
+    color: var(--accent);
+}
+
+/* ---------- колонки ---------- */
 
 .filter-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
     min-height: 0;
 }
 
@@ -45,42 +215,98 @@
     flex-direction: column;
     min-height: 0;
     min-width: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.filter-column-title {
-    font-size: 10.5px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 700;
-    padding: 0 4px 6px;
+.filter-column-head {
+    padding: 9px 12px;
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
-    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+
+/* Заголовок без обёртки .filter-column-head (диалог уведомлений). */
+.filter-column > .filter-column-title {
+    padding: 10px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
 }
 
 .filter-options {
-    height: 260px;
+    height: 284px;
     overflow-y: auto;
-    padding-right: 2px;
+    padding: 5px;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
 }
 
+.filter-options::-webkit-scrollbar { width: 6px; }
+.filter-options::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: 3px;
+}
+
+/* ---------- строка списка ---------- */
+
 .filter-option {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 8px;
-    border-radius: 6px;
+    padding: 7px 9px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 13px;
     transition: background 0.12s;
     user-select: none;
+    outline: none;
 }
-.filter-option:hover { background: var(--surface-2); }
+.filter-option:hover { background: var(--surface-3); }
 
-.filter-option input[type="checkbox"] {
-    accent-color: var(--accent);
-    cursor: pointer;
+.filter-option.is-selected {
+    background: var(--accent-soft);
+}
+.filter-option.is-selected:hover {
+    background: var(--accent-soft);
+    filter: brightness(1.04);
+}
+
+/* Нативный чекбокс прячем — рисуем свой, чтобы он был одинаковым
+   во всех темах. Input остаётся фокусируемым с клавиатуры. */
+.filter-option-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.filter-option-check {
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
     flex-shrink: 0;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.filter-option-input:focus-visible + .filter-option-check {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.filter-option.is-selected .filter-option-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
 }
 
 .filter-option-value {
@@ -90,17 +316,42 @@
     white-space: nowrap;
     min-width: 0;
 }
+.filter-option.is-selected .filter-option-value { font-weight: 600; }
 
-/* ============================================================
- *  ИЗБРАННОЕ — звёздочка рядом с опцией фильтра
- * ============================================================ */
+.filter-option-tag {
+    flex-shrink: 0;
+    max-width: 45%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    color: var(--text-muted);
+}
+.filter-option-tag.is-outside {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.filter-option-empty {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 10px 8px;
+    font-style: italic;
+}
+
+/* ---------- избранное ---------- */
 
 .favorite-star {
     appearance: none;
     background: transparent;
     border: none;
     padding: 2px;
-    margin: -2px 0;
+    margin: -2px -2px -2px 0;
     color: var(--text-dim);
     cursor: pointer;
     flex-shrink: 0;
@@ -114,36 +365,26 @@
 
 .favorite-star:hover {
     color: var(--accent);
-    background: var(--surface-3);
+    background: var(--surface);
 }
 
-.favorite-star:active {
-    transform: scale(0.88);
-}
+.favorite-star:active { transform: scale(0.88); }
 
-.favorite-star.is-favorite {
-    color: var(--accent);
-}
+.favorite-star.is-favorite { color: var(--accent); }
 
 .favorite-star svg {
     display: block;
     pointer-events: none;
 }
 
-.filter-option-empty {
-    font-size: 12px;
-    color: var(--text-muted);
-    padding: 8px;
-    font-style: italic;
-}
+/* ---------- подвал ---------- */
 
 .filter-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-top: 10px;
-    padding-top: 8px;
+    gap: 12px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
     flex-wrap: wrap;
 }
@@ -151,53 +392,43 @@
 .filter-counter {
     font-size: 12px;
     color: var(--text-muted);
-    padding-left: 4px;
+    padding-left: 2px;
     min-width: 0;
+    flex: 1 1 240px;
+    line-height: 1.45;
 }
 
 .filter-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
-.filter-quick-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 4px 10px;
-    font-size: 12px;
-}
-
-.filter-link-btn {
+.filter-reset {
     appearance: none;
     background: transparent;
-    border: none;
+    border: 1px solid var(--border);
     color: var(--text-muted);
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 14px;
     cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 4px;
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 3px;
-    transition: color 0.15s, text-decoration-color 0.15s;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 600;
+    min-height: 36px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.filter-link-btn:hover {
+.filter-reset:hover {
     color: var(--text);
-    text-decoration-color: currentColor;
+    border-color: var(--grid-line-strong);
+    background: var(--surface-2);
 }
-.filter-link-btn:active {
-    color: var(--accent);
-}
-
-.filter-link-sep {
-    color: var(--text-dim);
-    user-select: none;
-    font-weight: 400;
+.filter-reset[disabled] {
+    opacity: 0.45;
+    cursor: default;
+    background: transparent;
+    border-color: var(--border);
 }
 
 .filter-done {
@@ -205,7 +436,7 @@
     background: var(--accent);
     color: var(--accent-text);
     border: 1px solid var(--accent);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 8px 20px;
     cursor: pointer;
     font-size: 13px;
@@ -223,57 +454,17 @@
     background: var(--accent-hover);
     border-color: var(--accent-hover);
 }
-.filter-done:active {
-    transform: scale(0.98);
-}
-/* ============================================================
- *  ФАКУЛЬТЕТЫ В ФИЛЬТРЕ
- * ============================================================ */
+.filter-done:active { transform: scale(0.98); }
 
-.filter-faculty-block {
-    margin-bottom: 10px;
-}
-
-.filter-faculties {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    max-height: 92px;
-    overflow-y: auto;
-    padding: 2px 0;
-}
-
-.filter-faculty-chip {
-    appearance: none;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text-muted);
-    border-radius: 999px;
-    padding: 5px 10px;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.filter-faculty-chip:hover {
-    border-color: var(--accent);
-    color: var(--text);
-}
-
-.filter-faculty-chip.is-active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-@media (max-width: 700px) {
-    .filter-faculties {
-        max-height: 120px;
+@media (max-width: 760px) {
+    .filter-dropdown {
+        width: calc(100vw - 24px);
     }
-    .filter-faculty-chip {
-        padding: 7px 11px;
+    .filter-columns {
+        grid-template-columns: 1fr;
+    }
+    .filter-options {
+        height: auto;
+        max-height: 240px;
     }
 }
