@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 import {
   state, saveSetToStorage,
@@ -9,7 +9,7 @@ import {
 } from './state.js';
 import { escapeHtml, toISO } from './utils.js';
 import {
-    loadData, loadFacultyIndex, loadFacultyData,
+    loadData, loadFacultyIndex, loadFacultyData, facultyDataUrl,
 } from './data.js';
 
 import { render, updateDateLabel } from './render.js';
@@ -70,7 +70,7 @@ const SUPPORTED_SCHEMA_VERSION = 2;
 const INDEX_CACHE_KEY = 'schedule-faculty-index';
 
 function _isSupportedSchemaVersion(data) {
-    const version = data.schema_version;
+    const version = data && data.schema_version;
     if (version === undefined) return true;
     if (version === 1 || version === SUPPORTED_SCHEMA_VERSION) return true;
     console.warn(`[load] неподдерживаемая schema_version: ${version}`);
@@ -109,13 +109,6 @@ function _facultyMetaFromEvents(events) {
     return [...map.values()];
 }
 
-function isValidScheduleData(data) {
-    return !!data
-        && typeof data === 'object'
-        && Array.isArray(data.events)
-        && _isSupportedSchemaVersion(data);
-}
-
 function loadCachedData() {
     const events = loadSnapshot();
     if (!Array.isArray(events) || events.length === 0) return null;
@@ -129,25 +122,19 @@ function loadCachedData() {
 }
 
 async function loadFreshData({ onProgress = null } = {}) {
-    const online = navigator.onLine !== false;
+    const notify = typeof onProgress === 'function' ? onProgress : null;
 
-    let currentSource = 'main';
-    const safeProgress = typeof onProgress === 'function'
-        ? (pct) => {
-            if (currentSource === 'fallback' && pct < 50) {
-                onProgress(pct, { fallback: true });
-            } else {
-                onProgress(pct, { fallback: currentSource === 'fallback' });
-            }
-        }
-        : null;
-
-    // Новый формат: index.json + data/faculties/<id>.json
+    // index.json + data/faculties/<id>/data.json
     try {
         const index = await loadFacultyIndex();
-        if (index && Array.isArray(index.faculties) && index.faculties.length) {
+        if (
+            index
+            && _isSupportedSchemaVersion(index)
+            && Array.isArray(index.faculties)
+            && index.faculties.length
+        ) {
             _saveCachedIndex(index);
-            safeProgress?.(15);
+            notify?.(15);
 
             const payloads = await Promise.all(
                 index.faculties.map(async (faculty) => {
@@ -167,7 +154,7 @@ async function loadFreshData({ onProgress = null } = {}) {
                 events.push(...item.payload.events);
             }
             if (events.length > 0) {
-                safeProgress?.(95);
+                notify?.(95);
                 return {
                     data: {
                         schema_version: 2,
@@ -183,35 +170,8 @@ async function loadFreshData({ onProgress = null } = {}) {
         console.warn('[load] index.json недоступен:', e.message || e);
     }
 
-    // Совместимость со старым монолитным data.json.
-    try {
-        const data = await loadData('data.json', { onProgress: safeProgress });
-        if (isValidScheduleData(data)) {
-            if (!Array.isArray(data.faculties)) {
-                data.faculties = _facultyMetaFromEvents(data.events);
-            }
-            return { data, usedFallback: false };
-        }
-        console.warn('[load] data.json невалиден');
-    } catch (e) {
-        console.warn('[load] data.json недоступен:', e.message || e);
-    }
-
-    currentSource = 'fallback';
-
-    try {
-        const data = await loadData('old_data.json', { onProgress: safeProgress });
-        if (isValidScheduleData(data)) {
-            if (!Array.isArray(data.faculties)) {
-                data.faculties = _facultyMetaFromEvents(data.events);
-            }
-            return { data, usedFallback: online };
-        }
-        console.warn('[load] old_data.json невалиден');
-    } catch (e) {
-        console.warn('[load] old_data.json недоступен:', e.message || e);
-    }
-
+    // Совместимость: если index.json недоступен, но есть локальный снимок,
+    // работаем на нём (офлайн-режим).
     return null;
 }
 
@@ -666,29 +626,41 @@ async function openChangesFromNotification(version = null) {
 
     // Обычно pendingChanges уже посчитаны при загрузке данных.
     // Если пользователь уже видел эту версию (снимок обновлён), но
-    // пришёл по уведомлению — строим diff по old_data.json.
+    // пришёл по уведомлению — строим diff по old_data.json факультетов.
     if ((state.pendingChanges || []).length === 0) {
         try {
-            const oldData = await loadData('old_data.json');
+            const index = _loadCachedIndex();
             const current = state.currentData;
 
-            if (
-                oldData &&
-                Array.isArray(oldData.events) &&
-                current &&
-                Array.isArray(current.events)
-            ) {
-                const changes = compareRawEvents(oldData.events, current.events);
+            if (index && current && Array.isArray(index.faculties)) {
+                const changes = [];
+
+                for (const faculty of index.faculties) {
+                    try {
+                        const old = await loadData(
+                            facultyDataUrl(faculty.id, { previous: true })
+                        );
+                        if (!old || !Array.isArray(old.events)) continue;
+
+                        const fresh = (current.events || []).filter(
+                            event => String(event.faculty_id) === String(faculty.id)
+                        );
+                        changes.push(...compareRawEvents(old.events, fresh));
+                    } catch (e) {
+                        // у факультета может не быть прошлой версии
+                    }
+                }
+
                 if (changes.length > 0) {
                     state.pendingChanges = sortChanges(changes);
                     state.pendingChangesMeta = {
-                        oldVersion: oldData.generated_at || null,
+                        oldVersion: null,
                         newVersion: current.generated_at || null,
                     };
                 }
             }
         } catch (e) {
-            console.warn('[push] не удалось загрузить old_data.json:', e);
+            console.warn('[push] не удалось построить изменения:', e);
         }
     }
 
