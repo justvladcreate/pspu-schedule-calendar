@@ -5,7 +5,14 @@ import pytest
 
 from parser.core.model import AcademicPeriod, Faculty, FacultySource, RawBranch
 from parser.faculties.base import FacultyPaths
-from parser.faculties.f01_math.parser import MathParser, _parse_line, _split_teachers
+from parser.faculties.f01_math.parser import (
+    MathParser,
+    _clean_room_line,
+    _parse_line,
+    _room_entries,
+    _split_teachers,
+    _strip_leading_time_range,
+)
 from parser.sources.base import SheetData
 
 PERIOD = AcademicPeriod(
@@ -85,6 +92,77 @@ def test_parse_line_teacher_in_parentheses():
     item = _parse_line("25.09 Творческое мероприятие (Козлова Д.Ю.)", 2026)
     assert item["teachers"] == ["Козлова Д.Ю."]
     assert "Козлова" not in item["discipline"]
+
+
+def test_parse_line_keeps_leading_date_range_starting_with_s():
+    """«с 14.10-25.11» — это даты, а не время «с 14.10 до 25.11»."""
+    item = _parse_line(
+        "с 14.10-25.11 Методика обучения математике (пр) / Крылатых С.И.",
+        2026,
+    )
+    assert item["discipline"] == "Методика обучения математике"
+    assert item["dates"] == [
+        "14.10.2026", "21.10.2026", "28.10.2026",
+        "04.11.2026", "11.11.2026", "18.11.2026", "25.11.2026",
+    ]
+
+
+def test_parse_line_expands_range_with_trailing_date():
+    item = _parse_line(
+        "с 07.10-02.12, 23.12 Элементарная математика / Власова И.Н., Мусихина И.В.",
+        2026,
+    )
+    assert item["dates"][0] == "07.10.2026"
+    assert "28.10.2026" in item["dates"]
+    assert "02.12.2026" in item["dates"]
+    assert item["dates"][-1] == "23.12.2026"
+    assert item["teachers"] == ["Власова И.Н.", "Мусихина И.В."]
+
+
+def test_strip_leading_time_range_does_not_eat_dates():
+    assert (
+        _strip_leading_time_range("с 14.10-25.11 Методика")
+        == "с 14.10-25.11 Методика"
+    )
+    assert (
+        _strip_leading_time_range("с 07.10-02.12 Элементарная")
+        == "с 07.10-02.12 Элементарная"
+    )
+    assert (
+        _strip_leading_time_range("с 9.00 до 12.30 Алгебра")
+        == "Алгебра"
+    )
+    assert (
+        _strip_leading_time_range("с 9:00-12:30 Алгебра")
+        == "Алгебра"
+    )
+
+
+def test_room_entries_cleanup():
+    entries = _room_entries(
+        "Max\nВидеолекции\nIV / А-235\nгл. корп / 15\nIV \\ В-103"
+    )
+    assert entries[0] == ("дистанционно онлайн", "")
+    assert entries[1] == ("", "Видеолекции")
+    assert entries[2] == ("IV / А-235", "")
+    assert entries[3] == ("гл. корп. 15", "")
+    assert entries[4] == ("IV / В-103", "")
+
+
+def test_max_room_variants_become_online():
+    for value in ("max", "Max", "MAX", "мах", "макс", "Максимум"):
+        assert _clean_room_line(value) == ("дистанционно онлайн", "")
+
+
+def test_room_line_removes_dates_urls_and_junk():
+    assert _clean_room_line("23.09-В-103;")[0] == "В-103"
+    assert _clean_room_line("IV / 206 (26.10)")[0] == "IV / 206"
+    assert _clean_room_line("IV / А-304 (до 28.10")[0] == "IV / А-304"
+    assert _clean_room_line("гл. корп")[0] == "гл. корп."
+    assert _clean_room_line("02.10: https: / joincall / abc")[0] == (
+        "дистанционно онлайн"
+    )
+    assert _clean_room_line("нет") == ("", "")
 
 
 # ---------------------------------------------------------------- год
@@ -278,3 +356,21 @@ def test_refine_caches_results(tmp_path):
     parser2._branches = [_branch()]
     asyncio.run(parser2.refine({}, PERIOD))
     assert len(calls) == 1
+
+
+def test_refine_does_not_invent_rooms(tmp_path):
+    async def fake_ask(prompt):
+        return ['{"i": 1, "discipline": "Алгебра", "type": "лек.", "subgroup": "", '
+                '"teachers": [], "dates": ["12.10.2026"], "rooms": "IV / В-103"}']
+
+    parser = _parser(tmp_path, ask=fake_ask)
+    parser._branches = [
+        _branch(
+            rooms="",
+            room_source="IV / В-103\nIV / А-224",
+            source_text="12.10 Алгебра / Шеремет Г.Г.",
+        ),
+    ]
+
+    asyncio.run(parser.refine({}, PERIOD))
+    assert parser._branches[0].rooms == ""

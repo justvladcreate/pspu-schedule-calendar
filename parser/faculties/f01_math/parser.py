@@ -51,7 +51,6 @@ LLM_CACHE_NAME = "llm_cache.json"
 REPAIRABLE_ISSUES = {
     "dates_unparsed",
     "teacher_unparsed",
-    "rooms_mismatch",
     "no_discipline",
     "parallel_without_subgroup",
 }
@@ -102,7 +101,8 @@ _NOISE_RE = re.compile(
     re.I,
 )
 _LEADING_TIME_RANGE_RE = re.compile(
-    r"^\s*с\s*\d{1,2}\s*[.:]\s*\d{2}\s*(?:до|[-–—])\s*\d{1,2}\s*[.:]\s*\d{2}\s*",
+    r"^\s*с\s*(\d{1,2})\s*([.:])\s*(\d{2})\s*(до|[-–—])\s*"
+    r"(\d{1,2})\s*([.:])\s*(\d{2})\s*",
     re.I,
 )
 
@@ -141,6 +141,35 @@ def _parse_time(value: str) -> tuple[str, str]:
         total = hour * 60 + minute + 90
         end = f"{(total // 60) % 24:02d}:{total % 60:02d}"
     return start, end
+
+
+def _strip_leading_time_range(text: str) -> str:
+    """Убирает «с 9.00 до 12.30» в начале строки.
+
+    Важно не спутать с датами: «с 14.10-25.11» — это диапазон дат,
+    а не время. Поэтому:
+      • вариант с «до» считаем временем;
+      • вариант с двоеточием (9:00-12:30) считаем временем;
+      • «07.10-02.12» и «14.10-25.11» оставляем датами.
+    """
+    match = _LEADING_TIME_RANGE_RE.match(text)
+    if not match:
+        return text
+
+    hour1, sep1, minute1, connector, hour2, sep2, minute2 = match.groups()
+    if str(connector).lower() != "до" and ":" not in (sep1, sep2):
+        return text
+
+    try:
+        values = (int(hour1), int(minute1), int(hour2), int(minute2))
+    except (TypeError, ValueError):
+        return text
+    if not (
+        0 <= values[0] <= 23 and 0 <= values[1] <= 59
+        and 0 <= values[2] <= 23 and 0 <= values[3] <= 59
+    ):
+        return text
+    return text[match.end():]
 
 
 def _normalize_teacher(value: str) -> str:
@@ -208,7 +237,7 @@ def _parse_line(line: str, year: int | None) -> dict:
         dates_text = match.group(0)
         raw = raw[match.end():]
         # после дат может идти время мероприятия: «с 9.00 до 12.30 …»
-        raw = _LEADING_TIME_RANGE_RE.sub("", raw)
+        raw = _strip_leading_time_range(raw)
 
     dates = expand_date_text(dates_text, year) if dates_text else []
 
@@ -254,6 +283,61 @@ def _parse_line(line: str, year: int | None) -> dict:
     }
 
 
+_ROOM_JUNK = {
+    "-", "—", "–", "нет", "n/a", "н/д", "н д", "nan",
+}
+_MAX_ROOM_RE = re.compile(r"\b(?:max|мах|макс|максимум)\b", re.I)
+
+
+def _clean_room_line(line: str) -> tuple[str, str]:
+    """Одна строка колонки аудиторий → (аудитория, пометка).
+
+    «Max»/«мах»/«макс» — дистанционка, а не номер аудитории.
+    «Видеолекции» — пометка, а не аудитория.
+    Даты, ссылки и ФИО из поля аудитории вычищаем.
+    """
+    text = str(line or "").strip()
+    if not text or text.lower() in _ROOM_JUNK:
+        return "", ""
+
+    text = text.replace("\\", "/")
+    text = re.sub(r"\s+", " ", text).strip()
+    low = text.lower()
+
+    if _MAX_ROOM_RE.search(low) or "joincall" in low or "http" in low:
+        return "дистанционно онлайн", ""
+    if "видеолекц" in low:
+        return "", "Видеолекции"
+
+    # Даты перед аудиторией: «23.09-В-103», «IV / 26.10-А-323».
+    text = re.sub(r"\b\d{1,2}\.\d{2}(?:\.\d{4})?\s*[-–—]\s*", "", text)
+    # Даты в скобках/после «до»: «IV / 206 (26.10)», «А-304 (до 28.10».
+    text = re.sub(
+        r"\(\s*(?:до|с|по)?\s*\d{1,2}\.\d{2}(?:\.\d{4})?\s*\)?",
+        "",
+        text,
+        flags=re.I,
+    )
+    # ФИО в скобках и без них — к аудитории не относятся.
+    text = re.sub(r"\s*\([^()]*[А-ЯЁ]\.\s*[А-ЯЁ]?\.[^()]*\)", "", text)
+    text = _TEACHER_RE.sub("", text)
+
+    # «гл. корп / 15», «гл. корп15» → «гл. корп. 15».
+    text = re.sub(
+        r"гл\.?\s*корп\.?\s*[/\\]?\s*",
+        "гл. корп. ",
+        text,
+        flags=re.I,
+    )
+    text = re.sub(r"\s*/\s*", " / ", text)
+    text = re.sub(r"\s+", " ", text).strip(" ,;:.)")
+    if text.lower() in {"гл. корп", "гл.корп"}:
+        text = "гл. корп."
+    if text.lower() in _ROOM_JUNK:
+        return "", ""
+    return text, ""
+
+
 def _room_entries(value: str) -> list[tuple[str, str]]:
     """Колонка аудиторий → [(аудитория, пометка)] по строкам.
 
@@ -268,20 +352,7 @@ def _room_entries(value: str) -> list[tuple[str, str]]:
     while lines and not lines[-1].strip():
         lines.pop()
 
-    entries: list[tuple[str, str]] = []
-    for line in lines:
-        line = line.strip()
-        if not line or line.lower() == "nan":
-            entries.append(("", ""))
-            continue
-        parts = [part.strip() for part in line.split("/") if part.strip()]
-        remote = [part for part in parts if part.lower().startswith("max")]
-        local = [part for part in parts if part not in remote]
-        room = " / ".join(local)
-        # «IV / 47 (Рябухина Е.А.)» — ФИО в скобках к аудитории не относится
-        room = re.sub(r"\s*\([^()]*[А-ЯЁ]\.\s*[А-ЯЁ]?\.[^()]*\)", "", room).strip()
-        entries.append((room, "дистанционно" if remote else ""))
-    return entries
+    return [_clean_room_line(line) for line in lines]
 
 
 def _pair_rooms(
@@ -443,7 +514,7 @@ class MathParser(FacultyParser):
                 continue
 
             subject_text = "\n".join(
-                _LEADING_TIME_RANGE_RE.sub("", line)
+                _strip_leading_time_range(line)
                 for line in re.split(r"\r?\n", subject_text)
             )
 
@@ -457,11 +528,11 @@ class MathParser(FacultyParser):
             parallel_ambiguous = self._parallel_ambiguous(parsed)
 
             for index, item in enumerate(parsed):
-                rooms_text, remote = rooms[index] if index < len(rooms) else ("", "")
+                rooms_text, room_note = rooms[index] if index < len(rooms) else ("", "")
 
                 notes = [item["note"]] if item["note"] else []
-                if remote:
-                    notes.append(remote)
+                if room_note:
+                    notes.append(room_note)
 
                 branch = RawBranch(
                     group=group,
@@ -714,13 +785,8 @@ class MathParser(FacultyParser):
                     key=lambda item: (item[6:], item[3:5], item[:2]),
                 )
 
-        rooms = str(payload.get("rooms") or "").strip()
-        # Аудиторию меняем, только если своей не было: LLM любит
-        # отбрасывать «IV /», а это теряет корпус.
-        if rooms and not branch.rooms:
-            room_cell = branch.room_source or ""
-            if rooms in room_cell or rooms in source:
-                branch.rooms = rooms
+        # Аудитории LLM не трогает: при merged-ячейках она угадывает
+        # соседние кабинеты. Раскладку делает детерминированный парсер.
 
         if branch.discipline and branch.dates:
             branch.confidence = max(branch.confidence, 0.95)
