@@ -38,6 +38,7 @@ const DEFAULT_DATA_URL = DEFAULT_SITE_URL + 'data.json';
 const DEFAULT_OLD_DATA_URL = DEFAULT_SITE_URL + 'old_data.json';
 
 const LAST_VERSION_KEY = 'state:last_version';
+const LAST_CHECK_KEY = 'state:last_check';
 const FACULTY_VERSIONS_KEY = 'state:faculty_versions';
 const SUB_PREFIX = 'sub:';
 
@@ -712,13 +713,13 @@ async function checkForChanges(env) {
       result = await collectChangesFromLegacy(env);
     } catch (error) {
       console.error('[push] данные недоступны:', error.message);
-      return;
+      return { ok: false, error: error.message };
     }
   }
 
   if (!result) {
     console.warn('[push] нет данных — пропуск');
-    return;
+    return { ok: false, error: 'no_data' };
   }
 
   const lastVersion = await env.PUSH_KV.get(LAST_VERSION_KEY);
@@ -727,7 +728,9 @@ async function checkForChanges(env) {
   // Раньше здесь был только lastVersion === version. Если один факультет
   // не скачался, его версия не сохранялась, а lastVersion уже ставился —
   // и изменение терялось навсегда. Теперь pending заставляет повторить.
-  if (lastVersion === version && !pending) return;
+  if (lastVersion === version && !pending) {
+    return { ok: true, skipped: true, version };
+  }
 
   if (changes.length === 0) {
     if (versions) {
@@ -738,7 +741,7 @@ async function checkForChanges(env) {
       `[push] версия ${version}: изменений нет` +
         (touched ? `, обновлено факультетов ${touched}` : ''),
     );
-    return;
+    return { ok: true, version, changes: 0, touched, sent: 0 };
   }
 
   const subscriptions = await listSubscriptions(env);
@@ -783,6 +786,38 @@ async function checkForChanges(env) {
     `[push] версия ${version}: изменений ${changes.length}, ` +
       `факультетов ${touched}, подписок ${subscriptions.length}, отправлено ${sent}`,
   );
+
+  return {
+    ok: true,
+    version,
+    changes: changes.length,
+    touched,
+    subscriptions: subscriptions.length,
+    sent,
+    pending,
+  };
+}
+
+/**
+ * Обёртка для cron: всегда пишет отметку о запуске в KV, чтобы по /diag
+ * было видно, срабатывает ли триггер и что он нашёл.
+ */
+async function scheduledCheck(env) {
+  const record = { at: new Date().toISOString() };
+
+  try {
+    Object.assign(record, await checkForChanges(env));
+  } catch (error) {
+    console.error('[push] check failed:', error);
+    record.ok = false;
+    record.error = error.message;
+  }
+
+  try {
+    await env.PUSH_KV.put(LAST_CHECK_KEY, JSON.stringify(record));
+  } catch (error) {
+    console.error('[push] last_check write failed:', error);
+  }
 }
 
 /* ============================================================
@@ -879,8 +914,21 @@ async function handleDiag(env) {
     report.lastVersion = await env.PUSH_KV.get(LAST_VERSION_KEY);
     report.versions =
       (await env.PUSH_KV.get(FACULTY_VERSIONS_KEY, 'json')) || {};
+    report.lastCheck = await env.PUSH_KV.get(LAST_CHECK_KEY, 'json');
   } catch (error) {
     report.kvError = error.message;
+  }
+
+  try {
+    const subscriptions = await listSubscriptions(env);
+    report.subscriptions = {
+      total: subscriptions.length,
+      all: subscriptions.filter((s) => s.prefs?.all).length,
+      withGroups: subscriptions.filter((s) => (s.prefs?.groups || []).length).length,
+      withTeachers: subscriptions.filter((s) => (s.prefs?.teachers || []).length).length,
+    };
+  } catch (error) {
+    report.subscriptionsError = error.message;
   }
 
   let index;
@@ -980,6 +1028,6 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(checkForChanges(env));
+    ctx.waitUntil(scheduledCheck(env));
   },
 };
