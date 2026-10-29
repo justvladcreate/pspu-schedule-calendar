@@ -201,6 +201,219 @@
     color: var(--accent);
 }
 
+/* ---------- выбранные фильтры (карточки под поиском) ---------- */
+
+.filter-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 108px;
+    /* flex-колонка панели иначе сжимает блок ниже max-height
+       и карточки выглядят обрезанными. */
+    flex: 0 0 auto;
+    overflow-y: auto;
+    margin-top: -2px;
+    padding: 1px;
+    scrollbar-width: thin;
+}
+.filter-selected[hidden] { display: none; }
+
+.filter-selected-card {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 5px 7px 5px 11px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, transform 0.05s;
+}
+.filter-selected-card:hover {
+    border-color: var(--accent-hover);
+    filter: brightness(1.03);
+}
+.filter-selected-card:active { transform: scale(0.98); }
+
+.filter-selected-card-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.filter-selected-card-x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.filter-selected-card--faculty {
+    background: var(--surface-2);
+    border-color: var(--border);
+}
+.filter-selected-card--faculty .filter-selected-card-x {
+    background: var(--surface-3);
+    color: var(--text-muted);
+}
+
+.filter-selected-more {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.filter-selected-more:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface-2);
+}
+
+/* ---------- модалка «все выбранные фильтры» ---------- */
+
+.filter-selected-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(560px, calc(100vw - 24px));
+    max-height: min(80vh, 680px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.filter-selected-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.filter-selected-modal-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.filter-selected-modal-close {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+}
+.filter-selected-modal-close:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.filter-selected-modal-body {
+    padding: 14px 18px 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+}
+
+.filter-selected-group-title {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+.filter-selected-modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-selected-modal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    font-size: 13px;
+    color: var(--text);
+}
+
+.filter-selected-modal-row-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.filter-selected-modal-remove {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 1;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: background 0.12s, color 0.12s;
+}
+.filter-selected-modal-remove:hover {
+    background: var(--surface-3);
+    color: var(--accent);
+}
+
 /* ---------- колонки ---------- */
 
 .filter-columns {

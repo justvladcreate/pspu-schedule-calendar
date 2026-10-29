@@ -124,6 +124,12 @@
     }
     .filter-faculty-chip { flex-shrink: 0; }
     .filter-faculty-name { max-width: 46vw; }
+    /* Панель и так скроллится целиком: внутренний скролл карточек
+       прятал бы чип «Ещё N» за своей границей. */
+    .filter-selected {
+        max-height: none;
+        overflow: visible;
+    }
     .filter-footer {
         position: sticky;
         bottom: 0;

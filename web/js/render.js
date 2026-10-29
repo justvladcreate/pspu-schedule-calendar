@@ -37,7 +37,9 @@ function ensureDelegation(cal) {
 
 /* ---------- EMPTY STATE ---------- */
 export function hasActiveFilters() {
-    return state.selectedGroups.size > 0 || state.selectedTeachers.size > 0;
+    return state.selectedFaculties.size > 0
+        || state.selectedGroups.size > 0
+        || state.selectedTeachers.size > 0;
 }
 
 export function openFilterDropdown() {
