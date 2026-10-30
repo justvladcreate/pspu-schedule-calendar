@@ -293,8 +293,9 @@ export function savePrevFilter(prevFilter) {
   try {
     if (prevFilter) {
       localStorage.setItem(PREV_FILTER_KEY, JSON.stringify({
-        groups:   [...prevFilter.groups],
-        teachers: [...prevFilter.teachers],
+        faculties: [...(prevFilter.faculties || [])],
+        groups:    [...prevFilter.groups],
+        teachers:  [...prevFilter.teachers],
       }));
     } else {
       localStorage.removeItem(PREV_FILTER_KEY);
@@ -309,8 +310,9 @@ export function loadPrevFilter() {
     const obj = JSON.parse(raw);
     if (!obj || typeof obj !== 'object') return null;
     return {
-      groups:   Array.isArray(obj.groups)   ? obj.groups   : [],
-      teachers: Array.isArray(obj.teachers) ? obj.teachers : [],
+      faculties: Array.isArray(obj.faculties) ? obj.faculties : [],
+      groups:    Array.isArray(obj.groups)    ? obj.groups    : [],
+      teachers:  Array.isArray(obj.teachers)  ? obj.teachers  : [],
     };
   } catch { return null; }
 }

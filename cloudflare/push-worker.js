@@ -22,8 +22,14 @@
  *   SCHEDULE_DATA_URL    — .../data.json      (старый монолитный формат)
  *   SCHEDULE_OLD_DATA_URL— .../old_data.json  (старый монолитный формат)
  *
- * Cron Trigger: каждые 5 минут (поле Minutes = 5, Hours = *).
+ * Cron Trigger: каждые 5 минут (см. выражение в комментарии ниже).
+ * Выражение «5 * * * *» срабатывает раз в час в 5-ю минуту.
+ *
+ * Диагностика: GET /diag — покажет, видит ли воркер data.json и
+ * old_data.json каждого факультета, и какие версии лежат в KV.
  */
+
+// Cron в Cloudflare: */5 * * * *  (без пробела между * и /5).
 
 const DEFAULT_SITE_URL =
   'https://justvladcreate.github.io/pspu-schedule-calendar/';
@@ -32,6 +38,7 @@ const DEFAULT_DATA_URL = DEFAULT_SITE_URL + 'data.json';
 const DEFAULT_OLD_DATA_URL = DEFAULT_SITE_URL + 'old_data.json';
 
 const LAST_VERSION_KEY = 'state:last_version';
+const LAST_CHECK_KEY = 'state:last_check';
 const FACULTY_VERSIONS_KEY = 'state:faculty_versions';
 const SUB_PREFIX = 'sub:';
 
@@ -607,21 +614,40 @@ async function collectChangesFromIndex(env) {
 
   const versions =
     (await env.PUSH_KV.get(FACULTY_VERSIONS_KEY, 'json')) || {};
+  const nextVersions = { ...versions };
   const changes = [];
   let touched = 0;
+  let pending = false;
 
   for (const faculty of index.faculties) {
     const version = faculty.generated_at || '';
     if (version && versions[faculty.id] === version) continue;
 
+    // Версия ещё не обработана. Если сеть подведёт, pending останется
+    // true и следующий cron попробует снова — иначе изменение потеряется.
+    if (version) pending = true;
+
     const fresh = await fetchSchedule(
       facultyFileUrl(env, faculty.folder || `faculties/${faculty.id}`),
-    ).catch(() => null);
+    ).catch((error) => {
+      console.warn(`[push] ${faculty.id}: data.json недоступен:`, error.message);
+      return null;
+    });
     if (!fresh || !Array.isArray(fresh.events)) continue;
 
-    const old = await fetchSchedule(
-      facultyFileUrl(env, faculty.folder || `faculties/${faculty.id}`, { previous: true }),
-    ).catch(() => null);
+    let old = null;
+    try {
+      old = await fetchSchedule(
+        facultyFileUrl(env, faculty.folder || `faculties/${faculty.id}`, { previous: true }),
+      );
+    } catch (error) {
+      // 404 — это первая публикация, сравнивать не с чем.
+      // Любая другая ошибка — временная, версию не фиксируем.
+      if (!/HTTP 404/.test(error.message)) {
+        console.warn(`[push] ${faculty.id}: old_data.json недоступен:`, error.message);
+        continue;
+      }
+    }
 
     if (old && Array.isArray(old.events) && old.generated_at !== fresh.generated_at) {
       for (const change of compareEvents(old.events, fresh.events)) {
@@ -635,11 +661,17 @@ async function collectChangesFromIndex(env) {
       touched++;
     }
 
-    versions[faculty.id] = fresh.generated_at || version;
+    nextVersions[faculty.id] = fresh.generated_at || version;
   }
 
-  await env.PUSH_KV.put(FACULTY_VERSIONS_KEY, JSON.stringify(versions));
-  return { changes, version: index.generated_at, touched };
+  // KV обновляет вызывающий код только после успешной обработки.
+  return {
+    changes,
+    version: index.generated_at,
+    touched,
+    pending,
+    versions: nextVersions,
+  };
 }
 
 /** Старый формат (data.json + old_data.json) — запасной путь. */
@@ -664,7 +696,7 @@ async function collectChangesFromLegacy(env) {
       ? compareEvents(oldData.events, data.events).filter(isRelevantChange)
       : [];
 
-  return { changes, version: data.generated_at, touched: 0 };
+  return { changes, version: data.generated_at, touched: 0, pending: false };
 }
 
 async function checkForChanges(env) {
@@ -681,27 +713,35 @@ async function checkForChanges(env) {
       result = await collectChangesFromLegacy(env);
     } catch (error) {
       console.error('[push] данные недоступны:', error.message);
-      return;
+      return { ok: false, error: error.message };
     }
   }
 
   if (!result) {
     console.warn('[push] нет данных — пропуск');
-    return;
+    return { ok: false, error: 'no_data' };
   }
 
   const lastVersion = await env.PUSH_KV.get(LAST_VERSION_KEY);
-  if (lastVersion === result.version) return;
+  const { changes, version, touched, pending, versions } = result;
 
-  const { changes, version, touched } = result;
+  // Раньше здесь был только lastVersion === version. Если один факультет
+  // не скачался, его версия не сохранялась, а lastVersion уже ставился —
+  // и изменение терялось навсегда. Теперь pending заставляет повторить.
+  if (lastVersion === version && !pending) {
+    return { ok: true, skipped: true, version };
+  }
 
   if (changes.length === 0) {
+    if (versions) {
+      await env.PUSH_KV.put(FACULTY_VERSIONS_KEY, JSON.stringify(versions));
+    }
     await env.PUSH_KV.put(LAST_VERSION_KEY, version);
     console.log(
       `[push] версия ${version}: изменений нет` +
         (touched ? `, обновлено факультетов ${touched}` : ''),
     );
-    return;
+    return { ok: true, version, changes: 0, touched, sent: 0 };
   }
 
   const subscriptions = await listSubscriptions(env);
@@ -738,11 +778,46 @@ async function checkForChanges(env) {
     }
   }
 
+  if (versions) {
+    await env.PUSH_KV.put(FACULTY_VERSIONS_KEY, JSON.stringify(versions));
+  }
   await env.PUSH_KV.put(LAST_VERSION_KEY, version);
   console.log(
     `[push] версия ${version}: изменений ${changes.length}, ` +
       `факультетов ${touched}, подписок ${subscriptions.length}, отправлено ${sent}`,
   );
+
+  return {
+    ok: true,
+    version,
+    changes: changes.length,
+    touched,
+    subscriptions: subscriptions.length,
+    sent,
+    pending,
+  };
+}
+
+/**
+ * Обёртка для cron: всегда пишет отметку о запуске в KV, чтобы по /diag
+ * было видно, срабатывает ли триггер и что он нашёл.
+ */
+async function scheduledCheck(env) {
+  const record = { at: new Date().toISOString() };
+
+  try {
+    Object.assign(record, await checkForChanges(env));
+  } catch (error) {
+    console.error('[push] check failed:', error);
+    record.ok = false;
+    record.error = error.message;
+  }
+
+  try {
+    await env.PUSH_KV.put(LAST_CHECK_KEY, JSON.stringify(record));
+  } catch (error) {
+    console.error('[push] last_check write failed:', error);
+  }
 }
 
 /* ============================================================
@@ -821,6 +896,93 @@ async function handleTest(request, env) {
   }
 }
 
+async function handleDiag(env) {
+  const indexUrl = env.SCHEDULE_INDEX_URL || DEFAULT_INDEX_URL;
+
+  const report = {
+    ok: true,
+    service: 'pspu-push-worker',
+    mode: 'per-faculty',
+    indexUrl,
+    lastVersion: null,
+    versions: {},
+    indexGeneratedAt: null,
+    faculties: [],
+  };
+
+  try {
+    report.lastVersion = await env.PUSH_KV.get(LAST_VERSION_KEY);
+    report.versions =
+      (await env.PUSH_KV.get(FACULTY_VERSIONS_KEY, 'json')) || {};
+    report.lastCheck = await env.PUSH_KV.get(LAST_CHECK_KEY, 'json');
+  } catch (error) {
+    report.kvError = error.message;
+  }
+
+  try {
+    const subscriptions = await listSubscriptions(env);
+    report.subscriptions = {
+      total: subscriptions.length,
+      all: subscriptions.filter((s) => s.prefs?.all).length,
+      withGroups: subscriptions.filter((s) => (s.prefs?.groups || []).length).length,
+      withTeachers: subscriptions.filter((s) => (s.prefs?.teachers || []).length).length,
+    };
+  } catch (error) {
+    report.subscriptionsError = error.message;
+  }
+
+  let index;
+  try {
+    index = await fetchSchedule(indexUrl);
+  } catch (error) {
+    report.ok = false;
+    report.indexError = error.message;
+    return json(report, 502);
+  }
+
+  report.indexGeneratedAt = index?.generated_at || null;
+
+  const faculties = Array.isArray(index?.faculties) ? index.faculties : [];
+  report.faculties = await Promise.all(
+    faculties.map(async (faculty) => {
+      const folder = faculty.folder || `faculties/${faculty.id}`;
+      const entry = {
+        id: faculty.id,
+        generated_at: faculty.generated_at || '',
+        cached_version: report.versions[faculty.id] || null,
+      };
+
+      try {
+        const fresh = await fetchSchedule(facultyFileUrl(env, folder));
+        entry.data = {
+          ok: true,
+          generated_at: fresh.generated_at || '',
+          events: Array.isArray(fresh.events) ? fresh.events.length : 0,
+        };
+      } catch (error) {
+        entry.data = { ok: false, error: error.message };
+      }
+
+      try {
+        const old = await fetchSchedule(
+          facultyFileUrl(env, folder, { previous: true }),
+        );
+        entry.old_data = {
+          ok: true,
+          generated_at: old.generated_at || '',
+          events: Array.isArray(old.events) ? old.events.length : 0,
+        };
+      } catch (error) {
+        entry.old_data = { ok: false, error: error.message };
+      }
+
+      return entry;
+    }),
+  );
+
+  return json(report);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -835,8 +997,15 @@ export default {
           ok: true,
           service: 'pspu-push-worker',
           mode: 'per-faculty',
-          endpoints: ['/subscribe', '/unsubscribe', '/test'],
+          build: '2026-10-29-per-faculty-v2',
+          indexUrl: env.SCHEDULE_INDEX_URL || DEFAULT_INDEX_URL,
+          vapidPublicKey: String(env.VAPID_PUBLIC_KEY || '').trim() || null,
+          endpoints: ['/subscribe', '/unsubscribe', '/test', '/diag'],
         });
+      }
+
+      if (url.pathname === '/diag' && request.method === 'GET') {
+        return await handleDiag(env);
       }
 
       if (url.pathname === '/subscribe' && request.method === 'POST') {
@@ -859,6 +1028,6 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(checkForChanges(env));
+    ctx.waitUntil(scheduledCheck(env));
   },
 };

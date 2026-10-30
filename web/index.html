@@ -104,6 +104,8 @@
                                placeholder="Поиск по группам и преподавателям…">
                     </label>
 
+                    <div class="filter-selected" id="filterSelected" hidden></div>
+
                     <div class="filter-faculty-block">
                         <div class="filter-section-head">
                             <span class="filter-column-title">Факультеты</span>
@@ -316,6 +318,16 @@
 </div>
 
 <div class="popover" id="eventPopover"></div>
+
+<div class="modal-backdrop" id="filterSelectedModal">
+    <div class="filter-selected-modal" role="dialog" aria-labelledby="filterSelectedTitle">
+        <div class="filter-selected-modal-head">
+            <h2 class="filter-selected-modal-title" id="filterSelectedTitle">Выбранные фильтры</h2>
+            <button class="filter-selected-modal-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="filter-selected-modal-body" id="filterSelectedModalBody"></div>
+    </div>
+</div>
 
 <div class="modal-backdrop" id="dateModal">
     <div class="picker" role="dialog">
