@@ -51,6 +51,38 @@ def test_publish_rotates_previous_version(tmp_path):
     assert previous["events"][0]["group"] == "A"
 
 
+def test_publish_does_not_downgrade_version(tmp_path):
+    assert publish_faculty(
+        tmp_path, _faculty(), [{"group": "new"}], "2026-11-06T16:00:00+00:00",
+    ) is True
+
+    # Устаревшая копия пытается опубликовать старую версию — пропускаем.
+    assert publish_faculty(
+        tmp_path, _faculty(), [{"group": "old"}], "2026-11-06T13:00:00+00:00",
+    ) is False
+
+    payload = json.loads(
+        (tmp_path / "faculties" / "12" / "data.json").read_text(encoding="utf-8")
+    )
+    assert payload["events"][0]["group"] == "new"
+    assert payload["generated_at"] == "2026-11-06T16:00:00+00:00"
+
+
+def test_index_does_not_downgrade(tmp_path):
+    publish(tmp_path, [_faculty()], {"12": [{"group": "A"}]}, "2026-11-06T16:00:00+00:00")
+    index_path = publish(
+        tmp_path, [_faculty()], {"12": [{"group": "B"}]}, "2026-11-06T13:00:00+00:00",
+    )
+
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    assert index["generated_at"] == "2026-11-06T16:00:00+00:00"
+
+    payload = json.loads(
+        (tmp_path / "faculties" / "12" / "data.json").read_text(encoding="utf-8")
+    )
+    assert payload["events"][0]["group"] == "A"
+
+
 def test_publish_keeps_version_when_nothing_changed(tmp_path):
     publish(tmp_path, [_faculty()], {"12": [{"group": "A"}]}, "v1")
     publish(tmp_path, [_faculty()], {"12": [{"group": "A"}]}, "v2")

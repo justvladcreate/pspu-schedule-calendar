@@ -13,10 +13,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
 from parser.core.model import Faculty
+
+logger = logging.getLogger(__name__)
 
 SCHEMA_VERSION = 2
 
@@ -82,6 +85,19 @@ def publish_faculty(
     })
 
     data_path = folder / "data.json"
+
+    # Защита от отката: если новая версия старее уже опубликованной,
+    # не перезаписываем данные. Так устаревшая копия репозитория
+    # (со старым parsed.json) не «вернёт» расписание назад.
+    existing = _read_json(data_path)
+    existing_gen = str(existing.get("generated_at") or "")
+    if existing_gen and generated_at and generated_at < existing_gen:
+        logger.warning(
+            "Публикация %s: версия %s старее текущей %s — пропускаю",
+            faculty.id, generated_at, existing_gen,
+        )
+        return False
+
     prepared = {
         "schema_version": SCHEMA_VERSION,
         "faculty": {
@@ -127,7 +143,13 @@ def publish(
     previous_index = _read_json(index_path)
     drop_ids = set(drop_ids or ())
 
-    stamp = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    requested_stamp = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    stamp = requested_stamp
+
+    # Индекс тоже не должен «откатываться» назад из-за старой копии.
+    previous_stamp = str(previous_index.get("generated_at") or "")
+    if previous_stamp and stamp < previous_stamp:
+        stamp = previous_stamp
 
     # Сохраняем порядок прошлого индекса, убираем выбывшие.
     ordered_ids: list[str] = [
@@ -148,7 +170,7 @@ def publish(
         if not events:
             continue
 
-        changed = publish_faculty(web_data_dir, faculty, events, stamp)
+        changed = publish_faculty(web_data_dir, faculty, events, requested_stamp)
         changed_any = changed_any or changed
 
         data_path = web_data_dir / "faculties" / faculty.id / "data.json"
