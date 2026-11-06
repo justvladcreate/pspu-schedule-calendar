@@ -18,7 +18,7 @@ from pathlib import Path
 
 from parser.core.model import Faculty
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 2
 
 
 def _text(payload: dict) -> str:
