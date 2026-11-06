@@ -1,0 +1,7 @@
+{
+  // Конфиг для автоматического деплоя ICS-воркера через GitHub Actions.
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "pspu-ics-worker",
+  "main": "ics-worker.js",
+  "compatibility_date": "2025-01-01"
+}

@@ -1,0 +1,23 @@
+{
+  // Конфиг для автоматического деплоя push-воркера через GitHub Actions.
+  // Секрет VAPID_PRIVATE_KEY задаётся отдельно в Cloudflare (Secrets)
+  // и при деплое не перезаписывается.
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "push-worker",
+  "main": "push-worker.js",
+  "compatibility_date": "2025-01-01",
+  "vars": {
+    "SITE_URL": "https://justvladcreate.github.io/pspu-schedule-calendar/",
+    "VAPID_PUBLIC_KEY": "BGWze2kmriZ4U2L_wj4CBMrwsjDaEnk9JQC2_3-PF8mDKJDRQBDO7laqeJpOUc2IwqZk2kj41gdO96NToJkRhjI",
+    "VAPID_SUBJECT": "mailto:vladjust059@gmail.com"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PUSH_KV",
+      "id": "PASTE_KV_NAMESPACE_ID"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  }
+}
