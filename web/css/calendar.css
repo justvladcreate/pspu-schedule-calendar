@@ -13,9 +13,9 @@
     background: var(--surface);
     position: sticky;
     top: 0;
-    /* Выше линии текущего времени (z-index: 10), чтобы она уходила
-       под шапку, а не рисовалась поверх неё. */
-    z-index: 15;
+    /* Выше линии времени (10) и подсвеченного события (20), чтобы
+       при наведении карточка уходила под шапку с днями недели. */
+    z-index: 30;
 }
 .cal-header.week { grid-template-columns: 64px repeat(7, 1fr); }
 .cal-header.day  { grid-template-columns: 64px 1fr; }
