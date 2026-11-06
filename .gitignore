@@ -228,3 +228,5 @@ chunks**
 dev
 .idea/
 .worktree-gh-pages/
+# Reference copies of Cloudflare workers (deployed manually, not tracked)
+cloudflare/reference/
