@@ -265,10 +265,6 @@ def merge_ai_line(
             )
             color = _get_event_color(text_colors, dates)
             is_past = _is_grey_color(color)
-            # Серый текст — это пометка «прошедшее», а не цвет фона.
-            # В оригинале заливки нет, поэтому блок не красим.
-            if is_past:
-                color = None
             return [{
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -288,8 +284,6 @@ def merge_ai_line(
         for g_dates, g_rooms in groups:
             color = _get_event_color(text_colors, g_dates)
             is_past_g = _is_grey_color(color)
-            if is_past_g:
-                color = None
             res.append({
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -307,8 +301,6 @@ def merge_ai_line(
 
     color = _get_event_color(text_colors, dates)
     is_past = _is_grey_color(color)
-    if is_past:
-        color = None
     return [{
         "weekday":    weekday,
         "time_start": time_start,

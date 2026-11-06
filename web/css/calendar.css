@@ -13,7 +13,9 @@
     background: var(--surface);
     position: sticky;
     top: 0;
-    z-index: 5;
+    /* Выше линии текущего времени (z-index: 10), чтобы она уходила
+       под шапку, а не рисовалась поверх неё. */
+    z-index: 15;
 }
 .cal-header.week { grid-template-columns: 64px repeat(7, 1fr); }
 .cal-header.day  { grid-template-columns: 64px 1fr; }
@@ -110,6 +112,13 @@
     border-top: 2px solid var(--danger);
     z-index: 10;
     pointer-events: none;
+    /* Интервал обновления в main.js — 10 секунд; переход такой же,
+       чтобы линия ехала непрерывно. */
+    transition: top 10s linear;
+    will-change: top;
+}
+@media (prefers-reduced-motion: reduce) {
+    .current-time-line { transition: none; }
 }
 .current-time-line::before {
     content: '';

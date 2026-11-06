@@ -82,13 +82,13 @@ def test_grey_color_marks_past():
     assert items and items[0]["is_past"] is True
 
 
-def test_grey_text_does_not_fill_event():
-    """Серый текст в таблице — пометка «прошло», а не цвет заливки."""
+def test_grey_text_keeps_grey_color():
+    """Серый текст снова красит событие, но помечает его прошедшим."""
     source = _source(text_colors=[{"text": "07.09.2026", "color": "#cccccc"}])
     line = "[1];ПН;13:30;15:00;07.09.2026;Математика;лек.;;Иванов И.И.;"
     items = merge_ai_line(line, 0, [source])
     assert items[0]["is_past"] is True
-    assert items[0]["color"] == ""
+    assert items[0]["color"] == "#cccccc"
 
 
 def test_merge_ai_line_date_in_rooms_falls_back_to_hints():
