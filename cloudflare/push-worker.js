@@ -1161,7 +1161,7 @@ export default {
           ok: true,
           service: 'pspu-push-worker',
           mode: 'per-faculty',
-          build: '2026-10-29-per-faculty-v2',
+          build: '2026-11-06-push-details',
           indexUrl: env.SCHEDULE_INDEX_URL || DEFAULT_INDEX_URL,
           vapidPublicKey: String(env.VAPID_PUBLIC_KEY || '').trim() || null,
           endpoints: ['/subscribe', '/unsubscribe', '/test', '/diag'],
