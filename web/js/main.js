@@ -29,7 +29,7 @@ import {
 } from './online.js';
 import { compareEvents, compareRawEvents, sortChanges } from './changes.js';
 import { setupChangesModal } from './changes-modal.js';
-import { setupUpdateBanner, getVisibleChanges } from './update-banner.js';
+import { setupUpdateBanner, getVisibleChanges, filterChangesByFilters } from './update-banner.js';
 import { setupReadmeModal } from './readme.js';
 import { showToast } from './toast.js';
 import {
@@ -528,7 +528,10 @@ function setupAllUI() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'OPEN_CHANGES') {
-                openChangesFromNotification(event.data.version || null);
+                openChangesFromNotification(
+                    event.data.version || null,
+                    event.data.filters || null,
+                );
             }
         });
     }
@@ -627,8 +630,55 @@ function finalizeWithData() {
  *  ПЕРЕХОД ИЗ PUSH-УВЕДОМЛЕНИЯ В «ИЗМЕНЕНИЯ»
  * ============================================================ */
 
-async function openChangesFromNotification(version = null) {
+/**
+ * Применяет фильтры из уведомления (группы/преподаватели/факультеты)
+ * глобально, но не сохраняет их как личные настройки пользователя.
+ */
+function applyPushFilters(filters) {
+    if (!filters) return;
+
+    const knownGroups = new Set(state.groups || []);
+    const knownTeachers = new Set(state.teachers || []);
+    const knownFaculties = new Set(
+        (state.faculties || []).map(faculty => String(faculty.id))
+    );
+
+    const groups    = (filters.groups    || []).filter(g => knownGroups.has(g));
+    const teachers  = (filters.teachers  || []).filter(t => knownTeachers.has(t));
+    const faculties = (filters.faculties || [])
+        .map(String)
+        .filter(id => knownFaculties.has(id));
+
+    if (!groups.length && !teachers.length && !faculties.length) return;
+
+    const previousUrlContext = state.urlContext;
+    state.urlContext = true; // не сохранять в localStorage
+    try {
+        state.selectedFaculties = new Set(faculties);
+        state.selectedGroups    = new Set(groups);
+        state.selectedTeachers  = new Set(teachers);
+        state.favoritesActive   = false;
+
+        const favBtn = document.getElementById('favoritesBtn');
+        if (favBtn) {
+            favBtn.classList.remove('is-active');
+            favBtn.dataset.favorites = 'off';
+        }
+
+        applyFilters();
+        updateCounter();
+        updateTriggerLabel();
+        render();
+        updateDateLabel();
+    } finally {
+        state.urlContext = previousUrlContext;
+    }
+}
+
+async function openChangesFromNotification(version = null, filters = null) {
     if (!changesModalApi) return;
+
+    applyPushFilters(filters);
 
     // Обычно pendingChanges уже посчитаны при загрузке данных.
     // Если пользователь уже видел эту версию (снимок обновлён), но
@@ -670,9 +720,12 @@ async function openChangesFromNotification(version = null) {
         }
     }
 
-    // Не применяем текущие фильтры: уведомление могло прийти по группе,
-    // которую пользователь сейчас не смотрит, но показать изменение нужно.
-    changesModalApi.open(state.pendingChanges || []);
+    const all = state.pendingChanges || [];
+
+    // Если пришли из уведомления с фильтрами — показываем только те
+    // изменения, которые под них попадают.
+    const visible = filters ? filterChangesByFilters(all) : all;
+    changesModalApi.open(visible);
 }
 
 function maybeOpenChangesFromPush() {
@@ -686,6 +739,9 @@ function maybeOpenChangesFromPush() {
     if (params.get('open') !== 'changes') return;
 
     const version = params.get('cv');
+    const hasFilters = Boolean(
+        params.get('f') || params.get('g') || params.get('t')
+    );
 
     // Убираем служебные параметры, чтобы обновление страницы
     // не открывало модалку повторно.
@@ -700,7 +756,7 @@ function maybeOpenChangesFromPush() {
         );
     } catch {}
 
-    openChangesFromNotification(version);
+    openChangesFromNotification(version, hasFilters ? {} : null);
 }
 
 async function init() {

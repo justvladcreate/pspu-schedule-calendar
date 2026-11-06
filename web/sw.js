@@ -257,6 +257,8 @@ self.addEventListener('notificationclick', (event) => {
       client.postMessage({
         type: 'OPEN_CHANGES',
         version: data.version || null,
+        filters: data.filters || null,
+        when: data.when || null,
       });
       return;
     }

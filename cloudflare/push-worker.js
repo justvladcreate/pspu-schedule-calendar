@@ -31,6 +31,10 @@
 
 // Cron в Cloudflare: */5 * * * *  (без пробела между * и /5).
 
+const TZ_OFFSET_MIN = 5 * 60; // Asia/Yekaterinburg = UTC+5
+const MAX_BODY_LINES = 4;
+const DISCIPLINE_LIMIT = 26;
+
 const DEFAULT_SITE_URL =
   'https://justvladcreate.github.io/pspu-schedule-calendar/';
 const DEFAULT_INDEX_URL = DEFAULT_SITE_URL + 'data/index.json';
@@ -118,10 +122,21 @@ function siteUrl(env) {
   return raw.endsWith('/') ? raw : raw + '/';
 }
 
-function changesUrl(env, version) {
+function changesUrl(env, version, filters = {}) {
   const url = new URL(siteUrl(env));
   url.searchParams.set('open', 'changes');
   if (version) url.searchParams.set('cv', version);
+
+  // Ссылка несёт ровно те фильтры, по которым пришло уведомление:
+  // приложение применит их глобально и покажет только эти изменения.
+  const groups = filters.groups || [];
+  const teachers = filters.teachers || [];
+  const faculties = filters.faculties || [];
+
+  if (groups.length) url.searchParams.set('g', groups.join(','));
+  if (teachers.length) url.searchParams.set('t', teachers.join(','));
+  if (faculties.length) url.searchParams.set('f', faculties.join(','));
+
   return url.href;
 }
 
@@ -517,18 +532,167 @@ async function sendPush(subscription, notification, env) {
   });
 }
 
-function buildNotification(env, changes, version) {
+/* ============================================================
+ *  Текст уведомления
+ * ============================================================ */
+
+function truncate(text, limit) {
+  const value = String(text || '').trim();
+  if (value.length <= limit) return value;
+  return value.slice(0, limit - 1).trimEnd() + '…';
+}
+
+function shortList(list, limit = 2) {
+  const items = (list || []).map(String).filter(Boolean);
+  if (!items.length) return '—';
+  if (items.length <= limit) return items.join(', ');
+  return items.slice(0, limit).join(', ') + ` +${items.length - limit}`;
+}
+
+function describeField(field) {
+  const oldList = field.old || [];
+  const newList = field.new || [];
+
+  switch (field.name) {
+    case 'time_start':
+    case 'time_end': {
+      const label = field.name === 'time_start' ? 'начало' : 'конец';
+      if (!field.old && !field.new) return '';
+      if (!field.old) return `${label} ${field.new}`;
+      if (!field.new) return `${label} −${field.old}`;
+      return `${label} ${field.old}→${field.new}`;
+    }
+    case 'teachers': {
+      const oldT = shortList(oldList, 1);
+      const newT = shortList(newList, 1);
+      if (!oldList.length) return `препод. ${newT}`;
+      if (!newList.length) return `препод. −${oldT}`;
+      return `препод. ${oldT}→${newT}`;
+    }
+    case 'rooms': {
+      const oldR = shortList(oldList);
+      const newR = shortList(newList);
+      if (!oldList.length) return `ауд. ${newR}`;
+      if (!newList.length) return `ауд. −${oldR}`;
+      return `ауд. ${oldR}→${newR}`;
+    }
+    case 'dates': {
+      const plus = (field.onlyNew || []).length;
+      const minus = (field.onlyOld || []).length;
+      const parts = [];
+      if (plus) parts.push(`+${plus}`);
+      if (minus) parts.push(`−${minus}`);
+      return parts.length ? `даты ${parts.join('/')}` : 'даты';
+    }
+    case 'comment':
+      return 'комментарий';
+    default:
+      return field.name;
+  }
+}
+
+function describeChange(change) {
+  const ev = change.new || change.old;
+  if (!ev) return '';
+
+  const mark =
+    change.type === 'added' ? '+' : change.type === 'removed' ? '−' : '·';
+  const head = [ev.group, ev.weekday, ev.time_start].filter(Boolean).join(' ');
+  const name = truncate(ev.discipline, DISCIPLINE_LIMIT);
+
+  let line = `${mark} ${head}${name ? ' · ' + name : ''}`;
+
+  if (change.type === 'changed') {
+    const details = (change.fields || [])
+      .slice(0, 2)
+      .map(describeField)
+      .filter(Boolean)
+      .join(', ');
+    if (details) line += ` — ${details}`;
+  }
+
+  return truncate(line, 80);
+}
+
+function notificationFilters(changes) {
+  const list = (changes || []).filter(Boolean);
+
+  const groups = new Set();
+  const teachers = new Set();
+  const faculties = new Set();
+
+  let allHaveGroup = list.length > 0;
+  let allHaveTeacher = list.length > 0;
+  let allHaveFaculty = list.length > 0;
+
+  for (const change of list) {
+    const ev = change.new || change.old;
+    if (!ev || !ev.group) allHaveGroup = false;
+    if (!ev || !(ev.teachers || []).length) allHaveTeacher = false;
+    if (!ev || !ev.faculty_id) allHaveFaculty = false;
+
+    if (change.new) {
+      if (change.new.group) groups.add(String(change.new.group));
+      for (const t of change.new.teachers || []) teachers.add(String(t));
+      if (change.new.faculty_id) faculties.add(String(change.new.faculty_id));
+    }
+    if (change.old) {
+      if (change.old.group) groups.add(String(change.old.group));
+      for (const t of change.old.teachers || []) teachers.add(String(t));
+      if (change.old.faculty_id) faculties.add(String(change.old.faculty_id));
+    }
+  }
+
+  // Фильтры в ссылке применяются по «И», поэтому берём только те
+  // измерения, которые есть у ВСЕХ изменений — иначе часть из них
+  // исчезнет из модалки (например, физкультура без преподавателя).
   return {
-    title: 'Изменения в расписании',
-    body: changeSummary(changes),
+    groups: allHaveGroup ? [...groups] : [],
+    teachers: allHaveTeacher ? [...teachers] : [],
+    faculties: allHaveFaculty ? [...faculties] : [],
+  };
+}
+
+/** Локальное время ПГГПУ: «06.11, 19:55». */
+function localWhen(date) {
+  const shifted = new Date(date.getTime() + TZ_OFFSET_MIN * 60 * 1000);
+  const dd = String(shifted.getUTCDate()).padStart(2, '0');
+  const mm = String(shifted.getUTCMonth() + 1).padStart(2, '0');
+  const hh = String(shifted.getUTCHours()).padStart(2, '0');
+  const mi = String(shifted.getUTCMinutes()).padStart(2, '0');
+  return `${dd}.${mm}, ${hh}:${mi}`;
+}
+
+function buildNotification(env, changes, version) {
+  const when = localWhen(new Date());
+  const filters = notificationFilters(changes);
+
+  const lines = (changes || [])
+    .slice(0, MAX_BODY_LINES)
+    .map(describeChange)
+    .filter(Boolean);
+  const rest = Math.max(0, (changes || []).length - lines.length);
+
+  const body = [
+    ...lines,
+    rest > 0 ? `…и ещё ${rest}. Нажмите, чтобы увидеть все.` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    title: `Изменения в расписании · ${when}`,
+    body: body || changeSummary(changes),
     icon: assetUrl(env, 'icons/icon-192.png'),
     badge: assetUrl(env, 'icons/icon-192.png'),
     tag: `schedule-${version}`,
     renotify: false,
     data: {
-      url: changesUrl(env, version),
+      url: changesUrl(env, version, filters),
       version,
-      count: changes.length,
+      when,
+      count: (changes || []).length,
+      filters,
     },
   };
 }
