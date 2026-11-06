@@ -967,6 +967,21 @@ function _swReloadGuardSet() {
     try { sessionStorage.setItem(SW_RELOAD_FLAG, '1'); } catch {}
 }
 
+let swRegistration = null;
+let swUpdateCheckedAt = 0;
+/* Браузер сам проверяет sw.js не чаще раза в сутки — форсируем
+   проверку при загрузке и возврате на вкладку, иначе старый SW
+   может неделями отдавать старый main.js из кэша. */
+const SW_UPDATE_MIN_GAP = 15 * 60 * 1000;
+
+function requestSwUpdate(force = false) {
+    if (!swRegistration) return;
+    const now = Date.now();
+    if (!force && now - swUpdateCheckedAt < SW_UPDATE_MIN_GAP) return;
+    swUpdateCheckedAt = now;
+    swRegistration.update().catch(() => {});
+}
+
 function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
 
@@ -981,7 +996,9 @@ function registerServiceWorker() {
         location.reload();
     });
 
-    navigator.serviceWorker.register('sw.js').then((reg) => {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+        swRegistration = reg;
+        requestSwUpdate(true);
         console.info('[SW] Зарегистрирован. scope:', reg.scope);
     }).catch((err) => {
         console.warn('[SW] Регистрация не удалась:', err);
@@ -1104,7 +1121,9 @@ function setupPeriodicUpdates() {
 
     setInterval(maybeCheck, UPDATE_INTERVAL);
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) maybeCheck();
+        if (document.hidden) return;
+        maybeCheck();
+        requestSwUpdate();
     });
 }
 
