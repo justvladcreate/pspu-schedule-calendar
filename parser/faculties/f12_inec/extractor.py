@@ -278,7 +278,10 @@ def extraction(df, hyperlinks: dict | None = None, colors: dict | None = None):
                             i += 1
 
                     all_colors = []
-                    for c in range(start_cell[1], end_cell[1] + 1):
+                    # Только колонки с предметом: цвет времени и аудитории
+                    # к событию не относится (синий текст ссылки в комнате
+                    # раньше красил всё занятие).
+                    for c in range(start_cell[1] + 1, end_cell[1]):
                         all_colors.extend(colors.get((abs_row, c), []))
 
                     for time_value in merged_times:
