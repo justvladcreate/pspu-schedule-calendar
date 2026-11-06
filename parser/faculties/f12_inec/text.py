@@ -22,6 +22,15 @@ _JUNK_ROOMS = {
     "n\\a",
 }
 
+# Строка целиком из даты — это подпись «с какого числа» из ячейки
+# аудиторий, а не аудитория (например, «7.12» перед «IV к. спорт. зал»).
+_DATE_ONLY_RE = re.compile(r'^\d{1,2}\.\d{2}(?:\.\d{4})?$')
+_DATE_ONLY_WORDS_RE = re.compile(
+    r'^(?:кроме|до|после|с)\s+\d{1,2}\.\d{2}(?:\.\d{4})?$',
+    re.IGNORECASE,
+)
+_ONLINE_ROOM_RE = re.compile(r'^(?:онлайн|online)$', re.IGNORECASE)
+
 
 def clean_room(room: str) -> str:
     """Очистка одной записи аудитории. Возвращает "" для мусора."""
@@ -30,12 +39,18 @@ def clean_room(room: str) -> str:
 
     room = str(room).replace('\\', ' ').replace('/', ' ')
     room = re.sub(r'\s+', ' ', room).strip()
+    # Хвостовая пунктуация из таблицы: «12.11;», «IV к. А305,».
+    room = room.strip(' ;,')
     if not room:
         return ""
 
     low = room.lower()
     if low in _JUNK_ROOMS:
         return ""
+    if _DATE_ONLY_RE.match(room) or _DATE_ONLY_WORDS_RE.match(room):
+        return ""
+    if _ONLINE_ROOM_RE.match(room):
+        return "дистанционно онлайн"
     if low.startswith("дистанционно"):
         return "дистанционно онлайн"
 

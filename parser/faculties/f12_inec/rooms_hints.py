@@ -75,6 +75,9 @@ _DATE_HINT_RE = re.compile(
 # Отдельные DD.MM-точки — используются в _parse_dates_hint
 _DATE_MD_RE = re.compile(r'\b(\d{1,2})\.(\d{2})\b')
 
+# «дистанционно\ \nОНЛАЙН» — одно слово, разорванное переносом строки.
+_WRAPPED_ONLINE_RE = re.compile(r'дистанционно[\s\\/]*онлайн', re.IGNORECASE)
+
 
 # ========================================================================
 # РАЗВОРАЧИВАНИЕ ДИАПАЗОНОВ
@@ -200,7 +203,19 @@ def parse_rooms_with_hints(
     for ch in ('"', '«', '»', '“', '”'):
         text = text.replace(ch, ' ')
 
-    raw_parts = re.split(r'[\n\r,]+', text)
+    text = _WRAPPED_ONLINE_RE.sub('дистанционно онлайн', text)
+
+    # Сначала режем по переносам строк: запятые внутри списка дат
+    # («7.12, 14.12 - IV к. спорт. зал») не должны разрывать хинт.
+    raw_parts: list[str] = []
+    for line in re.split(r'[\n\r]+', text):
+        m_date = _DATE_HINT_RE.match(line)
+        if m_date and ',' in m_date.group(1):
+            # Разделители внутри префикса дат заменяем на ';' —
+            # грамматика хинта их понимает, а сплит по запятым — нет.
+            prefix = m_date.group(1).replace(',', ';')
+            line = line[:m_date.start(1)] + prefix + line[m_date.end(1):]
+        raw_parts.extend(re.split(r',+', line))
 
     result: list[dict] = []
 

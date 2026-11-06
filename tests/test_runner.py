@@ -82,6 +82,39 @@ def test_grey_color_marks_past():
     assert items and items[0]["is_past"] is True
 
 
+def test_grey_text_does_not_fill_event():
+    """Серый текст в таблице — пометка «прошло», а не цвет заливки."""
+    source = _source(text_colors=[{"text": "07.09.2026", "color": "#cccccc"}])
+    line = "[1];ПН;13:30;15:00;07.09.2026;Математика;лек.;;Иванов И.И.;"
+    items = merge_ai_line(line, 0, [source])
+    assert items[0]["is_past"] is True
+    assert items[0]["color"] == ""
+
+
+def test_merge_ai_line_date_in_rooms_falls_back_to_hints():
+    """Если LLM положила дату в аудитории — берём детерминированный разбор."""
+    source = _source(
+        room_raw="IV к. А305\n11.11, 18.11 - дистанционно\\ \nОНЛАЙН",
+    )
+    line = (
+        "[1];СР;11:30;13:00;07.10, 11.11, 18.11;Спецпрактикум;лек.прак.;;"
+        "Худорожков Л.Ю.;IV к. А305, 11.11, ОНЛАЙН"
+    )
+    items = merge_ai_line(line, 0, [source])
+    rooms = {item["dates"]: item["rooms"] for item in items}
+    assert rooms["07.10"] == "IV к. А305"
+    assert rooms["11.11, 18.11"] == "дистанционно онлайн"
+
+
+def test_finalize_rooms_restores_online_link():
+    from parser.faculties.f12_inec.ai_merge import finalize_rooms
+
+    src = {"rooms": "IV к. А305, [дистанционно онлайн](https://example.com/call)"}
+    assert finalize_rooms("IV к. А305, 11.11, ОНЛАЙН", src) == (
+        "IV к. А305, [дистанционно онлайн](https://example.com/call)"
+    )
+
+
 def test_events_equal_ignores_order():
     a = [{"event_id": "1", "group": "A", "weekday": "ПН", "pair_number": 1}]
     b = [{"event_id": "1", "group": "A", "weekday": "ПН", "pair_number": 1}]

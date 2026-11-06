@@ -13,7 +13,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from parser.sources import GoogleSheetsSource, SheetData, XlsxFileSource
-from parser.sources.google_sheets import _apply_merges, _build_df, _cell_links
+from parser.sources.google_sheets import (
+    _apply_merges,
+    _build_df,
+    _cell_links,
+    _extract_colored_texts,
+)
 
 
 # ---------------------------------------------------------------- базовые
@@ -29,6 +34,37 @@ def test_sheetdata_is_dataclass():
 def test_cell_links_cell_level_only():
     cell = {"hyperlink": "https://a.example/x"}
     assert _cell_links(cell) == ["https://a.example/x"]
+
+
+def test_grey_base_does_not_leak_to_default_run():
+    """Чёрная строка внутри серой ячейки не должна становиться серой."""
+    text = (
+        "8.09 Основы военной подготовки  (лек.) доц. Селиванов А.Е. \n"
+        "3.11 Основы военной подготовки (прак.) - Тактическая медицина"
+    )
+    cell = {
+        "formattedValue": text,
+        "effectiveFormat": {
+            "textFormat": {
+                "foregroundColorStyle": {
+                    "rgbColor": {"red": 0.8509804, "green": 0.8509804, "blue": 0.8509804},
+                },
+            },
+        },
+        "textFormatRuns": [
+            {"format": {}},
+            {
+                "startIndex": 60,
+                "format": {
+                    "foregroundColor": {},
+                    "foregroundColorStyle": {"rgbColor": {}},
+                },
+            },
+        ],
+    }
+
+    chunks = _extract_colored_texts(cell)
+    assert chunks == [{"text": text[:60], "color": "#d9d9d9"}]
 
 
 def test_cell_links_runs_and_cell_level():

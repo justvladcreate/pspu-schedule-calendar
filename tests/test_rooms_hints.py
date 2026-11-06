@@ -37,6 +37,38 @@ def test_parse_urls():
     ]
 
 
+def test_parse_date_list_before_room():
+    """Запятые внутри списка дат не разрывают хинт."""
+    rooms = _parsed("7.12, 14.12 - IV к.\\спорт. зал")
+    assert rooms == [
+        {"room": "IV к. спорт. зал", "hint_type": None, "hint_dates": ["12-07", "12-14"]},
+    ]
+
+
+def test_parse_wrapped_online_keeps_link():
+    rooms = parse_rooms_with_hints(
+        "IV к. А305 \n\n11.11, 18.11 - дистанционно\\ \nОНЛАЙН",
+        urls=["https://example.com/call"],
+    )
+    assert rooms == [
+        {"room": "IV к. А305", "hint_type": None, "hint_dates": None},
+        {
+            "room": "[дистанционно онлайн](https://example.com/call)",
+            "hint_type": None,
+            "hint_dates": ["11-11", "11-18"],
+        },
+    ]
+
+
+def test_date_is_not_a_room():
+    from parser.faculties.f12_inec.text import clean_room
+
+    assert clean_room("7.12") == ""
+    assert clean_room("11.11.2026") == ""
+    assert clean_room("кроме 9.11") == ""
+    assert clean_room("ОНЛАЙН") == "дистанционно онлайн"
+
+
 @pytest.mark.parametrize(
     ("raw", "branch_type", "branch_dates", "expected"),
     [

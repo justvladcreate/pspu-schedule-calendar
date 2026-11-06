@@ -17,6 +17,8 @@ from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 
 logger = logging.getLogger(__name__)
 
+_LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
+
 
 def format_ai_input(sources: list[dict]) -> str:
     """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
@@ -88,6 +90,86 @@ def _is_grey_color(hex_color: str) -> bool:
         return abs(r - g) <= 25 and abs(g - b) <= 25
     except ValueError:
         return False
+
+
+def _source_link(src: dict) -> str:
+    """Первая http-ссылка из исходной ячейки аудиторий."""
+    candidates: list[str] = [str(src.get("rooms") or "")]
+    for hint in src.get("rooms_hints") or []:
+        candidates.append(str(hint.get("room") or ""))
+    for candidate in candidates:
+        m = _LINK_RE.search(candidate)
+        if m:
+            return m.group(2)
+    return ""
+
+
+def _clean_ai_room(raw: str) -> str:
+    """Мягкая чистка комнаты из ответа LLM: без нормализации корпусов."""
+    text = str(raw or "").replace('\\', ' ').replace('/', ' ')
+    text = re.sub(r'\s+', ' ', text).strip().strip(' ;,')
+    if not text:
+        return ""
+    low = text.lower()
+    if low in {"-", "—", "–", "нет", "n/a", "н/д", "онлайн", "online"}:
+        return "дистанционно онлайн" if low in {"онлайн", "online"} else ""
+    if re.fullmatch(r'\d{1,2}\.\d{2}(?:\.\d{4})?', text):
+        return ""
+    if re.fullmatch(r'(?:кроме|до|после|с)\s+\d{1,2}\.\d{2}(?:\.\d{4})?', text, re.IGNORECASE):
+        return ""
+    if low.startswith("дистанционно"):
+        return "дистанционно онлайн"
+    return text
+
+
+def _rooms_ai_has_date(rooms: str) -> bool:
+    """В комнатах из ответа LLM есть отдельная дата («11.11»)."""
+    for raw in re.split(r'[,\n\r]+', str(rooms or '')):
+        if re.fullmatch(r'\d{1,2}\.\d{2}(?:\.\d{4})?', raw.strip()):
+            return True
+    return False
+
+
+def finalize_rooms(rooms: str, src: dict | None = None) -> str:
+    """Чистит аудитории, пришедшие из ответа LLM.
+
+    Модель иногда теряет ссылку и оставляет в комнатах дату («11.11»),
+    поэтому приводим строку к тому же виду, что и детерминированный
+    разбор: даты выбрасываем, «онлайн» превращаем в «дистанционно
+    онлайн» и возвращаем ссылку из исходной ячейки.
+    """
+    text = str(rooms or "")
+
+    parts: list[str] = []
+    seen: set[str] = set()
+    for raw in re.split(r'[,\n\r]+', text):
+        raw = raw.strip()
+        if not raw:
+            continue
+
+        m = _LINK_RE.fullmatch(raw)
+        name = _clean_ai_room(m.group(1)) if m else _clean_ai_room(raw)
+        if not name:
+            continue
+
+        if "](http" not in name:
+            key = name
+        else:
+            key = _LINK_RE.sub(r'\1', name)
+
+        if key in seen:
+            continue
+        seen.add(key)
+        parts.append(name)
+
+    url = _source_link(src or {})
+    if url:
+        for i, name in enumerate(parts):
+            if name.startswith("дистанционно") and "](http" not in name:
+                parts[i] = f"[{name}]({url})"
+                break
+
+    return ", ".join(parts)
 
 
 def _get_event_color(text_colors: list, b_dates: str) -> str | None:
@@ -162,6 +244,13 @@ def merge_ai_line(
 
     text_colors = src.get("text_colors") or []
 
+    # Если модель скопировала в аудитории дату («11.11»), её ответ
+    # ненадёжен — используем детерминированный разбор хинтов.
+    if rooms_ai and _rooms_ai_has_date(rooms_ai):
+        hints = src.get("rooms_hints") or []
+        if any(r.get("hint_type") or r.get("hint_dates") for r in hints):
+            rooms_ai = ""
+
     if not rooms_ai:
         hints = src.get("rooms_hints") or []
         has_overrides = any(r["hint_type"] or r["hint_dates"] for r in hints)
@@ -174,6 +263,10 @@ def merge_ai_line(
             )
             color = _get_event_color(text_colors, dates)
             is_past = _is_grey_color(color)
+            # Серый текст — это пометка «прошедшее», а не цвет фона.
+            # В оригинале заливки нет, поэтому блок не красим.
+            if is_past:
+                color = None
             return [{
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -193,6 +286,8 @@ def merge_ai_line(
         for g_dates, g_rooms in groups:
             color = _get_event_color(text_colors, g_dates)
             is_past_g = _is_grey_color(color)
+            if is_past_g:
+                color = None
             res.append({
                 "weekday":    weekday,
                 "time_start": time_start,
@@ -210,6 +305,8 @@ def merge_ai_line(
 
     color = _get_event_color(text_colors, dates)
     is_past = _is_grey_color(color)
+    if is_past:
+        color = None
     return [{
         "weekday":    weekday,
         "time_start": time_start,
@@ -219,7 +316,7 @@ def merge_ai_line(
         "type":       type_,
         "subgroup":   subgroup,
         "teachers":   teachers,
-        "rooms":      rooms_ai,
+        "rooms":      finalize_rooms(rooms_ai, src),
         "color":      color or "",
         "is_past":    is_past,
     }]

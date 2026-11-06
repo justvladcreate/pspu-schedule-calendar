@@ -124,12 +124,24 @@ def _extract_colored_texts(cell: dict) -> list[dict]:
             continue
 
         fmt = run.get("format") or {}
-        run_style = fmt.get("foregroundColorStyle") or {}
-        run_fg = run_style.get("rgbColor") or fmt.get("foregroundColor")
 
-        # Нет явного цвета у run — наследуем цвет ячейки. Если цвет
-        # задан явно (в том числе чёрный) — используем именно его.
-        color = _rgb_to_hex(run_fg) if run_fg else base_color
+        # Пустой foregroundColor/foregroundColorStyle — это НЕ «наследуй
+        # цвет ячейки», а явный сброс на цвет по умолчанию (чёрный).
+        # Именно так Google отдаёт чёрную строку внутри серой ячейки.
+        has_own_color = (
+            "foregroundColorStyle" in fmt or "foregroundColor" in fmt
+        )
+        if has_own_color:
+            run_style = fmt.get("foregroundColorStyle") or {}
+            run_fg = (
+                run_style.get("rgbColor")
+                or fmt.get("foregroundColor")
+                or {}
+            )
+            color = _rgb_to_hex(run_fg)
+        else:
+            color = base_color
+
         add_chunk(chunk, color)
 
     return chunks
