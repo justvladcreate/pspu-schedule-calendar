@@ -244,12 +244,14 @@ def merge_ai_line(
 
     text_colors = src.get("text_colors") or []
 
-    # Если модель скопировала в аудитории дату («11.11»), её ответ
-    # ненадёжен — используем детерминированный разбор хинтов.
-    if rooms_ai and _rooms_ai_has_date(rooms_ai):
-        hints = src.get("rooms_hints") or []
-        if any(r.get("hint_type") or r.get("hint_dates") for r in hints):
-            rooms_ai = ""
+    # Если в исходной ячейке есть комнаты, привязанные к датам
+    # («7.12, 14.12 - IV к. спорт. зал»), детерминированный разбор
+    # точнее ответа LLM: он сохраняет, к каким датам относится комната.
+    hints = src.get("rooms_hints") or []
+    has_date_overrides = any(r.get("hint_dates") for r in hints)
+
+    if rooms_ai and (has_date_overrides or _rooms_ai_has_date(rooms_ai)):
+        rooms_ai = ""
 
     if not rooms_ai:
         hints = src.get("rooms_hints") or []
