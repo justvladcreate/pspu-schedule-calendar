@@ -6,6 +6,7 @@ from parser.faculties.f12_inec.ai_merge import (
     chunk_hash,
     format_ai_input,
     merge_ai_line,
+    _get_event_color,
 )
 from parser.runner import events_equal
 from parser.faculties.f12_inec.rooms_hints import parse_rooms_with_hints
@@ -89,6 +90,40 @@ def test_grey_text_keeps_grey_color():
     items = merge_ai_line(line, 0, [source])
     assert items[0]["is_past"] is True
     assert items[0]["color"] == "#cccccc"
+
+
+def test_color_does_not_leak_between_disciplines_in_one_cell():
+    """Серый цвет одной строки не красит соседний предмет с той же датой."""
+    colors = [{
+        "text": "25.09 Методы проектной и исследовательской деятельности "
+                "(лек.) доц. П.",
+        "color": "#cccccc",
+    }]
+
+    assert _get_event_color(
+        colors,
+        "25.09, 02.10",
+        "Возрастная и педагогическая психология практикумом",
+    ) is None
+
+    assert _get_event_color(
+        colors,
+        "25.09",
+        "Методы проектной и исследовательской деятельности",
+    ) == "#cccccc"
+
+
+def test_color_matches_reworded_discipline():
+    colors = [{
+        "text": "25.09 - 20.11 Возрастная и педагогическая психология "
+                "с практикумом доц. Баландина Л.Л.",
+        "color": "#cccccc",
+    }]
+    assert _get_event_color(
+        colors,
+        "25.09, 02.10, 20.11",
+        "Возрастная и педагогическая психология практикумом",
+    ) == "#cccccc"
 
 
 def test_merge_ai_line_date_in_rooms_falls_back_to_hints():

@@ -172,8 +172,43 @@ def finalize_rooms(rooms: str, src: dict | None = None) -> str:
     return ", ".join(parts)
 
 
-def _get_event_color(text_colors: list, b_dates: str) -> str | None:
-    """Возвращает hex-код цвета, если все даты ветки найдены в цветном тексте."""
+def _text_matches_discipline(text: str, discipline: str) -> bool:
+    """Есть ли в цветном куске текста название той же дисциплины.
+
+    Нужен, когда в одной ячейке несколько предметов: серый цвет одной
+    строки не должен перекрашивать соседнюю. Сравниваем по значимым
+    словам, потому что LLM может слегка переписать название.
+    """
+    if not discipline:
+        return True
+
+    def words(value: str) -> set[str]:
+        return {
+            word
+            for word in re.findall(r'[А-Яа-яЁёA-Za-z]{3,}', str(value).lower())
+        }
+
+    chunk_words = words(text)
+    disc_words = words(discipline)
+    if not chunk_words or not disc_words:
+        return True
+
+    common = chunk_words & disc_words
+    need = min(2, len(disc_words))
+    return len(common) >= need and len(common) / len(disc_words) >= 0.5
+
+
+def _get_event_color(
+        text_colors: list,
+        b_dates: str,
+        discipline: str = "",
+) -> str | None:
+    """Возвращает hex-код, если цветной текст относится к этой ветке.
+
+    Совпадать должны и даты, и (когда известно) название дисциплины:
+    иначе серый цвет строки «Методы проектной…» красит соседнюю
+    «Возрастную психологию» только потому, что у них общая дата.
+    """
     if not text_colors or not b_dates:
         return None
 
@@ -193,7 +228,11 @@ def _get_event_color(text_colors: list, b_dates: str) -> str | None:
         # не должен определять цвет события.
         if not found:
             continue
-        if item["color"] and (found <= branch_dates or branch_dates <= found):
+        if not item["color"]:
+            continue
+        if not _text_matches_discipline(item["text"], discipline):
+            continue
+        if found <= branch_dates or branch_dates <= found:
             return item["color"]
 
     return None
@@ -263,7 +302,7 @@ def merge_ai_line(
                 branch_index=branch_index,
                 branch_total=branch_total,
             )
-            color = _get_event_color(text_colors, dates)
+            color = _get_event_color(text_colors, dates, discipline)
             is_past = _is_grey_color(color)
             return [{
                 "weekday":    weekday,
@@ -282,7 +321,7 @@ def merge_ai_line(
         groups = split_branch_by_rooms(hints, type_, dates)
         res = []
         for g_dates, g_rooms in groups:
-            color = _get_event_color(text_colors, g_dates)
+            color = _get_event_color(text_colors, g_dates, discipline)
             is_past_g = _is_grey_color(color)
             res.append({
                 "weekday":    weekday,
@@ -299,7 +338,7 @@ def merge_ai_line(
             })
         return res
 
-    color = _get_event_color(text_colors, dates)
+    color = _get_event_color(text_colors, dates, discipline)
     is_past = _is_grey_color(color)
     return [{
         "weekday":    weekday,
