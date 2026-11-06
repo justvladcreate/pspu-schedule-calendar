@@ -11,12 +11,13 @@ import json
 import logging
 import os
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 from parser.faculties import get_parser_class
 from parser.faculties.base import PARSED_NAME, read_json, rotate, write_json
 from parser.core.registry import load_registry
-from parser.core.finalize import transform_schedule
+from parser.core.finalize import stamp_updated_at, transform_schedule
 from parser.core.model import Faculty
 from parser.core.overrides import apply_overrides, load_overrides
 from parser.core.publish import publish
@@ -85,6 +86,15 @@ async def process_faculty(
     latest_path = parser.paths.latest_file(PARSED_NAME)
     previous = read_json(latest_path)
     previous_events = previous.get("events", []) if isinstance(previous, dict) else []
+
+    now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    stamp_updated_at(
+        parsed["events"],
+        previous_events,
+        now_iso=now_iso,
+        fallback_iso=previous.get("generated_at") if isinstance(previous, dict) else None,
+    )
+
     changed = not events_equal(previous_events, parsed["events"])
 
     if changed:

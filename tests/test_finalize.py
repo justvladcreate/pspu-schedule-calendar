@@ -3,8 +3,79 @@ import pytest
 from parser.core.finalize import (
     get_pair_number,
     normalize_teachers,
+    stamp_updated_at,
     transform_schedule,
 )
+
+
+def _event(**over):
+    event = {
+        "event_id": "12_1237_ВТ_3_1",
+        "group": "1237",
+        "weekday": "ВТ",
+        "pair_number": 3,
+        "discipline": "Операционные системы",
+        "type": "лек.",
+        "subgroup": "",
+        "time_start": "11:30",
+        "time_end": "13:00",
+        "teachers": ["Щипицын В.Д."],
+        "dates": ["15.09.2026", "22.09.2026"],
+        "rooms": "IV к. А111",
+        "comment": "",
+        "color": "",
+        "is_past": False,
+        "position": 1,
+        "updated_at": "",
+    }
+    event.update(over)
+    return event
+
+
+def test_stamp_updated_at_keeps_unchanged():
+    previous = [_event(updated_at="2026-11-01T10:00:00+00:00")]
+    fresh = [_event()]
+
+    stamp_updated_at(
+        fresh, previous,
+        now_iso="2026-11-06T16:00:00+00:00",
+        fallback_iso="2026-10-01T00:00:00+00:00",
+    )
+
+    assert fresh[0]["updated_at"] == "2026-11-01T10:00:00+00:00"
+
+
+def test_stamp_updated_at_updates_changed_and_new():
+    previous = [
+        _event(updated_at="2026-11-01T10:00:00+00:00"),
+        _event(event_id="12_1237_ВТ_4_1", pair_number=4, updated_at="2026-11-02T10:00:00+00:00"),
+    ]
+    fresh = [
+        _event(rooms="IV к. А112"),  # изменено
+        _event(event_id="12_1237_ВТ_5_1", pair_number=5, time_start="15:15"),  # новое
+    ]
+
+    stamp_updated_at(
+        fresh, previous,
+        now_iso="2026-11-06T16:00:00+00:00",
+        fallback_iso="2026-10-01T00:00:00+00:00",
+    )
+
+    assert fresh[0]["updated_at"] == "2026-11-06T16:00:00+00:00"
+    assert fresh[1]["updated_at"] == "2026-11-06T16:00:00+00:00"
+
+
+def test_stamp_updated_at_migration_uses_fallback():
+    previous = [_event()]  # без updated_at
+    fresh = [_event()]
+
+    stamp_updated_at(
+        fresh, previous,
+        now_iso="2026-11-06T16:00:00+00:00",
+        fallback_iso="2026-11-05T12:00:00+00:00",
+    )
+
+    assert fresh[0]["updated_at"] == "2026-11-05T12:00:00+00:00"
 
 
 @pytest.mark.parametrize(

@@ -66,13 +66,13 @@ function stripReloadMarker() {
  *  Загрузка данных
  * ============================================================ */
 
-const SUPPORTED_SCHEMA_VERSION = 2;
+const SUPPORTED_SCHEMA_VERSION = 3;
 const INDEX_CACHE_KEY = 'schedule-faculty-index';
 
 function _isSupportedSchemaVersion(data) {
     const version = data && data.schema_version;
     if (version === undefined) return true;
-    if (version === 1 || version === SUPPORTED_SCHEMA_VERSION) return true;
+    if (version === 1 || version === 2 || version === SUPPORTED_SCHEMA_VERSION) return true;
     console.warn(`[load] неподдерживаемая schema_version: ${version}`);
     return false;
 }
@@ -157,7 +157,7 @@ async function loadFreshData({ onProgress = null } = {}) {
                 notify?.(95);
                 return {
                     data: {
-                        schema_version: 2,
+                        schema_version: SUPPORTED_SCHEMA_VERSION,
                         generated_at: index.generated_at,
                         faculties: index.faculties,
                         events,

@@ -21,6 +21,7 @@ export function positionPopover(pop, anchor) {
 
 export function eventDetailsHtml(ev) {
     const titleText = ev.discipline + (ev.type ? ` (${ev.type})` : '');
+    const updatedAt = formatUpdatedAt(ev.updated_at);
     return `
         <div class="popover-title-row">
             <h3>${escapeHtml(titleText)}</h3>
@@ -44,6 +45,20 @@ export function eventDetailsHtml(ev) {
         ${ev.teachers && ev.teachers.length ? `<div class="popover-row"><span class="label">Преподаватель</span><span>${escapeHtml(ev.teachers.join(', '))}</span></div>` : ''}
         <div class="popover-row"><span class="label">Группа</span><span>${escapeHtml(ev.group)}</span></div>
         ${ev.subgroup ? `<div class="popover-row"><span class="label">Подгруппа</span><span>${escapeHtml(ev.subgroup)}</span></div>` : ''}
+        ${updatedAt ? `
+        <div class="popover-row popover-row--updated">
+            <span class="label">Обновлено</span>
+            <span class="popover-updated">
+                <svg class="popover-updated-icon" viewBox="0 0 24 24" width="13" height="13"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                    <path d="M12 7v5l4 2"/>
+                </svg>
+                ${escapeHtml(updatedAt)}
+            </span>
+        </div>` : ''}
 
         <div class="popover-actions-footer">
             <button class="popover-look" type="button" aria-label="Показать в таблице">
@@ -57,6 +72,17 @@ export function eventDetailsHtml(ev) {
             </button>
         </div>
     `;
+}
+
+/** ISO → «6.11.26 21:02» (локальное время устройства). */
+function formatUpdatedAt(value) {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    return `${date.getDate()}.${pad(date.getMonth() + 1)}.${year} `
+        + `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export function showEventDetails(ev, anchor) {

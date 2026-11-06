@@ -32,6 +32,83 @@ def get_pair_number(time_str: str) -> Optional[int]:
     return None
 
 
+# ================================================================
+# per-event updated_at
+# ================================================================
+
+def _rooms_set(value) -> set[str]:
+    return {
+        part.strip()
+        for part in str(value or "").split(",")
+        if part.strip()
+    }
+
+
+def event_signature(event: dict) -> tuple:
+    """Устойчивый ключ события без учёта позиции в слоте."""
+    return (
+        str(event.get("group", "")),
+        str(event.get("weekday", "")),
+        int(event.get("pair_number", 0) or 0),
+        str(event.get("discipline", "")),
+        str(event.get("type", "")),
+        str(event.get("subgroup", "")),
+    )
+
+
+def same_event_content(old: dict, new: dict) -> bool:
+    """Сравнивает содержательные поля события (как в «Изменениях»)."""
+    if old.get("time_start") != new.get("time_start"):
+        return False
+    if old.get("time_end") != new.get("time_end"):
+        return False
+    if set(old.get("teachers") or []) != set(new.get("teachers") or []):
+        return False
+    if set(old.get("dates") or []) != set(new.get("dates") or []):
+        return False
+    if _rooms_set(old.get("rooms")) != _rooms_set(new.get("rooms")):
+        return False
+    if (old.get("comment") or "") != (new.get("comment") or ""):
+        return False
+    return True
+
+
+def stamp_updated_at(
+    events: list[dict],
+    previous_events: list[dict],
+    *,
+    now_iso: str,
+    fallback_iso: str | None = None,
+) -> None:
+    """Проставляет updated_at: новым/изменённым — now, остальным — прежний.
+
+    События без previous получают fallback_iso (время прошлой публикации),
+    чтобы при первом выкате не помечать всё как «только что обновлено».
+    """
+    by_id = {
+        str(event.get("event_id", "")): event
+        for event in previous_events or []
+        if event
+    }
+
+    by_signature: dict[tuple, dict] = {}
+    for event in previous_events or []:
+        if event:
+            by_signature.setdefault(event_signature(event), event)
+
+    for event in events:
+        old = by_id.get(str(event.get("event_id", ""))) or by_signature.get(
+            event_signature(event)
+        )
+
+        if old and same_event_content(old, event):
+            event["updated_at"] = (
+                old.get("updated_at") or fallback_iso or now_iso
+            )
+        else:
+            event["updated_at"] = now_iso
+
+
 async def normalize_teachers(teacher_str: str) -> List[str]:
     cleaned = remove_academic_titles(teacher_str)   # уже возвращает "ФИО1, ФИО2, ..."
     if not cleaned:
@@ -86,6 +163,7 @@ async def transform_schedule(
                 "comment":      "",
                 "is_past":      event.get("is_past", False),
                 "color":        event.get("color", "") or "",
+                "updated_at":   event.get("updated_at", "") or "",
             })
 
     # Группируем по group, weekday, pair_number

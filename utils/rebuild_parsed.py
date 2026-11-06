@@ -15,13 +15,14 @@ from __future__ import annotations
 import argparse
 import asyncio
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 
 import config  # noqa: F401  — загружает .env и настраивает логирование
 
 from parser.faculties import paths_for
 from parser.faculties.base import AFTER_AI_NAME, PARSED_NAME, read_json, rotate, write_json
-from parser.core.finalize import transform_schedule
+from parser.core.finalize import stamp_updated_at, transform_schedule
 from parser.core.overrides import apply_overrides, load_overrides
 from parser.core.publish import publish
 from parser.core.registry import load_registry
@@ -58,6 +59,17 @@ async def rebuild(faculty_ids: set[str] | None = None) -> dict[str, int]:
         parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
 
         parsed_path = paths.latest_file(PARSED_NAME)
+        previous = read_json(parsed_path)
+        previous_events = previous.get("events", []) if isinstance(previous, dict) else []
+
+        now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        stamp_updated_at(
+            parsed["events"],
+            previous_events,
+            now_iso=now_iso,
+            fallback_iso=previous.get("generated_at") if isinstance(previous, dict) else None,
+        )
+
         rotate(parsed_path)
         write_json(parsed_path, parsed)
 
