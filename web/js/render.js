@@ -332,6 +332,38 @@ export function addCurrentTimeLine(col, day) {
     col.appendChild(line);
 }
 
+/**
+ * Плавно двигает линию текущего времени. CSS-переход длится ровно
+ * столько же, сколько интервал обновления, поэтому линия едет
+ * непрерывно, а не прыгает раз в минуту.
+ */
+export function refreshCurrentTimeLines({ animate = true } = {}) {
+    const now = new Date();
+    const top =
+        (now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600
+            - HOUR_START) * HOUR_HEIGHT;
+    const maxTop = (HOUR_END - HOUR_START + 1) * HOUR_HEIGHT;
+    const visible = top >= 0 && top <= maxTop;
+
+    for (const line of document.querySelectorAll('.current-time-line')) {
+        if (!visible) {
+            line.style.display = 'none';
+            continue;
+        }
+
+        line.style.display = '';
+
+        if (animate) {
+            line.style.top = top + 'px';
+        } else {
+            line.style.transition = 'none';
+            line.style.top = top + 'px';
+            void line.offsetHeight;
+            line.style.transition = '';
+        }
+    }
+}
+
 export function makeEventBlock(ev, column = 0, columnsCount = 1) {
     const [h, m] = ev.time_start.split(':').map(Number);
     const top = (h + m / 60 - HOUR_START) * HOUR_HEIGHT;

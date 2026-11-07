@@ -9,12 +9,39 @@ import { openShareMenu, buildTextForEvent, openShareModal } from './share.js';
 export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
     const popRect = pop.getBoundingClientRect();
+
+    // Держим поповер внутри календаря: он не должен накрывать тулбар
+    // и липкую шапку с днями недели.
+    const calendar = document.getElementById('calendar');
+    const calendarRect = calendar ? calendar.getBoundingClientRect() : null;
+    const header = calendar ? calendar.querySelector('.cal-header') : null;
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+
+    const minLeft = Math.max(8, calendarRect ? calendarRect.left : 8);
+    const maxRight = Math.min(
+        window.innerWidth - 8,
+        calendarRect ? calendarRect.right : window.innerWidth - 8,
+    );
+    const minTop = Math.max(
+        8,
+        calendarRect ? calendarRect.top + 8 : 8,
+        headerBottom + 8,
+    );
+    const maxBottom = Math.min(
+        window.innerHeight - 8,
+        calendarRect ? calendarRect.bottom : window.innerHeight - 8,
+    );
+
     let left = rect.right + 8;
     let top = rect.top;
-    if (left + popRect.width > window.innerWidth - 8) left = rect.left - popRect.width - 8;
-    if (left < 8) left = 8;
-    if (top + popRect.height > window.innerHeight - 8) top = window.innerHeight - popRect.height - 8;
-    if (top < 8) top = 8;
+
+    if (left + popRect.width > maxRight) left = rect.left - popRect.width - 8;
+    if (left + popRect.width > maxRight) left = maxRight - popRect.width;
+    if (left < minLeft) left = minLeft;
+
+    if (top + popRect.height > maxBottom) top = maxBottom - popRect.height;
+    if (top < minTop) top = minTop;
+
     pop.style.left = left + 'px';
     pop.style.top = top + 'px';
 }

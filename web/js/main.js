@@ -12,7 +12,7 @@ import {
     loadData, loadFacultyIndex, loadFacultyData, facultyDataUrl,
 } from './data.js';
 
-import { render, updateDateLabel } from './render.js';
+import { render, updateDateLabel, refreshCurrentTimeLines } from './render.js';
 import {
     applyFilters, setupUnifiedFilter, updateTriggerLabel,
     updateCounter, setupFavoritesButton,
@@ -1120,10 +1120,16 @@ function setupPeriodicUpdates() {
     }
 
     setInterval(maybeCheck, UPDATE_INTERVAL);
+
+    // Линия текущего времени: обновляем позицию каждые 10 секунд,
+    // CSS-переход с той же длительностью двигает её плавно.
+    setInterval(() => refreshCurrentTimeLines(), 10 * 1000);
+
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) return;
         maybeCheck();
         requestSwUpdate();
+        refreshCurrentTimeLines({ animate: false });
     });
 }
 
