@@ -229,6 +229,24 @@ def _git(*args: str) -> subprocess.CompletedProcess:
     )
 
 
+def _sync_pull() -> bool:
+    """Подтягивает origin перед прогоном.
+
+    Без этого копия репозитория может быть старой: парсер опубликует
+    устаревшие данные, а пуш либо отклонится, либо создаст merge,
+    который вернёт расписание назад.
+    """
+    pull = _git("pull", "--ff-only")
+    if pull.returncode != 0:
+        logger.warning(
+            "git pull --ff-only не удался: %s",
+            (pull.stderr or pull.stdout).strip(),
+        )
+        return False
+    logger.info("Репозиторий обновлён из origin")
+    return True
+
+
 def _sync_commit_and_push() -> bool:
     add = _git("add", "web/data")
     if add.returncode != 0:
@@ -269,6 +287,12 @@ async def process_schedule(
         publish_web,
         git_push,
     )
+
+    # Автопубликация: сначала синхронизируемся с origin, иначе старая
+    # копия может опубликовать устаревшее расписание.
+    if git_push:
+        await asyncio.to_thread(_sync_pull)
+
     results = await process_all(
         faculty_ids=faculty_ids,
         publish_web=publish_web,
