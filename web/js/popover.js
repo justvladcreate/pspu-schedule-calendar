@@ -10,27 +10,38 @@ export function positionPopover(pop, anchor) {
     const rect = anchor.getBoundingClientRect();
     const popRect = pop.getBoundingClientRect();
 
-    // Держим поповер внутри календаря: он не должен накрывать тулбар
-    // и липкую шапку с днями недели.
-    const calendar = document.getElementById('calendar');
-    const calendarRect = calendar ? calendar.getBoundingClientRect() : null;
-    const header = calendar ? calendar.querySelector('.cal-header') : null;
-    const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    const modalOpen = !!document.querySelector('.modal-backdrop.open');
 
-    const minLeft = Math.max(8, calendarRect ? calendarRect.left : 8);
-    const maxRight = Math.min(
-        window.innerWidth - 8,
-        calendarRect ? calendarRect.right : window.innerWidth - 8,
-    );
-    const minTop = Math.max(
-        8,
-        calendarRect ? calendarRect.top + 8 : 8,
-        headerBottom + 8,
-    );
-    const maxBottom = Math.min(
-        window.innerHeight - 8,
-        calendarRect ? calendarRect.bottom : window.innerHeight - 8,
-    );
+    // В модалке (например, «Изменения») поповер живёт в её пределах
+    // и не должен привязываться к календарю за ней.
+    let minLeft = 8;
+    let maxRight = window.innerWidth - 8;
+    let minTop = 8;
+    let maxBottom = window.innerHeight - 8;
+
+    if (!modalOpen) {
+        // Вне модалки держим поповер внутри календаря: он не должен
+        // накрывать тулбар и липкую шапку с днями недели.
+        const calendar = document.getElementById('calendar');
+        const calendarRect = calendar ? calendar.getBoundingClientRect() : null;
+        const header = calendar ? calendar.querySelector('.cal-header') : null;
+        const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+
+        minLeft = Math.max(8, calendarRect ? calendarRect.left : 8);
+        maxRight = Math.min(
+            window.innerWidth - 8,
+            calendarRect ? calendarRect.right : window.innerWidth - 8,
+        );
+        minTop = Math.max(
+            8,
+            calendarRect ? calendarRect.top + 8 : 8,
+            headerBottom + 8,
+        );
+        maxBottom = Math.min(
+            window.innerHeight - 8,
+            calendarRect ? calendarRect.bottom : window.innerHeight - 8,
+        );
+    }
 
     let left = rect.right + 8;
     let top = rect.top;
