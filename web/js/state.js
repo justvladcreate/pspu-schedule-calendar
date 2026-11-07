@@ -241,6 +241,7 @@ export function toSnapshotEntry(ev) {
     position: ev.position,
     is_past: ev.is_past || false,
     color: ev.color || "",
+    updated_at: ev.updated_at || "",
   };
 }
 
