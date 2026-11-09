@@ -110,7 +110,26 @@ def english_to_russian_lookalike(text: str) -> str:
     return pattern.sub(replacer, text)
 
 
+_TIME_AFTER_PREP_RE = re.compile(r'\b([сcвv])\s+(\d{1,2})\.(\d{2})(?!\d)', re.IGNORECASE)
+
+
+def _protect_time(match: re.Match) -> str:
+    """«с 9.00» → «с 09:00», но «с 9.11» оставляем датой."""
+    hours = int(match.group(2))
+    minutes = int(match.group(3))
+    looks_like_time = 0 <= hours <= 23 and 0 <= minutes <= 59
+    valid_month = 1 <= minutes <= 12
+    if looks_like_time and not valid_month:
+        return f"{match.group(1)} {hours:02d}:{minutes:02d}"
+    return match.group(0)
+
+
 def normalize_date_ranges(text: str, default_end_date: str = None) -> str:
+    # «с 9.00» — это время начала, а не дата: иначе регулярка ниже
+    # превращает его в диапазон «9.00 - <конец семестра>» и в датах
+    # остаётся конец семестра.
+    text = _TIME_AFTER_PREP_RE.sub(_protect_time, text)
+
     text = re.sub(rf'({_DATE})\s*[-–—]\s*({_DATE})', r'\1 - \2', text)
     text = re.sub(rf'({_DATE})\.(?=\s|$|[,–—\-])', r'\1', text)
     text = re.sub(
