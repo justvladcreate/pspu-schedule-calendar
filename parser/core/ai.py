@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 
@@ -51,19 +52,24 @@ def _strip_code_fence(text: str) -> str:
     return value.strip()
 
 
-async def _generate(prompt: str, model: str) -> str:
+async def _generate(prompt: str, model: str, response_schema: dict | None = None) -> str:
     """Один запрос к Gemini. Возвращает текст ответа."""
     api_base = _env("GEMINI_API_BASE") or DEFAULT_API_BASE
     url = f"{api_base.rstrip('/')}/v1beta/models/{model}:generateContent"
+
+    generation_config: dict = {
+        "temperature": 0.1,
+        "maxOutputTokens": MAX_OUTPUT_TOKENS,
+    }
+    if response_schema:
+        generation_config["responseMimeType"] = "application/json"
+        generation_config["responseSchema"] = response_schema
 
     payload = {
         "contents": [
             {"role": "user", "parts": [{"text": prompt}]},
         ],
-        "generationConfig": {
-            "temperature": 0.1,
-            "maxOutputTokens": MAX_OUTPUT_TOKENS,
-        },
+        "generationConfig": generation_config,
     }
 
     client_kwargs: dict = {"timeout": DEFAULT_TIMEOUT}
@@ -121,3 +127,19 @@ async def ask_ai(prompt: str = "", model: str | None = None) -> list[str]:
     chosen_model = (model or _env("GEMINI_MODEL") or DEFAULT_MODEL).strip()
     content = await _generate(prompt, chosen_model)
     return content.split("\n")
+
+
+async def ask_ai_json(
+    prompt: str,
+    schema: dict,
+    model: str | None = None,
+) -> dict:
+    """Запрос со structured output: Gemini сам собирает JSON по схеме."""
+    chosen_model = (model or _env("GEMINI_MODEL") or DEFAULT_MODEL).strip()
+    content = await _generate(prompt, chosen_model, response_schema=schema)
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"Gemini API: ответ не является JSON: {content[:300]}"
+        ) from exc

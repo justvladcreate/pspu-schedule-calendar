@@ -11,13 +11,53 @@ import hashlib
 import logging
 import re
 
-from parser.core.ai import ask_ai
+from parser.core.ai import ask_ai, ask_ai_json
 from parser.core.text import normalize_time
 from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 
 logger = logging.getLogger(__name__)
 
 _LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
+
+# Structured output: Gemini сам собирает JSON по этой схеме.
+F12_AI_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "events": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {
+                    "enumerator": {"type": "INTEGER"},
+                    "day_of_week": {"type": "STRING"},
+                    "time_start": {"type": "STRING"},
+                    "time_end": {"type": "STRING"},
+                    "dates": {"type": "STRING"},
+                    "discipline": {"type": "STRING"},
+                    "type": {"type": "STRING"},
+                    "subgroup": {"type": "STRING"},
+                    "teachers": {"type": "STRING"},
+                    "rooms": {"type": "STRING"},
+                },
+                "required": [
+                    "enumerator", "day_of_week", "time_start", "time_end",
+                    "dates", "discipline", "type", "subgroup",
+                    "teachers", "rooms",
+                ],
+            },
+        },
+    },
+    "required": ["events"],
+}
+
+JSON_OUTPUT_SUFFIX = """
+
+Return the result strictly as JSON matching the schema: an object with
+an "events" array. Each event has the same meaning as one line above:
+enumerator (integer), day_of_week, time_start, time_end, dates,
+discipline, type, subgroup, teachers, rooms (strings). Use "" for a
+missing value. Do not output the semicolon-separated lines.
+"""
 
 
 def format_ai_input(sources: list[dict]) -> str:
@@ -29,12 +69,58 @@ def chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def events_to_lines(payload: dict) -> list[str]:
+    """Превращает JSON от Gemini в привычные строки из 10 полей."""
+    events = payload.get("events") if isinstance(payload, dict) else None
+    if not isinstance(events, list):
+        return []
+
+    lines: list[str] = []
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+        try:
+            enumerator = int(event.get("enumerator"))
+        except (TypeError, ValueError):
+            continue
+
+        def cell(name: str) -> str:
+            value = event.get(name)
+            text = "" if value is None else str(value).strip()
+            # точка с запятой внутри значения сломала бы разбор строки
+            text = text.replace(";", ",")
+            return text or "-"
+
+        lines.append(";".join([
+            f"[{enumerator}]",
+            cell("day_of_week"),
+            cell("time_start"),
+            cell("time_end"),
+            cell("dates"),
+            cell("discipline"),
+            cell("type"),
+            cell("subgroup"),
+            cell("teachers"),
+            cell("rooms"),
+        ]))
+
+    return lines
+
+
 async def ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
     delay = 1.0
     last_exc: Exception | None = None
+
     for attempt in range(max_attempts):
         try:
-            return await ask_ai(prompt=prompt)
+            payload = await ask_ai_json(
+                prompt + JSON_OUTPUT_SUFFIX,
+                F12_AI_SCHEMA,
+            )
+            lines = events_to_lines(payload)
+            if not lines:
+                raise RuntimeError("Gemini вернула пустой список событий")
+            return lines
         except Exception as e:
             last_exc = e
             if attempt == max_attempts - 1:
@@ -45,7 +131,14 @@ async def ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
             )
             await asyncio.sleep(delay)
             delay *= 2
-    raise last_exc
+
+    # Последний шанс — старый текстовый формат (если JSON почему-то
+    # не поддержался моделью).
+    logger.warning(
+        "AI: structured output не удался (%s), пробую текстовый формат",
+        last_exc,
+    )
+    return await ask_ai(prompt=prompt)
 
 
 def add_90_minutes(time_start: str) -> str:

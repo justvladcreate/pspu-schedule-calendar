@@ -1,9 +1,13 @@
+import asyncio
+
 import pytest
 
+import parser.faculties.f12_inec.ai_merge as ai_merge_module
 from parser.faculties.f12_inec.ai_merge import (
     add_90_minutes,
     assign_rooms,
     chunk_hash,
+    events_to_lines,
     format_ai_input,
     merge_ai_line,
     _get_event_color,
@@ -100,6 +104,59 @@ def test_merge_ai_line_recovers_extra_field_without_teacher():
     items = merge_ai_line(line, 0, [source])
     assert len(items) == 1
     assert items[0]["discipline"] == "Физическая культура"
+
+
+def test_events_to_lines_from_json():
+    payload = {
+        "events": [{
+            "enumerator": 1,
+            "day_of_week": "",
+            "time_start": "",
+            "time_end": "",
+            "dates": "07.09.2026",
+            "discipline": "Математика",
+            "type": "",
+            "subgroup": "",
+            "teachers": "",
+            "rooms": "",
+        }],
+    }
+    assert events_to_lines(payload) == [
+        "[1];-;-;-;07.09.2026;Математика;-;-;-;-",
+    ]
+
+
+def test_events_to_lines_replaces_semicolons():
+    payload = {
+        "events": [{
+            "enumerator": 2,
+            "discipline": "A;B",
+        }],
+    }
+    assert events_to_lines(payload)[0].split(";")[5] == "A,B"
+
+
+def test_ask_ai_with_retry_uses_structured_output(monkeypatch):
+    async def fake_json(prompt, schema):
+        assert "events" in schema["properties"]
+        return {"events": [{"enumerator": 1, "discipline": "Математика"}]}
+
+    monkeypatch.setattr(ai_merge_module, "ask_ai_json", fake_json)
+    lines = asyncio.run(ai_merge_module.ask_ai_with_retry("prompt"))
+    assert lines == ["[1];-;-;-;-;Математика;-;-;-;-"]
+
+
+def test_ask_ai_with_retry_falls_back_to_text(monkeypatch):
+    async def fake_json(prompt, schema):
+        raise RuntimeError("no json")
+
+    async def fake_text(prompt, model=None):
+        return ["[1];-;-;-;-;Математика;-;-;-;-"]
+
+    monkeypatch.setattr(ai_merge_module, "ask_ai_json", fake_json)
+    monkeypatch.setattr(ai_merge_module, "ask_ai", fake_text)
+    lines = asyncio.run(ai_merge_module.ask_ai_with_retry("prompt", max_attempts=1))
+    assert lines == ["[1];-;-;-;-;Математика;-;-;-;-"]
 
 
 def test_grey_text_keeps_grey_color():
