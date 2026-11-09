@@ -83,6 +83,25 @@ def test_grey_color_marks_past():
     assert items and items[0]["is_past"] is True
 
 
+def test_merge_ai_line_recovers_extra_empty_field():
+    """Модель добавила лишнее поле — строка не должна теряться."""
+    source = _source()
+    line = "[1];-;-;-;07.09.2026;Математика;-;-;-;Иванов И.И.;-"
+    items = merge_ai_line(line, 0, [source])
+    assert len(items) == 1
+    assert items[0]["discipline"] == "Математика"
+    assert items[0]["teachers"] == "Иванов И.И."
+    assert items[0]["rooms"] == ""
+
+
+def test_merge_ai_line_recovers_extra_field_without_teacher():
+    source = _source()
+    line = "[1];-;-;-;-;Физическая культура;-;-;-;-;-"
+    items = merge_ai_line(line, 0, [source])
+    assert len(items) == 1
+    assert items[0]["discipline"] == "Физическая культура"
+
+
 def test_grey_text_keeps_grey_color():
     """Серый текст снова красит событие, но помечает его прошедшим."""
     source = _source(text_colors=[{"text": "07.09.2026", "color": "#cccccc"}])

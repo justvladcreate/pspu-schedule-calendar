@@ -8,6 +8,7 @@ USER_PROMPT = """You are a parser for university schedules. You receive a full g
 If a field is missing, write a single dash "-" in its place.
 Every field MUST be present between two ; characters, even if it contains only "-".
 Never omit a ; and never collapse ";;" into ";".
+The line MUST contain exactly 9 semicolons (10 fields). Count them before answering; an extra field is an error.
 
 Core Principles
 Never invent or hallucinate disciplines, teachers, dates, rooms, or type values. Every token in the output must come from the input.

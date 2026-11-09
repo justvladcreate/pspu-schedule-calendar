@@ -248,6 +248,26 @@ def merge_ai_line(
     parts = [p.strip() for p in line.split(";")]
     parts = ["" if p == "-" else p for p in parts]
 
+    # Некоторые модели (например, gemini-3.1-flash-lite) иногда добавляют
+    # лишнее пустое поле после subgroup. Восстанавливаем формат 10 полей,
+    # иначе строка целиком отбрасывается и теряется занятие.
+    if len(parts) == 11:
+        if parts[8] == "":
+            parts.pop(8)
+        elif parts[10] == "":
+            parts.pop(10)
+        else:
+            for index in range(6, 10):
+                if parts[index] == "":
+                    parts.pop(index)
+                    break
+            else:
+                parts.pop()
+
+        logger.warning(
+            "AI: лишнее поле в строке, восстановил 10 полей: %r", line,
+        )
+
     if len(parts) not in (9, 10):
         logger.warning(f"AI: ожидалось 9/10 полей, получено {len(parts)}: {line!r}")
         return []
