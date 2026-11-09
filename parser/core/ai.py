@@ -17,9 +17,10 @@ import re
 
 import httpx
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.1-flash-lite"
 DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
 DEFAULT_TIMEOUT = 120.0
+MAX_OUTPUT_TOKENS = 16384
 
 
 def _env(*names: str) -> str:
@@ -61,7 +62,7 @@ async def _generate(prompt: str, model: str) -> str:
         ],
         "generationConfig": {
             "temperature": 0.1,
-            "maxOutputTokens": 8192,
+            "maxOutputTokens": MAX_OUTPUT_TOKENS,
         },
     }
 
@@ -85,8 +86,21 @@ async def _generate(prompt: str, model: str) -> str:
         )
 
     data = response.json()
+
+    feedback = data.get("promptFeedback") or {}
+    if feedback.get("blockReason"):
+        raise RuntimeError(
+            f"Gemini API: запрос заблокирован ({feedback['blockReason']})"
+        )
+
     chunks: list[str] = []
     for candidate in data.get("candidates", []):
+        finish = candidate.get("finishReason")
+        if finish and finish != "STOP":
+            # MAX_TOKENS и т.п. — ответ обрезан, лучше повторить,
+            # чем вернуть половину расписания.
+            raise RuntimeError(f"Gemini API: ответ не завершён ({finish})")
+
         content = candidate.get("content") or {}
         for part in content.get("parts", []):
             if part.get("thought"):
