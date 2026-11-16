@@ -1,5 +1,5 @@
 import itertools
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from parser.core.dates import expand_dates
@@ -35,6 +35,48 @@ def get_pair_number(time_str: str) -> Optional[int]:
 # ================================================================
 # per-event updated_at
 # ================================================================
+
+WEEKDAY_RU = {"ПН": 0, "ВТ": 1, "СР": 2, "ЧТ": 3, "ПТ": 4, "СБ": 5, "ВС": 6}
+
+
+def fill_missing_dates(events: list[dict]) -> None:
+    """Если у занятия нет дат — растягиваем его на весь семестр по weekday.
+
+    Границы семестра берём из min/max дат остальных событий факультета.
+    События без дисциплины или дня недели не трогаем.
+    """
+    pool: list[date] = []
+    for event in events:
+        for value in event.get("dates") or []:
+            try:
+                pool.append(datetime.strptime(str(value), "%d.%m.%Y").date())
+            except ValueError:
+                continue
+
+    if not pool:
+        return
+
+    start, end = min(pool), max(pool)
+
+    for event in events:
+        if event.get("dates"):
+            continue
+
+        discipline = (event.get("discipline") or "").strip()
+        weekday = (event.get("weekday") or "").strip().upper()
+        target = WEEKDAY_RU.get(weekday)
+        if not discipline or target is None:
+            continue
+
+        current = start + timedelta(days=(target - start.weekday()) % 7)
+        dates: list[str] = []
+        while current <= end:
+            dates.append(current.strftime("%d.%m.%Y"))
+            current += timedelta(days=7)
+
+        if dates:
+            event["dates"] = dates
+
 
 def _rooms_set(value) -> set[str]:
     return {

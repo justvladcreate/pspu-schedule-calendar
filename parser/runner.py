@@ -17,7 +17,11 @@ from pathlib import Path
 from parser.faculties import get_parser_class
 from parser.faculties.base import PARSED_NAME, read_json, rotate, write_json
 from parser.core.registry import load_registry
-from parser.core.finalize import stamp_updated_at, transform_schedule
+from parser.core.finalize import (
+    fill_missing_dates,
+    stamp_updated_at,
+    transform_schedule,
+)
 from parser.core.model import Faculty
 from parser.core.overrides import apply_overrides, load_overrides
 from parser.core.publish import publish
@@ -82,6 +86,7 @@ async def process_faculty(
 
     parsed = await transform_schedule(groups, faculty_id=faculty.id)
     parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
+    fill_missing_dates(parsed["events"])
 
     latest_path = parser.paths.latest_file(PARSED_NAME)
     previous = read_json(latest_path)
