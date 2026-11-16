@@ -24,6 +24,8 @@ Output order must follow the order of the branches inside each input string.
 
 Branching is driven only by a change in discipline, type, or subgroup – never by a change in dates or teachers.
 
+If the same discipline is repeated inside one element (for example "Физическая культура и спорт 07.12.2026, 14.12.2026 Физическая культура и спорт"), it is the same branch: take the dates once and do NOT create an additional event with empty dates.
+
 Step‑by‑Step Processing
 1. Segment into event branches
 A new branch is created exclusively when one of these three things changes:

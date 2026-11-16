@@ -126,6 +126,32 @@ def test_events_to_lines_from_json():
     ]
 
 
+def test_events_to_lines_merges_repeated_discipline():
+    payload = {
+        "events": [
+            {"enumerator": 1, "discipline": "Физическая культура и спорт"},
+            {
+                "enumerator": 1,
+                "discipline": "Физическая культура и спорт",
+                "dates": "07.12.2026, 14.12.2026",
+            },
+        ],
+    }
+    lines = events_to_lines(payload)
+    assert len(lines) == 1
+    assert "07.12.2026, 14.12.2026" in lines[0]
+
+
+def test_events_to_lines_keeps_distinct_date_ranges():
+    payload = {
+        "events": [
+            {"enumerator": 1, "discipline": "X", "dates": "01.09 - 01.10"},
+            {"enumerator": 1, "discipline": "X", "dates": "02.10 - 01.11"},
+        ],
+    }
+    assert len(events_to_lines(payload)) == 2
+
+
 def test_events_to_lines_replaces_semicolons():
     payload = {
         "events": [{
