@@ -69,41 +69,13 @@ def chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _filled(value) -> str:
-    return "" if value is None else str(value).strip()
-
-
-def _merge_repeated_branches(group: list[dict]) -> list[dict]:
-    """Склеивает ветки одного источника, если модель повторила дисциплину.
-
-    Пример: «Физическая культура и спорт 07.12.2026, 14.12.2026
-    Физическая культура и спорт» — модель делает две ветки: без дат и
-    с датами. Это одно занятие, поэтому оставляем ветку с датами.
-    Ветки с разными непустыми диапазонами дат не трогаем.
-    """
-    dated = [event for event in group if _filled(event.get("dates"))]
-    if len(dated) > 1:
-        return group
-
-    base = dict(dated[0] if dated else group[0])
-    for event in group:
-        for field in ("dates", "rooms", "teachers", "type", "subgroup"):
-            if not _filled(base.get(field)):
-                value = _filled(event.get(field))
-                if value:
-                    base[field] = event.get(field)
-    return [base]
-
-
 def events_to_lines(payload: dict) -> list[str]:
     """Превращает JSON от Gemini в привычные строки из 10 полей."""
     events = payload.get("events") if isinstance(payload, dict) else None
     if not isinstance(events, list):
         return []
 
-    grouped: dict[tuple, list[dict]] = {}
-    order: list[tuple] = []
-
+    lines: list[str] = []
     for event in events:
         if not isinstance(event, dict):
             continue
@@ -112,41 +84,25 @@ def events_to_lines(payload: dict) -> list[str]:
         except (TypeError, ValueError):
             continue
 
-        key = (
-            enumerator,
-            _filled(event.get("day_of_week")),
-            _filled(event.get("time_start")),
-            _filled(event.get("time_end")),
-            _filled(event.get("discipline")),
-            _filled(event.get("type")),
-            _filled(event.get("subgroup")),
-        )
-        if key not in grouped:
-            grouped[key] = []
-            order.append(key)
-        grouped[key].append(event)
+        def cell(name: str) -> str:
+            value = event.get(name)
+            text = "" if value is None else str(value).strip()
+            # точка с запятой внутри значения сломала бы разбор строки
+            text = text.replace(";", ",")
+            return text or "-"
 
-    lines: list[str] = []
-    for key in order:
-        for event in _merge_repeated_branches(grouped[key]):
-            enumerator = int(event.get("enumerator"))
-
-            def cell(name: str, source: dict = event) -> str:
-                text = _filled(source.get(name)).replace(";", ",")
-                return text or "-"
-
-            lines.append(";".join([
-                f"[{enumerator}]",
-                cell("day_of_week"),
-                cell("time_start"),
-                cell("time_end"),
-                cell("dates"),
-                cell("discipline"),
-                cell("type"),
-                cell("subgroup"),
-                cell("teachers"),
-                cell("rooms"),
-            ]))
+        lines.append(";".join([
+            f"[{enumerator}]",
+            cell("day_of_week"),
+            cell("time_start"),
+            cell("time_end"),
+            cell("dates"),
+            cell("discipline"),
+            cell("type"),
+            cell("subgroup"),
+            cell("teachers"),
+            cell("rooms"),
+        ]))
 
     return lines
 
