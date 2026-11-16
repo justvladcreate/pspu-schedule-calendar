@@ -22,7 +22,11 @@ import config  # noqa: F401  — загружает .env и настраивае
 
 from parser.faculties import paths_for
 from parser.faculties.base import AFTER_AI_NAME, PARSED_NAME, read_json, rotate, write_json
-from parser.core.finalize import stamp_updated_at, transform_schedule
+from parser.core.finalize import (
+    fill_missing_dates,
+    stamp_updated_at,
+    transform_schedule,
+)
 from parser.core.overrides import apply_overrides, load_overrides
 from parser.core.publish import publish
 from parser.core.registry import load_registry
@@ -57,6 +61,7 @@ async def rebuild(faculty_ids: set[str] | None = None) -> dict[str, int]:
 
         parsed = await transform_schedule(after_ai, faculty_id=faculty.id)
         parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
+        fill_missing_dates(parsed["events"])
 
         parsed_path = paths.latest_file(PARSED_NAME)
         previous = read_json(parsed_path)

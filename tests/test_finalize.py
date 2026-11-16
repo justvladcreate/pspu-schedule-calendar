@@ -1,6 +1,7 @@
 import pytest
 
 from parser.core.finalize import (
+    fill_missing_dates,
     get_pair_number,
     normalize_teachers,
     stamp_updated_at,
@@ -30,6 +31,32 @@ def _event(**over):
     }
     event.update(over)
     return event
+
+
+def test_fill_missing_dates_expands_weekday():
+    events = [
+        {"weekday": "ПН", "discipline": "X", "dates": ["07.09.2026", "21.09.2026"]},
+        {"weekday": "ПН", "discipline": "Физическая культура", "dates": []},
+    ]
+    fill_missing_dates(events)
+    assert events[1]["dates"] == [
+        "07.09.2026", "14.09.2026", "21.09.2026",
+    ]
+
+
+def test_fill_missing_dates_skips_empty_discipline():
+    events = [
+        {"weekday": "ПН", "discipline": "X", "dates": ["07.09.2026"]},
+        {"weekday": "ПН", "discipline": "", "dates": []},
+    ]
+    fill_missing_dates(events)
+    assert events[1]["dates"] == []
+
+
+def test_fill_missing_dates_without_pool():
+    events = [{"weekday": "ПН", "discipline": "X", "dates": []}]
+    fill_missing_dates(events)
+    assert events[0]["dates"] == []
 
 
 def test_stamp_updated_at_keeps_unchanged():
