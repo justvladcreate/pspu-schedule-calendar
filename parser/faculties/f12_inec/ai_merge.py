@@ -25,6 +25,11 @@ _SPACED_DATE_RE = re.compile(r"\b\d(?:\s*\d){0,1}\s*\.\s*\d(?:\s*\d){0,1}\b")
 _COMMA_DATE_RE = re.compile(r"(?<![\d.])(\d{1,2}),\s*(\d{1,2})(?![\d.])")
 # «3.12,10.12» — забыли пробел после запятой-разделителя.
 _SEPARATOR_COMMA_RE = re.compile(r"(?<=\d)\s*,\s*(?=\d)")
+# «п/г 1,2», «подгруппа 2» — это не даты, нормализация их не трогает.
+_SUBGROUP_RE = re.compile(
+    r"(?:п\s*/\s*г[а-я]*|подгрупп[аы])\s*\.?\s*\d{1,2}(?:\s*[,.]\s*\d{1,2})?",
+    re.IGNORECASE,
+)
 
 
 def _normalize_dates(text: str) -> str:
@@ -33,14 +38,28 @@ def _normalize_dates(text: str) -> str:
     В таблицах встречаются опечатки: «3 0 . 1 2», «3,12», «3, 12»,
     а также лишние пробелы у запятой-разделителя «3.12 , 10.12».
     Перечисления вида «07.12, 14.12» не ломаются: там перед запятой
-    стоит полная дата, а не отдельное число.
+    стоит полная дата, а не отдельное число. Подгруппы («п/г 1,2»)
+    исключены — иначе «1,2» превращается в дату «1.2».
     """
     value = str(text or "")
+
+    protected: list[str] = []
+
+    def keep(match: re.Match) -> str:
+        protected.append(match.group(0))
+        return f"⟦{len(protected) - 1}⟧"
+
+    value = _SUBGROUP_RE.sub(keep, value)
+
     value = _SPACED_DATE_RE.sub(
         lambda m: re.sub(r"\s+", "", m.group(0)), value
     )
     value = _COMMA_DATE_RE.sub(r"\1.\2", value)
     value = _SEPARATOR_COMMA_RE.sub(", ", value)
+
+    for index, original in enumerate(protected):
+        value = value.replace(f"⟦{index}⟧", original)
+
     return value
 
 # Structured output: Gemini сам собирает JSON по этой схеме.

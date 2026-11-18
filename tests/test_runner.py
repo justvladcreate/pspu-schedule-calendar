@@ -156,6 +156,17 @@ def test_events_to_lines_accepts_bare_list():
     assert events_to_lines(payload)[0].startswith("[5]")
 
 
+def test_format_ai_input_keeps_subgroups():
+    text = format_ai_input([
+        {"subject": "п/г 1,2 Основы медицинских знаний (лаб.)"},
+    ])
+    assert "п/г 1,2" in text
+    assert "п/г 1.2" not in text
+
+    text = format_ai_input([{"subject": "подгруппа 1,2"}])
+    assert "подгруппа 1,2" in text
+
+
 def test_format_ai_input_fixes_comma_date():
     text = format_ai_input([
         {"subject": "3,12 Дидактические концепции (прак.) доц. Подорова В.А."},
