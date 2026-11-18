@@ -59,29 +59,6 @@ def test_fill_missing_dates_without_pool():
     assert events[0]["dates"] == []
 
 
-def test_fill_missing_dates_skips_events_with_dates_in_source():
-    events = [
-        {"weekday": "ПН", "discipline": "X", "dates": ["07.09.2026"]},
-        {
-            "weekday": "ПН",
-            "discipline": "Дидактические концепции",
-            "dates": [],
-            "_dated_source": True,
-        },
-    ]
-    fill_missing_dates(events)
-    assert events[1]["dates"] == []
-
-
-def test_fill_missing_dates_still_fills_weekly_branch():
-    events = [
-        {"weekday": "ПН", "discipline": "X", "dates": ["07.09.2026", "21.09.2026"]},
-        {"weekday": "ПН", "discipline": "Физкультура", "dates": [], "_dated_source": False},
-    ]
-    fill_missing_dates(events)
-    assert events[1]["dates"] == ["07.09.2026", "14.09.2026", "21.09.2026"]
-
-
 def test_stamp_updated_at_keeps_unchanged():
     previous = [_event(updated_at="2026-11-01T10:00:00+00:00")]
     fresh = [_event()]

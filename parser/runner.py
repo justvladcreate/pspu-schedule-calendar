@@ -87,8 +87,6 @@ async def process_faculty(
     parsed = await transform_schedule(groups, faculty_id=faculty.id)
     parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
     fill_missing_dates(parsed["events"])
-    for event in parsed["events"]:
-        event.pop("_dated_source", None)
 
     latest_path = parser.paths.latest_file(PARSED_NAME)
     previous = read_json(latest_path)

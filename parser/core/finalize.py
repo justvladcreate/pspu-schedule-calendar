@@ -1,12 +1,9 @@
 import itertools
-import logging
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from parser.core.dates import expand_dates
 from parser.core.postprocess import remove_academic_titles
-
-logger = logging.getLogger(__name__)
 
 
 # Карта соответствия времени начала пары номеру пары
@@ -69,16 +66,6 @@ def fill_missing_dates(events: list[dict]) -> None:
         weekday = (event.get("weekday") or "").strip().upper()
         target = WEEKDAY_RU.get(weekday)
         if not discipline or target is None:
-            continue
-
-        # В таблице даты были, но модель их не разобрала. Растягивать
-        # такое на весь семестр нельзя — это выдуманные занятия.
-        if event.get("_dated_source"):
-            logger.info(
-                "Не растягиваю %s (%s %s): в источнике даты есть, "
-                "но не разобраны",
-                discipline, weekday, event.get("time_start", ""),
-            )
             continue
 
         current = start + timedelta(days=(target - start.weekday()) % 7)
@@ -219,7 +206,6 @@ async def transform_schedule(
                 "is_past":      event.get("is_past", False),
                 "color":        event.get("color", "") or "",
                 "updated_at":   event.get("updated_at", "") or "",
-                "_dated_source": bool(event.get("_dated_source")),
             })
 
     # Группируем по group, weekday, pair_number
