@@ -69,19 +69,43 @@ def chunk_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _as_enumerator(value) -> int | None:
+    """«1», «[1]», 1, 1.0 — всё это номер ячейки."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value) if value.is_integer() else None
+    text = str(value or "").strip().strip("[]").strip()
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+
 def events_to_lines(payload: dict) -> list[str]:
-    """Превращает JSON от Gemini в привычные строки из 10 полей."""
-    events = payload.get("events") if isinstance(payload, dict) else None
+    """Превращает JSON от LLM в привычные строки из 10 полей."""
+    events = payload.get("events") if isinstance(payload, dict) else payload
     if not isinstance(events, list):
+        logger.warning(
+            "LLM вернула не список событий: %s", str(payload)[:300]
+        )
         return []
 
     lines: list[str] = []
     for event in events:
         if not isinstance(event, dict):
             continue
-        try:
-            enumerator = int(event.get("enumerator"))
-        except (TypeError, ValueError):
+        enumerator = _as_enumerator(
+            event.get("enumerator")
+            if event.get("enumerator") is not None
+            else event.get("index", event.get("n"))
+        )
+        if enumerator is None:
+            logger.warning(
+                "LLM: событие без номера ячейки: %s", str(event)[:200]
+            )
             continue
 
         def cell(name: str) -> str:
@@ -119,7 +143,7 @@ async def ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
             )
             lines = events_to_lines(payload)
             if not lines:
-                raise RuntimeError("Gemini вернула пустой список событий")
+                raise RuntimeError("LLM вернула пустой список событий")
             return lines
         except Exception as e:
             last_exc = e

@@ -136,6 +136,26 @@ def test_events_to_lines_replaces_semicolons():
     assert events_to_lines(payload)[0].split(";")[5] == "A,B"
 
 
+def test_events_to_lines_accepts_bracketed_enumerator():
+    payload = {"events": [{"enumerator": "[7]", "discipline": "Физика"}]}
+    assert events_to_lines(payload) == ["[7];-;-;-;-;Физика;-;-;-;-"]
+
+
+def test_events_to_lines_accepts_string_and_float_enumerator():
+    payload = {"events": [
+        {"enumerator": "3", "discipline": "Химия"},
+        {"enumerator": 4.0, "discipline": "Биология"},
+    ]}
+    lines = events_to_lines(payload)
+    assert lines[0].startswith("[3]")
+    assert lines[1].startswith("[4]")
+
+
+def test_events_to_lines_accepts_bare_list():
+    payload = [{"enumerator": 5, "discipline": "История"}]
+    assert events_to_lines(payload)[0].startswith("[5]")
+
+
 def test_ask_ai_with_retry_uses_structured_output(monkeypatch):
     async def fake_json(prompt, schema):
         assert "events" in schema["properties"]
