@@ -153,6 +153,15 @@ def test_openai_provider_truncated_answer_raises(monkeypatch):
         raise AssertionError("expected RuntimeError")
 
 
+def test_openai_default_max_tokens(monkeypatch):
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.delenv("AI_MAX_TOKENS", raising=False)
+    assert ai_module._max_output_tokens() == ai_module.DEFAULT_OPENAI_MAX_TOKENS
+
+    monkeypatch.setenv("AI_MAX_TOKENS", "4096")
+    assert ai_module._max_output_tokens() == 4096
+
+
 def test_strip_code_fence():
     assert ai_module._strip_code_fence("```\n[1];A\n```") == "[1];A"
     assert ai_module._strip_code_fence("```text\n[1];A\n```") == "[1];A"

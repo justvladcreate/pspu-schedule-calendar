@@ -42,6 +42,8 @@ DEFAULT_OPENAI_BASE = "https://api.vega.chat/api/v1"
 DEFAULT_OPENAI_MODEL = "google/gemini-2.5-flash"
 DEFAULT_TIMEOUT = 120.0
 MAX_OUTPUT_TOKENS = 32768
+# OpenAI-совместимые шлюзы (NVIDIA NIM, ВЕГА) не любят огромный max_tokens.
+DEFAULT_OPENAI_MAX_TOKENS = 8192
 # Бесплатный тариф Gemini — 20 запросов в минуту. 4.5с даёт ~13 RPM
 # и оставляет запас на повторные попытки.
 DEFAULT_MIN_INTERVAL = 4.5
@@ -75,9 +77,21 @@ def _openai_key() -> str:
     key = _env("AI_API_KEY", "VEGA_API_KEY", "OPENAI_API_KEY")
     if not key:
         raise RuntimeError(
-            "Не задан AI_API_KEY — добавьте ключ API ВЕГА в private/.env"
+            "Не задан AI_API_KEY — добавьте ключ OpenAI-совместимого шлюза в private/.env"
         )
     return key
+
+
+def _max_output_tokens() -> int:
+    raw = _env("AI_MAX_TOKENS")
+    if raw:
+        try:
+            return int(raw)
+        except ValueError:
+            pass
+    if _provider() == "openai":
+        return DEFAULT_OPENAI_MAX_TOKENS
+    return MAX_OUTPUT_TOKENS
 
 
 def _proxy_url() -> str:
@@ -126,12 +140,23 @@ def _client_kwargs() -> dict:
     return kwargs
 
 
+def _json_mode_unusable(text: str) -> bool:
+    """Шлюз отказал именно из-за JSON-режима, а не из-за самого запроса."""
+    markers = (
+        "response_format",
+        "json_validate_failed",
+        "Failed to generate JSON",
+        "does not support JSON",
+    )
+    return any(marker in text for marker in markers)
+
+
 async def _generate_openai(
     prompt: str,
     model: str,
     response_schema: dict | None = None,
 ) -> str:
-    """Запрос к OpenAI-совместимому шлюзу (API ВЕГА)."""
+    """Запрос к OpenAI-совместимому шлюзу (NVIDIA NIM, API ВЕГА)."""
     api_base = _env("AI_API_BASE") or DEFAULT_OPENAI_BASE
     url = f"{api_base.rstrip('/')}/chat/completions"
 
@@ -139,7 +164,7 @@ async def _generate_openai(
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
-        "max_tokens": MAX_OUTPUT_TOKENS,
+        "max_tokens": _max_output_tokens(),
     }
     if response_schema:
         payload["response_format"] = {"type": "json_object"}
@@ -151,6 +176,14 @@ async def _generate_openai(
 
     async with httpx.AsyncClient(**_client_kwargs()) as client:
         response = await client.post(url, json=payload, headers=headers)
+        if (
+            response.status_code == 400
+            and response_schema
+            and _json_mode_unusable(response.text)
+        ):
+            # Модель не умеет json_object — формат JSON и так описан в промпте.
+            payload.pop("response_format", None)
+            response = await client.post(url, json=payload, headers=headers)
 
     if response.status_code >= 400:
         raise RuntimeError(
