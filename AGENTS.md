@@ -199,11 +199,6 @@ LLM вызывается только для строк с низкой увер
 - LLM — Google AI Studio (Gemini): `GEMINI_API_KEY`, `GEMINI_MODEL` в
   `private/.env`. При необходимости запросы идут через прокси:
   `HTTPS_PROXY` (HTTP) или `ALL_PROXY` (SOCKS5).
-- `GEMINI_API_BASE` — базовый URL API. Если Google отвечает «User
-  location is not supported» (частая проблема VPS-хостингов), укажите
-  воркер-прокси `cloudflare/gemini-worker.js`:
-  `GEMINI_API_BASE=https://gemini-proxy.<account>.workers.dev`.
-  Деплой воркера — CI по `wrangler.gemini.jsonc`.
 - `data/` — рабочие файлы парсера (не коммитить).
 - `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
   данные, они в Git.
