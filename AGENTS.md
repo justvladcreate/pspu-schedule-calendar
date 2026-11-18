@@ -197,14 +197,20 @@ LLM вызывается только для строк с низкой увер
 
 - `.env` и Google-креды — в `private/` (игнорируется Git).
 - LLM: провайдер выбирается `AI_PROVIDER` — `gemini` (Google AI
-  Studio напрямую) или `openai` (OpenAI-совместимый шлюз, по умолчанию
-  API ВЕГА: `AI_API_BASE=https://api.vega.chat/api/v1`, ключ
-  `AI_API_KEY`, модели вида `google/gemini-*`). Модель/список моделей —
-  `AI_MODEL` (старое `GEMINI_MODEL` поддерживается); пауза между
-  запросами — `AI_MIN_INTERVAL`.
+  Studio напрямую) или `openai` (OpenAI-совместимый шлюз). Рабочая
+  конфигурация — DeepSeek: `AI_API_BASE=https://api.deepseek.com`,
+  `AI_MODEL=deepseek-flash`, `AI_THINKING=disabled` (у DeepSeek
+  thinking включён по умолчанию и съедает весь лимит ответа).
+  Модель/список моделей — `AI_MODEL` (старое `GEMINI_MODEL`
+  поддерживается); пауза между запросами — `AI_MIN_INTERVAL`;
+  таймаут — `AI_TIMEOUT`; лимит ответа — `AI_MAX_TOKENS`.
 - Gemini: `GEMINI_API_KEY`, `GEMINI_API_BASE`, `GEMINI_THINKING_BUDGET`
-  (0 отключает «размышления»); прокси — `HTTPS_PROXY` или `ALL_PROXY`
-  (у ВЕГИ прокси не нужен, но он не мешает).
+  (0 отключает «размышления»).
+- Google Sheets/Drive с hp-server напрямую недоступны, поэтому
+  `google_services.py` отправляет их через тот же SOCKS-туннель
+  (`ALL_PROXY`). Отключить — `GOOGLE_USE_PROXY=0`.
+- `ALL_PROXY` нужен для Google (Gemini и Sheets); DeepSeek/OpenAI-шлюзы
+  идут напрямую — `httpx` создаётся с `trust_env=False`.
 - `data/` — рабочие файлы парсера (не коммитить).
 - `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
   данные, они в Git.
