@@ -41,6 +41,8 @@ DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
 DEFAULT_OPENAI_BASE = "https://api.vega.chat/api/v1"
 DEFAULT_OPENAI_MODEL = "google/gemini-2.5-flash"
 DEFAULT_TIMEOUT = 120.0
+# NVIDIA NIM на большом промпте и длинном JSON отвечает дольше двух минут.
+DEFAULT_OPENAI_TIMEOUT = 300.0
 MAX_OUTPUT_TOKENS = 32768
 # OpenAI-совместимые шлюзы (NVIDIA NIM, ВЕГА) не любят огромный max_tokens.
 DEFAULT_OPENAI_MAX_TOKENS = 8192
@@ -133,7 +135,16 @@ async def _throttle() -> None:
 
 
 def _client_kwargs() -> dict:
-    kwargs: dict = {"timeout": DEFAULT_TIMEOUT}
+    default = (
+        DEFAULT_OPENAI_TIMEOUT if _provider() == "openai" else DEFAULT_TIMEOUT
+    )
+    raw = _env("AI_TIMEOUT")
+    try:
+        timeout = float(raw) if raw else default
+    except ValueError:
+        timeout = default
+
+    kwargs: dict = {"timeout": timeout}
     proxy = _proxy_url()
     if proxy:
         kwargs["proxy"] = proxy

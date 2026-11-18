@@ -154,8 +154,8 @@ async def ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
             if "429" in str(e):
                 delay = max(delay, 60.0)
             logger.warning(
-                f"AI: попытка {attempt + 1}/{max_attempts} не удалась: {e}; "
-                f"пауза {delay:.1f}с"
+                f"AI: попытка {attempt + 1}/{max_attempts} не удалась: "
+                f"{type(e).__name__}: {e}; пауза {delay:.1f}с"
             )
             await asyncio.sleep(delay)
             delay *= 2
