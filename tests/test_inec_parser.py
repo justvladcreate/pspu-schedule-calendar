@@ -52,6 +52,25 @@ def test_refine_restores_group_from_previous_version(tmp_path, monkeypatch):
     assert saved["1237"]["events"] == previous["1237"]["events"]
 
 
+def test_refine_restores_group_from_old_version(tmp_path, monkeypatch):
+    paths = _paths(tmp_path)
+    previous = {"1237": {"events": [{"discipline": "Физическая культура"}],
+                         "semester_start_year": 2026}}
+    write_json(paths.old_file(AFTER_AI_NAME), previous)
+
+    async def boom(**kwargs):
+        raise RuntimeError("All connection attempts failed")
+
+    monkeypatch.setattr(inec_parser, "ask_ai_with_retry", boom)
+
+    parser = _make_parser(tmp_path)
+    groups = {"1237": {"events": [{"subject": "Физическая культура"}],
+                       "semester_start_year": 2026}}
+    result = asyncio.run(parser.refine(groups, PERIOD))
+
+    assert result["1237"]["events"] == previous["1237"]["events"]
+
+
 def test_refine_keeps_other_groups_when_one_fails(tmp_path, monkeypatch):
     paths = _paths(tmp_path)
 

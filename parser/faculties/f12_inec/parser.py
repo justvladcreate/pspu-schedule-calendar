@@ -106,6 +106,7 @@ class InecParser(FacultyParser):
         # Прошлая версия after_ai: из неё берём группы, для которых LLM
         # не ответила, чтобы сбой сети/прокси не стирал расписание группы.
         previous: dict = read_json(self.paths.latest_file(AFTER_AI_NAME)) or {}
+        previous_old: dict = read_json(self.paths.old_file(AFTER_AI_NAME)) or {}
 
         new_cache: dict[str, list[str]] = {}
         cache_hits = 0
@@ -187,7 +188,7 @@ class InecParser(FacultyParser):
         )
 
         for group in failed:
-            fallback = previous.get(group) or {}
+            fallback = previous.get(group) or previous_old.get(group) or {}
             events = fallback.get("events") or []
             if events:
                 after_ai[group] = {
