@@ -23,8 +23,8 @@ _LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
 _SPACED_DATE_RE = re.compile(r"\b\d(?:\s*\d){0,1}\s*\.\s*\d(?:\s*\d){0,1}\b")
 # «3,12» / «3, 12» — запятая вместо точки внутри даты.
 _COMMA_DATE_RE = re.compile(r"(?<![\d.])(\d{1,2}),\s*(\d{1,2})(?![\d.])")
-# «3.12 , 10.12» — лишние пробелы вокруг запятой-разделителя.
-_SEPARATOR_COMMA_RE = re.compile(r"\s+,\s*")
+# «3.12,10.12» — забыли пробел после запятой-разделителя.
+_SEPARATOR_COMMA_RE = re.compile(r"(?<=\d)\s*,\s*(?=\d)")
 
 
 def _normalize_dates(text: str) -> str:

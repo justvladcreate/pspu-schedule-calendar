@@ -179,6 +179,19 @@ def test_format_ai_input_fixes_mixed_commas():
     assert "3.12, 10.12 Дидактические" in text
 
 
+def test_format_ai_input_fixes_forgotten_space_after_comma():
+    text = format_ai_input([{"subject": "3.12,10,12 Дидактические концепции"}])
+    assert "3.12, 10.12 Дидактические" in text
+
+
+def test_format_ai_input_keeps_time_after_v():
+    text = format_ai_input([
+        {"subject": "с 12.12 в 12.10 Конкурсная деятельность"},
+    ])
+    # время не превращается в дату и наоборот
+    assert "с 12.12 в 12.10" in text
+
+
 def test_format_ai_input_keeps_date_lists():
     text = format_ai_input([
         {"subject": "07.12, 14.12 Физическая культура и спорт"},
