@@ -162,6 +162,27 @@ def test_openai_default_max_tokens(monkeypatch):
     assert ai_module._max_output_tokens() == 4096
 
 
+def test_openai_goes_direct_by_default(monkeypatch):
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    monkeypatch.setenv("ALL_PROXY", "socks5h://127.0.0.1:1080")
+    monkeypatch.delenv("AI_USE_PROXY", raising=False)
+
+    assert ai_module._use_proxy() is False
+    assert "proxy" not in ai_module._client_kwargs()
+
+    monkeypatch.setenv("AI_USE_PROXY", "1")
+    assert "proxy" in ai_module._client_kwargs()
+
+
+def test_gemini_uses_proxy_by_default(monkeypatch):
+    monkeypatch.setenv("AI_PROVIDER", "gemini")
+    monkeypatch.setenv("ALL_PROXY", "socks5h://127.0.0.1:1080")
+    monkeypatch.delenv("AI_USE_PROXY", raising=False)
+
+    assert ai_module._use_proxy() is True
+    assert "proxy" in ai_module._client_kwargs()
+
+
 def test_strip_code_fence():
     assert ai_module._strip_code_fence("```\n[1];A\n```") == "[1];A"
     assert ai_module._strip_code_fence("```text\n[1];A\n```") == "[1];A"

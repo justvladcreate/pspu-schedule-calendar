@@ -134,6 +134,19 @@ async def _throttle() -> None:
     _last_call = loop.time()
 
 
+def _use_proxy() -> bool:
+    """Идти ли к провайдеру через HTTPS_PROXY/ALL_PROXY.
+
+    По умолчанию Gemini — через прокси (иначе Google блокирует по IP),
+    а OpenAI-совместимые шлюзы (NVIDIA, ВЕГА) — напрямую: лишний хоп
+    через SOCKS заметно замедляет длинные ответы.
+    """
+    raw = _env("AI_USE_PROXY").lower()
+    if raw:
+        return raw not in ("0", "false", "no", "off")
+    return _provider() != "openai"
+
+
 def _client_kwargs() -> dict:
     default = (
         DEFAULT_OPENAI_TIMEOUT if _provider() == "openai" else DEFAULT_TIMEOUT
@@ -145,9 +158,10 @@ def _client_kwargs() -> dict:
         timeout = default
 
     kwargs: dict = {"timeout": timeout}
-    proxy = _proxy_url()
-    if proxy:
-        kwargs["proxy"] = proxy
+    if _use_proxy():
+        proxy = _proxy_url()
+        if proxy:
+            kwargs["proxy"] = proxy
     return kwargs
 
 
