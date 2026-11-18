@@ -3,7 +3,9 @@
 Настройки берутся из окружения (``private/.env`` подхватывает config.py):
 
     GEMINI_API_KEY   — ключ Google AI Studio (обязателен)
-    GEMINI_MODEL     — модель, по умолчанию ``gemini-2.5-flash``
+    GEMINI_MODEL     — модель или список моделей через запятую
+                       (``gemini-3-flash-preview,gemini-3.8-flash``);
+                       перебираются по порядку, пока какая-нибудь не ответит
     GEMINI_API_BASE  — базовый URL, по умолчанию generativelanguage.googleapis.com
     HTTPS_PROXY / ALL_PROXY — прокси для запросов к Google (необязательно)
 
@@ -13,10 +15,13 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 
 import httpx
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gemini-3.1-flash-lite"
 DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
@@ -124,8 +129,7 @@ async def _generate(prompt: str, model: str, response_schema: dict | None = None
 
 async def ask_ai(prompt: str = "", model: str | None = None) -> list[str]:
     """Отправляет промпт в Gemini и возвращает ответ по строкам."""
-    chosen_model = (model or _env("GEMINI_MODEL") or DEFAULT_MODEL).strip()
-    content = await _generate(prompt, chosen_model)
+    content = await _generate_any(prompt, model)
     return content.split("\n")
 
 
@@ -135,11 +139,45 @@ async def ask_ai_json(
     model: str | None = None,
 ) -> dict:
     """Запрос со structured output: Gemini сам собирает JSON по схеме."""
-    chosen_model = (model or _env("GEMINI_MODEL") or DEFAULT_MODEL).strip()
-    content = await _generate(prompt, chosen_model, response_schema=schema)
+    content = await _generate_any(prompt, model, response_schema=schema)
     try:
         return json.loads(content)
     except json.JSONDecodeError as exc:
         raise RuntimeError(
             f"Gemini API: ответ не является JSON: {content[:300]}"
         ) from exc
+
+
+def _model_list(model: str | None) -> list[str]:
+    """Модели по порядку: явная, либо список из GEMINI_MODEL через запятую.
+
+    Google периодически отвечает 503/429/«location» на конкретную модель,
+    а соседняя в это время работает, поэтому модели перебираются
+    по очереди, пока какая-нибудь не ответит.
+    """
+    if model:
+        return [model.strip()]
+
+    raw = _env("GEMINI_MODEL") or DEFAULT_MODEL
+    models = [part.strip() for part in raw.split(",") if part.strip()]
+    return models or [DEFAULT_MODEL]
+
+
+async def _generate_any(
+    prompt: str,
+    model: str | None = None,
+    response_schema: dict | None = None,
+) -> str:
+    models = _model_list(model)
+    last_error: Exception | None = None
+
+    for name in models:
+        try:
+            return await _generate(prompt, name, response_schema)
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            if len(models) > 1:
+                logger.warning("Gemini: модель %s не ответила: %s", name, exc)
+
+    assert last_error is not None
+    raise last_error

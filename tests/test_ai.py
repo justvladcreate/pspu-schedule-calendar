@@ -11,7 +11,7 @@ def test_prompt_has_input_placeholder():
 
 
 def test_ask_ai_splits_response(monkeypatch):
-    async def fake_generate(prompt, model):
+    async def fake_generate(prompt, model, response_schema=None):
         assert prompt == "prompt"
         assert model
         return "[1];-;-;-;-;A;лек.;-;Y;-\n[1];-;-;-;-;B;прак.;-;Y;-"
@@ -22,6 +22,43 @@ def test_ask_ai_splits_response(monkeypatch):
         "[1];-;-;-;-;A;лек.;-;Y;-",
         "[1];-;-;-;-;B;прак.;-;Y;-",
     ]
+
+
+def test_ask_ai_falls_back_to_next_model(monkeypatch):
+    calls = []
+
+    async def fake_generate(prompt, model, response_schema=None):
+        calls.append(model)
+        if model == "blocked":
+            raise RuntimeError("HTTP 400: User location is not supported")
+        return "OK"
+
+    monkeypatch.setattr(ai_module, "_generate", fake_generate)
+    monkeypatch.setenv("GEMINI_MODEL", "blocked,working")
+
+    assert asyncio.run(ai_module.ask_ai("prompt")) == ["OK"]
+    assert calls == ["blocked", "working"]
+
+
+def test_ask_ai_fallback_raises_last_error(monkeypatch):
+    async def fake_generate(prompt, model, response_schema=None):
+        raise RuntimeError(f"HTTP 503 for {model}")
+
+    monkeypatch.setattr(ai_module, "_generate", fake_generate)
+    monkeypatch.setenv("GEMINI_MODEL", "first,second")
+
+    try:
+        asyncio.run(ai_module.ask_ai("prompt"))
+    except RuntimeError as exc:
+        assert "second" in str(exc)
+    else:
+        raise AssertionError("expected RuntimeError")
+
+
+def test_model_list_strips_spaces(monkeypatch):
+    monkeypatch.setenv("GEMINI_MODEL", " a , b ,, c ")
+    assert ai_module._model_list(None) == ["a", "b", "c"]
+    assert ai_module._model_list("explicit") == ["explicit"]
 
 
 def test_strip_code_fence():
