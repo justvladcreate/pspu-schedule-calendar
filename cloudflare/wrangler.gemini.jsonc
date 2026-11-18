@@ -1,0 +1,9 @@
+{
+  // Конфиг для автоматического деплоя прокси к Gemini через GitHub Actions.
+  // URL воркера: https://gemini-proxy.<account>.workers.dev
+  // В private/.env на hp-server: GEMINI_API_BASE=https://gemini-proxy.<account>.workers.dev
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "gemini-proxy",
+  "main": "gemini-worker.js",
+  "compatibility_date": "2025-01-01"
+}
