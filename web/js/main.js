@@ -961,6 +961,26 @@ function nearestEventDate(dates) {
     return best;
 }
 
+/** Ждёт появления элемента: рендер календаря может идти с анимацией. */
+function waitForElement(selector, timeout = 1500) {
+    return new Promise((resolve) => {
+        const found = document.querySelector(selector);
+        if (found) {
+            resolve(found);
+            return;
+        }
+
+        const started = Date.now();
+        const timer = setInterval(() => {
+            const el = document.querySelector(selector);
+            if (el || Date.now() - started > timeout) {
+                clearInterval(timer);
+                resolve(el || null);
+            }
+        }, 50);
+    });
+}
+
 /** Переход из модалки «Изменения» к событию на его дате в календаре. */
 function openEventInCalendar(ev) {
     const dates = (ev.dates && ev.dates.length) ? ev.dates : [ev.dateISO];
@@ -979,45 +999,44 @@ function openEventInCalendar(ev) {
     const iso = toISO(target);
     const eventId = ev.event_id || '';
 
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            let el = null;
-            if (eventId) {
-                try {
-                    el = document.querySelector(
-                        `[data-event-id="${CSS.escape(eventId)}"][data-date-iso="${CSS.escape(iso)}"]`
+    (async () => {
+        let el = null;
+        if (eventId) {
+            try {
+                el = await waitForElement(
+                    `[data-event-id="${CSS.escape(eventId)}"][data-date-iso="${CSS.escape(iso)}"]`
+                );
+                if (!el) {
+                    el = await waitForElement(
+                        `[data-event-id="${CSS.escape(eventId)}"]`,
+                        400,
                     );
-                    if (!el) {
-                        el = document.querySelector(
-                            `[data-event-id="${CSS.escape(eventId)}"]`
-                        );
-                    }
-                } catch (_) {
-                    el = null;
                 }
+            } catch (_) {
+                el = null;
             }
+        }
 
-            if (!el) {
-                showToast('Событие скрыто фильтрами');
-                return;
-            }
+        if (!el) {
+            showToast('Событие скрыто фильтрами');
+            return;
+        }
 
-            el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
 
-            const expanded = (state.filteredEvents || []).find(
-                e => e.event_id === eventId && e.dateISO === iso
-            );
-            showEventDetails(
-                expanded || {
-                    ...ev,
-                    dateObj: target,
-                    dateISO: iso,
-                    endTime: ev.endTime || ev.time_end || '',
-                },
-                el,
-            );
-        });
-    });
+        const expanded = (state.filteredEvents || []).find(
+            e => e.event_id === eventId && e.dateISO === iso
+        );
+        showEventDetails(
+            expanded || {
+                ...ev,
+                dateObj: target,
+                dateISO: iso,
+                endTime: ev.endTime || ev.time_end || '',
+            },
+            el,
+        );
+    })();
 }
 
 function openUrlContextEvent() {
