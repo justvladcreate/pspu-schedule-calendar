@@ -99,6 +99,18 @@ export function eventDetailsHtml(ev) {
         </div>` : ''}
 
         <div class="popover-actions-footer">
+            ${document.querySelector('.modal-backdrop.open') ? `
+            <button class="popover-goto" type="button" aria-label="Открыть это событие в календаре">
+                <svg viewBox="0 0 24 24" width="16" height="16"
+                     fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>В календаре</span>
+            </button>` : ''}
             <button class="popover-look" type="button" aria-label="Показать в таблице">
                 <svg viewBox="0 0 24 24" width="16" height="16"
                      fill="none" stroke="currentColor" stroke-width="2"
@@ -255,6 +267,34 @@ function attachShareHandler(pop, ev) {
 }
 
 let viewOriginalHandler = null;
+let gotoCalendarHandler = null;
+
+/**
+ * Кнопка «В календаре» в поповере. Показывается только внутри модалки
+ * «Изменения» — в календаре событие и так открыто на своей дате.
+ * Обработчик получает событие и решает, на какую дату перейти.
+ */
+export function setupPopoverGotoHandler(fn) {
+    if (typeof fn !== 'function' || gotoCalendarHandler) return;
+    gotoCalendarHandler = fn;
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest && e.target.closest('.popover-goto');
+        if (!btn) return;
+
+        const pop = document.getElementById('eventPopover');
+        if (!pop || !pop.contains(btn)) return;
+
+        const ev = pop._eventData;
+        if (!ev) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        try { gotoCalendarHandler(ev); }
+        catch (err) { console.warn('[goto] failed:', err); }
+    }, true);
+}
 
 export function setupPopoverViewHandler(fn) {
     if (typeof fn !== 'function' || viewOriginalHandler) return;

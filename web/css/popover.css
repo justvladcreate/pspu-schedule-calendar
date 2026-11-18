@@ -88,12 +88,14 @@
 /* Нижняя панель действий */
 .popover-actions-footer {
     display: flex;
+    gap: 8px;
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid var(--border);
 }
 
-.popover-look {
+.popover-look,
+.popover-goto {
     flex: 1;
     display: inline-flex;
     align-items: center;
@@ -111,17 +113,20 @@
     transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.popover-look:hover {
+.popover-look:hover,
+.popover-goto:hover {
     background: var(--surface-3);
     border-color: var(--grid-line-strong);
     color: var(--text);
 }
 
-.popover-look:active {
+.popover-look:active,
+.popover-goto:active {
     background: var(--surface);
 }
 
-.popover-look svg {
+.popover-look svg,
+.popover-goto svg {
     flex-shrink: 0;
     display: block;
     pointer-events: none;

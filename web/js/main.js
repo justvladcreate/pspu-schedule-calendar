@@ -20,7 +20,7 @@ import {
 import {
     navigate, goToToday, cycleView, toggleTheme,
     updateViewButton, initTheme,
-    switchToCalendar, switchToLoad,
+    switchToCalendar, switchToLoad, navigateTo,
 } from './navigation.js';
 import { setupUpdatedButton, updateUpdatedLabel } from './version.js';
 import {
@@ -44,7 +44,7 @@ import { setupModalHistory } from './modal-history.js';
 import { openDatePicker, closeDatePicker, renderPicker, pickerState } from './datepicker.js';
 import {
     hideEventDetails, showEventDetails,
-    setupPopoverViewHandler,
+    setupPopoverViewHandler, setupPopoverGotoHandler,
 } from './popover.js';
 
 let changesModalApi = null;
@@ -519,6 +519,8 @@ function setupAllUI() {
         if (originalApi) originalApi.focusOn(ev);
     });
 
+    setupPopoverGotoHandler(openEventInCalendar);
+
     changesModalApi = setupChangesModal();
     updateBannerApi = setupUpdateBanner({
         onOpen: () => changesModalApi.open(getVisibleChanges()),
@@ -925,6 +927,96 @@ function setupUrlContextBanner() {
     banner.setAttribute('aria-label', 'Вы смотрите расписание по чужой ссылке. Перейти к своему расписанию');
     banner.addEventListener('click', () => {
         location.replace(location.origin + location.pathname);
+    });
+}
+
+/** «DD.MM.YYYY» → Date (локальная полночь) или null. */
+function parseRuDate(value) {
+    const parts = String(value || '').split('.').map(Number);
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+}
+
+/**
+ * Дата для кнопки «В календаре»: если у события одна дата — она,
+ * если несколько — ближайшая к сегодняшней (при равенстве — будущая).
+ */
+function nearestEventDate(dates) {
+    const parsed = (dates || []).map(parseRuDate).filter(Boolean);
+    if (!parsed.length) return null;
+    if (parsed.length === 1) return parsed[0];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let best = parsed[0];
+    let bestDiff = Math.abs(best.getTime() - today.getTime());
+    for (const date of parsed.slice(1)) {
+        const diff = Math.abs(date.getTime() - today.getTime());
+        if (diff < bestDiff || (diff === bestDiff && date > best)) {
+            best = date;
+            bestDiff = diff;
+        }
+    }
+    return best;
+}
+
+/** Переход из модалки «Изменения» к событию на его дате в календаре. */
+function openEventInCalendar(ev) {
+    const dates = (ev.dates && ev.dates.length) ? ev.dates : [ev.dateISO];
+    const target = nearestEventDate(dates);
+    if (!target) {
+        showToast('У события нет дат');
+        return;
+    }
+
+    hideEventDetails();
+    if (changesModalApi) changesModalApi.close();
+
+    const view = state.view === 'load' ? 'week' : state.view;
+    navigateTo(view, target);
+
+    const iso = toISO(target);
+    const eventId = ev.event_id || '';
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            let el = null;
+            if (eventId) {
+                try {
+                    el = document.querySelector(
+                        `[data-event-id="${CSS.escape(eventId)}"][data-date-iso="${CSS.escape(iso)}"]`
+                    );
+                    if (!el) {
+                        el = document.querySelector(
+                            `[data-event-id="${CSS.escape(eventId)}"]`
+                        );
+                    }
+                } catch (_) {
+                    el = null;
+                }
+            }
+
+            if (!el) {
+                showToast('Событие скрыто фильтрами');
+                return;
+            }
+
+            el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+            const expanded = (state.filteredEvents || []).find(
+                e => e.event_id === eventId && e.dateISO === iso
+            );
+            showEventDetails(
+                expanded || {
+                    ...ev,
+                    dateObj: target,
+                    dateISO: iso,
+                    endTime: ev.endTime || ev.time_end || '',
+                },
+                el,
+            );
+        });
     });
 }
 
