@@ -39,7 +39,7 @@ DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
 DEFAULT_GROQ_BASE = "https://api.groq.com/openai/v1"
 DEFAULT_TIMEOUT = 120.0
 MAX_OUTPUT_TOKENS = 32768
-DEFAULT_GROQ_MAX_TOKENS = 8192
+DEFAULT_GROQ_MAX_TOKENS = 16384
 # Бесплатный тариф Gemini — 20 запросов в минуту. 4.5с даёт ~13 RPM
 # и оставляет запас на повторные попытки. У Groq лимиты мягче.
 DEFAULT_MIN_INTERVAL = 4.5
@@ -213,6 +213,17 @@ async def _generate_gemini(
     return _strip_code_fence(content)
 
 
+def _json_mode_unusable(text: str) -> bool:
+    """Groq отказал именно из-за JSON-режима, а не из-за самого запроса."""
+    markers = (
+        "response_format",
+        "json_validate_failed",
+        "Failed to generate JSON",
+        "does not support JSON",
+    )
+    return any(marker in text for marker in markers)
+
+
 async def _generate_groq(
     prompt: str,
     model: str,
@@ -228,6 +239,14 @@ async def _generate_groq(
         "temperature": 0.1,
         "max_tokens": _max_output_tokens(),
     }
+
+    # gpt-oss «размышляет», и эти токены съедают бюджет ответа:
+    # JSON обрывается на середине (json_validate_failed). Для разбора
+    # расписания размышления не нужны.
+    effort = _env("AI_REASONING_EFFORT") or "low"
+    if effort:
+        payload["reasoning_effort"] = effort
+
     if response_schema:
         # Не все модели Groq умеют json_object; если откажет — повторяем
         # без него, формат JSON уже описан в промпте.
@@ -243,7 +262,7 @@ async def _generate_groq(
         if (
             response.status_code == 400
             and response_schema
-            and "response_format" in response.text
+            and _json_mode_unusable(response.text)
         ):
             payload.pop("response_format", None)
             response = await client.post(url, json=payload, headers=headers)
