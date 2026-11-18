@@ -14,6 +14,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -26,7 +27,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_MODEL = "gemini-3.1-flash-lite"
 DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
 DEFAULT_TIMEOUT = 120.0
-MAX_OUTPUT_TOKENS = 16384
+MAX_OUTPUT_TOKENS = 32768
+# Бесплатный тариф Gemini — 20 запросов в минуту. 4.5с даёт ~13 RPM
+# и оставляет запас на повторные попытки.
+DEFAULT_MIN_INTERVAL = 4.5
+
+_last_call = 0.0
 
 
 def _env(*names: str) -> str:
@@ -57,10 +63,33 @@ def _strip_code_fence(text: str) -> str:
     return value.strip()
 
 
+async def _throttle() -> None:
+    """Держит бесплатную квоту Gemini (20 запросов в минуту).
+
+    Интервал задаётся ``GEMINI_MIN_INTERVAL`` (секунды, по умолчанию 4.5).
+    ``0`` отключает троттлинг, например если у вас платный тариф.
+    """
+    global _last_call
+    try:
+        interval = float(_env("GEMINI_MIN_INTERVAL") or DEFAULT_MIN_INTERVAL)
+    except ValueError:
+        interval = DEFAULT_MIN_INTERVAL
+    if interval <= 0:
+        return
+
+    loop = asyncio.get_running_loop()
+    wait = _last_call + interval - loop.time()
+    if wait > 0:
+        await asyncio.sleep(wait)
+    _last_call = loop.time()
+
+
 async def _generate(prompt: str, model: str, response_schema: dict | None = None) -> str:
     """Один запрос к Gemini. Возвращает текст ответа."""
     api_base = _env("GEMINI_API_BASE") or DEFAULT_API_BASE
     url = f"{api_base.rstrip('/')}/v1beta/models/{model}:generateContent"
+
+    await _throttle()
 
     generation_config: dict = {
         "temperature": 0.1,
@@ -69,6 +98,16 @@ async def _generate(prompt: str, model: str, response_schema: dict | None = None
     if response_schema:
         generation_config["responseMimeType"] = "application/json"
         generation_config["responseSchema"] = response_schema
+
+    # Gemini 2.5/3 по умолчанию «думает», и размышления съедают
+    # maxOutputTokens: ответ приходит обрезанным (MAX_TOKENS).
+    # Для разбора расписания размышления не нужны.
+    budget = _env("GEMINI_THINKING_BUDGET")
+    if budget:
+        try:
+            generation_config["thinkingConfig"] = {"thinkingBudget": int(budget)}
+        except ValueError:
+            pass
 
     payload = {
         "contents": [

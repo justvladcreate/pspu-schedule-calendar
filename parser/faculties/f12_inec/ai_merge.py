@@ -125,6 +125,10 @@ async def ask_ai_with_retry(prompt: str, max_attempts: int = 4) -> list[str]:
             last_exc = e
             if attempt == max_attempts - 1:
                 break
+            # Квота (429) восстанавливается не за секунды: ждём минуту,
+            # иначе следующие попытки снова упираются в тот же лимит.
+            if "429" in str(e):
+                delay = max(delay, 60.0)
             logger.warning(
                 f"AI: попытка {attempt + 1}/{max_attempts} не удалась: {e}; "
                 f"пауза {delay:.1f}с"
