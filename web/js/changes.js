@@ -40,6 +40,9 @@ function diffEntry(oldE, newE) {
   if (oldE.time_end !== newE.time_end) {
     fields.push({ name: 'time_end', old: oldE.time_end, new: newE.time_end });
   }
+  if ((oldE.subgroup || '') !== (newE.subgroup || '')) {
+    fields.push({ name: 'subgroup', old: oldE.subgroup || '', new: newE.subgroup || '' });
+  }
 
   const oldT = [...toSet(oldE.teachers)];
   const newT = [...toSet(newE.teachers)];

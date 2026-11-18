@@ -140,6 +140,12 @@ function fillEventContent(parent, entry, change, side) {
     const timeStr = `${entry.time_start || '—'}–${entry.time_end || '—'}`;
     parent.appendChild(buildScalarLine(timeStr, !!timeField, diffClass));
 
+    // Подгруппа — иначе изменение подгруппы выглядит как «удалили и добавили»
+    if (entry.subgroup) {
+        const subgroupField = findField(change, 'subgroup');
+        parent.appendChild(buildScalarLine(entry.subgroup, !!subgroupField, diffClass));
+    }
+
     // Даты
     if (entry.dates && entry.dates.length) {
         const datesField = findField(change, 'dates');
