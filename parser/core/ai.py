@@ -157,7 +157,7 @@ def _client_kwargs() -> dict:
     except ValueError:
         timeout = default
 
-    kwargs: dict = {"timeout": timeout}
+    kwargs: dict = {"timeout": timeout, "trust_env": False}
     if _use_proxy():
         proxy = _proxy_url()
         if proxy:
@@ -194,6 +194,15 @@ async def _generate_openai(
     if response_schema:
         payload["response_format"] = {"type": "json_object"}
 
+    # DeepSeek: thinking включён по умолчанию и съедает токены.
+    thinking = _env("AI_THINKING").lower()
+    if thinking in ("enabled", "disabled"):
+        payload["thinking"] = {"type": thinking}
+
+    effort = _env("AI_REASONING_EFFORT")
+    if effort:
+        payload["reasoning_effort"] = effort
+
     headers = {
         "Authorization": f"Bearer {_openai_key()}",
         "Content-Type": "application/json",
@@ -216,6 +225,15 @@ async def _generate_openai(
         )
 
     data = response.json()
+    usage = data.get("usage") or {}
+    if usage:
+        logger.info(
+            "LLM: %s вход %s (кэш %s), выход %s",
+            model,
+            usage.get("prompt_tokens"),
+            usage.get("prompt_cache_hit_tokens"),
+            usage.get("completion_tokens"),
+        )
     choices = data.get("choices") or []
     if not choices:
         raise RuntimeError(f"LLM API: пустой ответ: {str(data)[:400]}")
