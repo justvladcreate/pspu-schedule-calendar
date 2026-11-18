@@ -156,6 +156,21 @@ def test_events_to_lines_accepts_bare_list():
     assert events_to_lines(payload)[0].startswith("[5]")
 
 
+def test_format_ai_input_fixes_comma_date():
+    text = format_ai_input([
+        {"subject": "3,12 Дидактические концепции (прак.) доц. Подорова В.А."},
+    ])
+    assert "3.12 Дидактические" in text
+    assert "3,12" not in text
+
+
+def test_format_ai_input_keeps_date_lists():
+    text = format_ai_input([
+        {"subject": "07.12, 14.12 Физическая культура и спорт"},
+    ])
+    assert "07.12, 14.12" in text
+
+
 def test_ask_ai_with_retry_uses_structured_output(monkeypatch):
     async def fake_json(prompt, schema):
         assert "events" in schema["properties"]

@@ -18,6 +18,18 @@ from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 logger = logging.getLogger(__name__)
 
 _LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
+# «3,12» без пробела после запятой — это 3.12 (в таблицах запятую иногда
+# ставят вместо точки). Перечисления («07.12, 14.12») не трогаем.
+_COMMA_DATE_RE = re.compile(r"(?<!\d)(\d{1,2}),(\d{1,2})(?!\d)(?=\s)")
+
+
+def _normalize_comma_dates(text: str) -> str:
+    """«3,12 Дидактические…» → «3.12 Дидактические…».
+
+    Модель иначе не видит дату и возвращает занятие без дат — а дальше
+    срабатывает правило «нет дат → растянуть на весь семестр».
+    """
+    return _COMMA_DATE_RE.sub(r"\1.\2", str(text or ""))
 
 # Structured output: Gemini сам собирает JSON по этой схеме.
 F12_AI_SCHEMA = {
@@ -62,7 +74,10 @@ missing value. Do not output the semicolon-separated lines.
 
 def format_ai_input(sources: list[dict]) -> str:
     """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
-    return "\n\n".join(f"[{i}] {s['subject']}" for i, s in enumerate(sources, start=1))
+    return "\n\n".join(
+        f"[{i}] {_normalize_comma_dates(s['subject'])}"
+        for i, s in enumerate(sources, start=1)
+    )
 
 
 def chunk_hash(text: str) -> str:
