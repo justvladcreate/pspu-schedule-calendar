@@ -22,7 +22,6 @@ from parser.faculties.f12_inec.ai_merge import (
     events_to_lines,
     format_ai_input,
 )
-from parser.faculties.f12_inec.parser import _split_sources
 from parser.faculties.f12_inec.prompt import USER_PROMPT
 
 
@@ -38,12 +37,10 @@ def main() -> None:
         print(f"в extracted.json нет ячеек для группы {group}")
         return
 
-    chunks = _split_sources(sources)
-    chunk = chunks[0]
-    prompt = USER_PROMPT.format(data=format_ai_input(chunk)) + JSON_OUTPUT_SUFFIX
+    prompt = USER_PROMPT.format(data=format_ai_input(sources)) + JSON_OUTPUT_SUFFIX
     print(f"группа: {group}")
-    print(f"ячеек: {len(sources)}, пачек: {len(chunks)} (в этой: {len(chunk)})")
-    print(f"символов в промпте: {len(prompt)} (~{len(prompt) // 2} токенов)")
+    print(f"ячеек: {len(sources)}")
+    print(f"символов в промпте: {len(prompt)} (~{len(prompt) // 3} токенов)")
 
     payload = asyncio.run(ask_ai_json(prompt, F12_AI_SCHEMA))
 

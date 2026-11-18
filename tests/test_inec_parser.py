@@ -71,20 +71,6 @@ def test_refine_restores_group_from_old_version(tmp_path, monkeypatch):
     assert result["1237"]["events"] == previous["1237"]["events"]
 
 
-def test_split_sources_respects_limit(monkeypatch):
-    monkeypatch.setenv("AI_CHUNK_CHARS", "250")
-    sources = [{"subject": "x" * 100} for _ in range(5)]
-    chunks = inec_parser._split_sources(sources)
-    assert [len(chunk) for chunk in chunks] == [2, 2, 1]
-    assert sum(len(chunk) for chunk in chunks) == 5
-
-
-def test_split_sources_zero_limit_keeps_group(monkeypatch):
-    monkeypatch.setenv("AI_CHUNK_CHARS", "0")
-    sources = [{"subject": "x" * 100} for _ in range(5)]
-    assert inec_parser._split_sources(sources) == [sources]
-
-
 def test_refine_keeps_other_groups_when_one_fails(tmp_path, monkeypatch):
     paths = _paths(tmp_path)
 

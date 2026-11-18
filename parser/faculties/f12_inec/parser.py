@@ -44,74 +44,6 @@ from parser.sources.base import SheetData
 
 logger = logging.getLogger(__name__)
 
-# Сколько символов исходных ячеек отправлять за один запрос. Промпт с
-# правилами занимает ~9k символов, а у бесплатных тарифов (Groq) лимит
-# 8000 токенов в минуту на весь запрос, поэтому большие группы режем.
-DEFAULT_CHUNK_CHARS = 3000
-
-
-def _line_enumerator(line: str) -> int | None:
-    head = line.split(";", 1)[0].strip().strip("[]").strip()
-    try:
-        return int(head)
-    except ValueError:
-        return None
-
-
-def _merge_lines(lines: list[str], sources: list[dict]) -> list[dict]:
-    """Строки «[n];...» → события. Номер ячейки считается внутри пачки."""
-    merged: list[dict] = []
-    enum_counts: Counter = Counter()
-    for line in lines:
-        n = _line_enumerator(line)
-        if n is not None:
-            enum_counts[n] += 1
-
-    seen: dict[int, int] = {}
-    for line in lines:
-        n = _line_enumerator(line)
-        if n is None:
-            items = merge_ai_line(line, 0, sources)
-            if items:
-                merged.extend(items)
-            continue
-
-        branch_index = seen.get(n, 0)
-        seen[n] = branch_index + 1
-        items = merge_ai_line(
-            line, 0, sources,
-            branch_index=branch_index,
-            branch_total=enum_counts[n],
-        )
-        if items:
-            merged.extend(items)
-    return merged
-
-
-def _split_sources(sources: list[dict]) -> list[list[dict]]:
-    """Режет ячейки группы на пачки по AI_CHUNK_CHARS символов."""
-    try:
-        limit = int(os.environ.get("AI_CHUNK_CHARS") or DEFAULT_CHUNK_CHARS)
-    except ValueError:
-        limit = DEFAULT_CHUNK_CHARS
-    if limit <= 0:
-        return [sources]
-
-    chunks: list[list[dict]] = []
-    current: list[dict] = []
-    size = 0
-    for source in sources:
-        text_len = len(str(source.get("subject", ""))) + 2
-        if current and size + text_len > limit:
-            chunks.append(current)
-            current, size = [], 0
-        current.append(source)
-        size += text_len
-    if current:
-        chunks.append(current)
-    return chunks or [sources]
-
-
 
 class InecParser(FacultyParser):
     id = "12"
@@ -196,48 +128,55 @@ class InecParser(FacultyParser):
                 lines = old_cache[key]
                 cache_hits += 1
                 logger.info("[skip AI] %s: cache hit (%d ячеек)", group, len(sources))
-                new_cache[key] = lines
-                merged = _merge_lines(lines, sources)
             else:
-                merged = []
-                group_failed = False
-                chunks = _split_sources(sources)
-                if len(chunks) > 1:
-                    logger.info(
-                        "%s: %d ячеек — отправляю %d частями (лимит токенов)",
-                        group, len(sources), len(chunks),
-                    )
-
-                for chunk in chunks:
-                    chunk_text = format_ai_input(chunk)
-                    chunk_key = chunk_hash(chunk_text)
-
-                    if chunk_key in old_cache:
-                        chunk_lines = old_cache[chunk_key]
-                        cache_hits += 1
+                prompt_text = USER_PROMPT.format(data=ai_input_text)
+                try:
+                    chunk_result = await ask_ai_with_retry(prompt=prompt_text)
+                    if isinstance(chunk_result, list):
+                        lines = [e for e in chunk_result if e.strip()]
                     else:
-                        prompt_text = USER_PROMPT.format(data=chunk_text)
-                        try:
-                            chunk_result = await ask_ai_with_retry(prompt=prompt_text)
-                            if isinstance(chunk_result, list):
-                                chunk_lines = [e for e in chunk_result if e.strip()]
-                            else:
-                                chunk_lines = [
-                                    e for e in chunk_result.split("\n") if e.strip()
-                                ]
-                            ai_calls += 1
-                            await asyncio.sleep(0.5)
-                        except Exception as e:  # noqa: BLE001
-                            logger.error("AI ошибка (группа %s): %s", group, e)
-                            group_failed = True
-                            break
-
-                    new_cache[chunk_key] = chunk_lines
-                    merged.extend(_merge_lines(chunk_lines, chunk))
-
-                if group_failed:
+                        lines = [e for e in chunk_result.split("\n") if e.strip()]
+                    ai_calls += 1
+                    await asyncio.sleep(0.5)
+                except Exception as e:  # noqa: BLE001
+                    logger.error("AI ошибка (группа %s): %s", group, e)
                     failed.append(group)
                     continue
+
+            new_cache[key] = lines
+
+            merged: list[dict] = []
+            enum_counts = Counter()
+            for line in lines:
+                head = line.split(";", 1)[0].strip()
+                try:
+                    n = int(head.strip("[]").strip())
+                except ValueError:
+                    continue
+                enum_counts[n] += 1
+
+            seen: dict[int, int] = {}
+            for line in lines:
+                head = line.split(";", 1)[0].strip()
+                try:
+                    n = int(head.strip("[]").strip())
+                except ValueError:
+                    items = merge_ai_line(line, 0, sources)
+                    if items:
+                        merged.extend(items)
+                    continue
+
+                branch_index = seen.get(n, 0)
+                seen[n] = branch_index + 1
+                branch_total = enum_counts[n]
+
+                items = merge_ai_line(
+                    line, 0, sources,
+                    branch_index=branch_index,
+                    branch_total=branch_total,
+                )
+                if items:
+                    merged.extend(items)
 
             after_ai[group] = {
                 "events": merged,
