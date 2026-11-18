@@ -164,11 +164,31 @@ def test_format_ai_input_fixes_comma_date():
     assert "3,12" not in text
 
 
+def test_format_ai_input_fixes_comma_with_space():
+    text = format_ai_input([{"subject": "3, 12 Дидактические концепции"}])
+    assert "3.12 Дидактические" in text
+
+
+def test_format_ai_input_fixes_spaced_digits():
+    text = format_ai_input([{"subject": "3 0 . 1 2 Конкурсная деятельность"}])
+    assert "30.12 Конкурсная деятельность" in text
+
+
+def test_format_ai_input_fixes_mixed_commas():
+    text = format_ai_input([{"subject": "3,12 , 10.12 Дидактические"}])
+    assert "3.12, 10.12 Дидактические" in text
+
+
 def test_format_ai_input_keeps_date_lists():
     text = format_ai_input([
         {"subject": "07.12, 14.12 Физическая культура и спорт"},
     ])
     assert "07.12, 14.12" in text
+
+    text = format_ai_input([
+        {"subject": "с 24.09 - 8.10, 12.11 Технологии образования"},
+    ])
+    assert "с 24.09 - 8.10, 12.11" in text
 
 
 def test_ask_ai_with_retry_uses_structured_output(monkeypatch):

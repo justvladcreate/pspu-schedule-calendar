@@ -18,18 +18,30 @@ from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 logger = logging.getLogger(__name__)
 
 _LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
-# «3,12» без пробела после запятой — это 3.12 (в таблицах запятую иногда
-# ставят вместо точки). Перечисления («07.12, 14.12») не трогаем.
-_COMMA_DATE_RE = re.compile(r"(?<!\d)(\d{1,2}),(\d{1,2})(?!\d)(?=\s)")
+
+# «3 0 . 1 2» — пробелы внутри даты.
+_SPACED_DATE_RE = re.compile(r"\b\d(?:\s*\d){0,1}\s*\.\s*\d(?:\s*\d){0,1}\b")
+# «3,12» / «3, 12» — запятая вместо точки внутри даты.
+_COMMA_DATE_RE = re.compile(r"(?<![\d.])(\d{1,2}),\s*(\d{1,2})(?![\d.])")
+# «3.12 , 10.12» — лишние пробелы вокруг запятой-разделителя.
+_SEPARATOR_COMMA_RE = re.compile(r"\s+,\s*")
 
 
-def _normalize_comma_dates(text: str) -> str:
-    """«3,12 Дидактические…» → «3.12 Дидактические…».
+def _normalize_dates(text: str) -> str:
+    """Приводит даты к «30.12» перед отправкой в модель.
 
-    Модель иначе не видит дату и возвращает занятие без дат — а дальше
-    срабатывает правило «нет дат → растянуть на весь семестр».
+    В таблицах встречаются опечатки: «3 0 . 1 2», «3,12», «3, 12»,
+    а также лишние пробелы у запятой-разделителя «3.12 , 10.12».
+    Перечисления вида «07.12, 14.12» не ломаются: там перед запятой
+    стоит полная дата, а не отдельное число.
     """
-    return _COMMA_DATE_RE.sub(r"\1.\2", str(text or ""))
+    value = str(text or "")
+    value = _SPACED_DATE_RE.sub(
+        lambda m: re.sub(r"\s+", "", m.group(0)), value
+    )
+    value = _COMMA_DATE_RE.sub(r"\1.\2", value)
+    value = _SEPARATOR_COMMA_RE.sub(", ", value)
+    return value
 
 # Structured output: Gemini сам собирает JSON по этой схеме.
 F12_AI_SCHEMA = {
@@ -75,7 +87,7 @@ missing value. Do not output the semicolon-separated lines.
 def format_ai_input(sources: list[dict]) -> str:
     """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
     return "\n\n".join(
-        f"[{i}] {_normalize_comma_dates(s['subject'])}"
+        f"[{i}] {_normalize_dates(s['subject'])}"
         for i, s in enumerate(sources, start=1)
     )
 
