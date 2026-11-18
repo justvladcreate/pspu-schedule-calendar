@@ -18,6 +18,45 @@ from parser.faculties.f12_inec.rooms_hints import split_branch_by_rooms
 logger = logging.getLogger(__name__)
 
 _LINK_RE = re.compile(r'\[([^\]]+)\]\((https?://[^\s)]+)\)')
+# Дата вида «7.12», «3,12» — в таблицах запятую иногда ставят вместо точки.
+_DATE_TOKEN_RE = re.compile(r"\b\d{1,2}\s*[.,]\s*\d{1,2}\b")
+# «3,12» без пробела после запятой — это 3.12 (опечатка), а не список дат.
+_COMMA_DATE_RE = re.compile(r"(?<!\d)(\d{1,2}),(\d{1,2})(?!\d)(?=\s)")
+
+
+def source_has_dates_for(text: str, discipline: str) -> bool:
+    """Указана ли в исходной ячейке дата прямо перед этой дисциплиной.
+
+    Нужно, чтобы не растягивать на весь семестр занятие, у которого
+    в таблице даты явно стоят, но модель их не разобрала
+    (например «3,12 Дидактические концепции профессионального
+    образования (прак.)»).
+    """
+    if not text or not discipline:
+        return False
+
+    haystack = str(text).lower()
+    needle = discipline.strip().lower()
+    if not needle:
+        return False
+
+    total = 0
+    dated = 0
+    start = 0
+    while True:
+        index = haystack.find(needle, start)
+        if index < 0:
+            break
+        total += 1
+        prefix = haystack[max(0, index - 24):index]
+        if _DATE_TOKEN_RE.search(prefix):
+            dated += 1
+        start = index + 1
+
+    # Все упоминания дисциплины в ячейке стоят после дат. Если хотя бы
+    # одно без даты (как в «Физкультура ... 07.12, 14.12 Физкультура»),
+    # это может быть недельная ветка — её растягивать можно.
+    return total > 0 and dated == total
 
 # Structured output: Gemini сам собирает JSON по этой схеме.
 F12_AI_SCHEMA = {
@@ -60,9 +99,21 @@ missing value. Do not output the semicolon-separated lines.
 """
 
 
+def _normalize_comma_dates(text: str) -> str:
+    """«3,12 Дидактические…» → «3.12 Дидактические…».
+
+    В таблицах запятую иногда ставят вместо точки. Перечисление дат
+    («07.12, 14.12») не трогаем: там после запятой стоит пробел.
+    """
+    return _COMMA_DATE_RE.sub(r"\1.\2", str(text or ""))
+
+
 def format_ai_input(sources: list[dict]) -> str:
     """Собирает текст для AI: [1] subj1\\n\\n[2] subj2 ..."""
-    return "\n\n".join(f"[{i}] {s['subject']}" for i, s in enumerate(sources, start=1))
+    return "\n\n".join(
+        f"[{i}] {_normalize_comma_dates(s['subject'])}"
+        for i, s in enumerate(sources, start=1)
+    )
 
 
 def chunk_hash(text: str) -> str:
@@ -422,6 +473,12 @@ def merge_ai_line(
     time_start = normalize_time(time_start) if time_start else ""
     time_end   = normalize_time(time_end) if time_end else ""
 
+    # Модель не разобрала даты, хотя в ячейке они есть — запомним это,
+    # чтобы потом не растянуть занятие на весь семестр.
+    dated_source = False
+    if not dates:
+        dated_source = source_has_dates_for(str(src.get("subject", "")), discipline)
+
     text_colors = src.get("text_colors") or []
 
     # Если в исходной ячейке есть комнаты, привязанные к датам
@@ -457,6 +514,7 @@ def merge_ai_line(
                 "rooms":      rooms,
                 "color":      color or "",
                 "is_past":    is_past,
+                "_dated_source": dated_source,
             }]
 
         groups = split_branch_by_rooms(hints, type_, dates)
@@ -476,6 +534,7 @@ def merge_ai_line(
                 "rooms":      g_rooms,
                 "color":      color or "",
                 "is_past":    is_past_g,
+                "_dated_source": dated_source,
             })
         return res
 
@@ -493,4 +552,5 @@ def merge_ai_line(
         "rooms":      finalize_rooms(rooms_ai, src),
         "color":      color or "",
         "is_past":    is_past,
+        "_dated_source": dated_source,
     }]

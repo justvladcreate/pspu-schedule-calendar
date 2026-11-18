@@ -10,6 +10,7 @@ from parser.faculties.f12_inec.ai_merge import (
     events_to_lines,
     format_ai_input,
     merge_ai_line,
+    source_has_dates_for,
     _get_event_color,
 )
 from parser.runner import events_equal
@@ -154,6 +155,43 @@ def test_events_to_lines_accepts_string_and_float_enumerator():
 def test_events_to_lines_accepts_bare_list():
     payload = [{"enumerator": 5, "discipline": "История"}]
     assert events_to_lines(payload)[0].startswith("[5]")
+
+
+def test_source_has_dates_for_dated_cell():
+    text = (
+        "26.11 Конкурсная деятельность в профессии (прак.) доц. Пфлюг В.П. "
+        "3,12 Дидактические концепции профессионального образования (прак.)"
+    )
+    assert source_has_dates_for(text, "Дидактические концепции профессионального образования")
+    assert source_has_dates_for(text, "Конкурсная деятельность в профессии")
+
+
+def test_source_has_dates_for_weekly_branch():
+    # Первое упоминание без даты — это недельная ветка, её растягивать можно.
+    text = (
+        "Физическая культура и спорт 07.12, 14.12 "
+        "Физическая культура и спорт"
+    )
+    assert not source_has_dates_for(text, "Физическая культура и спорт")
+
+
+def test_source_has_dates_for_missing_discipline():
+    assert not source_has_dates_for("17.09 Лекция", "Нет такой дисциплины")
+
+
+def test_format_ai_input_fixes_comma_date():
+    text = format_ai_input([
+        {"subject": "3,12 Дидактические концепции (прак.) доц. Подорова В.А."},
+    ])
+    assert "3.12 Дидактические" in text
+    assert "3,12" not in text
+
+
+def test_format_ai_input_keeps_date_lists():
+    text = format_ai_input([
+        {"subject": "07.12, 14.12 Физическая культура и спорт"},
+    ])
+    assert "07.12, 14.12" in text
 
 
 def test_ask_ai_with_retry_uses_structured_output(monkeypatch):

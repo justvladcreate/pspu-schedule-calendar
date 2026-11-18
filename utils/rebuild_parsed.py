@@ -62,6 +62,8 @@ async def rebuild(faculty_ids: set[str] | None = None) -> dict[str, int]:
         parsed = await transform_schedule(after_ai, faculty_id=faculty.id)
         parsed["events"] = await apply_overrides(parsed.get("events", []), rules)
         fill_missing_dates(parsed["events"])
+        for event in parsed["events"]:
+            event.pop("_dated_source", None)
 
         parsed_path = paths.latest_file(PARSED_NAME)
         previous = read_json(parsed_path)
