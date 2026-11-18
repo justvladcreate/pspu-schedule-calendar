@@ -1,16 +1,27 @@
-﻿"""Клиент LLM (Google AI Studio / Gemini). Общий для всех факультетов.
+﻿"""Клиент LLM. Общий для всех факультетов.
+
+Провайдер выбирается ``AI_PROVIDER``:
+
+    gemini  — Google AI Studio напрямую (по умолчанию)
+    openai  — любой OpenAI-совместимый шлюз, по умолчанию API ВЕГА
+              (https://api.vega.chat/api/v1), прокси к 800+ моделям,
+              включая google/gemini-*
 
 Настройки берутся из окружения (``private/.env`` подхватывает config.py):
 
-    GEMINI_API_KEY   — ключ Google AI Studio (обязателен)
-    GEMINI_MODEL     — модель или список моделей через запятую
-                       (``gemini-3-flash-preview,gemini-3.8-flash``);
-                       перебираются по порядку, пока какая-нибудь не ответит
-    GEMINI_API_BASE  — базовый URL, по умолчанию generativelanguage.googleapis.com
-    HTTPS_PROXY / ALL_PROXY — прокси для запросов к Google (необязательно)
+    AI_PROVIDER      — gemini | openai
+    AI_MODEL         — модель или список через запятую; перебираются
+                       по порядку, пока какая-нибудь не ответит
+                       (старое имя ``GEMINI_MODEL`` тоже поддерживается)
+    AI_MIN_INTERVAL  — пауза между запросами, секунды (0 — не ждать)
 
-Прокси читаем явно, чтобы одинаково работали HTTP(S) и SOCKS5
-(для SOCKS нужен пакет ``httpx[socks]``).
+    GEMINI_API_KEY   — ключ Google AI Studio
+    GEMINI_API_BASE  — базовый URL, по умолчанию generativelanguage.googleapis.com
+
+    AI_API_KEY       — ключ OpenAI-совместимого шлюза (ВЕГА)
+    AI_API_BASE      — базовый URL, по умолчанию https://api.vega.chat/api/v1
+
+    HTTPS_PROXY / ALL_PROXY — прокси (необязательно).
 """
 from __future__ import annotations
 
@@ -24,13 +35,17 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_PROVIDER = "gemini"
 DEFAULT_MODEL = "gemini-3.1-flash-lite"
 DEFAULT_API_BASE = "https://generativelanguage.googleapis.com"
+DEFAULT_OPENAI_BASE = "https://api.vega.chat/api/v1"
+DEFAULT_OPENAI_MODEL = "google/gemini-2.5-flash"
 DEFAULT_TIMEOUT = 120.0
 MAX_OUTPUT_TOKENS = 32768
 # Бесплатный тариф Gemini — 20 запросов в минуту. 4.5с даёт ~13 RPM
 # и оставляет запас на повторные попытки.
 DEFAULT_MIN_INTERVAL = 4.5
+DEFAULT_OPENAI_MIN_INTERVAL = 1.0
 
 _last_call = 0.0
 
@@ -43,11 +58,24 @@ def _env(*names: str) -> str:
     return ""
 
 
+def _provider() -> str:
+    return (_env("AI_PROVIDER") or DEFAULT_PROVIDER).strip().lower()
+
+
 def _api_key() -> str:
     key = _env("GEMINI_API_KEY", "GOOGLE_AI_STUDIO_API_KEY")
     if not key:
         raise RuntimeError(
             "Не задан GEMINI_API_KEY — добавьте ключ Google AI Studio в private/.env"
+        )
+    return key
+
+
+def _openai_key() -> str:
+    key = _env("AI_API_KEY", "VEGA_API_KEY", "OPENAI_API_KEY")
+    if not key:
+        raise RuntimeError(
+            "Не задан AI_API_KEY — добавьте ключ API ВЕГА в private/.env"
         )
     return key
 
@@ -64,16 +92,22 @@ def _strip_code_fence(text: str) -> str:
 
 
 async def _throttle() -> None:
-    """Держит бесплатную квоту Gemini (20 запросов в минуту).
+    """Держит паузу между запросами (лимиты бесплатных тарифов).
 
-    Интервал задаётся ``GEMINI_MIN_INTERVAL`` (секунды, по умолчанию 4.5).
+    Интервал задаётся ``AI_MIN_INTERVAL`` (секунды) или ``GEMINI_MIN_INTERVAL``.
     ``0`` отключает троттлинг, например если у вас платный тариф.
     """
     global _last_call
+    default = (
+        DEFAULT_OPENAI_MIN_INTERVAL
+        if _provider() == "openai"
+        else DEFAULT_MIN_INTERVAL
+    )
+    raw = _env("AI_MIN_INTERVAL", "GEMINI_MIN_INTERVAL")
     try:
-        interval = float(_env("GEMINI_MIN_INTERVAL") or DEFAULT_MIN_INTERVAL)
+        interval = float(raw) if raw else default
     except ValueError:
-        interval = DEFAULT_MIN_INTERVAL
+        interval = default
     if interval <= 0:
         return
 
@@ -84,12 +118,77 @@ async def _throttle() -> None:
     _last_call = loop.time()
 
 
+def _client_kwargs() -> dict:
+    kwargs: dict = {"timeout": DEFAULT_TIMEOUT}
+    proxy = _proxy_url()
+    if proxy:
+        kwargs["proxy"] = proxy
+    return kwargs
+
+
+async def _generate_openai(
+    prompt: str,
+    model: str,
+    response_schema: dict | None = None,
+) -> str:
+    """Запрос к OpenAI-совместимому шлюзу (API ВЕГА)."""
+    api_base = _env("AI_API_BASE") or DEFAULT_OPENAI_BASE
+    url = f"{api_base.rstrip('/')}/chat/completions"
+
+    payload: dict = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+        "max_tokens": MAX_OUTPUT_TOKENS,
+    }
+    if response_schema:
+        payload["response_format"] = {"type": "json_object"}
+
+    headers = {
+        "Authorization": f"Bearer {_openai_key()}",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(**_client_kwargs()) as client:
+        response = await client.post(url, json=payload, headers=headers)
+
+    if response.status_code >= 400:
+        raise RuntimeError(
+            f"LLM API HTTP {response.status_code}: {response.text[:400]}"
+        )
+
+    data = response.json()
+    choices = data.get("choices") or []
+    if not choices:
+        raise RuntimeError(f"LLM API: пустой ответ: {str(data)[:400]}")
+
+    choice = choices[0]
+    if choice.get("finish_reason") == "length":
+        raise RuntimeError("LLM API: ответ не завершён (length)")
+
+    content = ((choice.get("message") or {}).get("content") or "").strip()
+    if not content:
+        raise RuntimeError(f"LLM API: пустой ответ: {str(data)[:400]}")
+
+    return _strip_code_fence(content)
+
+
 async def _generate(prompt: str, model: str, response_schema: dict | None = None) -> str:
-    """Один запрос к Gemini. Возвращает текст ответа."""
+    """Один запрос к выбранному провайдеру."""
+    await _throttle()
+    if _provider() == "openai":
+        return await _generate_openai(prompt, model, response_schema)
+    return await _generate_gemini(prompt, model, response_schema)
+
+
+async def _generate_gemini(
+    prompt: str,
+    model: str,
+    response_schema: dict | None = None,
+) -> str:
+    """Запрос к Google AI Studio напрямую."""
     api_base = _env("GEMINI_API_BASE") or DEFAULT_API_BASE
     url = f"{api_base.rstrip('/')}/v1beta/models/{model}:generateContent"
-
-    await _throttle()
 
     generation_config: dict = {
         "temperature": 0.1,
@@ -116,10 +215,7 @@ async def _generate(prompt: str, model: str, response_schema: dict | None = None
         "generationConfig": generation_config,
     }
 
-    client_kwargs: dict = {"timeout": DEFAULT_TIMEOUT}
-    proxy = _proxy_url()
-    if proxy:
-        client_kwargs["proxy"] = proxy
+    client_kwargs: dict = _client_kwargs()
 
     headers = {
         "x-goog-api-key": _api_key(),
@@ -188,18 +284,21 @@ async def ask_ai_json(
 
 
 def _model_list(model: str | None) -> list[str]:
-    """Модели по порядку: явная, либо список из GEMINI_MODEL через запятую.
+    """Модели по порядку: явная, либо список из AI_MODEL через запятую.
 
-    Google периодически отвечает 503/429/«location» на конкретную модель,
+    Провайдеры периодически отвечают 503/429 на конкретную модель,
     а соседняя в это время работает, поэтому модели перебираются
     по очереди, пока какая-нибудь не ответит.
     """
     if model:
         return [model.strip()]
 
-    raw = _env("GEMINI_MODEL") or DEFAULT_MODEL
+    fallback = (
+        DEFAULT_OPENAI_MODEL if _provider() == "openai" else DEFAULT_MODEL
+    )
+    raw = _env("AI_MODEL", "GEMINI_MODEL") or fallback
     models = [part.strip() for part in raw.split(",") if part.strip()]
-    return models or [DEFAULT_MODEL]
+    return models or [fallback]
 
 
 async def _generate_any(

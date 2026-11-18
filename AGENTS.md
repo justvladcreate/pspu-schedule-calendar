@@ -196,9 +196,15 @@ LLM вызывается только для строк с низкой увер
 ## Окружение и секреты
 
 - `.env` и Google-креды — в `private/` (игнорируется Git).
-- LLM — Google AI Studio (Gemini): `GEMINI_API_KEY`, `GEMINI_MODEL` в
-  `private/.env`. При необходимости запросы идут через прокси:
-  `HTTPS_PROXY` (HTTP) или `ALL_PROXY` (SOCKS5).
+- LLM: провайдер выбирается `AI_PROVIDER` — `gemini` (Google AI
+  Studio напрямую) или `openai` (OpenAI-совместимый шлюз, по умолчанию
+  API ВЕГА: `AI_API_BASE=https://api.vega.chat/api/v1`, ключ
+  `AI_API_KEY`, модели вида `google/gemini-*`). Модель/список моделей —
+  `AI_MODEL` (старое `GEMINI_MODEL` поддерживается); пауза между
+  запросами — `AI_MIN_INTERVAL`.
+- Gemini: `GEMINI_API_KEY`, `GEMINI_API_BASE`, `GEMINI_THINKING_BUDGET`
+  (0 отключает «размышления»); прокси — `HTTPS_PROXY` или `ALL_PROXY`
+  (у ВЕГИ прокси не нужен, но он не мешает).
 - `data/` — рабочие файлы парсера (не коммитить).
 - `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
   данные, они в Git.
