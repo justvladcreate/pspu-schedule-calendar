@@ -196,15 +196,9 @@ LLM вызывается только для строк с низкой увер
 ## Окружение и секреты
 
 - `.env` и Google-креды — в `private/` (игнорируется Git).
-- LLM: провайдер выбирается `AI_PROVIDER` — `gemini` (по умолчанию)
-  или `groq`; модель/список моделей — `AI_MODEL` (старое `GEMINI_MODEL`
-  поддерживается).
-  - Gemini: `GEMINI_API_KEY`, `GEMINI_MODEL`, `GEMINI_API_BASE`,
-    `GEMINI_THINKING_BUDGET`; прокси — `HTTPS_PROXY` или `ALL_PROXY`.
-  - Groq: `GROQ_API_KEY`, `GROQ_API_BASE`
-    (по умолчанию `https://api.groq.com/openai/v1`).
-  - `AI_MIN_INTERVAL` — пауза между запросами (бесплатные тарифы:
-    20 RPM у Gemini, лимиты Groq мягче).
+- LLM — Google AI Studio (Gemini): `GEMINI_API_KEY`, `GEMINI_MODEL` в
+  `private/.env`. При необходимости запросы идут через прокси:
+  `HTTPS_PROXY` (HTTP) или `ALL_PROXY` (SOCKS5).
 - `GEMINI_API_BASE` — базовый URL API. Если Google отвечает «User
   location is not supported» (частая проблема VPS-хостингов), укажите
   воркер-прокси `cloudflare/gemini-worker.js`:
