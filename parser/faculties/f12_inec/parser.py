@@ -103,11 +103,16 @@ class InecParser(FacultyParser):
     async def refine(self, groups: dict, period: AcademicPeriod) -> dict:
         cache_path = self.paths.latest_file(CHUNKS_NAME)
         old_cache = read_json(cache_path).get("entries", {}) or {}
+        # Прошлая версия after_ai: из неё берём группы, для которых LLM
+        # не ответила, чтобы сбой сети/прокси не стирал расписание группы.
+        previous: dict = read_json(self.paths.latest_file(AFTER_AI_NAME)) or {}
 
         new_cache: dict[str, list[str]] = {}
         cache_hits = 0
         ai_calls = 0
         after_ai: dict = {}
+        failed: list[str] = []
+        restored: list[str] = []
 
         for group, group_data in groups.items():
             sources: list[dict] = group_data.get("events", [])
@@ -134,6 +139,7 @@ class InecParser(FacultyParser):
                     await asyncio.sleep(0.5)
                 except Exception as e:  # noqa: BLE001
                     logger.error("AI ошибка (группа %s): %s", group, e)
+                    failed.append(group)
                     continue
 
             new_cache[key] = lines
@@ -179,6 +185,28 @@ class InecParser(FacultyParser):
         logger.info(
             "AI-статистика: %d вызовов, %d попаданий в кэш", ai_calls, cache_hits
         )
+
+        for group in failed:
+            fallback = previous.get(group) or {}
+            events = fallback.get("events") or []
+            if events:
+                after_ai[group] = {
+                    "events": events,
+                    "semester_start_year": fallback.get("semester_start_year"),
+                }
+                restored.append(group)
+            else:
+                logger.error(
+                    "Группа %s останется без расписания: нет ответа LLM "
+                    "и нет прошлой версии",
+                    group,
+                )
+        if failed:
+            logger.warning(
+                "AI недоступна для групп: %s; восстановлено из прошлой версии: %s",
+                ", ".join(failed),
+                ", ".join(restored) or "нет",
+            )
 
         write_json(cache_path, {"entries": new_cache})
 
