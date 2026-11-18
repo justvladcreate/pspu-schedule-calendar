@@ -71,6 +71,23 @@ def test_refine_restores_group_from_old_version(tmp_path, monkeypatch):
     assert result["1237"]["events"] == previous["1237"]["events"]
 
 
+def test_inherit_discipline_from_previous_line():
+    lines = [
+        "[1];СР;13:30;-;16.09.2026 - 23.09.2026;Конкурсная деятельность в профессии;лек.прак.;-;Пфлюг В.П.;IV к. A202",
+        "[1];СР;13:30;-;30.09.2026 - 21.10.2026;-;прак.;-;Пфлюг В.П.;IV к. A202",
+    ]
+    result = inec_parser._inherit_discipline(lines)
+    assert result[1].split(";")[5] == "Конкурсная деятельность в профессии"
+    # первая строка не меняется
+    assert result[0].split(";")[5] == "Конкурсная деятельность в профессии"
+
+
+def test_inherit_discipline_keeps_empty_when_no_previous():
+    lines = ["[1];СР;13:30;-;30.09.2026;-;прак.;-;Пфлюг В.П.;IV к. A202"]
+    result = inec_parser._inherit_discipline(lines)
+    assert result[0].split(";")[5] == "-"
+
+
 def test_refine_keeps_other_groups_when_one_fails(tmp_path, monkeypatch):
     paths = _paths(tmp_path)
 

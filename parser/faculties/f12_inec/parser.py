@@ -45,6 +45,32 @@ from parser.sources.base import SheetData
 logger = logging.getLogger(__name__)
 
 
+def _inherit_discipline(lines: list[str]) -> list[str]:
+    """Пустая дисциплина = «то же, что строкой выше» для этой ячейки.
+
+    В таблице встречается продолжение строки без названия:
+    «с 16.09-23.09 Конкурсная деятельность (лек.прак.), с 30.09-21.10 - прак.»
+    Модель отдаёт вторую часть с пустым названием — подставляем прежнее.
+    """
+    last: dict[str, str] = {}
+    result: list[str] = []
+
+    for line in lines:
+        parts = line.split(";")
+        if len(parts) >= 6:
+            key = parts[0].strip()
+            value = parts[5].strip()
+            if value in ("", "-"):
+                inherited = last.get(key)
+                if inherited:
+                    parts[5] = inherited
+            else:
+                last[key] = value
+        result.append(";".join(parts))
+
+    return result
+
+
 class InecParser(FacultyParser):
     id = "12"
     uses_llm = True
@@ -144,6 +170,8 @@ class InecParser(FacultyParser):
                     continue
 
             new_cache[key] = lines
+
+            lines = _inherit_discipline(lines)
 
             merged: list[dict] = []
             enum_counts = Counter()
