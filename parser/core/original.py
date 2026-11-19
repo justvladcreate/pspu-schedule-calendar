@@ -22,7 +22,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-from parser.core.colors import apply_tint
+from parser.core.colors import apply_tint, ensure_readable
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +106,7 @@ def _norm_color(color) -> str | None:
 
 def _cell_style(cell) -> str:
     parts: list[str] = []
+    text_color: str | None = None
 
     font = cell.font
     if font is not None:
@@ -120,9 +121,7 @@ def _cell_style(cell) -> str:
             parts.append("font-style:italic")
         if font.u:
             parts.append("text-decoration:underline")
-        color = _norm_color(font.color)
-        if color:
-            parts.append(f"color:{color}")
+        text_color = _norm_color(font.color)
 
     alignment = cell.alignment
     horizontal = getattr(alignment, "horizontal", None)
@@ -133,10 +132,14 @@ def _cell_style(cell) -> str:
         parts.append(f"vertical-align:{vertical}")
 
     fill = cell.fill
+    background: str | None = None
     if fill is not None and getattr(fill, "patternType", None) == "solid":
         background = _norm_color(fill.fgColor)
         if background and background.upper() != "#FFFFFF":
             parts.append(f"background:{background}")
+
+    if text_color:
+        parts.append(f"color:{ensure_readable(text_color, background)}")
 
     border = cell.border
     if border is not None:

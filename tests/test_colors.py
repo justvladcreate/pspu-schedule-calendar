@@ -1,5 +1,5 @@
 """Цвета: tint, серый и сопоставление фрагмента с занятием."""
-from parser.core.colors import apply_tint, is_grey, match_color
+from parser.core.colors import apply_tint, ensure_readable, is_grey, match_color
 
 
 def test_tint_turns_black_grey():
@@ -44,3 +44,19 @@ def test_match_color_ignores_other_lines():
 def test_match_color_without_chunks():
     assert match_color([], ["01.09.2026"], "Геометрия") is None
     assert match_color(None, ["01.09.2026"], "Геометрия") is None
+
+
+def test_contrast_keeps_readable_pair():
+    assert ensure_readable("#000000", "#ffffff") == "#000000"
+
+
+def test_white_text_on_light_background_becomes_black():
+    assert ensure_readable("#ffffff", "#dae3f3") == "#000000"
+
+
+def test_dark_text_on_dark_background_becomes_white():
+    assert ensure_readable("#222222", "#1f1f1f") == "#ffffff"
+
+
+def test_no_background_keeps_color():
+    assert ensure_readable("#ffffff", None) == "#ffffff"
