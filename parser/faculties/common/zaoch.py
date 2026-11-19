@@ -153,6 +153,27 @@ def parse_zaoch_sheet(sheet: SheetData, year: int | None = None, bounds=None) ->
         return {group: {"events": [], "kind": "zo"}}
 
     year = year or datetime.now().year
+
+    # Если в листе вообще нет дат текущего учебного года, значит
+    # составители забыли поменять год в шапке — фильтр отключаем,
+    # иначе потеряем всю сессию.
+    if bounds:
+        has_current = False
+        for row in rows[header_index + 1:]:
+            for cell in row:
+                parsed_date = _parse_date(cell, year)
+                if parsed_date and bounds[0] <= parsed_date[2] <= bounds[1]:
+                    has_current = True
+                    break
+            if has_current:
+                break
+        if not has_current:
+            logger.warning(
+                "Заочка %s: дат текущего учебного года нет, фильтр по году отключён",
+                group,
+            )
+            bounds = None
+
     events: list[dict] = []
     current: tuple[str, str] | None = None
 

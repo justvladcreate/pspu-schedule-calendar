@@ -125,8 +125,14 @@ class InecParser(FacultyParser):
         sheets: list[SheetData],
         period: AcademicPeriod,
     ) -> dict:
-        oo_sheets = [sheet for sheet in sheets if sheet.kind in ("", "oo")]
-        zo_sheets = [sheet for sheet in sheets if sheet.kind == "zo"]
+        oo_sheets = [
+            sheet for sheet in sheets
+            if sheet.kind in ("", "oo") and not sheet.hidden
+        ]
+        zo_sheets = [
+            sheet for sheet in sheets
+            if sheet.kind == "zo" and not sheet.hidden
+        ]
 
         groups: dict = {}
         if oo_sheets:

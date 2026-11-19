@@ -80,6 +80,9 @@ async def load_sources(faculty: Faculty, cache_dir: Path) -> list[SheetData]:
     for source in sources:
         sheets = await _load_source(faculty, source, cache_dir)
         for sheet in sheets:
+            if sheet.hidden:
+                logger.info("Лист %r скрыт, пропускаю", sheet.name)
+                continue
             if sheet.name in used:
                 sheet.name = f"{sheet.kind}:{sheet.name}"
             used.add(sheet.name)
