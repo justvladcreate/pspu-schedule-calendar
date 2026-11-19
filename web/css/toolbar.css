@@ -529,11 +529,11 @@
     align-items: center;
     gap: 10px;
     padding: 8px 16px 8px 14px;
-    background: var(--danger-bg);
+    background: var(--warning-bg);
     border: none;
-    border-left: 4px solid var(--danger);
+    border-left: 4px solid var(--warning);
     border-radius: 0;
-    color: var(--danger-text);
+    color: var(--warning-text);
     font: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -545,11 +545,11 @@
     transition: background 0.15s, padding-left 0.15s;
 }
 .warning-banner:hover {
-    background: color-mix(in srgb, var(--danger-bg) 70%, var(--danger) 30%);
+    background: color-mix(in srgb, var(--warning-bg) 70%, var(--warning) 30%);
     padding-left: 18px;
 }
 .warning-banner:focus-visible {
-    outline: 2px solid var(--danger);
+    outline: 2px solid var(--warning);
     outline-offset: -2px;
 }
 

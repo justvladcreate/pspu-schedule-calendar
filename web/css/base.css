@@ -23,6 +23,9 @@
     --danger: #e57373;
     --danger-bg: rgba(229, 115, 115, 0.12);
     --danger-text: #ef8c8c;
+    --warning: #e0b341;
+    --warning-bg: rgba(224, 179, 65, 0.14);
+    --warning-text: #e6c26a;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -45,6 +48,9 @@
     --danger: #e53935;
     --danger-bg: rgba(229, 57, 53, 0.10);
     --danger-text: #c62828;
+    --warning: #d9a520;
+    --warning-bg: rgba(217, 165, 32, 0.14);
+    --warning-text: #8a6200;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 

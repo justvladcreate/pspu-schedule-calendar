@@ -22,6 +22,8 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
+from parser.core.colors import apply_tint
+
 logger = logging.getLogger(__name__)
 
 SHEETS_INDEX = "sheets.json"
@@ -75,22 +77,31 @@ _BORDER_STYLES = {
 
 # ------------------------------------------------------------------ helpers
 def _norm_color(color) -> str | None:
-    """openpyxl Color → '#RRGGBB' (или None)."""
+    """openpyxl Color → '#RRGGBB' (или None), с учётом tint."""
     if color is None:
         return None
+
+    hex_color = None
     if getattr(color, "type", None) == "rgb" and isinstance(color.rgb, str):
         rgb = color.rgb
         if len(rgb) == 8:  # AARRGGBB
             rgb = rgb[2:]
-        if len(rgb) == 6 and rgb.upper() != "000000":
-            return f"#{rgb.upper()}"
         if len(rgb) == 6:
-            return f"#{rgb.upper()}"
-    if getattr(color, "type", None) == "indexed" and isinstance(color.indexed, int):
-        return _INDEXED.get(color.indexed)
-    if getattr(color, "type", None) == "theme" and isinstance(color.theme, int):
-        return _THEME.get(color.theme)
-    return None
+            hex_color = f"#{rgb.upper()}"
+    elif getattr(color, "type", None) == "indexed" and isinstance(color.indexed, int):
+        hex_color = _INDEXED.get(color.indexed)
+    elif getattr(color, "type", None) == "theme" and isinstance(color.theme, int):
+        hex_color = _THEME.get(color.theme)
+
+    if not hex_color:
+        return None
+
+    # «Серый текст» Excel часто хранит как чёрный с осветлением (tint).
+    tint = getattr(color, "tint", 0) or 0
+    if tint:
+        hex_color = apply_tint(hex_color, tint)
+
+    return hex_color
 
 
 def _cell_style(cell) -> str:

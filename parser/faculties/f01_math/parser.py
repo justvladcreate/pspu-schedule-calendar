@@ -24,6 +24,7 @@ import re
 from dataclasses import asdict
 from datetime import date, datetime, timedelta
 
+from parser.core.colors import is_grey, match_color
 from parser.core.dates import expand_date_text
 from parser.core.model import AcademicPeriod, Faculty, RawBranch
 from parser.core.text import normalize_time
@@ -535,6 +536,12 @@ class MathParser(FacultyParser):
                 if room_note:
                     notes.append(room_note)
 
+                cell_color = match_color(
+                    sheet.colors.get((row_index, 4)),
+                    item["dates"],
+                    item["discipline"],
+                )
+
                 branch = RawBranch(
                     group=group,
                     weekday=day,
@@ -547,6 +554,8 @@ class MathParser(FacultyParser):
                     teachers=item["teachers"],
                     rooms=rooms_text,
                     comment="; ".join(notes),
+                    color=cell_color or "",
+                    is_past=is_grey(cell_color) if cell_color else False,
                     source_text=item["raw"],
                     room_source=value(5),
                     source_ref={"sheet": sheet.name, "row": row_index + 1},

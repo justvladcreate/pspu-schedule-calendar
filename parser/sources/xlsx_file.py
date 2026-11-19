@@ -9,6 +9,7 @@ from xml.etree import ElementTree as ET
 import pandas as pd
 from openpyxl import load_workbook
 
+from parser.core.colors import apply_tint
 from parser.sources.base import ScheduleSource, SheetData
 
 logger = logging.getLogger(__name__)
@@ -76,7 +77,141 @@ def _extract_color_hex(hex_str: str | None) -> str | None:
         return None
     return f"#{hex_str}"
 
-def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, dict[tuple[int, int], list[str]]]:
+
+# Индексы Excel (64/65 — системные фон/текст).
+_INDEXED = {
+    0: "#000000", 1: "#FFFFFF", 2: "#FF0000", 3: "#00FF00", 4: "#0000FF",
+    5: "#FFFF00", 6: "#FF00FF", 7: "#00FFFF", 8: "#000000", 9: "#FFFFFF",
+    10: "#FF0000", 11: "#00FF00", 12: "#0000FF", 13: "#FFFF00",
+    14: "#FF00FF", 15: "#00FFFF", 16: "#800000", 17: "#008000",
+    18: "#000080", 19: "#808000", 20: "#800080", 21: "#008080",
+    22: "#C0C0C0", 23: "#808080", 24: "#9999FF", 25: "#993366",
+    26: "#FFFFCC", 27: "#CCFFFF", 28: "#660066", 29: "#FF8080",
+    30: "#0066CC", 31: "#CCCCFF", 32: "#000080", 33: "#FF00FF",
+    34: "#FFFF00", 35: "#00FFFF", 36: "#800080", 37: "#800000",
+    38: "#008080", 39: "#0000FF", 40: "#00CCFF", 41: "#CCFFFF",
+    42: "#CCFFCC", 43: "#FFFF99", 44: "#99CCFF", 45: "#FF99CC",
+    46: "#CC99FF", 47: "#FFCC99", 48: "#3366FF", 49: "#33CCCC",
+    50: "#99CC00", 51: "#FFCC00", 52: "#FF9900", 53: "#FF6600",
+    54: "#666699", 55: "#969696", 56: "#003366", 57: "#339966",
+    58: "#003300", 59: "#333300", 60: "#993300", 61: "#993366",
+    62: "#333399", 63: "#333333",
+    64: "#000000", 65: "#FFFFFF",
+}
+
+# Стандартная тема Office, если из файла не удалось прочитать свою.
+_DEFAULT_THEME = [
+    "#FFFFFF", "#000000", "#E7E6E6", "#44546A", "#4472C4", "#ED7D31",
+    "#A5A5A5", "#FFC000", "#5B9BD5", "#70AD47", "#0563C1", "#954F72",
+]
+
+
+def _theme_palette(workbook) -> list[str]:
+    """Цвета темы в порядке индексов Excel: lt1, dk1, lt2, dk2, accent1…
+
+    В XML порядок другой (dk1, lt1, …), поэтому переставляем: иначе
+    «белый с затемнением» (серый текст) читается как чёрный.
+    """
+    try:
+        xml = workbook.loaded_theme
+        if isinstance(xml, str):
+            xml = xml.encode("utf-8")
+        if not xml:
+            return _DEFAULT_THEME
+        root = ET.fromstring(xml)
+    except Exception:  # noqa: BLE001
+        return _DEFAULT_THEME
+
+    ns = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
+    scheme = root.find(".//a:clrScheme", ns)
+    if scheme is None:
+        return _DEFAULT_THEME
+
+    def read_color(tag: str) -> str | None:
+        node = scheme.find(f"a:{tag}", ns)
+        if node is None:
+            return None
+        srgb = node.find("a:srgbClr", ns)
+        if srgb is not None:
+            value = srgb.get("val")
+        else:
+            sys_color = node.find("a:sysClr", ns)
+            value = sys_color.get("lastClr") if sys_color is not None else None
+        if value and len(value) == 6:
+            return f"#{value.upper()}"
+        return None
+
+    order = ["lt1", "dk1", "lt2", "dk2", "accent1", "accent2", "accent3",
+             "accent4", "accent5", "accent6", "hlink", "folHlink"]
+    colors = [read_color(tag) for tag in order]
+    if any(color is None for color in colors):
+        return _DEFAULT_THEME
+    return colors
+
+
+def _font_color_hex(color, palette: list[str]) -> str | None:
+    """openpyxl color → hex (rgb / theme / indexed) с учётом tint."""
+    if color is None:
+        return None
+    hex_color = None
+    try:
+        if color.type == "rgb":
+            hex_color = _extract_color_hex(color.rgb)
+        elif color.type == "theme" and color.theme is not None and color.theme < len(palette):
+            hex_color = _extract_color_hex(palette[color.theme].lstrip("#"))
+        elif color.type == "indexed" and color.indexed is not None:
+            if color.indexed in (64, 9):
+                return None
+            hex_color = _extract_color_hex(_INDEXED.get(color.indexed, "").lstrip("#"))
+    except Exception:  # noqa: BLE001
+        return None
+
+    if hex_color:
+        hex_color = apply_tint(hex_color, getattr(color, "tint", 0) or 0)
+        if hex_color.lower() == "#000000":
+            return None
+    return hex_color
+
+
+def _cell_color_chunks(cell, palette: list[str]) -> list[dict]:
+    """Цветные фрагменты ячейки: rich text по кускам или один цвет ячейки."""
+    value = cell.value
+    if value is None or value == "":
+        return []
+
+    chunks: list[dict] = []
+
+    # openpyxl отдаёт CellRichText, если книга открыта с rich_text=True.
+    parts = list(value) if hasattr(value, "__iter__") and not isinstance(value, str) else None
+    if parts:
+        for part in parts:
+            text = part if isinstance(part, str) else getattr(part, "text", "")
+            if not text:
+                continue
+            color = _font_color_hex(
+                getattr(getattr(part, "font", None), "color", None),
+                palette,
+            )
+            if not color:
+                continue
+            if chunks and chunks[-1]["color"] == color:
+                chunks[-1]["text"] += text
+            else:
+                chunks.append({"text": text, "color": color})
+        if chunks:
+            return chunks
+
+    color = _font_color_hex(getattr(cell.font, "color", None), palette)
+    if color:
+        return [{"text": str(value), "color": color}]
+    return []
+
+def _read_sheet_df(
+    excel_file: pd.ExcelFile,
+    worksheet,
+    theme_palette: list[str] | None = None,
+) -> tuple[pd.DataFrame, dict[tuple[int, int], list[dict]]]:
+    theme_palette = theme_palette or _DEFAULT_THEME
     df = excel_file.parse(worksheet.title, header=None)
     df = df.astype(object)
 
@@ -97,28 +232,9 @@ def _read_sheet_df(excel_file: pd.ExcelFile, worksheet) -> tuple[pd.DataFrame, d
     colors = {}
     for row in worksheet.iter_rows():
         for cell in row:
-            color = cell.font.color
-            if color and cell.value:
-                hex_color = None
-
-                if color.type == 'rgb':
-                    hex_color = _extract_color_hex(color.rgb)
-                elif color.type == 'theme':
-                    # Игнорируем стандартный черный (Theme 1) и белый (Theme 0) без оттенков
-                    if not (color.theme == 1 and color.tint == 0) and not (color.theme == 0 and color.tint == 0):
-                        # Если это цвет темы, но не черный/белый — принудительно ставим серый.
-                        # В большинстве таблиц так помечают прошедшие пары.
-                        hex_color = "#808080"
-                elif color.type == 'indexed':
-                    # Игнорируем 64 (стандартный черный)
-                    if color.indexed not in (64, 9):
-                        hex_color = "#808080"
-
-                if hex_color:
-                    colors[(cell.row - 1, cell.column - 1)] = [{
-                        "text": str(cell.value),
-                        "color": hex_color
-                    }]
+            chunks = _cell_color_chunks(cell, theme_palette)
+            if chunks:
+                colors[(cell.row - 1, cell.column - 1)] = chunks
 
     return df, colors
 
@@ -198,8 +314,9 @@ class XlsxFileSource(ScheduleSource):
         if not self.path.exists():
             raise FileNotFoundError(f"Нет файла: {self.path}")
 
-        wb = load_workbook(self.path, data_only=True)
+        wb = load_workbook(self.path, data_only=True, rich_text=True)
         excel_file = pd.ExcelFile(self.path)
+        palette = _theme_palette(wb)
 
         try:
             hidden = {
@@ -210,7 +327,7 @@ class XlsxFileSource(ScheduleSource):
             result: list[SheetData] = []
             with zipfile.ZipFile(self.path) as zf:
                 for name in wb.sheetnames:
-                    df, colors = _read_sheet_df(excel_file, wb[name])
+                    df, colors = _read_sheet_df(excel_file, wb[name], palette)
                     links = _load_hyperlinks(zf, sheet_paths.get(name))
                     result.append(SheetData(
                         name=name,
