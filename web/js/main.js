@@ -516,6 +516,7 @@ function setupAllUI() {
 
     setupPopoverViewHandler((ev) => {
         hideEventDetails();
+        if (changesModalApi) changesModalApi.close();
         if (originalApi) originalApi.focusOn(ev);
     });
 

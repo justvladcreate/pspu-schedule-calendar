@@ -157,6 +157,7 @@ export function setupOriginalModal() {
     const wrapEl   = document.getElementById('originalSheetWrap');
     const offline  = document.getElementById('originalOffline');
     const external = document.getElementById('originalExternal');
+    const sourceLink = document.getElementById('originalSourceLink');
     const tabsBox  = document.getElementById('originalSheetTabs');
     const zoomBox  = document.getElementById('originalZoomControls');
 
@@ -198,6 +199,15 @@ export function setupOriginalModal() {
         if (!original) return false;
         if (original.type === 'google_sheets' && original.spreadsheet_id) return true;
         return !!original.sheets;
+    }
+
+    /** Прямая ссылка на исходную таблицу факультета. */
+    function sourceUrlFor(original) {
+        if (!original) return '';
+        if (original.type === 'google_sheets' && original.spreadsheet_id) {
+            return `https://docs.google.com/spreadsheets/d/${original.spreadsheet_id}/edit?usp=sharing`;
+        }
+        return original.url || original.file || '';
     }
 
     function availableFaculties() {
@@ -377,6 +387,19 @@ export function setupOriginalModal() {
                 'href',
                 (original && (original.url || original.file)) || externalUrl
             );
+        }
+
+        if (sourceLink) {
+            const url = sourceUrlFor(original);
+            if (url) {
+                sourceLink.href = url;
+                sourceLink.textContent = original && original.type === 'google_sheets'
+                    ? 'Google Таблицы'
+                    : 'Открыть оригинал';
+                sourceLink.hidden = false;
+            } else {
+                sourceLink.hidden = true;
+            }
         }
 
         renderFacultyBar();
