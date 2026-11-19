@@ -77,6 +77,25 @@ def ensure_readable(color: str, background: str | None) -> str:
     return "#000000" if _luminance(background) > 0.5 else "#ffffff"
 
 
+def readable_grey(hex_color: str) -> str:
+    """Светло-серый текст на белом почти не виден — делаем его темнее.
+
+    В таблицах «прошедшие» занятия часто помечены как «белый, темнее
+    25 %» (#bfbfbf) — формально верно, но читается почти как белый.
+    """
+    if not is_grey(hex_color):
+        return hex_color
+    try:
+        r = int(hex_color[1:3], 16)
+        g = int(hex_color[3:5], 16)
+        b = int(hex_color[5:7], 16)
+    except ValueError:
+        return hex_color
+    if min(r, g, b) >= 160:
+        return "#808080"
+    return hex_color
+
+
 def is_grey(hex_color: str) -> bool:
     """Серый оттенок: R, G и B близки друг к другу."""
     if not hex_color or not hex_color.startswith("#") or len(hex_color) != 7:

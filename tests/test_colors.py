@@ -1,5 +1,5 @@
 """Цвета: tint, серый и сопоставление фрагмента с занятием."""
-from parser.core.colors import apply_tint, ensure_readable, is_grey, match_color
+from parser.core.colors import apply_tint, ensure_readable, is_grey, match_color, readable_grey
 
 
 def test_tint_turns_black_grey():
@@ -60,3 +60,14 @@ def test_dark_text_on_dark_background_becomes_white():
 
 def test_no_background_keeps_color():
     assert ensure_readable("#ffffff", None) == "#ffffff"
+
+
+def test_light_grey_becomes_readable():
+    assert readable_grey("#bfbfbf") == "#808080"
+    assert readable_grey("#d9d9d9") == "#808080"
+
+
+def test_darker_grey_and_colours_are_kept():
+    assert readable_grey("#808080") == "#808080"
+    assert readable_grey("#ff0000") == "#ff0000"
+    assert readable_grey("#000000") == "#000000"

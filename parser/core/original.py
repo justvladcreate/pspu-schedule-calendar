@@ -22,7 +22,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-from parser.core.colors import apply_tint, ensure_readable
+from parser.core.colors import apply_tint, ensure_readable, readable_grey
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ SHEETS_INDEX = "sheets.json"
 SHEETS_DIR = "sheets"
 
 # Меняется при правках рендера: старый кэш листов тогда игнорируется.
-RENDER_VERSION = 2
+RENDER_VERSION = 3
 
 # Индексы цветов Excel (64/65 — системные фон/текст)
 _INDEXED = {
@@ -142,7 +142,8 @@ def _cell_style(cell) -> str:
             parts.append(f"background:{background}")
 
     if text_color:
-        parts.append(f"color:{ensure_readable(text_color, background)}")
+        color = ensure_readable(text_color, background)
+        parts.append(f"color:{readable_grey(color)}")
 
     border = cell.border
     if border is not None:
