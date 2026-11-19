@@ -68,4 +68,3 @@ for item in index.get("faculties", []):
 
 print("site:", site)
 print("total events:", len(data["events"]))
-Path("preview_path.txt").write_text(str(site), encoding="utf-8")
