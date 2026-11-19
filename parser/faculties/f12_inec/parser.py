@@ -135,8 +135,12 @@ class InecParser(FacultyParser):
         if zo_sheets:
             from parser.faculties.common.zaoch import parse_zaoch_sheet
 
+            bounds = period.academic_bounds()
+            year = period.semester_start.year if period.semester_start else None
             for sheet in zo_sheets:
-                groups.update(parse_zaoch_sheet(sheet))
+                groups.update(
+                    parse_zaoch_sheet(sheet, year=year, bounds=bounds)
+                )
 
         extracted_path = self.paths.latest_file(EXTRACTED_NAME)
         rotate(extracted_path)

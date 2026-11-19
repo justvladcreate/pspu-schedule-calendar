@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import date, datetime
 
 from parser.core.colors import is_grey, match_color
 from parser.sources.base import SheetData
@@ -58,8 +58,8 @@ def _norm_time(value: str) -> str:
     return ""
 
 
-def _parse_date(value: str, year: int) -> tuple[str, str] | None:
-    """«понедельник 14.09.2026» → ('ЧТ', '14.09.2026')."""
+def _parse_date(value: str, year: int) -> tuple[str, str, "date"] | None:
+    """«понедельник 14.09.2026» → ('ЧТ', '14.09.2026', date)."""
     match = _DATE_RE.search(value or "")
     if not match:
         return None
@@ -74,10 +74,10 @@ def _parse_date(value: str, year: int) -> tuple[str, str] | None:
         if month <= 8:
             resolved += 1
     try:
-        date = datetime(resolved, month, day)
+        date = datetime(resolved, month, day).date()
     except ValueError:
         return None
-    return WEEKDAYS[date.weekday()], date.strftime("%d.%m.%Y")
+    return WEEKDAYS[date.weekday()], date.strftime("%d.%m.%Y"), date
 
 
 def _looks_like_room(value: str) -> bool:
@@ -127,7 +127,7 @@ def _header_columns(row: list[str]) -> dict[str, int] | None:
     return columns
 
 
-def parse_zaoch_sheet(sheet: SheetData, year: int | None = None) -> dict:
+def parse_zaoch_sheet(sheet: SheetData, year: int | None = None, bounds=None) -> dict:
     """Возвращает {группа: {"events": [...], "kind": "zo"}}."""
     group = sheet.name.strip()
     if not looks_like_group(group):
@@ -164,13 +164,18 @@ def parse_zaoch_sheet(sheet: SheetData, year: int | None = None) -> dict:
         date_col = columns.get("date")
         date_value = row[date_col] if date_col is not None and date_col < len(row) else ""
         parsed = _parse_date(date_value, year)
+        if parsed is None and date_value:
+            parsed = None
         if parsed is None:
             # дата может лежать в любой другой ячейке строки
             for value in row:
                 parsed = _parse_date(value, year)
                 if parsed:
                     break
-        if parsed:
+        if parsed is not None:
+            if bounds and not (bounds[0] <= parsed[2] <= bounds[1]):
+                current = None
+                continue
             current = parsed
         if current is None:
             continue
@@ -226,7 +231,7 @@ def parse_zaoch_sheet(sheet: SheetData, year: int | None = None) -> dict:
         color = match_color(
             sheet.colors.get((row_index, disc_col)), [], discipline
         )
-        weekday, iso = current
+        weekday, iso, _ = current
         events.append({
             "weekday": weekday,
             "time_start": time_start,
