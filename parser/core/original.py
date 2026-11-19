@@ -334,11 +334,25 @@ def publish_original(
     sheets_dir.mkdir(parents=True, exist_ok=True)
 
     index_path = folder / SHEETS_INDEX
-    if index_path.exists() and index_path.stat().st_mtime >= xlsx_path.stat().st_mtime:
+    cached: dict | None = None
+    if index_path.exists():
         try:
             cached = json.loads(index_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             cached = None
+
+    # Защита от устаревшего процесса: если на диске листы новее этой
+    # версии рендера, значит код в памяти старше — не перезаписываем.
+    disk_version = (cached or {}).get("version") or 0
+    if disk_version > RENDER_VERSION:
+        logger.warning(
+            "Оригинал %s: на диске листы версии %s, а код — %s; "
+            "не перезаписываю (перезапустите процесс)",
+            faculty_id, disk_version, RENDER_VERSION,
+        )
+        return (cached or {}).get("sheets")
+
+    if index_path.exists() and index_path.stat().st_mtime >= xlsx_path.stat().st_mtime:
         if cached and cached.get("sheets") and cached.get("version") == RENDER_VERSION:
             return cached["sheets"]
 
