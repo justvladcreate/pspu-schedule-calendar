@@ -92,7 +92,10 @@ class InecParser(FacultyParser):
         return GoogleSheetsSource(SPREADSHEET_ID, sheets_service)
 
     async def load(self) -> list[SheetData]:
-        if len(self.faculty.sources) > 1:
+        if len(self.faculty.sources) > 1 or any(
+            source.type == "cloud_mail_folder"
+            for source in self.faculty.sources
+        ):
             from parser.sources.loader import load_sources
 
             return await load_sources(self.faculty, self.paths.latest)

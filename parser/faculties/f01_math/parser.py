@@ -424,6 +424,42 @@ class MathParser(FacultyParser):
         )
 
     # ---------------------------------------------------------- parse
+    async def load(self) -> list[SheetData]:
+        if len(self.faculty.sources) > 1 or any(
+            source.type == "cloud_mail_folder"
+            for source in self.faculty.sources
+        ):
+            from parser.sources.loader import load_sources
+
+            return await load_sources(self.faculty, self.paths.latest)
+        return await super().load()
+
+    @staticmethod
+    def _event_branch(group: str, event: dict) -> RawBranch:
+        teachers = event.get("teachers") or ""
+        if isinstance(teachers, str):
+            teachers_list = [part.strip() for part in teachers.split(",") if part.strip()]
+        else:
+            teachers_list = list(teachers)
+        return RawBranch(
+            group=group,
+            weekday=event.get("weekday") or "",
+            time_start=event.get("time_start") or "",
+            time_end=event.get("time_end") or "",
+            dates=[event["dates"]] if event.get("dates") else [],
+            discipline=event.get("discipline") or "",
+            type=event.get("type") or "",
+            subgroup=event.get("subgroup") or "",
+            teachers=teachers_list,
+            rooms=event.get("rooms") or "",
+            color=event.get("color") or "",
+            is_past=bool(event.get("is_past")),
+            confidence=1.0,
+            source_text=event.get("discipline") or "",
+            source_ref={"kind": event.get("kind") or ""},
+            kind=event.get("kind") or "",
+        )
+
     async def parse(
         self,
         sheets: list[SheetData],
@@ -432,7 +468,17 @@ class MathParser(FacultyParser):
         self._period = period
         self._branches = []
 
-        anchor = self._actual_year(sheets, period)
+        oo_sheets = [
+            sheet for sheet in sheets
+            if sheet.kind in ("", "oo") and not sheet.hidden
+        ]
+        extra_sheets = [
+            sheet for sheet in sheets
+            if sheet.kind in ("zo", "oo_exams", "zo_exams") and not sheet.hidden
+        ]
+
+        anchor_sheets = oo_sheets or extra_sheets
+        anchor = self._actual_year(anchor_sheets, period)
         if anchor is None:
             logger.info(
                 "Файл 01: ни на одном листе нет текущего учебного года — пропуск"
@@ -440,17 +486,35 @@ class MathParser(FacultyParser):
             self._branches = []
             return {}
 
-        window = self._semester_window(sheets, period, anchor)
-        logger.info(
-            "Файл 01: учебный год %s/%s, окно %s — %s",
-            anchor, anchor + 1, window[0], window[1],
-        )
+        branches: list[RawBranch] = []
+        if oo_sheets:
+            window = self._semester_window(oo_sheets, period, anchor)
+            logger.info(
+                "Файл 01: учебный год %s/%s, окно %s — %s",
+                anchor, anchor + 1, window[0], window[1],
+            )
+            for sheet in oo_sheets:
+                branches.extend(self._parse_sheet(sheet, period, anchor))
+            branches = self._fill_weekly(branches, period)
+            branches = self._filter_window(branches, window)
 
-        for sheet in sheets:
-            self._branches.extend(self._parse_sheet(sheet, period, anchor))
+        bounds = period.academic_bounds()
+        for sheet in extra_sheets:
+            if sheet.kind == "zo":
+                from parser.faculties.common.zaoch import parse_zaoch_sheet
 
-        self._branches = self._fill_weekly(self._branches, period)
-        self._branches = self._filter_window(self._branches, window)
+                data = parse_zaoch_sheet(sheet, year=anchor, bounds=bounds)
+            else:
+                from parser.faculties.common.exams import parse_exams_sheet
+
+                data = parse_exams_sheet(
+                    sheet, sheet.kind, year=anchor, bounds=bounds
+                )
+            for group, payload in data.items():
+                for event in payload.get("events") or []:
+                    branches.append(self._event_branch(group, event))
+
+        self._branches = branches
 
         extracted_path = self.paths.latest_file(EXTRACTED_NAME)
         rotate(extracted_path)
@@ -559,6 +623,7 @@ class MathParser(FacultyParser):
                     source_text=item["raw"],
                     room_source=value(5),
                     source_ref={"sheet": sheet.name, "row": row_index + 1},
+                    kind="oo",
                 )
                 self._score(branch, parallel_ambiguous, rooms_status)
                 branches.append(branch)
@@ -988,6 +1053,7 @@ class MathParser(FacultyParser):
                 "comment": branch.comment,
                 "color": branch.color,
                 "is_past": branch.is_past,
+                "kind": branch.kind,
             })
         return groups
 

@@ -35,6 +35,12 @@ _SKIP_RE = re.compile(
     re.IGNORECASE,
 )
 _GROUP_RE = re.compile(r"^Z?\s*M?\s*\d{3,4}$", re.IGNORECASE)
+_GROUP_IN_TEXT_RE = re.compile(
+    r"групп[аы]?\s*[№:]?\s*([A-Za-zА-Яа-яЁё]?\s*\d{3,4})", re.IGNORECASE
+)
+_GROUP_TOKEN_RE = re.compile(
+    r"\b(Z\s*M?\s*\d{3,4}|[МM]\s*\d{3,4}|\d{3})\b", re.IGNORECASE
+)
 
 
 def looks_like_group(name: str) -> bool:
@@ -42,8 +48,35 @@ def looks_like_group(name: str) -> bool:
     return bool(_GROUP_RE.match(str(name or "").strip()))
 
 
+def _detect_group(rows: list[list[str]], fallback: str) -> str:
+    """Группа из шапки листа («5 курс, Z152»), иначе имя листа."""
+    for row in rows[:15]:
+        for value in row:
+            match = _GROUP_IN_TEXT_RE.search(value or "")
+            if match:
+                candidate = re.sub(r"\s+", "", match.group(1)).upper()
+                if looks_like_group(candidate):
+                    return candidate
+
+    for row in rows[:15]:
+        text = " ".join(cell for cell in row if cell)
+        if not re.search(r"курс|групп", text, re.IGNORECASE):
+            continue
+        match = _GROUP_TOKEN_RE.search(text)
+        if match:
+            candidate = re.sub(r"\s+", "", match.group(1)).upper()
+            if looks_like_group(candidate):
+                return candidate
+
+    return str(fallback or "").strip()
+
+
 def _text(value) -> str:
     if value is None:
+        return ""
+    if isinstance(value, float) and value != value:  # NaN
+        return ""
+    if type(value).__name__ == "NaTType":  # pandas NaT
         return ""
     return str(value).replace("\n", " ").strip()
 
@@ -129,15 +162,15 @@ def _header_columns(row: list[str]) -> dict[str, int] | None:
 
 def parse_zaoch_sheet(sheet: SheetData, year: int | None = None, bounds=None) -> dict:
     """Возвращает {группа: {"events": [...], "kind": "zo"}}."""
-    group = sheet.name.strip()
-    if not looks_like_group(group):
-        logger.info("Заочка: лист %r не похож на группу, пропускаю", group)
-        return {}
-
     rows = [
         [_text(value) for value in row]
         for row in sheet.df.values.tolist()
     ]
+
+    group = _detect_group(rows, sheet.name)
+    if not looks_like_group(group):
+        logger.info("Заочка: лист %r не похож на группу, пропускаю", sheet.name)
+        return {}
 
     header_index = -1
     columns: dict[str, int] = {}

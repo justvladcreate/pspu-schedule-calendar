@@ -75,7 +75,6 @@ async def load_sources(faculty: Faculty, cache_dir: Path) -> list[SheetData]:
     """Все листы всех источников факультета, без совпадающих имён."""
     sources = list(faculty.sources) or [faculty.source]
     result: list[SheetData] = []
-    used: set[str] = set()
 
     for source in sources:
         sheets = await _load_source(faculty, source, cache_dir)
@@ -83,9 +82,7 @@ async def load_sources(faculty: Faculty, cache_dir: Path) -> list[SheetData]:
             if sheet.hidden:
                 logger.info("Лист %r скрыт, пропускаю", sheet.name)
                 continue
-            if sheet.name in used:
-                sheet.name = f"{sheet.kind}:{sheet.name}"
-            used.add(sheet.name)
+            # Имя листа — это группа; переименовывать нельзя.
             result.append(sheet)
 
     logger.info(

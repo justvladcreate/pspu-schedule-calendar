@@ -15,10 +15,13 @@ def test_registry_sources():
     inec = get_faculty(faculties, "12")
     assert inec.source.type == "google_sheets"
     assert inec.source.spreadsheet_id
+    kinds = {source.type for source in inec.sources}
+    assert kinds == {"google_sheets", "cloud_mail_folder"}
 
     math = get_faculty(faculties, "01")
-    assert math.source.type == "cloud_mail"
+    assert math.source.type == "cloud_mail_folder"
     assert math.source.url.startswith("https://cloud.mail.ru/")
+    assert set(math.source.kinds) == {"oo", "zo", "oo_exams", "gia"}
 
 
 def test_every_faculty_has_parser_module():

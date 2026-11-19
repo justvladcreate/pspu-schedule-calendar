@@ -60,6 +60,7 @@ class RawBranch:
     source_text: str = ""
     room_source: str = ""
     source_ref: dict = field(default_factory=dict)
+    kind: str = ""
 
 
 @dataclass(frozen=True)
