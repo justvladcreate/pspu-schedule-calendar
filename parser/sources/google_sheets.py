@@ -12,10 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 _FIELDS = (
-    "spreadsheetTheme("
-    "primaryFontFamily,"
-    "colorScheme(colorType,color(rgbColor))"
-    "),"
     "sheets("
     "properties(title,sheetId,hidden,gridProperties),"
     "merges,"
@@ -88,34 +84,7 @@ def _rgb_to_hex(color_obj: dict | None) -> str | None:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def _theme_map(spreadsheet_theme: dict | None) -> dict[str, str]:
-    """Карта «TEXT/ACCENT1/...» → hex из палитры таблицы."""
-    result: dict[str, str] = {}
-    for item in (spreadsheet_theme or {}).get("colorScheme") or []:
-        name = str(item.get("colorType") or "").strip().upper()
-        hex_color = _rgb_to_hex(item.get("color") or {})
-        if name and hex_color:
-            result[name] = hex_color
-    return result
-
-
-def _style_hex(style: dict | None, theme: dict[str, str] | None) -> str | None:
-    """foregroundColorStyle → hex: явный rgb или цвет темы.
-
-    Google отдаёт часть текста не как rgbColor, а как themeColor
-    (ACCENT1, TEXT и т.п.) — без палитры такие цвета терялись.
-    """
-    if not style:
-        return None
-    if "rgbColor" in style:
-        return _rgb_to_hex(style["rgbColor"])
-    name = style.get("themeColor")
-    if name and theme:
-        return theme.get(str(name).strip().upper())
-    return None
-
-
-def _extract_colored_texts(cell: dict, theme: dict[str, str] | None = None) -> list[dict]:
+def _extract_colored_texts(cell: dict) -> list[dict]:
     if not cell: return []
     val = cell.get("formattedValue") or ""
     if not val: return []
@@ -125,7 +94,8 @@ def _extract_colored_texts(cell: dict, theme: dict[str, str] | None = None) -> l
     # Базовый цвет ячейки. Отдельные куски текста (textFormatRuns) могут
     # его переопределять — тогда effectiveFormat врёт про весь текст.
     style = text_format.get("foregroundColorStyle") or {}
-    base_color = _style_hex(style, theme) or _rgb_to_hex(text_format.get("foregroundColor"))
+    base_fg = style.get("rgbColor") or text_format.get("foregroundColor")
+    base_color = _rgb_to_hex(base_fg)
 
     runs = cell.get("textFormatRuns") or []
     if not runs:
@@ -162,10 +132,13 @@ def _extract_colored_texts(cell: dict, theme: dict[str, str] | None = None) -> l
             "foregroundColorStyle" in fmt or "foregroundColor" in fmt
         )
         if has_own_color:
-            color = (
-                _style_hex(fmt.get("foregroundColorStyle"), theme)
-                or _rgb_to_hex(fmt.get("foregroundColor"))
+            run_style = fmt.get("foregroundColorStyle") or {}
+            run_fg = (
+                run_style.get("rgbColor")
+                or fmt.get("foregroundColor")
+                or {}
             )
+            color = _rgb_to_hex(run_fg)
         else:
             color = base_color
 
