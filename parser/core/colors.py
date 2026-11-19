@@ -41,42 +41,6 @@ def apply_tint(hex_color: str, tint: float) -> str:
     return f"#{max(0, min(255, r)):02x}{max(0, min(255, g)):02x}{max(0, min(255, b)):02x}"
 
 
-def _luminance(hex_color: str) -> float:
-    """Относительная яркость цвета (0 — чёрный, 1 — белый)."""
-    try:
-        r = int(hex_color[1:3], 16) / 255
-        g = int(hex_color[3:5], 16) / 255
-        b = int(hex_color[5:7], 16) / 255
-    except (ValueError, IndexError):
-        return 0.5
-
-    def channel(value: float) -> float:
-        return value / 12.92 if value <= 0.03928 else ((value + 0.055) / 1.055) ** 2.4
-
-    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
-
-
-def contrast_ratio(first: str, second: str) -> float:
-    a = _luminance(first)
-    b = _luminance(second)
-    light, dark = max(a, b), min(a, b)
-    return (light + 0.05) / (dark + 0.05)
-
-
-def ensure_readable(color: str, background: str | None) -> str:
-    """Не оставляет белый текст на светлой заливке (и наоборот).
-
-    В исходных таблицах встречается «белый на голубом», но при нашем
-    рендере заливка может оказаться светлее — текст становится
-    нечитаемым. Тогда подбираем контрастный цвет.
-    """
-    if not color or not background:
-        return color
-    if contrast_ratio(color, background) >= 3.0:
-        return color
-    return "#000000" if _luminance(background) > 0.5 else "#ffffff"
-
-
 def is_grey(hex_color: str) -> bool:
     """Серый оттенок: R, G и B близки друг к другу."""
     if not hex_color or not hex_color.startswith("#") or len(hex_color) != 7:
