@@ -17,6 +17,24 @@ def _parse_date(value: str | None):
     return datetime.strptime(str(value), "%d.%m.%Y").date()
 
 
+def _parse_source(raw: dict, faculty_id: str) -> FacultySource:
+    source_type = str(raw.get("type") or "").strip()
+    if source_type not in {"google_sheets", "cloud_mail", "cloud_mail_folder"}:
+        raise ValueError(
+            f"Неизвестный source.type у факультета {faculty_id}: {source_type!r}"
+        )
+    kinds = raw.get("kinds") or ()
+    if isinstance(kinds, str):
+        kinds = [kinds]
+    return FacultySource(
+        type=source_type,
+        url=raw.get("url"),
+        spreadsheet_id=raw.get("spreadsheet_id"),
+        kind=str(raw.get("kind") or "").strip(),
+        kinds=tuple(str(kind).strip() for kind in kinds if str(kind).strip()),
+    )
+
+
 def load_registry(path: Path | str = DEFAULT_PATH) -> tuple[AcademicPeriod, list[Faculty]]:
     path = Path(path)
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -36,22 +54,22 @@ def load_registry(path: Path | str = DEFAULT_PATH) -> tuple[AcademicPeriod, list
             continue
         seen.add(faculty_id)
 
-        source_raw = item.get("source") or {}
-        source_type = str(source_raw.get("type") or "").strip()
-        if source_type not in {"google_sheets", "cloud_mail"}:
-            raise ValueError(f"Неизвестный source.type у факультета {faculty_id}: {source_type!r}")
+        raw_sources = item.get("sources")
+        if raw_sources:
+            sources = tuple(_parse_source(source, faculty_id) for source in raw_sources)
+            source = sources[0]
+        else:
+            source = _parse_source(item.get("source") or {}, faculty_id)
+            sources = (source,)
 
         faculties.append(Faculty(
             id=faculty_id,
             name=str(item.get("name") or faculty_id),
             short=str(item.get("short") or item.get("name") or faculty_id),
-            source=FacultySource(
-                type=source_type,
-                url=source_raw.get("url"),
-                spreadsheet_id=source_raw.get("spreadsheet_id"),
-            ),
+            source=source,
             prompt=str(item.get("prompt") or faculty_id),
             enabled=bool(item.get("enabled", True)),
+            sources=sources,
         ))
 
     return academic, faculties

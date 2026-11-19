@@ -67,6 +67,8 @@ class FacultySource:
     type: str
     url: str | None = None
     spreadsheet_id: str | None = None
+    kind: str = ""
+    kinds: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -77,3 +79,4 @@ class Faculty:
     source: FacultySource
     prompt: str = ""
     enabled: bool = True
+    sources: tuple[FacultySource, ...] = ()

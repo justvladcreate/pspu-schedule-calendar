@@ -16,6 +16,8 @@ class SheetData:
     colors: dict[tuple[int, int], list[str]] = field(default_factory=dict)  # (row, col) -> [серые подстроки]
     hidden: bool = False
     sheet_id: int | None = None                  # gid для Google, None для xlsx
+    kind: str = "oo"                             # oo | zo | oo_exams | zo_exams
+    source: str = ""                             # откуда лист: имя источника
 
 
 class ScheduleSource:

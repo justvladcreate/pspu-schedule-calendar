@@ -22,9 +22,16 @@ faculties:
   - id: "12"
     name: "Информатики и экономики"
     short: "ИНЭК"
-    source:
-      type: google_sheets
-      spreadsheet_id: "1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg"
+    sources:
+      # Очное — только Google, как раньше.
+      - type: google_sheets
+        kind: oo
+        spreadsheet_id: "1_fsm-OxH9E9LgHnLC0iju5OlaHIv0agmM87GLvRKIAg"
+      # Заочное — из папки cloud.mail (свежий XLSX).
+      - type: cloud_mail_folder
+        kind: zo
+        url: "https://cloud.mail.ru/public/xqay/nJth4nGAS"
+        kinds: ["zo"]
     prompt: inec
     enabled: true
 

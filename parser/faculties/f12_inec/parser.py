@@ -92,6 +92,11 @@ class InecParser(FacultyParser):
         return GoogleSheetsSource(SPREADSHEET_ID, sheets_service)
 
     async def load(self) -> list[SheetData]:
+        if len(self.faculty.sources) > 1:
+            from parser.sources.loader import load_sources
+
+            return await load_sources(self.faculty, self.paths.latest)
+
         if self.source_type() == "xlsx":
             await asyncio.to_thread(self._download_drive_xlsx)
             return await XlsxFileSource(self.paths.latest_file(SOURCE_NAME)).load()
@@ -120,7 +125,19 @@ class InecParser(FacultyParser):
         sheets: list[SheetData],
         period: AcademicPeriod,
     ) -> dict:
-        groups = await DataExtractor(_SheetsSource(sheets)).extract()
+        oo_sheets = [sheet for sheet in sheets if sheet.kind in ("", "oo")]
+        zo_sheets = [sheet for sheet in sheets if sheet.kind == "zo"]
+
+        groups: dict = {}
+        if oo_sheets:
+            groups = await DataExtractor(_SheetsSource(oo_sheets)).extract()
+
+        if zo_sheets:
+            from parser.faculties.common.zaoch import parse_zaoch_sheet
+
+            for sheet in zo_sheets:
+                groups.update(parse_zaoch_sheet(sheet))
+
         extracted_path = self.paths.latest_file(EXTRACTED_NAME)
         rotate(extracted_path)
         write_json(extracted_path, groups)
@@ -144,6 +161,10 @@ class InecParser(FacultyParser):
 
         for group, group_data in groups.items():
             sources: list[dict] = group_data.get("events", [])
+            if group_data.get("kind") == "zo":
+                # Заочка разобрана детерминированно, LLM ей не нужна.
+                after_ai[group] = group_data
+                continue
             if not sources:
                 after_ai[group] = {"events": []}
                 continue
