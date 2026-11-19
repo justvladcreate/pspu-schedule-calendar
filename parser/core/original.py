@@ -29,6 +29,9 @@ logger = logging.getLogger(__name__)
 SHEETS_INDEX = "sheets.json"
 SHEETS_DIR = "sheets"
 
+# Меняется при правках рендера: старый кэш листов тогда игнорируется.
+RENDER_VERSION = 2
+
 # Индексы цветов Excel (64/65 — системные фон/текст)
 _INDEXED = {
     0: "#000000", 1: "#FFFFFF", 2: "#FF0000", 3: "#00FF00", 4: "#0000FF",
@@ -290,7 +293,7 @@ def publish_original(
             cached = json.loads(index_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             cached = None
-        if cached and cached.get("sheets"):
+        if cached and cached.get("sheets") and cached.get("version") == RENDER_VERSION:
             return cached["sheets"]
 
     try:
@@ -320,7 +323,11 @@ def publish_original(
         return None
 
     index_path.write_text(
-        json.dumps({"sheets": entries}, ensure_ascii=False, separators=(",", ":")),
+        json.dumps(
+            {"version": RENDER_VERSION, "sheets": entries},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ),
         encoding="utf-8",
     )
     logger.info(
