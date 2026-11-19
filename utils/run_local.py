@@ -32,6 +32,9 @@ from parser.core.registry import load_registry
 from parser.faculties import available_faculties
 from parser.runner import process_schedule
 
+# Для журнала расхода токенов: run_local — ручной прогон.
+os.environ.setdefault("USAGE_SOURCE", "manual")
+
 logger = logging.getLogger(__name__)
 
 
@@ -135,8 +138,7 @@ def _setup_console_logging() -> None:
     root.setLevel(logging.INFO)
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = _parse_args(argv)
+def main(argv: list[str] | None = None) -> int:    args = _parse_args(argv)
 
     if args.list:
         _print_faculties()

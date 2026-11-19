@@ -23,6 +23,9 @@ import time
 
 import httpx
 
+# Бенчмарк не должен попадать в статистику парсера как обычный прогон.
+os.environ.setdefault("USAGE_SOURCE", "bench")
+
 from parser.core.ai import _client_kwargs, _openai_key
 from parser.faculties.base import paths_for
 from parser.faculties.f12_inec.ai_merge import (

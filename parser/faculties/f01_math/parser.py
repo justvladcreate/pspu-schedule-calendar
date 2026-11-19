@@ -27,6 +27,7 @@ from datetime import date, datetime, timedelta
 from parser.core.dates import expand_date_text
 from parser.core.model import AcademicPeriod, Faculty, RawBranch
 from parser.core.text import normalize_time
+from parser.core.usage import usage_context
 from parser.faculties.base import (
     AFTER_AI_NAME,
     EXTRACTED_NAME,
@@ -670,7 +671,8 @@ class MathParser(FacultyParser):
                 batch = pending[start:start + LLM_BATCH_SIZE]
                 prompt = self._build_prompt(batch, period)
                 try:
-                    lines = await ask(prompt)
+                    with usage_context(faculty=self.id):
+                        lines = await ask(prompt)
                 except Exception as exc:  # noqa: BLE001 - без LLM оставляем как есть
                     logger.warning("Факультет 01: LLM недоступна: %s", exc)
                     break

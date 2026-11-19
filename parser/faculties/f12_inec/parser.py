@@ -37,6 +37,7 @@ from parser.faculties.f12_inec.ai_merge import (
     merge_ai_line,
 )
 from parser.faculties.f12_inec.extractor import DataExtractor
+from parser.core.usage import usage_context
 from parser.faculties.f12_inec.prompt import USER_PROMPT
 from parser.core.model import AcademicPeriod
 from parser.sources import GoogleSheetsSource, ScheduleSource, XlsxFileSource
@@ -157,7 +158,8 @@ class InecParser(FacultyParser):
             else:
                 prompt_text = USER_PROMPT.format(data=ai_input_text)
                 try:
-                    chunk_result = await ask_ai_with_retry(prompt=prompt_text)
+                    with usage_context(faculty=self.id, group=group):
+                        chunk_result = await ask_ai_with_retry(prompt=prompt_text)
                     if isinstance(chunk_result, list):
                         lines = [e for e in chunk_result if e.strip()]
                     else:

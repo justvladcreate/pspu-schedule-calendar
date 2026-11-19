@@ -82,6 +82,8 @@ web/data/faculties/<id>/sheets/*.html   # предрендер листов (ш�
 | `utils/run_local.py` | локальный прогон по факультетам (флаги `--faculty`, |
 |  | `--no-publish`, `--git-push`, `--source`, `--list`) |
 | `utils/rebuild_parsed.py` | пересборка `parsed.json` из `after_ai.json` |
+| `utils/usage.py` | отчёт по расходу токенов (`--period`, `--by`) |
+| `parser/core/usage.py` | журнал расхода: `data/usage/YYYY-MM.jsonl` |
 | `web/` | статический сайт |
 | `parser/core/original.py` | рендер листов XLSX в HTML для «Оригинала» |
 | `web/sw.js` | service worker; при добавлении файла обновите `STATIC_ASSETS` |
@@ -211,6 +213,10 @@ LLM вызывается только для строк с низкой увер
   (`ALL_PROXY`). Отключить — `GOOGLE_USE_PROXY=0`.
 - `ALL_PROXY` нужен для Google (Gemini и Sheets); DeepSeek/OpenAI-шлюзы
   идут напрямую — `httpx` создаётся с `trust_env=False`.
+- `data/usage/YYYY-MM.jsonl` — журнал расхода токенов LLM (в `.gitignore`,
+  как и весь `data/`). Пишется в `parser/core/usage.py`, отчёт —
+  `python -m utils.usage`. Отключается `USAGE_LOG=0`, каталог меняется
+  `USAGE_DIR`, источник (`service` / `manual` / `bench`) — `USAGE_SOURCE`.
 - `data/` — рабочие файлы парсера (не коммитить).
 - `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
   данные, они в Git.
@@ -236,6 +242,11 @@ LLM вызывается только для строк с низкой увер
 # пересборка parsed.json из after_ai.json без AI и сети
 .venv\Scripts\python.exe -m utils.rebuild_parsed
 .venv\Scripts\python.exe -m utils.rebuild_parsed --faculty 01
+
+# расход токенов (журнал data/usage/YYYY-MM.jsonl)
+.venv\Scripts\python.exe -m utils.usage --period day
+.venv\Scripts\python.exe -m utils.usage --period week --by group
+.venv\Scripts\python.exe -m utils.usage --period month --by model
 
 # таймер парсера
 .venv\Scripts\python.exe main.py

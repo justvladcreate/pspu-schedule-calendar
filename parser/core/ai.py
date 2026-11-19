@@ -30,8 +30,11 @@ import json
 import logging
 import os
 import re
+import time
 
 import httpx
+
+from parser.core.usage import record_usage
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +211,7 @@ async def _generate_openai(
         "Content-Type": "application/json",
     }
 
+    started = time.monotonic()
     async with httpx.AsyncClient(**_client_kwargs()) as client:
         response = await client.post(url, json=payload, headers=headers)
         if (
@@ -218,6 +222,7 @@ async def _generate_openai(
             # Модель не умеет json_object — формат JSON и так описан в промпте.
             payload.pop("response_format", None)
             response = await client.post(url, json=payload, headers=headers)
+    elapsed_ms = (time.monotonic() - started) * 1000
 
     if response.status_code >= 400:
         raise RuntimeError(
@@ -233,6 +238,19 @@ async def _generate_openai(
             usage.get("prompt_tokens"),
             usage.get("prompt_cache_hit_tokens"),
             usage.get("completion_tokens"),
+        )
+        record_usage(
+            "openai",
+            model,
+            {
+                "prompt_tokens": usage.get("prompt_tokens"),
+                "prompt_cache_hit_tokens": usage.get("prompt_cache_hit_tokens"),
+                "completion_tokens": usage.get("completion_tokens"),
+                "reasoning_tokens": (
+                    usage.get("completion_tokens_details") or {}
+                ).get("reasoning_tokens"),
+            },
+            elapsed_ms=elapsed_ms,
         )
     choices = data.get("choices") or []
     if not choices:
@@ -298,8 +316,10 @@ async def _generate_gemini(
         "Content-Type": "application/json",
     }
 
+    started = time.monotonic()
     async with httpx.AsyncClient(**client_kwargs) as client:
         response = await client.post(url, json=payload, headers=headers)
+    elapsed_ms = (time.monotonic() - started) * 1000
 
     if response.status_code >= 400:
         # Тело может содержать полезную причину (квота, неверный ключ).
@@ -308,6 +328,20 @@ async def _generate_gemini(
         )
 
     data = response.json()
+
+    meta = data.get("usageMetadata") or {}
+    if meta:
+        record_usage(
+            "gemini",
+            model,
+            {
+                "prompt_tokens": meta.get("promptTokenCount"),
+                "prompt_cache_hit_tokens": meta.get("cachedContentTokenCount"),
+                "completion_tokens": meta.get("candidatesTokenCount"),
+                "reasoning_tokens": meta.get("thoughtsTokenCount"),
+            },
+            elapsed_ms=elapsed_ms,
+        )
 
     feedback = data.get("promptFeedback") or {}
     if feedback.get("blockReason"):

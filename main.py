@@ -1,10 +1,14 @@
 import asyncio
 import logging
+import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import config
 from parser.runner import process_schedule
+
+# Для журнала расхода токенов: main.py — это сервис.
+os.environ.setdefault("USAGE_SOURCE", "service")
 
 logger = logging.getLogger(__name__)
 
