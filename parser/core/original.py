@@ -30,7 +30,7 @@ SHEETS_INDEX = "sheets.json"
 SHEETS_DIR = "sheets"
 
 # Меняется при правках рендера: старый кэш листов тогда игнорируется.
-RENDER_VERSION = 3
+RENDER_VERSION = 4
 
 # Индексы цветов Excel (64/65 — системные фон/текст)
 _INDEXED = {
@@ -174,6 +174,51 @@ def _cell_value(cell) -> str:
     return str(value)
 
 
+def _cell_html(cell) -> str:
+    """HTML содержимого ячейки с сохранением цвета отдельных строк (rich text)."""
+    value = cell.value
+    if value is None:
+        return ""
+
+    if isinstance(value, str) or not hasattr(value, "__iter__"):
+        return _escape(_cell_value(cell))
+
+    parts = list(value)
+    if not any(not isinstance(part, str) for part in parts):
+        return _escape(str(value))
+
+    chunks: list[str] = []
+    for part in parts:
+        if isinstance(part, str):
+            chunks.append(_escape(part))
+            continue
+
+        text = getattr(part, "text", "")
+        if not text:
+            continue
+
+        font = getattr(part, "font", None)
+        styles: list[str] = []
+        if font is not None:
+            color = _norm_color(getattr(font, "color", None))
+            if color:
+                styles.append(f"color:{readable_grey(color)}")
+            if getattr(font, "b", None):
+                styles.append("font-weight:700")
+            if getattr(font, "i", None):
+                styles.append("font-style:italic")
+            if getattr(font, "u", None):
+                styles.append("text-decoration:underline")
+
+        escaped = _escape(text)
+        if styles:
+            chunks.append(f'<span style="{";".join(styles)}">{escaped}</span>')
+        else:
+            chunks.append(escaped)
+
+    return "".join(chunks)
+
+
 def _escape(text: str) -> str:
     text = html.escape(text, quote=False)
     return text.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "<br>")
@@ -261,7 +306,7 @@ def render_sheet_html(ws) -> str:
             css = _cell_style(cell)
             if css:
                 attributes.append(f"style=\"{css}\"")
-            text = _escape(_cell_value(cell))
+            text = _cell_html(cell)
             parts.append(f"<td {' '.join(attributes)}>{text}</td>")
         parts.append("</tr>")
 
@@ -298,7 +343,7 @@ def publish_original(
             return cached["sheets"]
 
     try:
-        workbook = load_workbook(xlsx_path, data_only=True)
+        workbook = load_workbook(xlsx_path, data_only=True, rich_text=True)
     except Exception as exc:  # noqa: BLE001
         logger.warning("Не удалось открыть %s для «Оригинала»: %s", xlsx_path, exc)
         return None
