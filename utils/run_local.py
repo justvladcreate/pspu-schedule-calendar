@@ -138,7 +138,8 @@ def _setup_console_logging() -> None:
     root.setLevel(logging.INFO)
 
 
-def main(argv: list[str] | None = None) -> int:    args = _parse_args(argv)
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
 
     if args.list:
         _print_faculties()
