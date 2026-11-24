@@ -1184,7 +1184,7 @@
     border-radius: 12px;
     box-shadow: var(--shadow);
     width: min(560px, calc(100vw - 24px));
-    max-height: min(88vh, 780px);
+    max-height: min(92vh, 900px);
     display: flex;
     flex-direction: column;
     overflow: visible; /* Чтобы тултипы не обрезались */
@@ -1396,7 +1396,7 @@
 }
 
 .push-dialog {
-    width: min(620px, calc(100vw - 24px));
+    width: min(760px, calc(100vw - 24px));
 }
 
 .push-body {
@@ -1444,12 +1444,13 @@
 }
 
 /* Списки в модалке уведомлений не должны сжиматься в полоску
-   при крупном масштабе: высота тянется по содержимому, но упирается
-   в минимум, а тело модалки прокручивается. */
+   при крупном масштабе: у них своя высота, а прокручивается тело
+   модалки. */
 .push-body .filter-options {
-    height: auto;
-    min-height: 180px;
-    max-height: 284px;
+    height: min(320px, 40vh);
+    min-height: 200px;
+    max-height: none;
+    flex-shrink: 0;
 }
 
 .push-columns.is-disabled {
@@ -1476,6 +1477,19 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* На узком экране модалка уведомлений занимает почти весь экран,
+   а списки прокручивают её тело. */
+@media (max-width: 760px) {
+    .push-dialog {
+        width: calc(100vw - 16px);
+        max-height: calc(100vh - 16px);
+    }
+    .push-body .filter-options {
+        min-height: 200px;
+        max-height: 40vh;
+    }
 }
 
 /* Переключатель (Toggle) */

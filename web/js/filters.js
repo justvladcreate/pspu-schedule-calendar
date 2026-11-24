@@ -785,9 +785,47 @@ export function setupUnifiedFilter() {
 
     /* ---------- открытие / закрытие ---------- */
 
+    /**
+     * Панель шире кнопки, поэтому «right: 0» уводил её за левый край
+     * экрана. На десктопе ставим её по координатам кнопки, прижимая
+     * к краям окна; на мобилке работает полноэкранный режим из CSS.
+     */
+    function positionDropdown() {
+        if (!ui.dropdown) return;
+
+        if (window.innerWidth <= 760) {
+            ui.dropdown.style.position = '';
+            ui.dropdown.style.width = '';
+            ui.dropdown.style.left = '';
+            ui.dropdown.style.right = '';
+            ui.dropdown.style.top = '';
+            ui.dropdown.style.maxHeight = '';
+            return;
+        }
+
+        const rect = ui.trigger.getBoundingClientRect();
+        const width = Math.min(780, window.innerWidth - 24);
+        const left = Math.min(
+            Math.max(12, rect.right - width),
+            Math.max(12, window.innerWidth - width - 12),
+        );
+        const top = Math.round(rect.bottom + 8);
+
+        ui.dropdown.style.position = 'fixed';
+        ui.dropdown.style.width = width + 'px';
+        ui.dropdown.style.left = left + 'px';
+        ui.dropdown.style.right = 'auto';
+        ui.dropdown.style.top = top + 'px';
+        // Не выше нижнего края окна: иначе кнопки «Сбросить / Готово»
+        // уезжают за экран. Лишнее прокручивается внутри панели.
+        ui.dropdown.style.maxHeight =
+            Math.max(240, window.innerHeight - top - 12) + 'px';
+    }
+
     function openFilter() {
         document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
         root.classList.add('open');
+        positionDropdown();
 
         if (ui.searchUi) ui.searchUi.setValue('');
         renderSelectedChips();
@@ -915,4 +953,7 @@ export function setupUnifiedFilter() {
     updatePanelMeta();
 
     window.addEventListener('resize', updateDateLabel);
+    window.addEventListener('resize', () => {
+        if (isFilterOpen()) positionDropdown();
+    });
 }
