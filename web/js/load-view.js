@@ -4,77 +4,18 @@ import { state } from './state.js';
 import { toISO, startOfWeek, addDays, isToday } from './utils.js';
 import { WEEKDAYS_SHORT, MONTHS_SHORT } from './config.js';
 import { groupByDate } from './data.js';
-import { navigateTo } from './navigation.js';
 import { pluralRu } from './version.js';
+import {
+    WEEK_MAX_PAIRS, WEEK_LOW_PAIRS,
+    levelFor, weekLevelFor, semesterLevelFor, dowLevelFor,
+    toUnitValue, unitShort, unitWord,
+} from './load-model.js';
+import { showDayDetails, showWeekDetails } from './load-details.js';
 
 /* ---------- константы ---------- */
 
 const UNIT_KEY = 'schedule-load-unit';
 const VIEW_KEY = 'schedule-load-view';
-const HOURS_PER_PAIR = 2;
-
-/**
- * Абсолютные пороги плотности ДНЯ (в парах).
- *   1–4 пары  → low  (2–8 ч)
- *   5 пар     → mid  (10 ч)
- *   6+ пар    → high (12+ ч) — перегруз
- */
-const LEVELS = [
-    { maxPairs: 4,        level: 'low'  },
-    { maxPairs: 5,        level: 'mid'  },
-    { maxPairs: Infinity, level: 'high' },
-];
-
-function levelFor(pairs) {
-    if (pairs <= 0) return 'empty';
-    for (const l of LEVELS) {
-        if (pairs <= l.maxPairs) return l.level;
-    }
-    return 'high';
-}
-
-/**
- * Пороги плотности НЕДЕЛИ (в парах).
- *   54 ч (27 пар) — официальный максимум недельной нагрузки.
- *   Ниже 60% от него (16 пар ≈ 32 ч) — комфортная неделя.
- *
- * Оценка идёт по СУММЕ часов за неделю, а не по худшему дню:
- * одна загруженная суббота больше не красит всю неделю в красный.
- */
-const WEEK_MAX_PAIRS = 27;
-const WEEK_LOW_PAIRS = Math.round(WEEK_MAX_PAIRS * 0.6);
-
-function weekLevelFor(pairs) {
-    if (pairs <= 0) return 'empty';
-    if (pairs > WEEK_MAX_PAIRS) return 'high';
-    if (pairs > WEEK_LOW_PAIRS) return 'mid';
-    return 'low';
-}
-
-/**
- * Нормы СЕМЕСТРА.
- *
- *   semesterMax = 27 пар (54 ч) × кол-во недель
- *   dowMax      = semesterMax / 7   — на один день недели за весь семестр
- *
- * Пороги mid/low — те же 60 % / 100 % от максимума, что и у недели,
- * чтобы визуальный язык оставался единым.
- */
-function semesterLevelFor(pairs, numWeeks) {
-    if (pairs <= 0 || numWeeks <= 0) return 'empty';
-    const max = WEEK_MAX_PAIRS * numWeeks;
-    if (pairs > max)        return 'high';
-    if (pairs > max * 0.6)  return 'mid';
-    return 'low';
-}
-
-function dowLevelFor(pairs, numWeeks) {
-    if (pairs <= 0 || numWeeks <= 0) return 'empty';
-    const max = (WEEK_MAX_PAIRS * numWeeks) / 7;
-    if (pairs > max)        return 'high';
-    if (pairs > max * 0.6)  return 'mid';
-    return 'low';
-}
 
 function unit() {
     try {
@@ -173,14 +114,6 @@ function buildWeeks(byDate) {
     }
 
     return { weeks };
-}
-
-function toUnitValue(pairs, u) {
-    return u === 'hours' ? pairs * HOURS_PER_PAIR : pairs;
-}
-
-function unitShort(u) {
-    return u === 'hours' ? 'ч' : 'пар';
 }
 
 /* ---------- публичный рендер ---------- */
@@ -415,16 +348,16 @@ function buildWeekColumn(w, u, todayIso, selectedIso) {
     if (containsToday)    numBtn.classList.add('is-current');
     if (containsSelected) numBtn.classList.add('is-selected');
     numBtn.textContent = String(w.num);
-    numBtn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') — открыть';
+    numBtn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') — подробности';
     numBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        navigateTo('week', w.start);
+        showWeekDetails(w, u);
     });
     col.appendChild(numBtn);
 
     /* 7 дней */
     for (const d of w.days) {
-        col.appendChild(buildDayCell(d, u, selectedIso));
+        col.appendChild(buildDayCell(d, w, u, selectedIso));
     }
 
     /* итог недели */
@@ -433,7 +366,7 @@ function buildWeekColumn(w, u, todayIso, selectedIso) {
     return col;
 }
 
-function buildDayCell(d, u, selectedIso) {
+function buildDayCell(d, week, u, selectedIso) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'load-hm-cell';
@@ -455,10 +388,10 @@ function buildDayCell(d, u, selectedIso) {
         const val = u === 'hours'
             ? toUnitValue(d.pairs, u) + ' ч'
             : d.pairs + ' пар';
-        btn.title = label + ': ' + val + ' — открыть день';
+        btn.title = label + ': ' + val + ' — подробности';
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            navigateTo('day', d.date);
+            showDayDetails(d, week, u);
         });
     } else {
         btn.disabled = true;
@@ -487,7 +420,7 @@ function buildTotalCell(w, u, isSelected) {
     btn.textContent = String(v);
 
     btn.title = w.pairs > 0
-        ? 'Неделя ' + w.num + ': ' + v + ' ' + unitShort(u) + ' — открыть'
+        ? 'Неделя ' + w.num + ': ' + v + ' ' + unitShort(u) + ' — подробности'
         : 'Неделя ' + w.num + ': занятий нет';
 
     if (w.pairs === 0) {
@@ -495,7 +428,7 @@ function buildTotalCell(w, u, isSelected) {
     } else {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            navigateTo('week', w.start);
+            showWeekDetails(w, u);
         });
     }
 
@@ -525,46 +458,123 @@ function buildStripView(weeks, u, maxWeekPairs) {
     head.appendChild(el('span', 'load-strip-view-title', 'Шкала по неделям'));
     card.appendChild(head);
 
-    const bars = el('div', 'load-strip-view-bars');
-    for (const w of weeks) {
-        bars.appendChild(buildStripBar(w, u, maxWeekPairs));
+    // Шкала всегда включает официальный максимум недели (27 пар):
+    // иначе «перегруз» не видно, если все недели спокойные.
+    const scaleMax = Math.max(WEEK_MAX_PAIRS, maxWeekPairs, 1);
+    const toPercent = (pairs) => Math.max(
+        0, Math.min(100, Math.round((pairs / scaleMax) * 100)),
+    );
+
+    const activeWeeks = weeks.filter(w => w.pairs > 0);
+    const avgPairs = activeWeeks.length
+        ? activeWeeks.reduce((sum, w) => sum + w.pairs, 0) / activeWeeks.length
+        : 0;
+
+    const plot = el('div', 'load-strip-plot');
+
+    // Горизонтальные ориентиры: комфорт (60% нормы), норма и среднее.
+    const guides = el('div', 'load-strip-guides');
+    const addGuide = (pairs, text, className) => {
+        if (pairs <= 0) return;
+        const line = el('div', 'load-strip-guide' + (className ? ' ' + className : ''));
+        line.style.bottom = toPercent(pairs) + '%';
+        line.appendChild(el('span', 'load-strip-guide-label', text));
+        guides.appendChild(line);
+    };
+    addGuide(WEEK_LOW_PAIRS, 'комфорт ' + toUnitValue(WEEK_LOW_PAIRS, u) + ' ' + unitShort(u), 'is-comfort');
+    addGuide(WEEK_MAX_PAIRS, 'норма ' + toUnitValue(WEEK_MAX_PAIRS, u) + ' ' + unitShort(u), 'is-norm');
+    if (avgPairs > 0 && Math.abs(avgPairs - WEEK_MAX_PAIRS) > scaleMax * 0.05) {
+        const avgValue = Math.round(toUnitValue(avgPairs, u));
+        addGuide(
+            Math.round(avgPairs),
+            'среднее ' + avgValue + ' ' + unitWord(u, avgValue),
+            'is-avg',
+        );
     }
-    card.appendChild(bars);
+    plot.appendChild(guides);
+
+    const bars = el('div', 'load-strip-bars');
+    for (const w of weeks) {
+        bars.appendChild(buildStripBar(w, u, toPercent(w.pairs)));
+    }
+    plot.appendChild(bars);
+    card.appendChild(plot);
+
+    // Номера недель — отдельной полосой, чтобы график не «прыгал».
+    const labels = el('div', 'load-strip-labels');
+    for (const w of weeks) {
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'load-strip-label';
+        if (w.pairs > 0) {
+            label.textContent = String(w.num);
+            label.title = 'Неделя ' + w.num + ' (' +
+                formatWeekRange(w.start, w.end) + ') — подробности';
+            label.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showWeekDetails(w, u);
+            });
+        } else {
+            label.disabled = true;
+            label.textContent = String(w.num);
+            label.title = 'Неделя ' + w.num + ': занятий нет';
+        }
+        labels.appendChild(label);
+    }
+    card.appendChild(labels);
+
+    // Короткая сводка под шкалой: где пик и сколько недель пустых.
+    const busiest = weeks.reduce(
+        (best, w) => (w.pairs > best.pairs ? w : best),
+        weeks[0] || { pairs: 0, num: 0 },
+    );
+    const emptyWeeks = weeks.filter(w => w.pairs === 0).length;
+    const summary = el('div', 'load-strip-summary');
+    if (busiest.pairs > 0) {
+        const peak = toUnitValue(busiest.pairs, u);
+        summary.append('Пик — неделя ' + busiest.num + ': ');
+        summary.appendChild(el('b', null, peak + ' ' + unitWord(u, peak)));
+    }
+    if (emptyWeeks > 0) {
+        if (busiest.pairs > 0) summary.append(' · ');
+        summary.append(
+            emptyWeeks + ' ' +
+            pluralRu(emptyWeeks, 'неделя', 'недели', 'недель') + ' без занятий',
+        );
+    }
+    if (summary.childNodes.length) card.appendChild(summary);
 
     card.appendChild(buildLegend(u));
 
     return card;
 }
 
-function buildStripBar(w, u, maxWeekPairs) {
+function buildStripBar(w, u, percent) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'load-strip-bar';
 
-    const ratio = maxWeekPairs > 0 ? w.pairs / maxWeekPairs : 0;
-    const h = w.pairs > 0 ? Math.max(4, Math.round(4 + ratio * 88)) : 3;
-
-    // Уровень — по сумме за неделю, аналогично клеткам Σ.
     const level = weekLevelFor(w.pairs);
+    const height = w.pairs > 0 ? Math.max(3, percent) : 0;
 
-    const v = toUnitValue(w.pairs, u);
-    btn.appendChild(el('div', 'load-strip-bar-value', String(v)));
-
-    const fillWrap = el('div', 'load-strip-bar-fill-wrap');
-    const fill = el('div', 'load-strip-bar-fill');
+    const fill = el('span', 'load-strip-bar-fill');
     if (level === 'mid')  fill.classList.add('is-mid');
     if (level === 'high') fill.classList.add('is-high');
-    fill.style.height = h + '%';
-    fillWrap.appendChild(fill);
-    btn.appendChild(fillWrap);
+    fill.style.height = height + '%';
+    btn.appendChild(fill);
 
-    btn.appendChild(el('div', 'load-strip-bar-label', String(w.num)));
+    if (w.pairs > 0) {
+        const value = el('span', 'load-strip-bar-value', String(toUnitValue(w.pairs, u)));
+        value.style.bottom = 'calc(' + height + '% + 3px)';
+        btn.appendChild(value);
+    }
 
-    btn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') · ' + v + ' ' + unitShort(u);
+    btn.title = 'Неделя ' + w.num + ' (' + formatWeekRange(w.start, w.end) + ') · ' +
+        toUnitValue(w.pairs, u) + ' ' + unitShort(u) + ' — подробности';
 
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        navigateTo('week', w.start);
+        showWeekDetails(w, u);
     });
 
     return btn;
@@ -580,10 +590,10 @@ function buildInsights(weeks, u) {
     const allDays = [];
     for (const w of weeks) {
         for (const d of w.days) {
-            if (d.pairs > 0) allDays.push({ ...d, weekNum: w.num });
+            if (d.pairs > 0) allDays.push({ day: d, week: w });
         }
     }
-    const top = [...allDays].sort((a, b) => b.pairs - a.pairs).slice(0, 5);
+    const top = [...allDays].sort((a, b) => b.day.pairs - a.day.pairs).slice(0, 5);
     aside.appendChild(buildTopDaysCard(top, u));
 
     // Перегруженные недели — по той же логике, что и цвет клеток Σ.
@@ -617,7 +627,9 @@ function buildTopDaysCard(days, u) {
     }
 
     const list = el('ul', 'load-insight-list');
-    for (const d of days) {
+    for (const item of days) {
+        const d = item.day;
+        const week = item.week;
         const level = levelFor(d.pairs);
         const li = el('li');
         const btn = document.createElement('button');
@@ -629,14 +641,14 @@ function buildTopDaysCard(days, u) {
         const dowName = WEEKDAYS_SHORT[(d.date.getDay() + 6) % 7];
         const dateStr = d.date.getDate() + ' ' + MONTHS_SHORT[d.date.getMonth()];
         main.appendChild(el('div', 'load-insight-item-date', dowName + ', ' + dateStr));
-        main.appendChild(el('div', 'load-insight-item-sub', 'Неделя ' + d.weekNum));
+        main.appendChild(el('div', 'load-insight-item-sub', 'Неделя ' + week.num));
         btn.appendChild(main);
 
         const v = toUnitValue(d.pairs, u);
         btn.appendChild(el('div', 'load-insight-item-value', v + ' ' + unitShort(u)));
 
-        btn.title = 'Открыть ' + dateStr;
-        btn.addEventListener('click', () => navigateTo('day', d.date));
+        btn.title = 'Подробности: ' + dateStr;
+        btn.addEventListener('click', () => showDayDetails(d, week, u));
 
         li.appendChild(btn);
         list.appendChild(li);
@@ -677,8 +689,9 @@ function buildOverloadCard(items, u) {
         const v = toUnitValue(week.pairs, u);
         btn.appendChild(el('div', 'load-insight-item-value', v + ' ' + unitShort(u)));
 
-        btn.title = 'Открыть неделю ' + week.num + ' (' + formatWeekRange(week.start, week.end) + ')';
-        btn.addEventListener('click', () => navigateTo('week', week.start));
+        btn.title = 'Подробности: неделя ' + week.num +
+            ' (' + formatWeekRange(week.start, week.end) + ')';
+        btn.addEventListener('click', () => showWeekDetails(week, u));
 
         li.appendChild(btn);
         list.appendChild(li);

@@ -514,6 +514,12 @@ function setupAllUI() {
     setupModalHistory();
     setupShareModal(); // Инициализация модалки шаринга
 
+    // «В таблице» из карточки нагрузки: открываем «Оригинал»
+    // на листе группы, к которой относится занятие.
+    document.addEventListener('pspu:open-original', (event) => {
+        if (originalApi && event.detail) originalApi.focusOn(event.detail);
+    });
+
     setupPopoverViewHandler((ev) => {
         hideEventDetails();
         if (changesModalApi) changesModalApi.close();

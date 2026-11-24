@@ -58,6 +58,8 @@ const WATCHED = [
     'js/data.js',
     'js/render.js',
     'js/load-view.js',
+    'js/load-model.js',
+    'js/load-details.js',
     'js/layout.js',
     'js/navigation.js',
     'js/datepicker.js',
