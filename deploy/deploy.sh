@@ -11,6 +11,10 @@ SERVICE="${SERVICE:-pspu-schedule-calendar.service}"
 
 cd "$REPO_DIR"
 
+# Локальная публикация (web/data) не должна блокировать деплой:
+# сервис всё равно пересоберёт данные после перезапуска.
+git checkout -- web/data 2>/dev/null || true
+
 before="$(git rev-parse HEAD)"
 
 git fetch --quiet origin "$BRANCH"

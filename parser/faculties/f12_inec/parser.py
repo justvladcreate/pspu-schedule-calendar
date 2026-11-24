@@ -243,7 +243,7 @@ class InecParser(FacultyParser):
                     merged.extend(items)
 
             after_ai[group] = {
-                "events": merged,
+                "events": [dict(event, kind="oo") for event in merged],
                 "semester_start_year": group_data.get("semester_start_year"),
             }
 
