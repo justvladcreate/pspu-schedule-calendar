@@ -2,7 +2,8 @@
 # Автодеплой на hp-server: подтянуть main и перезапустить парсер.
 #
 # Ставится в cron/systemd timer (см. deploy/README.md). Запускается от
-# root: нужен только ему, чтобы перезапускать сервис.
+# serveradmin: у root нет доступа к репозиторию и ssh-алиасу github-pspu.
+# Перезапуск сервиса разрешён через /etc/sudoers.d/pspu-deploy.
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-/home/serveradmin/pspu-schedule-calendar}"
