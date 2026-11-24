@@ -4,7 +4,7 @@
    (см. tools/bump-sw.mjs + .github/workflows/deploy-pages.yml).
    В репозитории всегда должен лежать этот плейсхолдер —
    так коммиты остаются чистыми и без гонок. */
-const CACHE = 'pspu-schedule-v216b6dae';
+const CACHE = 'pspu-schedule-v3e1dcdcb';
 
 const STATIC_ASSETS = [
   './',
@@ -71,7 +71,11 @@ async function addWithRetry(cache, url, attempts = 3) {
   let lastErr;
   for (let i = 0; i < attempts; i++) {
     try {
-      await cache.add(url);
+      // cache: 'reload' — мимо HTTP-кэша браузера. GitHub Pages отдаёт
+      // статику с max-age, и без этого новая версия service worker
+      // складывала в кэш файлы прошлого деплоя: получалась смесь
+      // нового HTML со старыми модулями и приложение падало.
+      await cache.add(new Request(url, { cache: 'reload' }));
       return { url, ok: true };
     } catch (err) {
       lastErr = err;
@@ -188,7 +192,8 @@ async function cacheFirst(request) {
   if (cached) return cached;
 
   try {
-    const response = await fetch(request);
+    // no-cache — проверяем свежесть на сервере, а не берём из HTTP-кэша.
+    const response = await fetch(request, { cache: 'no-cache' });
     if (response.ok) {
       const cache = await caches.open(CACHE);
       cache.put(request, response.clone());

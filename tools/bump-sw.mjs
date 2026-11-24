@@ -99,6 +99,19 @@ async function hashFiles() {
             console.warn(`[bump-sw] ⚠ пропущен ${rel} (${e.code || e.message})`);
         }
     }
+
+    // Сам sw.js тоже влияет на поведение кэша (например, как он
+    // скачивает файлы). Строку CACHE из хэша исключаем — иначе
+    // версия зависела бы от себя самой.
+    try {
+        const swSrc = await readFile(join(ROOT, 'sw.js'), 'utf8');
+        h.update('sw.js');
+        h.update(swSrc.replace(/const CACHE = 'pspu-schedule-v[\w.-]+';/, "const CACHE = '';"));
+        count++;
+    } catch (e) {
+        console.warn(`[bump-sw] ⚠ пропущен sw.js (${e.code || e.message})`);
+    }
+
     if (count === 0) {
         throw new Error(`Ни один файл не найден в ${ROOT}. Проверьте --root.`);
     }
