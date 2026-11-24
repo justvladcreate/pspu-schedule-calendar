@@ -1396,7 +1396,7 @@
 }
 
 .push-dialog {
-    width: min(760px, calc(100vw - 24px));
+    width: min(620px, calc(100vw - 24px));
 }
 
 .push-body {
@@ -1479,11 +1479,10 @@
     gap: 8px;
 }
 
-/* На узком экране модалка уведомлений занимает почти весь экран,
+/* На узком экране модалка уведомлений занимает почти всю высоту,
    а списки прокручивают её тело. */
 @media (max-width: 760px) {
     .push-dialog {
-        width: calc(100vw - 16px);
         max-height: calc(100vh - 16px);
     }
     .push-body .filter-options {

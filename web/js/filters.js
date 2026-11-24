@@ -804,7 +804,7 @@ export function setupUnifiedFilter() {
         }
 
         const rect = ui.trigger.getBoundingClientRect();
-        const width = Math.min(780, window.innerWidth - 24);
+        const width = Math.min(680, window.innerWidth - 24);
         const left = Math.min(
             Math.max(12, rect.right - width),
             Math.max(12, window.innerWidth - width - 12),
