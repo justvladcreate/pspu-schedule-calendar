@@ -12,6 +12,7 @@ import logging
 import os
 import shutil
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -352,34 +353,87 @@ def _write_data_commit(worktree: Path) -> bool:
     return True
 
 
+def _push_data(worktree: Path) -> bool:
+    """Пушит ветку data с повторами.
+
+    Сеть на сервере бывает нестабильной (DNS/туннель). Пуш не должен
+    терять уже собранные данные: до трёх попыток с паузой, а между
+    ними — перечитывание ветки на случай, если её обогнали.
+    """
+    for attempt in range(1, 4):
+        push = _git("push", "origin", f"HEAD:{DATA_BRANCH}", cwd=worktree)
+        if push.returncode == 0:
+            logger.info("Расписание опубликовано в ветку %s", DATA_BRANCH)
+            return True
+
+        logger.warning(
+            "git push (data), попытка %d из 3: %s",
+            attempt, (push.stderr or push.stdout).strip()[:300],
+        )
+
+        fetch = _git("fetch", "--quiet", "origin", DATA_BRANCH, cwd=worktree)
+        if fetch.returncode == 0:
+            _git("reset", "--hard", f"origin/{DATA_BRANCH}", cwd=worktree)
+            _write_data_commit(worktree)
+
+        if attempt < 3:
+            time.sleep(5 * attempt)
+
+    logger.error(
+        "git push (data): не удалось за 3 попытки, данные останутся "
+        "в .data-branch до следующего прогона"
+    )
+    return False
+
+
+def _restore_data_snapshot() -> None:
+    """Подкладывает последние опубликованные данные в ``web/data``.
+
+    После ``git pull`` (или на свежем клоне) рабочее дерево пустое,
+    а ``publish()`` опирается на прошлый ``index.json``: без него
+    факультет, который в этом прогоне не разобрался, исчез бы с сайта
+    вместе со своими событиями. Источник — ветка ``data``.
+    """
+    worktree = _data_worktree()
+    if worktree is None:
+        return
+
+    source = worktree / "web" / "data"
+    if not source.exists():
+        return
+
+    if WEB_DATA_DIR.exists():
+        _clear_dir(WEB_DATA_DIR)
+    _copy_tree(source, WEB_DATA_DIR)
+    logger.info("Данные из ветки %s подложены в web/data", DATA_BRANCH)
+
+
+def _up_to_date(worktree: Path) -> bool:
+    """Совпадает ли HEAD рабочего дерева с origin/data."""
+    head = _git("rev-parse", "HEAD", cwd=worktree)
+    remote = _git("rev-parse", f"origin/{DATA_BRANCH}", cwd=worktree)
+    if head.returncode != 0:
+        return True
+    if remote.returncode != 0:
+        # Ветки на origin ещё нет — пушить точно надо.
+        return False
+    return head.stdout.strip() == remote.stdout.strip()
+
+
 def _sync_commit_and_push() -> bool:
     worktree = _data_worktree()
     if worktree is None:
         return False
 
-    if not _write_data_commit(worktree):
+    changed = _write_data_commit(worktree)
+
+    # Коммита нет, но прошлый пуш мог не дойти (сеть) — тогда ветка
+    # на origin отстаёт, и её нужно дослать.
+    if not changed and _up_to_date(worktree):
         logger.info("Нет изменений для коммита")
         return False
 
-    push = _git("push", "origin", f"HEAD:{DATA_BRANCH}", cwd=worktree)
-    if push.returncode != 0:
-        # Кто-то успел запушить (ручной прогон рядом с сервисом):
-        # перечитываем ветку и повторяем — данные всё равно собираются
-        # из web/data заново.
-        logger.warning("git push (data) отклонён, повторяю: %s", push.stderr.strip())
-        _git("fetch", "--quiet", "origin", DATA_BRANCH, cwd=worktree)
-        _git("reset", "--hard", f"origin/{DATA_BRANCH}", cwd=worktree)
-        if not _write_data_commit(worktree):
-            logger.info("После перечитывания ветки коммитить нечего")
-            return False
-        push = _git("push", "origin", f"HEAD:{DATA_BRANCH}", cwd=worktree)
-
-    if push.returncode != 0:
-        logger.error("git push (data): %s", push.stderr.strip())
-        return False
-
-    logger.info("Расписание опубликовано в ветку %s", DATA_BRANCH)
-    return True
+    return _push_data(worktree)
 
 
 async def commit_and_push() -> bool:
@@ -403,6 +457,9 @@ async def process_schedule(
     # копия может опубликовать устаревшее расписание.
     if git_push:
         await asyncio.to_thread(_sync_pull)
+        # Рабочее дерево после pull может быть пустым — подкладываем
+        # прошлый снимок, иначе выпавший факультет исчезнет с сайта.
+        await asyncio.to_thread(_restore_data_snapshot)
 
     results = await process_all(
         faculty_ids=faculty_ids,
