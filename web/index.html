@@ -361,16 +361,19 @@
         <div class="original-sheet-bar" id="originalSheetBar" hidden>
             <div class="original-sheet-tabs" id="originalSheetTabs"
                  role="tablist" aria-label="Листы расписания" hidden></div>
-            <span class="original-group-jump" id="originalGroupPicker"
-                  hidden title="Выбрать группу">
-                <select class="original-group-select" id="originalGroupSelect"
-                        aria-label="Выбрать группу"></select>
+            <button class="original-group-jump" id="originalGroupPicker" type="button"
+                    hidden aria-label="Выбрать группу" aria-expanded="false"
+                    title="Выбрать группу">
                 <svg class="original-group-chevron" viewBox="0 0 24 24" width="16" height="16"
                      fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="6 9 12 15 18 9"/>
                 </svg>
-            </span>
+            </button>
+            <div class="original-group-popover" id="originalGroupPopover" hidden>
+                <div id="originalGroupSearchHost"></div>
+                <div class="original-group-list" id="originalGroupList"></div>
+            </div>
         </div>
         <div class="original-body">
             <div class="original-sheet-wrap" id="originalSheetWrap">
@@ -745,16 +748,38 @@
                 <span>Все изменения расписания</span>
             </label>
 
-            <input type="text" class="filter-search" id="pushSearch"
-                   placeholder="Поиск по группам и преподавателям...">
+            <div id="pushSearchHost"></div>
+
+            <div class="filter-selected" id="pushSelected" hidden></div>
+
+            <div class="filter-faculty-block">
+                <div class="filter-section-head">
+                    <span class="filter-column-title">Факультеты</span>
+                </div>
+                <div class="filter-faculties" id="pushFaculties"></div>
+            </div>
 
             <div class="filter-columns push-columns" id="pushColumns">
                 <div class="filter-column">
-                    <div class="filter-column-title">Группы</div>
+                    <div class="filter-column-head">
+                        <span class="filter-column-title">Группы</span>
+                        <span class="filter-column-tools">
+                            <span class="filter-column-count" id="pushGroupsCount"></span>
+                            <button class="filter-column-all" type="button" id="pushGroupsAll"
+                                    aria-label="Выбрать все группы">Все</button>
+                        </span>
+                    </div>
                     <div class="filter-options" id="pushGroupsList"></div>
                 </div>
                 <div class="filter-column">
-                    <div class="filter-column-title">Преподаватели</div>
+                    <div class="filter-column-head">
+                        <span class="filter-column-title">Преподаватели</span>
+                        <span class="filter-column-tools">
+                            <span class="filter-column-count" id="pushTeachersCount"></span>
+                            <button class="filter-column-all" type="button" id="pushTeachersAll"
+                                    aria-label="Выбрать всех преподавателей">Все</button>
+                        </span>
+                    </div>
                     <div class="filter-options" id="pushTeachersList"></div>
                 </div>
             </div>

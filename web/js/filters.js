@@ -9,6 +9,18 @@ import {
 import { render, updateDateLabel } from './render.js';
 import { expandEvents } from './data.js';
 import { refreshBanner } from './update-banner.js';
+import {
+    pluralRu,
+    matchesQuery,
+    createSearch,
+    createOption,
+    createEmptyRow,
+    createSelectedChip,
+    createFacultyChip,
+    facultyIdsOf,
+    inFacultyScope,
+    valuesInScope,
+} from './filter-core.js';
 
 const FAV_GROUPS_KEY   = 'schedule-favorites-groups';
 const FAV_TEACHERS_KEY = 'schedule-favorites-teachers';
@@ -25,21 +37,6 @@ const RENDER_DEBOUNCE_MS = 80;
    Остальные прячем за чип «Ещё N» и показываем в модалке. */
 const MAX_VISIBLE_CHIPS = 12;
 
-const CHECK_ICON = `
-    <svg viewBox="0 0 16 16" width="12" height="12" fill="none"
-         stroke="currentColor" stroke-width="2.2"
-         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polyline points="3 8.5 6.5 12 13 4.5"/>
-    </svg>`;
-
-const STAR_ICON = `
-    <svg viewBox="0 0 24 24" width="14" height="14"
-         fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round"
-         aria-hidden="true">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-    </svg>`;
-
 /* ============================================================
  *  ВСПОМОГАТЕЛЬНОЕ
  * ============================================================ */
@@ -49,6 +46,7 @@ const ui = {
     trigger: null,
     dropdown: null,
     search: null,
+    searchUi: null,
     groupsList: null,
     teachersList: null,
     faculties: null,
@@ -69,15 +67,6 @@ function isFilterOpen() {
     return !!ui.root && ui.root.classList.contains('open');
 }
 
-function pluralRu(n, one, few, many) {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod100 >= 11 && mod100 <= 14) return many;
-    if (mod10 === 1) return one;
-    if (mod10 >= 2 && mod10 <= 4) return few;
-    return many;
-}
-
 function facultyIdOf(faculty) {
     return String(faculty && faculty.id);
 }
@@ -88,24 +77,6 @@ function facultyShort(id) {
     );
     if (!faculty) return String(id);
     return faculty.short || faculty.name || String(id);
-}
-
-function facultyIdsOf(type, value) {
-    const map = type === 'group'
-        ? state.groupFaculties
-        : state.teacherFaculties;
-    return (map && map.get(value)) || null;
-}
-
-/** Входит ли группа/преподаватель в текущую выборку факультетов. */
-function inFacultyScope(type, value, scope) {
-    if (!scope || scope.size === 0) return true;
-    const ids = facultyIdsOf(type, value);
-    if (!ids || ids.size === 0) return true;
-    for (const id of ids) {
-        if (scope.has(String(id))) return true;
-    }
-    return false;
 }
 
 function setsEqual(a, b) {
@@ -226,8 +197,8 @@ function updatePanelMeta() {
     if (!ui.search) return;
 
     const query = ui.search.value;
-    const scopeGroups = inScopeValues('group', query);
-    const scopeTeachers = inScopeValues('teacher', query);
+    const scopeGroups = scopeValues('group', query);
+    const scopeTeachers = scopeValues('teacher', query);
     const selectedGroups = state.selectedGroups;
     const selectedTeachers = state.selectedTeachers;
 
@@ -235,10 +206,14 @@ function updatePanelMeta() {
     const selectedInScopeTeachers = scopeTeachers.filter(v => selectedTeachers.has(v)).length;
 
     if (ui.groupsCount) {
-        ui.groupsCount.textContent = `${selectedInScopeGroups} / ${scopeGroups.length}`;
+        ui.groupsCount.textContent = selectedInScopeGroups > 0
+            ? `${selectedInScopeGroups}/${scopeGroups.length}`
+            : '';
     }
     if (ui.teachersCount) {
-        ui.teachersCount.textContent = `${selectedInScopeTeachers} / ${scopeTeachers.length}`;
+        ui.teachersCount.textContent = selectedInScopeTeachers > 0
+            ? `${selectedInScopeTeachers}/${scopeTeachers.length}`
+            : '';
     }
 
     const allGroups = scopeGroups.length > 0
@@ -339,30 +314,18 @@ function selectedSetFor(type) {
 }
 
 /**
- * Значения в текущей выборке факультетов и под поиском — именно они
- * попадают в «Все» и в счётчик заголовка колонки.
+ * Все значения в выбранных факультетах и под поиском.
+ * Отмеченные остаются в списке на своих местах: список не прыгает
+ * под курсором, а выбранное видно и галочкой, и чипом сверху.
  */
-function inScopeValues(type, query = '') {
-    const all = type === 'group' ? state.groups : state.teachers;
-    const q = String(query || '').trim().toLowerCase();
-    const scope = state.selectedFaculties;
-
-    return all.filter(value => {
-        if (q && !String(value).toLowerCase().includes(q)) return false;
-        return inFacultyScope(type, value, scope);
-    });
+function listValues(type, query = '') {
+    return valuesInScope(type, query, state.selectedFaculties)
+        .sort((a, b) => String(a).localeCompare(String(b), 'ru'));
 }
 
-/**
- * Всё, что видно в списке: значения в выбранных факультетах, кроме уже
- * отмеченных. Выбранные живут отдельными карточками под поиском, поэтому
- * дублировать их в списке больше не нужно.
- */
-function visibleValues(type, query = '') {
-    const selected = selectedSetFor(type);
-    return inScopeValues(type, query)
-        .filter(value => !selected.has(value))
-        .sort((a, b) => String(a).localeCompare(String(b), 'ru'));
+/** Значения для счетчиков «Все/Снять» и выбора всех под поиском. */
+function scopeValues(type, query = '') {
+    return valuesInScope(type, query, state.selectedFaculties);
 }
 
 /* ---------- карточки выбранных фильтров ---------- */
@@ -375,10 +338,8 @@ function selectionLabel(type, value) {
 function selectedEntries() {
     const entries = [];
 
-    for (const id of state.selectedFaculties) {
-        const value = String(id);
-        entries.push({ type: 'faculty', value, label: selectionLabel('faculty', value) });
-    }
+    // Факультеты живут отдельными чипами и всегда видны — в строке
+    // выбранного они были бы дублем.
     for (const group of state.selectedGroups) {
         entries.push({ type: 'group', value: group, label: selectionLabel('group', group) });
     }
@@ -408,33 +369,11 @@ function removeSelected(entry) {
 }
 
 function makeSelectedCard(entry) {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'filter-selected-card';
-    if (entry.type === 'faculty') card.classList.add('filter-selected-card--faculty');
-    card.title = `Убрать: ${entry.label}`;
-    card.setAttribute('aria-label', `Убрать фильтр: ${entry.label}`);
-    card.dataset.type = entry.type;
-
-    const label = document.createElement('span');
-    label.className = 'filter-selected-card-label';
-    label.textContent = entry.label;
-
-    // Крестик чисто визуальный: снимает фильтр клик по всей карточке.
-    const cross = document.createElement('span');
-    cross.className = 'filter-selected-card-x';
-    cross.textContent = '×';
-    cross.setAttribute('aria-hidden', 'true');
-
-    card.appendChild(label);
-    card.appendChild(cross);
-    card.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        removeSelected(entry);
+    return createSelectedChip({
+        label: entry.label,
+        kind: entry.type,
+        onRemove: () => removeSelected(entry),
     });
-
-    return card;
 }
 
 function renderSelectedModal(entries) {
@@ -539,93 +478,49 @@ function closeSelectedModal() {
     ui.selectedModal.classList.remove('open');
 }
 
-function makeCheckbox() {
-    const box = document.createElement('span');
-    box.className = 'filter-option-check';
-    box.innerHTML = CHECK_ICON;
-    return box;
-}
-
-function makeFavoriteStar(type, value) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'favorite-star';
-
-    const favSet = type === 'group'
+function toggleFavorite(type, value) {
+    const favorites = type === 'group'
         ? state.favoritesGroups
         : state.favoritesTeachers;
-    const isFav = favSet.has(value);
 
-    btn.classList.toggle('is-favorite', isFav);
-    btn.setAttribute('aria-label', isFav ? 'Убрать из избранного' : 'В избранное');
-    btn.innerHTML = STAR_ICON;
-    btn.querySelector('svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
+    if (favorites.has(value)) favorites.delete(value);
+    else favorites.add(value);
 
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    saveSetToStorage(
+        type === 'group' ? FAV_GROUPS_KEY : FAV_TEACHERS_KEY,
+        favorites
+    );
 
-        const favorites = type === 'group'
-            ? state.favoritesGroups
-            : state.favoritesTeachers;
-
-        if (favorites.has(value)) favorites.delete(value);
-        else favorites.add(value);
-
-        const nowFav = favorites.has(value);
-        btn.classList.toggle('is-favorite', nowFav);
-        btn.setAttribute('aria-label', nowFav ? 'Убрать из избранного' : 'В избранное');
-        btn.querySelector('svg').setAttribute('fill', nowFav ? 'currentColor' : 'none');
-
-        saveSetToStorage(
-            type === 'group' ? FAV_GROUPS_KEY : FAV_TEACHERS_KEY,
-            favorites
-        );
-
-        // В режиме «только избранное» выбор должен следовать за звёздочками.
-        if (state.favoritesActive) {
-            state.selectedGroups = new Set(state.favoritesGroups);
-            state.selectedTeachers = new Set(state.favoritesTeachers);
-            persistFilters();
-            renderLists(ui.search ? ui.search.value : '');
-            applyNow();
-        }
-    });
-
-    return btn;
+    // В режиме «только избранное» выбор должен следовать за звёздочками.
+    if (state.favoritesActive) {
+        state.selectedGroups = new Set(state.favoritesGroups);
+        state.selectedTeachers = new Set(state.favoritesTeachers);
+        persistFilters();
+        renderLists(ui.search ? ui.search.value : '');
+        applyNow();
+    }
 }
 
 function buildOption(type, value) {
     const selected = selectedSetFor(type);
-    const checked = selected.has(value);
+    const favorites = type === 'group'
+        ? state.favoritesGroups
+        : state.favoritesTeachers;
 
-    const row = document.createElement('label');
-    row.className = 'filter-option';
-    row.classList.toggle('is-selected', checked);
-
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.className = 'filter-option-input';
-    input.checked = checked;
-    input.addEventListener('change', () => {
-        const set = selectedSetFor(type);
-        if (input.checked) set.add(value);
-        else set.delete(value);
-
-        row.classList.toggle('is-selected', input.checked);
-        onSelectionChange();
+    return createOption({
+        value,
+        label: value,
+        checked: selected.has(value),
+        favorite: {
+            active: () => favorites.has(value),
+            toggle: () => toggleFavorite(type, value),
+        },
+        onToggle: (checked) => {
+            if (checked) selected.add(value);
+            else selected.delete(value);
+            onSelectionChange();
+        },
     });
-
-    const text = document.createElement('span');
-    text.className = 'filter-option-value';
-    text.textContent = value;
-    text.title = value;
-
-    row.appendChild(input);
-    row.appendChild(makeCheckbox());
-    row.appendChild(text);
-    row.appendChild(makeFavoriteStar(type, value));
-    return row;
 }
 
 function fillList(container, type, values, emptyText = 'Не найдено') {
@@ -633,10 +528,7 @@ function fillList(container, type, values, emptyText = 'Не найдено') {
     container.innerHTML = '';
 
     if (values.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'filter-option-empty';
-        empty.textContent = emptyText;
-        container.appendChild(empty);
+        container.appendChild(createEmptyRow(emptyText));
         return;
     }
 
@@ -648,16 +540,8 @@ function fillList(container, type, values, emptyText = 'Не найдено') {
 function renderLists(query = '') {
     if (!ui.groupsList) return;
 
-    const scopeGroups = inScopeValues('group', query);
-    const groups = visibleValues('group', query);
-    const groupsEmpty = scopeGroups.length > 0 ? 'Все группы выбраны' : 'Не найдено';
-
-    const scopeTeachers = inScopeValues('teacher', query);
-    const teachers = visibleValues('teacher', query);
-    const teachersEmpty = scopeTeachers.length > 0 ? 'Все преподаватели выбраны' : 'Не найдено';
-
-    fillList(ui.groupsList, 'group', groups, groupsEmpty);
-    fillList(ui.teachersList, 'teacher', teachers, teachersEmpty);
+    fillList(ui.groupsList, 'group', listValues('group', query));
+    fillList(ui.teachersList, 'teacher', listValues('teacher', query));
     updatePanelMeta();
 }
 
@@ -677,63 +561,34 @@ function renderFaculties() {
     ui.faculties.innerHTML = '';
 
     if (!state.faculties.length) {
-        const empty = document.createElement('div');
-        empty.className = 'filter-option-empty';
-        empty.textContent = 'Нет факультетов';
-        ui.faculties.appendChild(empty);
+        ui.faculties.appendChild(createEmptyRow('Нет факультетов'));
         return;
     }
 
-    // Выбранные факультеты уже показаны карточками под поиском.
-    const available = state.faculties.filter(
-        faculty => !state.selectedFaculties.has(facultyIdOf(faculty))
-    );
-
-    if (available.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'filter-option-empty';
-        empty.textContent = 'Все факультеты выбраны';
-        ui.faculties.appendChild(empty);
-        return;
-    }
-
-    for (const faculty of available) {
+    // Все факультеты на своих местах: выбранный просто подсвечен.
+    // Так ряд не «схлопывается» и видно, что можно переключить.
+    for (const faculty of state.faculties) {
         const id = facultyIdOf(faculty);
+        const active = state.selectedFaculties.has(id);
 
-        const chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'filter-faculty-chip';
-        chip.setAttribute('aria-pressed', 'false');
-        chip.title = faculty.name || facultyShort(id);
+        ui.faculties.appendChild(createFacultyChip({
+            label: faculty.short || faculty.name || id,
+            count: groupsForFaculty(id),
+            title: faculty.name || id,
+            active,
+            onClick: () => {
+                if (state.selectedFaculties.has(id)) {
+                    state.selectedFaculties.delete(id);
+                } else {
+                    state.selectedFaculties.add(id);
+                }
 
-        const name = document.createElement('span');
-        name.className = 'filter-faculty-name';
-        name.textContent = faculty.short || faculty.name || id;
-
-        const count = document.createElement('span');
-        count.className = 'filter-faculty-count';
-        count.textContent = String(groupsForFaculty(id));
-
-        chip.appendChild(name);
-        chip.appendChild(count);
-
-        chip.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (state.selectedFaculties.has(id)) {
-                state.selectedFaculties.delete(id);
-            } else {
-                state.selectedFaculties.add(id);
-            }
-
-            persistFilters();
-            renderFaculties();
-            renderLists(ui.search ? ui.search.value : '');
-            applyNow();
-        });
-
-        ui.faculties.appendChild(chip);
+                persistFilters();
+                renderFaculties();
+                renderLists(ui.search ? ui.search.value : '');
+                applyNow();
+            },
+        }));
     }
 }
 
@@ -871,7 +726,18 @@ export function setupUnifiedFilter() {
     ui.root = root;
     ui.trigger = root.querySelector('.filter-trigger');
     ui.dropdown = root.querySelector('.filter-dropdown');
-    ui.search = root.querySelector('.filter-search');
+
+    const searchWrap = root.querySelector('.filter-search-wrap');
+    if (searchWrap) {
+        const searchUi = createSearch({
+            placeholder: 'Поиск по группам и преподавателям…',
+            onInput: (value) => renderLists(value),
+        });
+        searchWrap.replaceWith(searchUi.element);
+        ui.search = searchUi.input;
+        ui.searchUi = searchUi;
+    }
+
     ui.groupsList = document.getElementById('filterGroupsList');
     ui.teachersList = document.getElementById('filterTeachersList');
     ui.faculties = document.getElementById('filterFaculties');
@@ -912,7 +778,7 @@ export function setupUnifiedFilter() {
         document.querySelectorAll('.filter.open').forEach(el => el.classList.remove('open'));
         root.classList.add('open');
 
-        ui.search.value = '';
+        if (ui.searchUi) ui.searchUi.setValue('');
         renderSelectedChips();
         renderFaculties();
         renderLists('');
@@ -984,12 +850,10 @@ export function setupUnifiedFilter() {
 
     /* ---------- поиск ---------- */
 
-    ui.search.addEventListener('input', () => renderLists(ui.search.value));
-
     /* ---------- «Все» в заголовке колонки ---------- */
 
     function toggleAll(type) {
-        const values = inScopeValues(type, ui.search.value);
+        const values = scopeValues(type, ui.search.value);
         const set = selectedSetFor(type);
         if (values.length === 0) return;
 

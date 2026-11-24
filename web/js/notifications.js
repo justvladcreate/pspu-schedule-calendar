@@ -3,6 +3,15 @@
 import { state } from './state.js';
 import { PUSH_API_BASE, PUSH_VAPID_PUBLIC_KEY } from './config.js';
 import { showToast } from './toast.js';
+import {
+    createSearch,
+    createOption,
+    createEmptyRow,
+    createSelectedChip,
+    createFacultyChip,
+    valuesInScope,
+    pluralRu,
+} from './filter-core.js';
 
 const ENABLED_KEY = 'schedule-push-enabled';
 const PREFS_KEY = 'schedule-push-prefs';
@@ -18,6 +27,9 @@ let ui = null;
 let draftAll = false;
 let draftGroups = new Set();
 let draftTeachers = new Set();
+// Факультеты в уведомлениях — только область видимости списка,
+// в подписку не уходят: воркер матчит по группе/преподавателю.
+let draftFaculties = new Set();
 
 /* ============================================================
  *  БАЗОВЫЕ ПРОВЕРКИ / ХРАНИЛИЩЕ
@@ -450,63 +462,166 @@ export async function updatePushPrefs(nextPrefs) {
  *  МОДАЛКА НАСТРОЙКИ УВЕДОМЛЕНИЙ
  * ============================================================ */
 
-function renderOptions(container, values, selected) {
-    container.innerHTML = '';
+function prefsSetFor(type) {
+    return type === 'group' ? draftGroups : draftTeachers;
+}
 
-    if (!values.length) {
-        const empty = document.createElement('div');
-        empty.className = 'filter-option-empty';
-        empty.textContent = 'Не найдено';
-        container.appendChild(empty);
+function groupsOfFaculty(id) {
+    let count = 0;
+    for (const group of state.groups) {
+        const ids = state.groupFaculties.get(group);
+        if (ids && ids.has(id)) count++;
+    }
+    return count;
+}
+
+/** Чипы факультетов: сужают списки, в подписку не попадают. */
+function renderPrefsFaculties() {
+    if (!ui) return;
+
+    if (!ui.faculties) return;
+    ui.faculties.innerHTML = '';
+
+    if (!state.faculties.length) {
+        ui.faculties.appendChild(createEmptyRow('Нет факультетов'));
         return;
     }
 
-    for (const value of values) {
-        const row = document.createElement('label');
-        row.className = 'filter-option';
-        row.classList.toggle('is-selected', selected.has(value));
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'filter-option-input';
-        checkbox.checked = selected.has(value);
-        checkbox.addEventListener('change', () => {
-            if (checkbox.checked) selected.add(value);
-            else selected.delete(value);
-            row.classList.toggle('is-selected', checkbox.checked);
-            updatePrefsCounter();
-        });
-
-        const check = document.createElement('span');
-        check.className = 'filter-option-check';
-        check.setAttribute('aria-hidden', 'true');
-        check.innerHTML = `
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none"
-                 stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 8.5 6.5 12 13 4.5"/>
-            </svg>`;
-
-        const text = document.createElement('span');
-        text.className = 'filter-option-value';
-        text.textContent = value;
-
-        row.appendChild(checkbox);
-        row.appendChild(check);
-        row.appendChild(text);
-        container.appendChild(row);
+    for (const faculty of state.faculties) {
+        const id = String(faculty.id);
+        ui.faculties.appendChild(createFacultyChip({
+            label: faculty.short || faculty.name || id,
+            title: faculty.name || id,
+            count: groupsOfFaculty(id),
+            active: draftFaculties.has(id),
+            onClick: () => {
+                if (draftFaculties.has(id)) draftFaculties.delete(id);
+                else draftFaculties.add(id);
+                renderPrefsFaculties();
+                renderPrefsLists(ui.search ? ui.search.value : '');
+            },
+        }));
     }
+}
+
+/** Чипы выбранных групп и преподавателей — как в основном фильтре. */
+function renderPrefsSelected() {
+    if (!ui || !ui.selected) return;
+
+    const entries = [
+        ...[...draftGroups].map(value => ({ type: 'group', value })),
+        ...[...draftTeachers].map(value => ({ type: 'teacher', value })),
+    ];
+    entries.sort((a, b) => String(a.value).localeCompare(String(b.value), 'ru'));
+
+    ui.selected.innerHTML = '';
+
+    if (!entries.length) {
+        ui.selected.hidden = true;
+        return;
+    }
+
+    ui.selected.hidden = false;
+    for (const entry of entries) {
+        ui.selected.appendChild(createSelectedChip({
+            label: entry.value,
+            kind: entry.type,
+            onRemove: () => {
+                prefsSetFor(entry.type).delete(entry.value);
+                renderPrefsLists(ui.search ? ui.search.value : '');
+            },
+        }));
+    }
+}
+
+function setColumnMeta(countEl, allBtn, selected, total, title) {
+    if (countEl) {
+        countEl.textContent = selected > 0 ? selected + '/' + total : '';
+    }
+    if (!allBtn) return;
+
+    const all = total > 0 && selected >= total;
+    allBtn.textContent = all ? 'Снять' : 'Все';
+    allBtn.disabled = total === 0;
+    allBtn.classList.toggle('is-on', all);
+    allBtn.setAttribute(
+        'aria-label',
+        (all ? 'Снять все ' : 'Выбрать все ') + title,
+    );
+}
+
+function fillPrefsList(container, type, values) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!values.length) {
+        container.appendChild(createEmptyRow('Не найдено'));
+        return;
+    }
+
+    const selected = prefsSetFor(type);
+    const sorted = [...values].sort((a, b) => String(a).localeCompare(String(b), 'ru'));
+
+    const fragment = document.createDocumentFragment();
+    for (const value of sorted) {
+        fragment.appendChild(createOption({
+            value,
+            label: value,
+            checked: selected.has(value),
+            onToggle: (checked) => {
+                if (checked) selected.add(value);
+                else selected.delete(value);
+                renderPrefsSelected();
+                renderPrefsMeta(ui.search ? ui.search.value : '');
+                updatePrefsCounter();
+            },
+        }));
+    }
+    container.appendChild(fragment);
+}
+
+function renderPrefsMeta(query = '') {
+    if (!ui) return;
+
+    const scopeGroups = valuesInScope('group', query, draftFaculties);
+    const scopeTeachers = valuesInScope('teacher', query, draftFaculties);
+
+    const selectedGroups = scopeGroups.filter(v => draftGroups.has(v)).length;
+    const selectedTeachers = scopeTeachers.filter(v => draftTeachers.has(v)).length;
+
+    setColumnMeta(
+        ui.groupsCount, ui.groupsAll,
+        selectedGroups, scopeGroups.length, 'группы',
+    );
+    setColumnMeta(
+        ui.teachersCount, ui.teachersAll,
+        selectedTeachers, scopeTeachers.length, 'преподавателей',
+    );
 }
 
 function renderPrefsLists(query = '') {
     if (!ui) return;
 
-    const q = query.trim().toLowerCase();
-    const groups = state.groups.filter((g) => !q || g.toLowerCase().includes(q));
-    const teachers = state.teachers.filter((t) => !q || t.toLowerCase().includes(q));
+    fillPrefsList(ui.groupsList, 'group', valuesInScope('group', query, draftFaculties));
+    fillPrefsList(ui.teachersList, 'teacher', valuesInScope('teacher', query, draftFaculties));
 
-    renderOptions(ui.groupsList, groups, draftGroups);
-    renderOptions(ui.teachersList, teachers, draftTeachers);
+    renderPrefsSelected();
+    renderPrefsMeta(query);
+}
+
+function togglePrefsAll(type) {
+    if (!ui) return;
+
+    const values = valuesInScope(type, ui.search ? ui.search.value : '', draftFaculties);
+    if (!values.length) return;
+
+    const set = prefsSetFor(type);
+    const all = values.every(value => set.has(value));
+    if (all) values.forEach(value => set.delete(value));
+    else values.forEach(value => set.add(value));
+
+    renderPrefsLists(ui.search ? ui.search.value : '');
+    updatePrefsCounter();
 }
 
 function updatePrefsCounter() {
@@ -522,9 +637,9 @@ function updatePrefsCounter() {
             text = 'Ничего не выбрано — уведомлений не будет';
         } else {
             const parts = [];
-            if (g) parts.push(`групп: ${g}`);
-            if (t) parts.push(`преподавателей: ${t}`);
-            text = `Выбрано — ${parts.join(', ')}`;
+            if (g) parts.push(g + ' ' + pluralRu(g, 'группа', 'группы', 'групп'));
+            if (t) parts.push(t + ' ' + pluralRu(t, 'преподаватель', 'преподавателя', 'преподавателей'));
+            text = parts.join(' · ');
         }
     }
 
@@ -532,7 +647,7 @@ function updatePrefsCounter() {
 
     const disabled = draftAll;
     ui.columns.classList.toggle('is-disabled', disabled);
-    ui.search.disabled = disabled;
+    if (ui.search) ui.search.disabled = disabled;
 }
 
 function openPrefs() {
@@ -542,9 +657,12 @@ function openPrefs() {
     draftAll = !!prefs.all;
     draftGroups = new Set(prefs.groups);
     draftTeachers = new Set(prefs.teachers);
+    draftFaculties = new Set();
 
     ui.all.checked = draftAll;
-    ui.search.value = '';
+    if (ui.searchUi) ui.searchUi.setValue('');
+
+    renderPrefsFaculties();
     renderPrefsLists('');
     updatePrefsCounter();
 
@@ -622,14 +740,30 @@ export function setupNotifications() {
 
     const modal = document.getElementById('pushModal');
     if (modal) {
+        const searchHost = document.getElementById('pushSearchHost');
+        const searchUi = searchHost
+            ? createSearch({
+                placeholder: 'Поиск по группам и преподавателям…',
+                onInput: (value) => renderPrefsLists(value),
+            })
+            : null;
+        if (searchUi) searchHost.replaceWith(searchUi.element);
+
         ui = {
             modal,
             closeBtn: modal.querySelector('.push-close'),
             all: document.getElementById('pushAll'),
-            search: document.getElementById('pushSearch'),
+            search: searchUi ? searchUi.input : null,
+            searchUi,
+            selected: document.getElementById('pushSelected'),
+            faculties: document.getElementById('pushFaculties'),
             groupsList: document.getElementById('pushGroupsList'),
             teachersList: document.getElementById('pushTeachersList'),
             columns: document.getElementById('pushColumns'),
+            groupsCount: document.getElementById('pushGroupsCount'),
+            teachersCount: document.getElementById('pushTeachersCount'),
+            groupsAll: document.getElementById('pushGroupsAll'),
+            teachersAll: document.getElementById('pushTeachersAll'),
             counter: document.getElementById('pushCounter'),
             doneBtn: document.getElementById('pushDone'),
             testBtn: document.getElementById('pushTestBtn'),
@@ -647,10 +781,11 @@ export function setupNotifications() {
             });
         }
 
-        if (ui.search) {
-            ui.search.addEventListener('input', () => {
-                renderPrefsLists(ui.search.value);
-            });
+        if (ui.groupsAll) {
+            ui.groupsAll.addEventListener('click', () => togglePrefsAll('group'));
+        }
+        if (ui.teachersAll) {
+            ui.teachersAll.addEventListener('click', () => togglePrefsAll('teacher'));
         }
 
         if (ui.doneBtn) {

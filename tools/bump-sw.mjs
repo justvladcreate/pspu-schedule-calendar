@@ -64,6 +64,7 @@ const WATCHED = [
     'js/navigation.js',
     'js/datepicker.js',
     'js/filters.js',
+    'js/filter-core.js',
     'js/popover.js',
     'js/gestures.js',
     'js/export.js',

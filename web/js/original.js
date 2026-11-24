@@ -4,6 +4,9 @@ import { fetchSheetHtml } from './sheets.js';
 import {
     createGoogleSource, createStaticSource, createCompositeSource, sheetTitle,
 } from './original-source.js';
+import {
+    createSearch, createOption, createEmptyRow, matchesQuery,
+} from './filter-core.js';
 import { state } from './state.js';
 import {
     mountSheetFrame, findCellInFrame, focusCellInFrame,
@@ -229,7 +232,17 @@ export function setupOriginalModal() {
     const kindsBox     = document.getElementById('originalKinds');
     const sheetBar     = document.getElementById('originalSheetBar');
     const groupPicker  = document.getElementById('originalGroupPicker');
-    const groupSelect  = document.getElementById('originalGroupSelect');
+    const groupPopover = document.getElementById('originalGroupPopover');
+    const groupList    = document.getElementById('originalGroupList');
+
+    const groupSearchHost = document.getElementById('originalGroupSearchHost');
+    const groupSearchUi = groupSearchHost
+        ? createSearch({
+            placeholder: 'Поиск группы…',
+            onInput: () => renderGroupPicker(),
+        })
+        : null;
+    if (groupSearchUi && groupSearchHost) groupSearchHost.replaceWith(groupSearchUi.element);
 
     let source = null;          // текущий источник («google» или «static»)
     let spreadsheetId = defaultSpreadsheetId;
@@ -443,38 +456,68 @@ export function setupOriginalModal() {
         updateToolbarVisibility();
     }
 
+    function openGroupPicker() {
+        if (!groupPicker || !groupPopover) return;
+        if (groupSearchUi) groupSearchUi.setValue('');
+        renderGroupPicker();
+        groupPopover.hidden = false;
+        groupPicker.setAttribute('aria-expanded', 'true');
+        if (window.innerWidth > 700 && groupSearchUi) {
+            setTimeout(() => groupSearchUi.input.focus(), 30);
+        }
+    }
+
+    function closeGroupPicker() {
+        if (!groupPopover || groupPopover.hidden) return;
+        groupPopover.hidden = true;
+        if (groupPicker) groupPicker.setAttribute('aria-expanded', 'false');
+    }
+
     function renderGroupPicker() {
-        if (!groupPicker || !groupSelect) { updateSheetBarVisibility(); return; }
+        if (!groupPicker || !groupList) { updateSheetBarVisibility(); return; }
 
         const list = visibleSheets();
         if (list.length < 2) {
             groupPicker.hidden = true;
-            groupSelect.innerHTML = '';
+            closeGroupPicker();
+            groupList.innerHTML = '';
             updateSheetBarVisibility();
             return;
         }
 
         groupPicker.hidden = false;
-        groupSelect.innerHTML = '';
+        groupList.innerHTML = '';
 
         // В «Группе» показываем листы-группы, а не оглавление/титул.
         const groupSheets = list.filter(isGroupSheet);
         const options = (groupSheets.length ? groupSheets : list).slice();
 
         // Текущий лист может быть не группой (например, «ГРУППЫ»):
-        // добавляем его, чтобы select не показывал чужое значение.
+        // добавляем его, чтобы список не терял выбранное.
         if (currentGid && !options.some(s => String(s.gid) === String(currentGid))) {
             const current = list.find(s => String(s.gid) === String(currentGid));
             if (current) options.unshift(current);
         }
 
-        for (const sheet of options) {
-            const option = document.createElement('option');
-            option.value = sheet.gid;
-            option.textContent = sheetTitle(sheet);
-            groupSelect.appendChild(option);
+        const query = groupSearchUi ? groupSearchUi.input.value : '';
+        const filtered = options.filter(sheet => matchesQuery(sheetTitle(sheet), query));
+
+        if (!filtered.length) {
+            groupList.appendChild(createEmptyRow('Не найдено'));
+        } else {
+            for (const sheet of filtered) {
+                groupList.appendChild(createOption({
+                    value: String(sheet.gid),
+                    label: sheetTitle(sheet),
+                    hint: sheet.name,
+                    checked: String(sheet.gid) === String(currentGid),
+                    onToggle: () => {
+                        showSheet(sheet.gid);
+                        closeGroupPicker();
+                    },
+                }));
+            }
         }
-        if (currentGid) groupSelect.value = currentGid;
 
         updateSheetBarVisibility();
     }
@@ -579,12 +622,22 @@ export function setupOriginalModal() {
         showSheet(gid);
     }
 
-    if (groupSelect) {
-        groupSelect.addEventListener('change', () => {
-            if (groupSelect.value) showSheet(groupSelect.value);
+    if (groupPicker) {
+        groupPicker.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (groupPopover && !groupPopover.hidden) closeGroupPicker();
+            else openGroupPicker();
         });
-        groupSelect.addEventListener('click', (e) => e.stopPropagation());
     }
+
+    if (groupPopover) {
+        groupPopover.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    document.addEventListener('click', () => closeGroupPicker());
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeGroupPicker();
+    });
 
     if (external) external.setAttribute('href', externalUrl);
 
@@ -604,12 +657,8 @@ export function setupOriginalModal() {
                 } catch {}
             }
         }
-        if (groupSelect) {
-            const value = String(gid);
-            const exists = [...groupSelect.options]
-                .some(option => String(option.value) === value);
-            if (!exists && currentGid) renderGroupPicker();
-            groupSelect.value = value;
+        if (groupPopover && !groupPopover.hidden) {
+            renderGroupPicker();
         }
     }
 

@@ -77,6 +77,32 @@
 }
 .filter-search::placeholder { color: var(--text-dim); }
 
+/* Крестик очистки: появляется только когда есть текст. */
+.filter-search-clear {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 17px;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    transition: background 0.12s, color 0.12s;
+}
+.filter-search-clear:hover {
+    background: var(--surface-3);
+    color: var(--text);
+}
+.filter-search-clear[hidden] { display: none; }
+
 /* ---------- заголовки секций ---------- */
 
 .filter-section-head,
