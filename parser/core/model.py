@@ -60,6 +60,7 @@ class RawBranch:
     source_text: str = ""
     room_source: str = ""
     source_ref: dict = field(default_factory=dict)
+    kind: str = ""
 
 
 @dataclass(frozen=True)
@@ -67,6 +68,8 @@ class FacultySource:
     type: str
     url: str | None = None
     spreadsheet_id: str | None = None
+    kind: str = ""
+    kinds: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -77,3 +80,4 @@ class Faculty:
     source: FacultySource
     prompt: str = ""
     enabled: bool = True
+    sources: tuple[FacultySource, ...] = ()

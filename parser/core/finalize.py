@@ -202,6 +202,7 @@ async def transform_schedule(
                 "teachers":     teachers,
                 "dates":        dates,
                 "rooms":        event.get("rooms", "") or "",
+                "kind":         event.get("kind", "") or "",
                 "comment":      "",
                 "is_past":      event.get("is_past", False),
                 "color":        event.get("color", "") or "",

@@ -21,7 +21,7 @@ from parser.core.model import Faculty
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 def _text(payload: dict) -> str:
