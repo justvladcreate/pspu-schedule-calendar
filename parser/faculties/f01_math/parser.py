@@ -27,7 +27,7 @@ from datetime import date, datetime, timedelta
 from parser.core.colors import is_grey, match_color
 from parser.core.dates import expand_date_text
 from parser.core.model import AcademicPeriod, Faculty, RawBranch
-from parser.core.text import normalize_time
+from parser.core.text import clean_room, normalize_time
 from parser.core.usage import usage_context
 from parser.faculties.base import (
     AFTER_AI_NAME,
@@ -285,59 +285,9 @@ def _parse_line(line: str, year: int | None) -> dict:
     }
 
 
-_ROOM_JUNK = {
-    "-", "—", "–", "нет", "n/a", "н/д", "н д", "nan",
-}
-_MAX_ROOM_RE = re.compile(r"\b(?:max|мах|макс|максимум)\b", re.I)
-
-
 def _clean_room_line(line: str) -> tuple[str, str]:
-    """Одна строка колонки аудиторий → (аудитория, пометка).
-
-    «Max»/«мах»/«макс» — дистанционка, а не номер аудитории.
-    «Видеолекции» — пометка, а не аудитория.
-    Даты, ссылки и ФИО из поля аудитории вычищаем.
-    """
-    text = str(line or "").strip()
-    if not text or text.lower() in _ROOM_JUNK:
-        return "", ""
-
-    text = text.replace("\\", "/")
-    text = re.sub(r"\s+", " ", text).strip()
-    low = text.lower()
-
-    if _MAX_ROOM_RE.search(low) or "joincall" in low or "http" in low:
-        return "дистанционно онлайн", ""
-    if "видеолекц" in low:
-        return "", "Видеолекции"
-
-    # Даты перед аудиторией: «23.09-В-103», «IV / 26.10-А-323».
-    text = re.sub(r"\b\d{1,2}\.\d{2}(?:\.\d{4})?\s*[-–—]\s*", "", text)
-    # Даты в скобках/после «до»: «IV / 206 (26.10)», «А-304 (до 28.10».
-    text = re.sub(
-        r"\(\s*(?:до|с|по)?\s*\d{1,2}\.\d{2}(?:\.\d{4})?\s*\)?",
-        "",
-        text,
-        flags=re.I,
-    )
-    # ФИО в скобках и без них — к аудитории не относятся.
-    text = re.sub(r"\s*\([^()]*[А-ЯЁ]\.\s*[А-ЯЁ]?\.[^()]*\)", "", text)
-    text = _TEACHER_RE.sub("", text)
-
-    # «гл. корп / 15», «гл. корп15» → «гл. корп. 15».
-    text = re.sub(
-        r"гл\.?\s*корп\.?\s*[/\\]?\s*",
-        "гл. корп. ",
-        text,
-        flags=re.I,
-    )
-    text = re.sub(r"\s*/\s*", " / ", text)
-    text = re.sub(r"\s+", " ", text).strip(" ,;:.)")
-    if text.lower() in {"гл. корп", "гл.корп"}:
-        text = "гл. корп."
-    if text.lower() in _ROOM_JUNK:
-        return "", ""
-    return text, ""
+    """Очистка аудитории — общая для факультетов, см. core.text."""
+    return clean_room(line)
 
 
 def _room_entries(value: str) -> list[tuple[str, str]]:

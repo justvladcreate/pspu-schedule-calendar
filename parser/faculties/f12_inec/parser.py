@@ -186,13 +186,16 @@ class InecParser(FacultyParser):
             groups = await DataExtractor(_SheetsSource(oo_sheets)).extract()
 
         if zo_sheets:
-            from parser.faculties.common.zaoch import parse_zaoch_sheet
+            from parser.faculties.common.zaoch import (
+                merge_zaoch_groups, parse_zaoch_sheet,
+            )
 
             bounds = period.academic_bounds()
             year = period.semester_start.year if period.semester_start else None
             for sheet in zo_sheets:
-                groups.update(
-                    parse_zaoch_sheet(sheet, year=year, bounds=bounds)
+                merge_zaoch_groups(
+                    groups,
+                    parse_zaoch_sheet(sheet, year=year, bounds=bounds),
                 )
 
         extracted_path = self.paths.latest_file(EXTRACTED_NAME)

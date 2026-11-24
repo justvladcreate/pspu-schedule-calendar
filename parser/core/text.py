@@ -79,3 +79,63 @@ def normalize_time(time_str: str) -> str:
         if 0 <= hour <= 23 and 0 <= minute <= 59:
             return f"{hour:02d}:{minute:02d}"
     return time_str
+
+
+# ------------------------------------------------------------------ rooms
+_ROOM_JUNK = {
+    "-", "—", "–", "нет", "n/a", "н/д", "н д", "nan",
+}
+_MAX_ROOM_RE = re.compile(r"\b(?:max|мах|макс|максимум)\b", re.I)
+_ROOM_TEACHER_RE = re.compile(
+    r"(?:[А-ЯЁ]\.\s*){1,2}\s*[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?"
+    r"|[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s+(?:[А-ЯЁ]\.\s*){1,2}"
+)
+
+
+def clean_room(line: str) -> tuple[str, str]:
+    """Строка колонки аудиторий → (аудитория, пометка).
+
+    «Max»/«мах»/«макс» — дистанционка, а не номер аудитории.
+    «Видеолекции» — пометка, а не аудитория.
+    Даты, ссылки и ФИО из поля аудитории вычищаем.
+    """
+    text = str(line or "").strip()
+    if not text or text.lower() in _ROOM_JUNK:
+        return "", ""
+
+    text = text.replace("\\", "/")
+    text = re.sub(r"\s+", " ", text).strip()
+    low = text.lower()
+
+    if _MAX_ROOM_RE.search(low) or "joincall" in low or "http" in low:
+        return "дистанционно онлайн", ""
+    if "видеолекц" in low:
+        return "", "Видеолекции"
+
+    # Даты перед аудиторией: «23.09-В-103», «IV / 26.10-А-323».
+    text = re.sub(r"\b\d{1,2}\.\d{2}(?:\.\d{4})?\s*[-–—]\s*", "", text)
+    # Даты в скобках/после «до»: «IV / 206 (26.10)», «А-304 (до 28.10».
+    text = re.sub(
+        r"\(\s*(?:до|с|по)?\s*\d{1,2}\.\d{2}(?:\.\d{4})?\s*\)?",
+        "",
+        text,
+        flags=re.I,
+    )
+    # ФИО в скобках и без них — к аудитории не относятся.
+    text = re.sub(r"\s*\([^()]*[А-ЯЁ]\.\s*[А-ЯЁ]?\.[^()]*\)", "", text)
+    text = _ROOM_TEACHER_RE.sub("", text)
+
+    # «гл. корп / 15», «гл. корп15» → «гл. корп. 15».
+    text = re.sub(
+        r"гл\.?\s*корп\.?\s*[/\\]?\s*",
+        "гл. корп. ",
+        text,
+        flags=re.I,
+    )
+    text = re.sub(r"\s*/\s*", " / ", text)
+    text = re.sub(r"\s+", " ", text).strip(" ,;:.)")
+    if text.lower() in {"гл. корп", "гл.корп"}:
+        text = "гл. корп."
+    if text.lower() in _ROOM_JUNK:
+        return "", ""
+    return text, ""
