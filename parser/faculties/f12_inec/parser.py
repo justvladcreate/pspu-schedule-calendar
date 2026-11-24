@@ -72,6 +72,50 @@ def _inherit_discipline(lines: list[str]) -> list[str]:
     return result
 
 
+def _norm_discipline(value: str) -> str:
+    return " ".join(value.replace("ё", "е").lower().split())
+
+
+def _inherit_teachers(lines: list[str]) -> list[str]:
+    """Один преподаватель на всю дисциплину внутри ячейки.
+
+    В ячейке преподаватель часто указан один раз — после всех частей:
+    «с 24.10-21.11, 28.11 Web-программирование (лек.), с 5.12-26.12 прак.
+    ст.преп. Кудреватых В.А.». Модель иногда относит его только к той
+    части, после которой он стоит, и лекция остаётся без преподавателя.
+    Здесь преподаватель дублируется по всем строкам той же ячейки
+    и той же дисциплины.
+
+    Ячейка — номер из первой колонки (`[33]`), дисциплина берётся
+    после `_inherit_discipline`, чтобы пустые названия уже были
+    заполнены.
+    """
+    rows = [line.split(";") for line in lines]
+
+    known: dict[tuple[str, str], str] = {}
+    for parts in rows:
+        if len(parts) < 9:
+            continue
+        teachers = parts[8].strip()
+        if teachers in ("", "-"):
+            continue
+        key = (parts[0].strip(), _norm_discipline(parts[5]))
+        known.setdefault(key, teachers)
+
+    if not known:
+        return lines
+
+    result: list[str] = []
+    for parts in rows:
+        if len(parts) >= 9 and parts[8].strip() in ("", "-"):
+            inherited = known.get((parts[0].strip(), _norm_discipline(parts[5])))
+            if inherited:
+                parts[8] = inherited
+        result.append(";".join(parts))
+
+    return result
+
+
 class InecParser(FacultyParser):
     id = "12"
     uses_llm = True
@@ -208,6 +252,7 @@ class InecParser(FacultyParser):
             new_cache[key] = lines
 
             lines = _inherit_discipline(lines)
+            lines = _inherit_teachers(lines)
 
             merged: list[dict] = []
             enum_counts = Counter()

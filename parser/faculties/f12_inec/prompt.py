@@ -77,7 +77,7 @@ Teacher names consist of a title (one of ст.преп., ст. преп., доц
 Hour annotations of the form "-Nч" (e.g. "-22ч", "-8ч") belong to the teachers field: they immediately follow the teacher name and are part of that teacher's workload, so append them to the teacher string.
 
 
-If no teacher appears in the branch, look ahead to later parts of the same element’s text (if available) – sometimes the teacher is given only after all branches. If still not found, write a single dash "-" in the teachers field, as required by the output format.
+If no teacher appears in the branch, look ahead to later parts of the same element’s text (if available) – sometimes the teacher is given only after all branches. A teacher written once after several branches of the same discipline applies to every one of those branches: repeat the same teacher string in each of their output lines. If still not found, write a single dash "-" in the teachers field, as required by the output format.
 
 7. Assemble the discipline
 After removing the date and time part, type parentheses, subgroup token, and teacher string, the remaining text is the discipline. Trim leading/trailing spaces, commas, and dots. If the discipline includes notes like (ТЕСТИРОВАНИЕ) or "ЯВКА СТУДЕНТОВ ОБЯЗАТЕЛЬНА", keep them as part of the discipline name.
