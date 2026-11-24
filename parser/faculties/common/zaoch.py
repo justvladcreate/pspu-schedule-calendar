@@ -116,6 +116,28 @@ def _detect_group(rows: list[list], fallback: str) -> str:
     return _normalize_group(fallback)
 
 
+def _sheet_groups(rows: list[list], sheet_name: str) -> list[str]:
+    """Все группы листа: из шапки и из имени.
+
+    В шапке обычно одна группа («5 курс, Z152»), а в имени листа может
+    стоять несколько — «Z151   Z152». Это значит, что занятия общие:
+    в файле для этой пары групп один лист, и все дисциплины есть в
+    учебных планах обеих групп.
+    """
+    groups: list[str] = []
+
+    header_group = _detect_group(rows, sheet_name)
+    if looks_like_group(header_group):
+        groups.append(header_group)
+
+    for token in _GROUP_TOKEN_RE.findall(str(sheet_name or "")):
+        candidate = _normalize_group(token)
+        if looks_like_group(candidate) and candidate not in groups:
+            groups.append(candidate)
+
+    return groups
+
+
 def _text(value) -> str:
     if value is None:
         return ""
@@ -366,19 +388,25 @@ def merge_zaoch_groups(target: dict, incoming: dict) -> None:
 
 
 def parse_zaoch_sheet(sheet: SheetData, year: int | None = None, bounds=None) -> dict:
-    """Возвращает {группа: {"events": [...], "kind": "zo"}}."""
+    """Возвращает {группа: {"events": [...], "kind": "zo"}}.
+
+    Если лист общий для нескольких групп («Z151   Z152»), расписание
+    возвращается для каждой из них.
+    """
     df = getattr(sheet, "df", None)
     rows = df.values.tolist() if df is not None and not df.empty else []
 
-    group = _detect_group(rows, sheet.name)
-    if not looks_like_group(group):
+    groups = _sheet_groups(rows, sheet.name)
+    if not groups:
         logger.info("Заочка: лист %r не похож на группу, пропускаю", sheet.name)
         return {}
+
+    group = groups[0]
 
     header_index, columns = _find_header(rows)
     if header_index < 0:
         logger.warning("Заочка %s: не найдена шапка таблицы", group)
-        return {group: {"events": [], "kind": "zo"}}
+        return {name: {"events": [], "kind": "zo"} for name in groups}
 
     year = year or datetime.now().year
     day_col = columns.get("day", 0)
@@ -510,5 +538,12 @@ def parse_zaoch_sheet(sheet: SheetData, year: int | None = None, bounds=None) ->
 
     events.sort(key=lambda e: (WEEKDAYS.index(e["weekday"]), e["time_start"]))
 
-    logger.info("Заочка %s: событий %d", group, len(events))
-    return {group: {"events": events, "kind": "zo"}}
+    logger.info(
+        "Заочка %s: событий %d%s",
+        group, len(events),
+        f" (лист общий для {', '.join(groups)})" if len(groups) > 1 else "",
+    )
+    return {
+        name: {"events": [dict(event) for event in events], "kind": "zo"}
+        for name in groups
+    }

@@ -148,6 +148,20 @@ def test_dates_outside_academic_year_are_dropped():
     assert events == []
 
 
+def test_sheet_name_lists_several_groups():
+    """Лист «Z151   Z152» — занятия общие, публикуем обеим группам."""
+    rows = [
+        ["5 курс,  Z152"],
+        ["День", "№", "Начало занятий", "Дисциплина / ФИО", "Форма"],
+        ["понедельник 05.10.2026", "3", "11-30", "Алгебра / Иванов И.И.", "А-101"],
+    ]
+    data = parse_zaoch_sheet(_sheet(rows, "Z151   Z152"), year=2026)
+
+    assert sorted(data) == ["Z151", "Z152"]
+    assert data["Z151"]["events"] == data["Z152"]["events"]
+    assert data["Z151"]["events"][0]["discipline"] == "Алгебра"
+
+
 def test_merge_keeps_events_from_stale_copy():
     """«Z1233» и «Z1233 (копия)»: пустой лист не затирает разобранный."""
     good = {
