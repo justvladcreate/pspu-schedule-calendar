@@ -10,6 +10,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,6 +33,11 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 WEB_DIR = PROJECT_ROOT / "web"
 WEB_DATA_DIR = WEB_DIR / "data"
 OVERRIDES_PATH = PROJECT_ROOT / "overrides.yaml"
+
+# Данные живут отдельно от кода: ветка data и рабочее дерево для неё.
+# Так коммиты парсера не мешают правкам кода и не ломают git pull.
+DATA_BRANCH = "data"
+DATA_WORKTREE = PROJECT_ROOT / ".data-branch"
 
 
 # ================================================================
@@ -226,10 +232,10 @@ def _stamp(results: dict[str, dict]) -> str:
 # git
 # ================================================================
 
-def _git(*args: str) -> subprocess.CompletedProcess:
+def _git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["git", *args],
-        cwd=str(PROJECT_ROOT),
+        cwd=str(cwd or PROJECT_ROOT),
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -254,27 +260,116 @@ def _sync_pull() -> bool:
     return True
 
 
-def _sync_commit_and_push() -> bool:
-    add = _git("add", "web/data")
+# ------------------------------------------------------------------ data-ветка
+
+def _clear_dir(path: Path) -> None:
+    """Удаляет содержимое каталога, не трогая .git рабочего дерева."""
+    for entry in path.iterdir():
+        if entry.name == ".git":
+            continue
+        if entry.is_dir() and not entry.is_symlink():
+            shutil.rmtree(entry, ignore_errors=True)
+        else:
+            entry.unlink(missing_ok=True)
+
+
+def _copy_tree(src: Path, dst: Path) -> None:
+    dst.mkdir(parents=True, exist_ok=True)
+    for entry in src.iterdir():
+        target = dst / entry.name
+        if entry.is_dir():
+            shutil.copytree(entry, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(entry, target)
+
+
+def _data_worktree() -> Path | None:
+    """Рабочее дерево ветки ``data`` (создаётся при первом прогоне).
+
+    Каталог ``.data-branch`` лежит рядом с кодом, но это отдельное
+    рабочее дерево git: коммиты данных не касаются ``main``.
+    """
+    if (DATA_WORKTREE / ".git").exists():
+        _git("fetch", "--quiet", "origin", DATA_BRANCH)
+        if _git("rev-parse", "--verify", f"origin/{DATA_BRANCH}").returncode == 0:
+            _git("reset", "--hard", f"origin/{DATA_BRANCH}", cwd=DATA_WORKTREE)
+        return DATA_WORKTREE
+
+    if DATA_WORKTREE.exists():
+        shutil.rmtree(DATA_WORKTREE, ignore_errors=True)
+
+    _git("fetch", "--quiet", "origin", DATA_BRANCH)
+    has_remote = (
+        _git("rev-parse", "--verify", f"origin/{DATA_BRANCH}").returncode == 0
+    )
+
+    if has_remote:
+        add = _git(
+            "worktree", "add", "--force", "-B", DATA_BRANCH,
+            str(DATA_WORKTREE), f"origin/{DATA_BRANCH}",
+        )
+    else:
+        # Первый прогон: ветки ещё нет. Делаем осиротевшую ветку,
+        # чтобы в ней не было истории кода.
+        add = _git("worktree", "add", "--detach", str(DATA_WORKTREE))
+        if add.returncode == 0:
+            _git("checkout", "--orphan", DATA_BRANCH, cwd=DATA_WORKTREE)
+            _git("rm", "-rf", "--cached", ".", cwd=DATA_WORKTREE)
+            _git("rm", "-rf", ".", cwd=DATA_WORKTREE)
+
     if add.returncode != 0:
-        logger.error("git add: %s", add.stderr.strip())
+        logger.error(
+            "Не удалось создать рабочее дерево ветки %s: %s",
+            DATA_BRANCH, (add.stderr or add.stdout).strip(),
+        )
+        return None
+
+    return DATA_WORKTREE
+
+
+def _write_data_commit(worktree: Path) -> bool:
+    """Копирует web/data в ветку data и коммитит. True — если был коммит."""
+    _clear_dir(worktree)
+    _copy_tree(WEB_DATA_DIR, worktree / "web" / "data")
+
+    _git("add", "-A", cwd=worktree)
+    if _git("diff", "--cached", "--quiet", cwd=worktree).returncode == 0:
         return False
 
-    if _git("diff", "--cached", "--quiet").returncode == 0:
+    commit = _git("commit", "-m", "data: update schedule", cwd=worktree)
+    if commit.returncode != 0:
+        logger.error("git commit (data): %s", commit.stderr.strip())
+        return False
+    return True
+
+
+def _sync_commit_and_push() -> bool:
+    worktree = _data_worktree()
+    if worktree is None:
+        return False
+
+    if not _write_data_commit(worktree):
         logger.info("Нет изменений для коммита")
         return False
 
-    commit = _git("commit", "-m", "chore: update schedule")
-    if commit.returncode != 0:
-        logger.error("git commit: %s", commit.stderr.strip())
-        return False
-
-    push = _git("push")
+    push = _git("push", "origin", f"HEAD:{DATA_BRANCH}", cwd=worktree)
     if push.returncode != 0:
-        logger.error("git push: %s", push.stderr.strip())
+        # Кто-то успел запушить (ручной прогон рядом с сервисом):
+        # перечитываем ветку и повторяем — данные всё равно собираются
+        # из web/data заново.
+        logger.warning("git push (data) отклонён, повторяю: %s", push.stderr.strip())
+        _git("fetch", "--quiet", "origin", DATA_BRANCH, cwd=worktree)
+        _git("reset", "--hard", f"origin/{DATA_BRANCH}", cwd=worktree)
+        if not _write_data_commit(worktree):
+            logger.info("После перечитывания ветки коммитить нечего")
+            return False
+        push = _git("push", "origin", f"HEAD:{DATA_BRANCH}", cwd=worktree)
+
+    if push.returncode != 0:
+        logger.error("git push (data): %s", push.stderr.strip())
         return False
 
-    logger.info("Расписание закоммичено и запушено")
+    logger.info("Расписание опубликовано в ветку %s", DATA_BRANCH)
     return True
 
 

@@ -228,5 +228,8 @@ chunks**
 dev
 .idea/
 .worktree-gh-pages/
+# Публикуемые данные живут в ветке data; в main их нет.
+web/data/
+.data-branch/
 # Reference copies of Cloudflare workers (deployed manually, not tracked)
 cloudflare/reference/

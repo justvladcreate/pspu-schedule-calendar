@@ -49,7 +49,7 @@ data/faculties/<id>/
   old/     те же файлы предыдущего прогона
 ```
 
-Фронтенд (в Git):
+Фронтенд (в Git — **ветка `data`**, в `main` этих файлов нет):
 
 ```text
 web/data/index.json                     # список факультетов, версии, группы
@@ -58,6 +58,11 @@ web/data/faculties/<id>/old_data.json   # предыдущая версия
 web/data/faculties/<id>/sheets.json     # список листов «Оригинала»
 web/data/faculties/<id>/sheets/*.html   # предрендер листов (имя содержит хэш)
 ```
+
+Парсер пишет `web/data` в рабочем дереве и публикует его отдельным
+коммитом в ветку `data` (рабочее дерево — `.data-branch/`). Pages
+собирает сайт из двух веток: код из `main`, данные из `data`.
+Так коммиты парсера не мешают правкам кода и не ломают `git pull`.
 
 `sheets.json` перечисляет листы всех исходных файлов факультета
 (очное, заочное, сессии, ГИА): у каждого есть `id` (`<kind>:<имя>`),
@@ -111,7 +116,7 @@ process_all()
     overrides.apply_overrides()
     если события изменились → rotate(latest) + write parsed.json
   publish() → index.json + web/data/faculties/<id>/{data,old_data}.json
-  git commit/push
+  git commit/push → ветка data (код в main не трогается)
 ```
 
 ### ИНЭК (эталон, не менять без нужды)
@@ -245,7 +250,10 @@ LLM вызывается только для строк с низкой увер
   `file` нет — путь к данным строится от `index.json`.
 - Cron Trigger — каждые 5 минут: `*/5 * * * *` (без пробела после `*`).
   Выражение `5 * * * *` срабатывает раз в час.
-- `GET /health` показывает сборку, `indexUrl` и публичный VAPID-ключ;
+- `GET /health` показывает сборку, `indexUrl`, публичный VAPID-ключ и
+  блок `parser`: когда данные опубликованы (`generated_at`), каким кодом
+  (`version`, `host`) и сколько событий/факультетов. Берётся из
+  `index.json`, отдельного health-файла нет;
   `GET /diag` — видит ли воркер `data.json`/`old_data.json` факультетов
   и какие версии лежат в KV.
 - `VAPID_SUBJECT` должен быть URI: `mailto:you@example.com`.
@@ -274,10 +282,9 @@ LLM вызывается только для строк с низкой увер
   `python -m utils.usage`. Отключается `USAGE_LOG=0`, каталог меняется
   `USAGE_DIR`, источник (`service` / `manual` / `bench`) — `USAGE_SOURCE`.
 - `data/` — рабочие файлы парсера (не коммитить).
-- `web/data/index.json`, `web/data/faculties/<id>/*.json` — публикуемые
-  данные, они в Git.
-- `web/data/faculties/<id>/sheets/*.html` — предрендер «Оригинала», тоже
-  в Git (обновляется при прогоне парсера).
+- `web/data/` в `main` не отслеживается (`.gitignore`): публикуемые данные
+  живут в ветке `data`, её обновляет парсер. Для локального просмотра файлы
+  остаются на диске как обычный кэш.
 - Не коммитить `private/`, `.venv/`, `data/`, `__pycache__/`, `.idea/`.
 
 ## Команды

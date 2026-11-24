@@ -754,6 +754,36 @@ async function fetchSchedule(url) {
   return response.json();
 }
 
+/**
+ * Состояние парсера по опубликованным данным: когда публиковали,
+ * каким кодом и что получилось. Отдельного health-файла нет —
+ * всё берём из index.json, чтобы не было лишних коммитов.
+ */
+async function parserHealth(indexUrl) {
+  try {
+    const index = await fetchSchedule(indexUrl);
+    if (!index || !index.generated_at) return null;
+
+    const meta = index.parser || {};
+    const faculties = (index.faculties || []).map((faculty) => ({
+      id: faculty.id,
+      short: faculty.short || faculty.name || faculty.id,
+      events: faculty.events,
+      generated_at: faculty.generated_at || null,
+    }));
+
+    return {
+      generated_at: index.generated_at,
+      version: meta.version || null,
+      host: meta.host || null,
+      events: faculties.reduce((sum, item) => sum + (Number(item.events) || 0), 0),
+      faculties,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 function facultyFileUrl(env, folder, { previous = false } = {}) {
   // В index.json у факультета есть folder: "faculties/<id>".
   // Папка факультета лежит рядом с index.json (data/faculties/<id>/),
@@ -1157,14 +1187,16 @@ export default {
 
     try {
       if (url.pathname === '/' || url.pathname === '/health') {
+        const indexUrl = env.SCHEDULE_INDEX_URL || DEFAULT_INDEX_URL;
         return json({
           ok: true,
           service: 'pspu-push-worker',
           mode: 'per-faculty',
-          build: '2026-11-06-push-details',
-          indexUrl: env.SCHEDULE_INDEX_URL || DEFAULT_INDEX_URL,
+          build: '2026-11-25-health',
+          indexUrl,
           vapidPublicKey: String(env.VAPID_PUBLIC_KEY || '').trim() || null,
           endpoints: ['/subscribe', '/unsubscribe', '/test', '/diag'],
+          parser: await parserHealth(indexUrl),
         });
       }
 

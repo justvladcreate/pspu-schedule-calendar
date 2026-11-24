@@ -12,9 +12,13 @@ SERVICE="${SERVICE:-pspu-schedule-calendar.service}"
 
 cd "$REPO_DIR"
 
-# Локальная публикация (web/data) не должна блокировать деплой:
-# сервис всё равно пересоберёт данные после перезапуска.
-git checkout -- web/data 2>/dev/null || true
+# Миграция со старой схемы: раньше web/data лежал в main. Теперь он
+# живёт в ветке data, а в рабочем дереве это только кэш парсера.
+# Проверяем, отслеживается ли файл, — после перехода на data-ветку
+# эта ветка просто не сработает и ничего не удалит.
+if git ls-files --error-unmatch web/data/index.json >/dev/null 2>&1; then
+    git checkout -- web/data 2>/dev/null || true
+fi
 
 before="$(git rev-parse HEAD)"
 

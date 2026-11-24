@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import json
 import logging
+import socket
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -22,6 +24,23 @@ from parser.core.model import Faculty
 logger = logging.getLogger(__name__)
 
 SCHEMA_VERSION = 3
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _code_version() -> str:
+    """Короткий SHA кода, которым собраны данные (для GET /health)."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+    except OSError:
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""
 
 
 def _text(payload: dict) -> str:
@@ -202,6 +221,11 @@ def publish(
     index = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": stamp,
+        # Кто и каким кодом собрал данные — для GET /health в push-воркере.
+        "parser": {
+            "version": _code_version(),
+            "host": socket.gethostname(),
+        },
         "faculties": [entries[fid] for fid in ordered_ids if fid in entries],
     }
     _write(index_path, _text(index))
