@@ -14,6 +14,7 @@ Description=Deploy latest schedule code from GitHub
 
 [Service]
 Type=oneshot
+User=serveradmin
 ExecStart=/home/serveradmin/pspu-schedule-calendar/deploy/deploy.sh
 EOF
 
@@ -30,7 +31,12 @@ Unit=pspu-deploy.service
 WantedBy=timers.target
 EOF
 
-sudo chmod +x deploy/deploy.sh
+# Перезапуск сервиса без пароля — только эта команда.
+echo 'serveradmin ALL=(root) NOPASSWD: /usr/bin/systemctl restart pspu-schedule-calendar.service' \
+  | sudo tee /etc/sudoers.d/pspu-deploy >/dev/null
+sudo chmod 440 /etc/sudoers.d/pspu-deploy
+sudo visudo -c
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now pspu-deploy.timer
 ```
@@ -57,7 +63,10 @@ journalctl -u pspu-deploy.service -n 20 --no-pager
 
 - деплой следит за веткой **main**. Пока правки живут в
   `feature/multi-source-schedule`, автодеплой их не увидит — нужно смержить;
-- `pspu-deploy.service` работает от root (нужен перезапуск сервиса);
+- сервис идёт от `serveradmin`: у root нет ни доступа к репозиторию
+  (`dubious ownership`), ни ssh-алиаса `github-pspu` из `~/.ssh/config`;
+- перезапуск парсера разрешён через `/etc/sudoers.d/pspu-deploy`
+  (только `systemctl restart pspu-schedule-calendar.service`, без пароля);
 - если нужно деплоить другую ветку, поправьте `BRANCH=` в `deploy.sh`;
 - локальные изменения на сервере (`data/`, `private/`) не мешают: они в
   `.gitignore`, `git pull --ff-only` их не трогает.

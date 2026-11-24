@@ -28,5 +28,7 @@ echo "deploy: $before -> $remote"
 git pull --ff-only --quiet origin "$BRANCH"
 
 # Перезапуск обязателен: Python не перечитывает код на ходу.
-systemctl restart "$SERVICE"
+# Сервис деплоя работает от serveradmin, поэтому нужен NOPASSWD-доступ
+# только к этой команде (см. deploy/README.md).
+sudo -n systemctl restart "$SERVICE"
 echo "deploy: обновлено, $SERVICE перезапущен"
