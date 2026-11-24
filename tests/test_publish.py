@@ -113,6 +113,21 @@ def test_publish_points_to_prerendered_sheets(tmp_path):
     assert "file" not in original
 
 
+def test_publish_google_faculty_keeps_extra_sheets(tmp_path):
+    """У гугл-факультета очное из Google, а заочка — предрендеренная."""
+    faculty = _faculty("12")
+    folder = tmp_path / "faculties" / "12"
+    folder.mkdir(parents=True)
+    (folder / "sheets.json").write_text('{"sheets":[]}', encoding="utf-8")
+
+    index_path = publish(tmp_path, [faculty], {"12": [{"group": "1221"}]}, "v1")
+
+    original = json.loads(index_path.read_text(encoding="utf-8"))["faculties"][0]["original"]
+    assert original["spreadsheet_id"] == "x"
+    assert original["sheets"] == "sheets.json"
+
+
+
 def test_publish_several_faculties(tmp_path):
     publish(
         tmp_path,

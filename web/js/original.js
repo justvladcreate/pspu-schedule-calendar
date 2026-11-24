@@ -2,7 +2,7 @@
 
 import { fetchSheetHtml } from './sheets.js';
 import {
-    createGoogleSource, createStaticSource, sheetTitle,
+    createGoogleSource, createStaticSource, createCompositeSource, sheetTitle,
 } from './original-source.js';
 import { state } from './state.js';
 import {
@@ -388,13 +388,17 @@ export function setupOriginalModal() {
         buildTabs();
         renderGroupPicker();
 
-        // Предрендеренные листы (очное + заочное + сессия + ГИА)
-        // важнее типа источника: если они есть — показываем их,
-        // иначе для google_sheets идём в htmlview.
-        if (original && original.sheets) {
+        // Предрендеренные листы важнее типа источника. Если у факультета
+        // есть и Google-таблица, и дополнительные файлы (заочка, сессии),
+        // показываем листы обоих.
+        const folder = `data/${(meta && meta.folder) || `faculties/${id}`}`;
+
+        if (original && original.spreadsheet_id && original.sheets) {
+            spreadsheetId = original.spreadsheet_id;
+            source = createCompositeSource(spreadsheetId, folder);
+        } else if (original && original.sheets) {
             spreadsheetId = '';
-            const folder = (meta && meta.folder) || `faculties/${id}`;
-            source = createStaticSource(`data/${folder}`);
+            source = createStaticSource(folder);
         } else if (original && original.spreadsheet_id) {
             spreadsheetId = original.spreadsheet_id;
             source = createGoogleSource(spreadsheetId);
@@ -690,14 +694,14 @@ export function setupOriginalModal() {
      * берётся с no-store.
      */
     async function refreshSheetList() {
-        if (!source || source.type !== 'google' || !spreadsheetId) return;
+        if (!source || typeof source.refresh !== 'function') return;
 
         const sourceRef = source;
         const facultyRef = activeFacultyId;
 
         try {
-            const fresh = await fetchSheetListFromNetwork(spreadsheetId);
-            if (!fresh.length) return;
+            const fresh = await source.refresh(fetchSheetListFromNetwork);
+            if (!fresh || !fresh.length) return;
             // Факультет успели переключить — чужой список не применяем.
             if (source !== sourceRef || activeFacultyId !== facultyRef) return;
 

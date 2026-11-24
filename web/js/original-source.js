@@ -48,6 +48,9 @@ export function createGoogleSource(spreadsheetId) {
         async htmlFor(fetchSheetHtml, gid) {
             return fetchSheetHtml(spreadsheetId, gid);
         },
+        async refresh(fetchSheetListFresh) {
+            return fetchSheetListFresh(spreadsheetId);
+        },
     };
 }
 
@@ -101,6 +104,41 @@ export function createStaticSource(folder) {
             const resp = await fetch(`${base}/${sheet.file}`, { cache: 'force-cache' });
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             return resp.text();
+        },
+    };
+}
+
+/**
+ * Google-таблица + предрендеренные листы (заочка, сессии, ГИА).
+ * Листы Google идут первыми, дополнительные — после них.
+ * gid предрендеренных листов содержит «:» (например «zo:Z1223»),
+ * по нему и различаем источники.
+ */
+export function createCompositeSource(spreadsheetId, folder) {
+    const google = createGoogleSource(spreadsheetId);
+    const local = createStaticSource(folder);
+
+    return {
+        type: 'composite',
+        async list(fetchSheetList) {
+            const [remote, extra] = await Promise.all([
+                google.list(fetchSheetList).catch(() => []),
+                local.list().catch(() => []),
+            ]);
+            return [...remote, ...extra];
+        },
+        async htmlFor(fetchSheetHtml, gid) {
+            if (String(gid).includes(':')) return local.htmlFor(fetchSheetHtml, gid);
+            return google.htmlFor(fetchSheetHtml, gid);
+        },
+        async refresh(fetchSheetListFresh) {
+            // Если гугл-часть не пришла (сеть), список не трогаем:
+            // иначе пропали бы вкладки Google.
+            const remote = await fetchSheetListFresh(spreadsheetId).catch(() => null);
+            if (!remote || !remote.length) return null;
+            const extra = await local.list().catch(() => null);
+            if (!extra) return null;
+            return [...remote, ...extra];
         },
     };
 }

@@ -56,8 +56,9 @@ def faculty_original(faculty: Faculty, folder: Path | None = None) -> dict:
     original: dict = {"type": faculty.source.type, "url": faculty.source.url}
     if faculty.source.type == "google_sheets":
         original["spreadsheet_id"] = faculty.source.spreadsheet_id
-    elif folder and (folder / "sheets.json").exists():
-        # Предрендеренные листы (шрифты, цвета, рамки) для «Оригинала»
+    # Предрендеренные листы (шрифты, цвета, рамки). Для гугл-факультета
+    # это дополнительный файл — например, заочное отделение.
+    if folder and (folder / "sheets.json").exists():
         original["sheets"] = "sheets.json"
     return original
 
