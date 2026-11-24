@@ -56,8 +56,15 @@ web/data/index.json                     # список факультетов, �
 web/data/faculties/<id>/data.json       # текущая версия
 web/data/faculties/<id>/old_data.json   # предыдущая версия
 web/data/faculties/<id>/sheets.json     # список листов «Оригинала»
-web/data/faculties/<id>/sheets/*.html   # предрендер листов (шрифты, цвета, рамки)
+web/data/faculties/<id>/sheets/*.html   # предрендер листов (имя содержит хэш)
 ```
+
+`sheets.json` перечисляет листы всех исходных файлов факультета
+(очное, заочное, сессии, ГИА): у каждого есть `id` (`<kind>:<имя>`),
+`name`, `kind`, `source` и `file`. Имя файла листа включает хэш
+содержимого, поэтому изменившийся лист приходит по новому адресу и
+не залипает в кэше браузера; лишние файлы прошлых прогонов удаляются
+при рендере.
 
 `index.json` содержит для каждого факультета `folder`, `groups`,
 `events`, `generated_at` и `original` (тип источника + ссылка).
@@ -82,6 +89,7 @@ web/data/faculties/<id>/sheets/*.html   # предрендер листов (ш�
 | `utils/run_local.py` | локальный прогон по факультетам (флаги `--faculty`, |
 |  | `--no-publish`, `--git-push`, `--source`, `--list`) |
 | `utils/rebuild_parsed.py` | пересборка `parsed.json` из `after_ai.json` |
+| `utils/rebuild_original.py` | пересборка листов «Оригинала» из скачанных XLSX |
 | `utils/usage.py` | отчёт по расходу токенов (`--period`, `--by`) |
 | `parser/core/usage.py` | журнал расхода: `data/usage/YYYY-MM.jsonl` |
 | `web/` | статический сайт |
@@ -156,7 +164,10 @@ LLM вызывается только для строк с низкой увер
   шрифтов, цветов, рамок и объединённых ячеек; при их отсутствии —
   ссылка на cloud.mail. Сверху — чипы факультетов, в полосе листов —
   стрелка выбора группы; последний лист запоминается отдельно для
-  каждого факультета.
+  каждого факультета. Если в `sheets.json` есть листы, показываем их
+  (это приоритетнее Google): так в «Оригинале» видны и очное, и заочное,
+  и сессии. Список листов Google перепроверяется в фоне, чтобы новый
+  лист-группа не ждал сутки.
 - `sw.js` кэширует статику cache-first, `/data/` — network-first.
 - После добавления JS обновите `STATIC_ASSETS` и `WATCHED`.
 
@@ -242,6 +253,10 @@ LLM вызывается только для строк с низкой увер
 # пересборка parsed.json из after_ai.json без AI и сети
 .venv\Scripts\python.exe -m utils.rebuild_parsed
 .venv\Scripts\python.exe -m utils.rebuild_parsed --faculty 01
+
+# пересборка листов «Оригинала» из скачанных XLSX
+.venv\Scripts\python.exe -m utils.rebuild_original
+.venv\Scripts\python.exe -m utils.rebuild_original --faculty 01
 
 # расход токенов (журнал data/usage/YYYY-MM.jsonl)
 .venv\Scripts\python.exe -m utils.usage --period day

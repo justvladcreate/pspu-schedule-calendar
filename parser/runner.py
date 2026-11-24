@@ -69,18 +69,19 @@ async def process_faculty(
 
     # Исходную таблицу рендерим в HTML для кнопки «Оригинал» —
     # со шрифтами, цветами, рамками и объединёнными ячейками.
+    # У факультета может быть несколько файлов: очное, заочное,
+    # экзамены, ГИА — показываем листы всех.
     source_path = getattr(parser, "paths", None)
-    if source_path is not None:
+    if source_path is not None and faculty.source.type != "google_sheets":
         try:
             from parser.core.original import publish_original
-            from parser.faculties.base import SOURCE_NAME
+            from parser.sources.loader import cached_sources
 
-            await asyncio.to_thread(
-                publish_original,
-                WEB_DATA_DIR,
-                faculty.id,
-                source_path.latest_file(SOURCE_NAME),
-            )
+            files = cached_sources(source_path.latest)
+            if files:
+                await asyncio.to_thread(
+                    publish_original, WEB_DATA_DIR, faculty.id, files,
+                )
         except Exception as exc:  # noqa: BLE001
             logger.warning("Факультет %s: «Оригинал» не отрендерен: %s", faculty.id, exc)
 

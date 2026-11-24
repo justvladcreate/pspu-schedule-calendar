@@ -1,7 +1,9 @@
 'use strict';
 
 import { fetchSheetHtml } from './sheets.js';
-import { createGoogleSource, createStaticSource } from './original-source.js';
+import {
+    createGoogleSource, createStaticSource, sheetTitle,
+} from './original-source.js';
 import { state } from './state.js';
 import {
     mountSheetFrame, findCellInFrame, focusCellInFrame,
@@ -118,13 +120,39 @@ async function fetchSheetListFromNetwork(spreadsheetId) {
     return list;
 }
 
-function findGidByGroup(group) {
+/** Имя листа соответствует группе: «1211» или «Z151   Z152» (две группы). */
+function sheetMatchesGroup(name, group) {
+    const n = String(name || '').trim();
+    const g = String(group || '').trim();
+    if (!n || !g) return false;
+    if (n === g) return true;
+    // На одном листе может быть несколько групп через пробел/запятую.
+    const tokens = n.split(/[\s,/;]+/).filter(Boolean);
+    if (tokens.includes(g)) return true;
+    return n.startsWith(g);
+}
+
+function findGidByGroup(group, kind) {
     if (!group) return null;
     const g = String(group).trim();
     if (!g) return null;
-    for (const s of sheets) if (String(s.name).trim() === g) return s.gid;
-    for (const s of sheets) if (String(s.name).trim().startsWith(g)) return s.gid;
-    return null;
+
+    // Если у события известен тип (очное/заочное/экзамены), сначала
+    // ищем лист того же типа: группа «152» есть и в очном файле,
+    // и в сессии.
+    const pool = kind ? sheets.filter(s => !s.kind || s.kind === kind) : sheets;
+
+    const search = (list) => {
+        for (const s of list) if (String(s.name).trim() === g) return s.gid;
+        for (const s of list) {
+            const tokens = String(s.name).trim().split(/[\s,/;]+/).filter(Boolean);
+            if (tokens.includes(g)) return s.gid;
+        }
+        for (const s of list) if (String(s.name).trim().startsWith(g)) return s.gid;
+        return null;
+    };
+
+    return search(pool) || (pool === sheets ? null : search(sheets));
 }
 
 /** Лист похож на группу, а не на оглавление («ГРУППЫ», «Титул»). */
@@ -132,9 +160,7 @@ function isGroupSheet(sheet) {
     const name = String((sheet && sheet.name) || '').trim();
     if (!name) return false;
     for (const group of state.groups || []) {
-        const g = String(group).trim();
-        if (!g) continue;
-        if (name === g || name.startsWith(g)) return true;
+        if (sheetMatchesGroup(name, group)) return true;
     }
     return false;
 }
@@ -337,7 +363,7 @@ export function setupOriginalModal() {
         for (const sheet of options) {
             const option = document.createElement('option');
             option.value = sheet.gid;
-            option.textContent = sheet.name;
+            option.textContent = sheetTitle(sheet);
             groupSelect.appendChild(option);
         }
         if (currentGid) groupSelect.value = currentGid;
@@ -362,13 +388,16 @@ export function setupOriginalModal() {
         buildTabs();
         renderGroupPicker();
 
-        if (original && original.type === 'google_sheets' && original.spreadsheet_id) {
-            spreadsheetId = original.spreadsheet_id;
-            source = createGoogleSource(spreadsheetId);
-        } else if (original && original.type === 'cloud_mail' && original.sheets) {
+        // Предрендеренные листы (очное + заочное + сессия + ГИА)
+        // важнее типа источника: если они есть — показываем их,
+        // иначе для google_sheets идём в htmlview.
+        if (original && original.sheets) {
             spreadsheetId = '';
             const folder = (meta && meta.folder) || `faculties/${id}`;
             source = createStaticSource(`data/${folder}`);
+        } else if (original && original.spreadsheet_id) {
+            spreadsheetId = original.spreadsheet_id;
+            source = createGoogleSource(spreadsheetId);
         } else if (original && original.type === 'cloud_mail') {
             // Старые опубликованные данные без предрендеренных листов.
             spreadsheetId = '';
@@ -486,7 +515,9 @@ export function setupOriginalModal() {
             b.type = 'button';
             b.className = 'original-sheet-tab';
             b.dataset.gid = sheet.gid;
-            b.textContent = sheet.name;
+            b.dataset.kind = sheet.kind || '';
+            b.textContent = sheetTitle(sheet);
+            b.title = sheetTitle(sheet);
             b.setAttribute('role', 'tab');
             b.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -634,8 +665,11 @@ export function setupOriginalModal() {
         if (sheetsPromise) return sheetsPromise;
         if (!source) return Promise.resolve([]);
 
+        const sourceRef = source;
         sheetsPromise = source.list(fetchSheetList)
             .then((list) => {
+                // Пока грузились листы, могли переключить факультет.
+                if (source !== sourceRef) return sheets;
                 sheets = list || [];
                 buildTabs();
                 renderGroupPicker();
@@ -643,10 +677,50 @@ export function setupOriginalModal() {
             })
             .catch((e) => {
                 console.warn('[original] не удалось получить список листов:', e);
-                sheetsPromise = null;
+                if (source === sourceRef) sheetsPromise = null;
                 return [];
             });
         return sheetsPromise;
+    }
+
+    /**
+     * Обновляет список листов Google-таблицы в фоне: в localStorage
+     * он может лежать сутки, а новый лист-группа должен появиться
+     * сразу. Предрендеренные листы не кэшируются — там sheets.json
+     * берётся с no-store.
+     */
+    async function refreshSheetList() {
+        if (!source || source.type !== 'google' || !spreadsheetId) return;
+
+        const sourceRef = source;
+        const facultyRef = activeFacultyId;
+
+        try {
+            const fresh = await fetchSheetListFromNetwork(spreadsheetId);
+            if (!fresh.length) return;
+            // Факультет успели переключить — чужой список не применяем.
+            if (source !== sourceRef || activeFacultyId !== facultyRef) return;
+
+            const same = fresh.length === sheets.length
+                && fresh.every((item, i) => (
+                    String(item.gid) === String(sheets[i].gid)
+                    && item.name === sheets[i].name
+                ));
+            if (same) return;
+
+            const keepGid = currentGid;
+            sheets = fresh;
+            buildTabs();
+            renderGroupPicker();
+
+            if (keepGid && sheets.some(s => String(s.gid) === String(keepGid))) {
+                setActiveTab(keepGid);
+            } else if (sheets.length) {
+                showSheet(fallbackGid(sheets));
+            }
+        } catch (e) {
+            // нет сети — остаёмся на закэшированном списке
+        }
     }
 
     /* ---------- open / close ---------- */
@@ -699,6 +773,7 @@ export function setupOriginalModal() {
 
         setActiveTab(gid);
         showSheet(gid);
+        refreshSheetList();
     }
 
     function close() {
@@ -728,7 +803,7 @@ export function setupOriginalModal() {
 
         try { await ensureSheets(); } catch {}
 
-        const gid = findGidByGroup(ev.group)
+        const gid = findGidByGroup(ev.group, ev.kind)
             || lastGids[facultyId]
             || (sheets.length ? sheets[0].gid : '');
 

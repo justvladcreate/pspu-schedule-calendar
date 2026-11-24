@@ -12,7 +12,7 @@ from pathlib import Path
 from parser.core.model import Faculty, FacultySource
 from parser.sources.base import SheetData
 from parser.sources.cloud_mail import CloudMailFileSource
-from parser.sources.cloud_mail_folder import download_kind, sheet_kind
+from parser.sources.cloud_mail_folder import FILE_KINDS, download_kind, sheet_kind
 from parser.sources.xlsx_file import XlsxFileSource
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,22 @@ logger = logging.getLogger(__name__)
 def _cache_path(cache_dir: Path, kind: str) -> Path:
     name = "source.xlsx" if kind in ("", "oo") else f"source_{kind}.xlsx"
     return Path(cache_dir) / name
+
+
+def cached_sources(cache_dir: Path) -> list[tuple[str, Path]]:
+    """Файлы источников, скачанные этим прогоном: ``[(kind, path), …]``.
+
+    Нужны для «Оригинала»: у факультета бывает очное, заочное,
+    экзамены и ГИА — показываем листы всех файлов. Порядок
+    фиксированный, чтобы вкладки не прыгали между прогонами.
+    """
+    order = {kind: index for index, kind in enumerate(FILE_KINDS)}
+    result: list[tuple[str, Path]] = []
+    for path in Path(cache_dir).glob("source*.xlsx"):
+        kind = path.stem[len("source"):].lstrip("_") or "oo"
+        result.append((kind, path))
+    result.sort(key=lambda item: (order.get(item[0], len(order)), item[0]))
+    return result
 
 
 async def _load_source(

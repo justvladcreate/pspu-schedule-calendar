@@ -5,13 +5,20 @@
 тот же вид, что в Excel — объединённые ячейки, ширины колонок, шрифты,
 цвета и рамки.
 
+У факультета может быть несколько исходных файлов (очное, заочное,
+экзамены, ГИА) — тогда листы сводятся в один список.
+
 Результат публикуется рядом с данными факультета:
 
     web/data/faculties/<id>/sheets.json
-    web/data/faculties/<id>/sheets/sheet-1.html
+    web/data/faculties/<id>/sheets/sheet-1-<hash>.html
+
+Имя файла содержит хэш содержимого: изменился лист — изменился URL,
+и браузер не может отдать старую копию из кэша.
 """
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import logging
@@ -30,7 +37,7 @@ SHEETS_INDEX = "sheets.json"
 SHEETS_DIR = "sheets"
 
 # Меняется при правках рендера: старый кэш листов тогда игнорируется.
-RENDER_VERSION = 4
+RENDER_VERSION = 5
 
 # Индексы цветов Excel (64/65 — системные фон/текст)
 _INDEXED = {
@@ -314,18 +321,52 @@ def render_sheet_html(ws) -> str:
     return "".join(parts)
 
 
-def _sheet_file(index: int) -> str:
-    return f"{SHEETS_DIR}/sheet-{index}.html"
+def _sheet_file(index: int, page: str) -> str:
+    """Имя листа с хэшем содержимого — новый URL на каждое изменение."""
+    digest = hashlib.sha256(page.encode("utf-8")).hexdigest()[:10]
+    return f"{SHEETS_DIR}/sheet-{index}-{digest}.html"
+
+
+def _sheet_id(kind: str, name: str, used: set[str]) -> str:
+    base = f"{kind}:{name}".strip(":")
+    candidate = base
+    counter = 2
+    while candidate in used:
+        candidate = f"{base}#{counter}"
+        counter += 1
+    used.add(candidate)
+    return candidate
+
+
+def _sheet_kind(file_kind: str, name: str) -> str:
+    """Тип листа: ГИА и сессия делятся на очные и заочные по имени."""
+    try:
+        from parser.sources.cloud_mail_folder import sheet_kind
+
+        return sheet_kind(file_kind or "oo", name)
+    except Exception:  # noqa: BLE001
+        return file_kind or "oo"
 
 
 def publish_original(
     web_data_dir: Path,
     faculty_id: str,
-    xlsx_path: Path,
+    sources: list[tuple[str, Path]] | Path,
 ) -> list[dict] | None:
-    """Рендерит видимые листы XLSX в web/data/faculties/<id>/sheets/."""
-    xlsx_path = Path(xlsx_path)
-    if not xlsx_path.exists():
+    """Рендерит видимые листы всех XLSX факультета в web/data/faculties/<id>/sheets/.
+
+    ``sources`` — список ``(kind, путь)``: очное, заочное, экзамены, ГИА.
+    Один путь без типа тоже принимается (совместимость).
+    """
+    if isinstance(sources, (str, Path)):
+        sources = [("", Path(sources))]
+
+    pairs = [
+        (kind or "oo", Path(path))
+        for kind, path in sources
+        if Path(path).exists()
+    ]
+    if not pairs:
         return None
 
     folder = Path(web_data_dir) / "faculties" / faculty_id
@@ -352,32 +393,48 @@ def publish_original(
         )
         return (cached or {}).get("sheets")
 
-    if index_path.exists() and index_path.stat().st_mtime >= xlsx_path.stat().st_mtime:
+    newest = max(path.stat().st_mtime for _, path in pairs)
+    if index_path.exists() and index_path.stat().st_mtime >= newest:
         if cached and cached.get("sheets") and cached.get("version") == RENDER_VERSION:
             return cached["sheets"]
 
-    try:
-        workbook = load_workbook(xlsx_path, data_only=True, rich_text=True)
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("Не удалось открыть %s для «Оригинала»: %s", xlsx_path, exc)
-        return None
-
     entries: list[dict] = []
-    for index, name in enumerate(workbook.sheetnames, start=1):
-        worksheet = workbook[name]
-        if worksheet.sheet_state != "visible":
-            continue
+    used_ids: set[str] = set()
+    written: set[str] = set()
+    position = 0
+
+    for file_kind, xlsx_path in pairs:
         try:
-            page = render_sheet_html(worksheet)
+            workbook = load_workbook(xlsx_path, data_only=True, rich_text=True)
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Лист %s не отрендерен: %s", name, exc)
+            logger.warning("Не удалось открыть %s для «Оригинала»: %s", xlsx_path, exc)
             continue
 
-        relative = _sheet_file(index)
-        target = folder / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(page, encoding="utf-8")
-        entries.append({"name": name, "file": relative})
+        for name in workbook.sheetnames:
+            worksheet = workbook[name]
+            if worksheet.sheet_state != "visible":
+                continue
+            try:
+                page = render_sheet_html(worksheet)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Лист %s не отрендерен: %s", name, exc)
+                continue
+
+            position += 1
+            relative = _sheet_file(position, page)
+            if relative not in written:
+                target = folder / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(page, encoding="utf-8")
+                written.add(relative)
+
+            entries.append({
+                "id": _sheet_id(file_kind, name, used_ids),
+                "name": name,
+                "kind": _sheet_kind(file_kind, name),
+                "source": file_kind,
+                "file": relative,
+            })
 
     if not entries:
         return None
@@ -390,8 +447,18 @@ def publish_original(
         ),
         encoding="utf-8",
     )
+
+    # Убираем файлы прошлых прогонов — иначе репозиторий растёт, а
+    # старые листы продолжают лежать в папке без ссылок.
+    for stale in sheets_dir.glob("*.html"):
+        if f"{SHEETS_DIR}/{stale.name}" not in written:
+            try:
+                stale.unlink()
+            except OSError:
+                pass
+
     logger.info(
         "Оригинал %s: %d листов (%s)",
-        faculty_id, len(entries), ", ".join(entry["name"] for entry in entries),
+        faculty_id, len(entries), ", ".join(entry["id"] for entry in entries),
     )
     return entries
