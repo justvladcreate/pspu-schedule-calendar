@@ -154,6 +154,9 @@
 }
 .changes-versions[hidden] { display: none; }
 
+/* Когда изменений нет, в шапке одна ячейка — дата текущей версии. */
+.changes-versions--single { grid-template-columns: 1fr; }
+
 .changes-version {
     min-width: 0;
     display: flex;

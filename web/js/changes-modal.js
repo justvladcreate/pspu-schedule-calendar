@@ -29,17 +29,62 @@ function formatVersionDate(iso) {
         : `${day} ${month} ${d.getFullYear()}, ${hh}:${mm}`;
 }
 
+/* Полная дата для подсказки: «24.11.2026, 20:04». */
+function formatFullDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return `${dd}.${mm}.${d.getFullYear()}, ${hh}:${mi}`;
+}
+
+/* Дата текущей версии расписания — та, что реально показана на экране.
+   Берём из загруженных данных: мета изменений может отсутствовать
+   (изменений нет) или быть старше текущего файла. */
+function currentVersionIso() {
+    const data = state.currentData;
+    if (data && data.generated_at) return data.generated_at;
+    return state.displayedIso || null;
+}
+
 /* Шапка с версиями, между которыми построен diff.
    Слева — «Было» (снимок, с которым сравниваем),
    справа — «Стало» (свежая версия).
-   Если мета отсутствует (старые пользователи до обновления) —
-   аккуратно скрываем весь блок. */
-function renderVersions(meta) {
+   Если изменений нет — показываем только дату текущей версии:
+   так видно, от какого числа открыт файл расписания. */
+function renderVersions(meta, hasChanges) {
     const box = document.getElementById('changesVersions');
     if (!box) return;
 
-    const oldDate = meta ? formatVersionDate(meta.oldVersion) : null;
-    const newDate = meta ? formatVersionDate(meta.newVersion) : null;
+    const currentIso = currentVersionIso();
+    const currentDate = formatVersionDate(currentIso);
+
+    if (!hasChanges) {
+        box.classList.add('changes-versions--single');
+        if (!currentDate) {
+            box.hidden = true;
+            box.innerHTML = '';
+            return;
+        }
+        box.hidden = false;
+        box.innerHTML = `
+            <div class="changes-version changes-version--current">
+                <div class="changes-version-label">Текущая версия</div>
+                <div class="changes-version-date" title="${formatFullDate(currentIso)}">${currentDate}</div>
+            </div>
+        `;
+        return;
+    }
+
+    box.classList.remove('changes-versions--single');
+
+    const oldIso = meta ? meta.oldVersion : null;
+    const newIso = (meta && meta.newVersion) || currentIso;
+    const oldDate = formatVersionDate(oldIso);
+    const newDate = formatVersionDate(newIso);
 
     if (!oldDate && !newDate) {
         box.hidden = true;
@@ -51,11 +96,11 @@ function renderVersions(meta) {
     box.innerHTML = `
         <div class="changes-version changes-version--old">
             <div class="changes-version-label">Было</div>
-            <div class="changes-version-date" title="${oldDate || ''}">${oldDate || '—'}</div>
+            <div class="changes-version-date" title="${formatFullDate(oldIso)}">${oldDate || '—'}</div>
         </div>
         <div class="changes-version changes-version--new">
             <div class="changes-version-label">Стало</div>
-            <div class="changes-version-date" title="${newDate || ''}">${newDate || '—'}</div>
+            <div class="changes-version-date" title="${formatFullDate(newIso)}">${newDate || '—'}</div>
         </div>
     `;
 }
@@ -299,8 +344,9 @@ export function setupChangesModal() {
     function open(changes) {
         allChanges = changes || [];
         shownCount = Math.min(PAGE_SIZE, allChanges.length);
-        // Шапку с версиями показываем только если реально есть что сравнивать.
-        renderVersions(allChanges.length > 0 ? state.pendingChangesMeta : null);
+        // Версии показываем всегда: без изменений — только текущую,
+        // с изменениями — «Было / Стало».
+        renderVersions(state.pendingChangesMeta, allChanges.length > 0);
         renderList();
         modal.classList.add('open');
     }
