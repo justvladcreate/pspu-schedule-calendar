@@ -332,6 +332,15 @@ def _write_data_commit(worktree: Path) -> bool:
     _clear_dir(worktree)
     _copy_tree(WEB_DATA_DIR, worktree / "web" / "data")
 
+    # GitHub запускает воркфлоу только из той ветки, куда пришёл push.
+    # В ветке data нет кода, поэтому кладём туда диспетчер: он запускает
+    # сборку страниц на main (деплой с data запрещён политикой окружения).
+    workflow = PROJECT_ROOT / ".github" / "workflows" / "dispatch-pages.yml"
+    if workflow.exists():
+        target = worktree / ".github" / "workflows" / "dispatch-pages.yml"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(workflow, target)
+
     _git("add", "-A", cwd=worktree)
     if _git("diff", "--cached", "--quiet", cwd=worktree).returncode == 0:
         return False

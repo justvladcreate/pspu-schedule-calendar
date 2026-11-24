@@ -2,10 +2,13 @@ name: Deploy to GitHub Pages
 
 # Код живёт в main, данные — в ветке data (её обновляет парсер).
 # Здесь они собираются вместе: main даёт сайт, data — web/data.
+# Пуш в data не может деплоить сам (у окружения github-pages политика
+# «только main»), поэтому он запускает этот воркфлоу через
+# workflow_dispatch — см. dispatch-pages.yml.
 
 on:
   push:
-    branches: [main, data]
+    branches: [main]
     paths:
       - 'web/**'
       - 'tools/bump-sw.mjs'
