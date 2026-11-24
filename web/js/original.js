@@ -27,6 +27,27 @@ const LAST_GID_KEY     = 'pspu-original-last-gid';
 const LAST_GIDS_KEY    = 'pspu-original-last-gids';
 const ZOOM_KEY         = 'pspu-original-zoom';
 
+/* Типы листов для фильтра в полосе над таблицей. Порядок — как в
+   расписании: очно, заочно, зачёты, ГИА. */
+const KIND_FILTERS = [
+    { id: 'oo',    label: 'Очно' },
+    { id: 'zo',    label: 'Заочно' },
+    { id: 'exams', label: 'Зачёты' },
+    { id: 'gia',   label: 'ГИА' },
+];
+
+/** Тип листа для фильтра: смотрим, из какого файла он отрендерен. */
+function sheetFilterKind(sheet) {
+    const kind = String((sheet && sheet.kind) || '');
+    const source = String((sheet && sheet.source) || '');
+    if (source === 'gia') return 'gia';
+    if (source === 'oo_exams') return 'exams';
+    if (source === 'zo') return 'zo';
+    if (kind === 'zo' || kind === 'zo_exams') return 'zo';
+    if (kind === 'oo_exams' || kind === 'exams') return 'exams';
+    return 'oo';
+}
+
 /* Каждый факультет запоминает свой последний лист: переключение
    между факультетами не должно сбрасывать выбор. */
 function loadLastGids() {
@@ -205,6 +226,7 @@ export function setupOriginalModal() {
 
     const toolbarEl    = document.getElementById('originalToolbar');
     const facultiesBox = document.getElementById('originalFaculties');
+    const kindsBox     = document.getElementById('originalKinds');
     const sheetBar     = document.getElementById('originalSheetBar');
     const groupPicker  = document.getElementById('originalGroupPicker');
     const groupSelect  = document.getElementById('originalGroupSelect');
@@ -212,6 +234,7 @@ export function setupOriginalModal() {
     let source = null;          // текущий источник («google» или «static»)
     let spreadsheetId = defaultSpreadsheetId;
     let activeFacultyId = null;
+    let activeKind = '';        // '' — все листы, иначе id из KIND_FILTERS
     const lastGids = loadLastGids();
 
     function facultyMeta(id) {
@@ -249,7 +272,91 @@ export function setupOriginalModal() {
     }
 
     function updateToolbarVisibility() {
-        if (toolbarEl) toolbarEl.hidden = !facultiesBox || facultiesBox.hidden;
+        if (!toolbarEl) return;
+        const noFaculties = !facultiesBox || facultiesBox.hidden;
+        const noKinds = !kindsBox || kindsBox.hidden;
+        toolbarEl.hidden = noFaculties && noKinds;
+    }
+
+    /** Листы с учётом выбранного типа (очно/заочно/зачёты/ГИА). */
+    function visibleSheets() {
+        if (!activeKind) return sheets;
+        return sheets.filter(sheet => sheetFilterKind(sheet) === activeKind);
+    }
+
+    function sheetKindOf(gid) {
+        const sheet = sheets.find(s => String(s.gid) === String(gid));
+        return sheet ? sheetFilterKind(sheet) : '';
+    }
+
+    /** Включает тип листа, к которому относится gid, и перерисовывает полосы. */
+    function focusKindOfGid(gid) {
+        const kind = sheetKindOf(gid);
+        if (!kind) return;
+        if (activeKind === kind) return;
+        activeKind = kind;
+        renderKindBar();
+        buildTabs();
+        renderGroupPicker();
+    }
+
+    function renderKindBar() {
+        if (!kindsBox) { updateToolbarVisibility(); return; }
+
+        const counts = new Map();
+        for (const sheet of sheets) {
+            const kind = sheetFilterKind(sheet);
+            counts.set(kind, (counts.get(kind) || 0) + 1);
+        }
+
+        const present = KIND_FILTERS.filter(item => counts.has(item.id));
+        if (present.length < 2) {
+            kindsBox.hidden = true;
+            kindsBox.innerHTML = '';
+            updateToolbarVisibility();
+            return;
+        }
+        if (activeKind && !counts.has(activeKind)) activeKind = '';
+
+        kindsBox.hidden = false;
+        kindsBox.innerHTML = '';
+
+        const addChip = (id, label, count) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'original-kind-chip';
+            chip.classList.toggle('is-active', id === activeKind);
+            chip.dataset.kind = id;
+            chip.setAttribute('role', 'tab');
+            chip.setAttribute('aria-selected', id === activeKind ? 'true' : 'false');
+            chip.append(label);
+
+            const badge = document.createElement('span');
+            badge.className = 'original-kind-chip-count';
+            badge.textContent = String(count);
+            chip.append(badge);
+
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (activeKind === id) return;
+                activeKind = id;
+                renderKindBar();
+                buildTabs();
+                renderGroupPicker();
+                const list = visibleSheets();
+                if (list.length && !list.some(s => String(s.gid) === String(currentGid))) {
+                    showSheet(fallbackGid(list));
+                }
+            });
+            kindsBox.appendChild(chip);
+        };
+
+        addChip('', 'Все', sheets.length);
+        for (const item of present) {
+            addChip(item.id, item.label, counts.get(item.id));
+        }
+
+        updateToolbarVisibility();
     }
 
     function updateSheetBarVisibility() {
@@ -339,7 +446,8 @@ export function setupOriginalModal() {
     function renderGroupPicker() {
         if (!groupPicker || !groupSelect) { updateSheetBarVisibility(); return; }
 
-        if (sheets.length < 2) {
+        const list = visibleSheets();
+        if (list.length < 2) {
             groupPicker.hidden = true;
             groupSelect.innerHTML = '';
             updateSheetBarVisibility();
@@ -350,13 +458,13 @@ export function setupOriginalModal() {
         groupSelect.innerHTML = '';
 
         // В «Группе» показываем листы-группы, а не оглавление/титул.
-        const groupSheets = sheets.filter(isGroupSheet);
-        const options = (groupSheets.length ? groupSheets : sheets).slice();
+        const groupSheets = list.filter(isGroupSheet);
+        const options = (groupSheets.length ? groupSheets : list).slice();
 
         // Текущий лист может быть не группой (например, «ГРУППЫ»):
         // добавляем его, чтобы select не показывал чужое значение.
         if (currentGid && !options.some(s => String(s.gid) === String(currentGid))) {
-            const current = sheets.find(s => String(s.gid) === String(currentGid));
+            const current = list.find(s => String(s.gid) === String(currentGid));
             if (current) options.unshift(current);
         }
 
@@ -385,7 +493,9 @@ export function setupOriginalModal() {
         sheetsPromise = null;
         sheets = [];
         currentGid = null;
+        activeKind = '';
         buildTabs();
+        renderKindBar();
         renderGroupPicker();
 
         // Предрендеренные листы важнее типа источника. Если у факультета
@@ -506,7 +616,8 @@ export function setupOriginalModal() {
     function buildTabs() {
         if (!tabsBox) return;
         tabsBox.innerHTML = '';
-        if (sheets.length === 0) {
+        const list = visibleSheets();
+        if (list.length === 0) {
             tabsBox.hidden = true;
             updateSheetBarVisibility();
             return;
@@ -514,7 +625,7 @@ export function setupOriginalModal() {
         tabsBox.hidden = false;
         updateSheetBarVisibility();
 
-        for (const sheet of sheets) {
+        for (const sheet of list) {
             const b = document.createElement('button');
             b.type = 'button';
             b.className = 'original-sheet-tab';
@@ -676,6 +787,7 @@ export function setupOriginalModal() {
                 if (source !== sourceRef) return sheets;
                 sheets = list || [];
                 buildTabs();
+                renderKindBar();
                 renderGroupPicker();
                 return sheets;
             })
@@ -714,13 +826,15 @@ export function setupOriginalModal() {
 
             const keepGid = currentGid;
             sheets = fresh;
+            renderKindBar();
             buildTabs();
             renderGroupPicker();
 
             if (keepGid && sheets.some(s => String(s.gid) === String(keepGid))) {
+                focusKindOfGid(keepGid);
                 setActiveTab(keepGid);
             } else if (sheets.length) {
-                showSheet(fallbackGid(sheets));
+                showSheet(fallbackGid(visibleSheets().length ? visibleSheets() : sheets));
             }
         } catch (e) {
             // нет сети — остаёмся на закэшированном списке
@@ -750,6 +864,7 @@ export function setupOriginalModal() {
         const list = await ensureSheets();
 
         let gid = '';
+        let fromGroup = false;
         const selectedGids = [];
         for (const group of state.selectedGroups || []) {
             const found = findGidByGroup(group);
@@ -762,6 +877,7 @@ export function setupOriginalModal() {
             gid = selectedGids.includes(currentGid)
                 ? currentGid
                 : selectedGids[0];
+            fromGroup = true;
         }
 
         if (!gid) gid = currentGid;
@@ -769,12 +885,16 @@ export function setupOriginalModal() {
         if (!gid) gid = loadLegacyGid();
         if (!gid || !list.some(s => String(s.gid) === String(gid))) {
             gid = fallbackGid(list);
+            fromGroup = false;
         }
         if (!gid) {
             showFallback('Таблица факультета недоступна на сайте.');
             return;
         }
 
+        // Пришли по конкретной группе — сразу показываем её тип
+        // (заочка, зачёты). Иначе оставляем все листы и полосу типов.
+        if (fromGroup) focusKindOfGid(gid);
         setActiveTab(gid);
         showSheet(gid);
         refreshSheetList();
@@ -812,6 +932,7 @@ export function setupOriginalModal() {
             || (sheets.length ? sheets[0].gid : '');
 
         if (!gid) return;
+        focusKindOfGid(gid);
         await showSheet(gid, { focusEvent: ev });
     }
 
