@@ -225,6 +225,69 @@ export function createEmptyRow(text) {
 }
 
 /* ============================================================
+ *  РАЗДЕЛЫ ПО КУРСАМ
+ * ============================================================ */
+
+/**
+ * Курс группы по номеру. Последняя цифра — номер группы,
+ * предпоследняя — курс: 1214 → 1, 142 → 4, M1217 → 1, ZM1213 → 1.
+ * Буквы М (магистры) и Z (заочники) на курс не влияют.
+ */
+export function groupCourse(value) {
+    // В имени листа может стоять несколько групп: «Z151   Z152».
+    // Курс берём по первой — она же основная.
+    const text = String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/М/g, 'M')
+        .split(/\s+/)[0];
+
+    const match = text.match(/^Z?M?(\d{2,4})$/);
+    if (!match) return null;
+
+    const digits = match[1];
+    if (digits.length < 3) return null;
+
+    const course = Number(digits[digits.length - 2]);
+    return course >= 1 && course <= 6 ? course : null;
+}
+
+function createCourseHead(text) {
+    return el('div', 'filter-course-head', text);
+}
+
+/**
+ * Раскладывает значения по разделам «1 курс», «2 курс», ….
+ * courseOf позволяет считать курс не по самому значению
+ * (в «Оригинале» значение — id листа, а имя группы рядом).
+ */
+export function appendCourseSections(container, values, makeRow, courseOf = groupCourse) {
+    const buckets = new Map();
+    const other = [];
+
+    for (const value of values) {
+        const course = courseOf(value);
+        if (!course) {
+            other.push(value);
+            continue;
+        }
+        if (!buckets.has(course)) buckets.set(course, []);
+        buckets.get(course).push(value);
+    }
+
+    const courses = [...buckets.keys()].sort((a, b) => a - b);
+    for (const course of courses) {
+        container.appendChild(createCourseHead(course + ' курс'));
+        for (const value of buckets.get(course)) container.appendChild(makeRow(value));
+    }
+
+    if (other.length) {
+        container.appendChild(createCourseHead('Прочее'));
+        for (const value of other) container.appendChild(makeRow(value));
+    }
+}
+
+/* ============================================================
  *  ЧИПЫ
  * ============================================================ */
 

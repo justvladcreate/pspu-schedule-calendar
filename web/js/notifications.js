@@ -9,6 +9,7 @@ import {
     createEmptyRow,
     createSelectedChip,
     createFacultyChip,
+    appendCourseSections,
     valuesInScope,
     pluralRu,
 } from './filter-core.js';
@@ -562,20 +563,24 @@ function fillPrefsList(container, type, values) {
     const selected = prefsSetFor(type);
     const sorted = [...values].sort((a, b) => String(a).localeCompare(String(b), 'ru'));
 
+    const makeRow = (value) => createOption({
+        value,
+        label: value,
+        checked: selected.has(value),
+        onToggle: (checked) => {
+            if (checked) selected.add(value);
+            else selected.delete(value);
+            renderPrefsSelected();
+            renderPrefsMeta(ui.search ? ui.search.value : '');
+            updatePrefsCounter();
+        },
+    });
+
     const fragment = document.createDocumentFragment();
-    for (const value of sorted) {
-        fragment.appendChild(createOption({
-            value,
-            label: value,
-            checked: selected.has(value),
-            onToggle: (checked) => {
-                if (checked) selected.add(value);
-                else selected.delete(value);
-                renderPrefsSelected();
-                renderPrefsMeta(ui.search ? ui.search.value : '');
-                updatePrefsCounter();
-            },
-        }));
+    if (type === 'group') {
+        appendCourseSections(fragment, sorted, makeRow);
+    } else {
+        for (const value of sorted) fragment.appendChild(makeRow(value));
     }
     container.appendChild(fragment);
 }

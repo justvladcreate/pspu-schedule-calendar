@@ -6,6 +6,7 @@ import {
 } from './original-source.js';
 import {
     createSearch, createOption, createEmptyRow, matchesQuery,
+    appendCourseSections, groupCourse,
 } from './filter-core.js';
 import { state } from './state.js';
 import {
@@ -500,13 +501,17 @@ export function setupOriginalModal() {
         }
 
         const query = groupSearchUi ? groupSearchUi.input.value : '';
-        const filtered = options.filter(sheet => matchesQuery(sheetTitle(sheet), query));
+        const filtered = options
+            .filter(sheet => matchesQuery(sheetTitle(sheet), query))
+            .sort((a, b) => sheetTitle(a).localeCompare(sheetTitle(b), 'ru'));
 
         if (!filtered.length) {
             groupList.appendChild(createEmptyRow('Не найдено'));
         } else {
-            for (const sheet of filtered) {
-                groupList.appendChild(createOption({
+            appendCourseSections(
+                groupList,
+                filtered,
+                (sheet) => createOption({
                     value: String(sheet.gid),
                     label: sheetTitle(sheet),
                     hint: sheet.name,
@@ -515,8 +520,9 @@ export function setupOriginalModal() {
                         showSheet(sheet.gid);
                         closeGroupPicker();
                     },
-                }));
-            }
+                }),
+                (sheet) => groupCourse(sheet.name),
+            );
         }
 
         updateSheetBarVisibility();

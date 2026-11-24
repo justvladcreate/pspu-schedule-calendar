@@ -490,6 +490,27 @@
 
 /* ---------- строка списка ---------- */
 
+/* Разделитель курсов: тонкая линия и подпись, без лишних слов. */
+.filter-course-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 2px;
+    padding: 7px 9px 0;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    user-select: none;
+}
+.filter-course-head:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
 .filter-option {
     position: relative;
     display: flex;
@@ -685,6 +706,7 @@
     }
     .filter-options {
         height: auto;
+        min-height: 160px;
         max-height: 240px;
     }
 }

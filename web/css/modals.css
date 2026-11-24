@@ -1234,6 +1234,9 @@
     overflow-y: auto;
     border-radius: 0 0 12px 12px;
     background: var(--surface);
+    /* Без min-height flex-элемент не даёт телу прокручиваться,
+       и списки внутри него сжимаются в полоску. */
+    min-height: 0;
 }
 
 /* ---------- секции настроек ---------- */
@@ -1437,6 +1440,16 @@
 
 .push-columns {
     margin-top: 2px;
+    min-height: 0;
+}
+
+/* Списки в модалке уведомлений не должны сжиматься в полоску
+   при крупном масштабе: высота тянется по содержимому, но упирается
+   в минимум, а тело модалки прокручивается. */
+.push-body .filter-options {
+    height: auto;
+    min-height: 180px;
+    max-height: 284px;
 }
 
 .push-columns.is-disabled {

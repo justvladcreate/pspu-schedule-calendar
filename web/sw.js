@@ -4,7 +4,7 @@
    (см. tools/bump-sw.mjs + .github/workflows/deploy-pages.yml).
    В репозитории всегда должен лежать этот плейсхолдер —
    так коммиты остаются чистыми и без гонок. */
-const CACHE = 'pspu-schedule-ve338ff8a';
+const CACHE = 'pspu-schedule-v2a1f17c3';
 
 const STATIC_ASSETS = [
   './',

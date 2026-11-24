@@ -17,6 +17,7 @@ import {
     createEmptyRow,
     createSelectedChip,
     createFacultyChip,
+    appendCourseSections,
     facultyIdsOf,
     inFacultyScope,
     valuesInScope,
@@ -532,8 +533,18 @@ function fillList(container, type, values, emptyText = 'Не найдено') {
         return;
     }
 
+    const makeRow = (value) => buildOption(type, value);
+
+    // Группы идут по курсам, преподаватели — просто списком.
+    if (type === 'group') {
+        const fragment = document.createDocumentFragment();
+        appendCourseSections(fragment, values, makeRow);
+        container.appendChild(fragment);
+        return;
+    }
+
     const fragment = document.createDocumentFragment();
-    for (const value of values) fragment.appendChild(buildOption(type, value));
+    for (const value of values) fragment.appendChild(makeRow(value));
     container.appendChild(fragment);
 }
 
